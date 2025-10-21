@@ -1,6 +1,5 @@
 {
   lib,
-  pkgs,
   config,
   ...
 }:
@@ -18,7 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.zekurio = { pkgs, lib, ... }: {
+    home-manager.users.zekurio = { pkgs, ... }: {
       programs.git = {
         enable = true;
 

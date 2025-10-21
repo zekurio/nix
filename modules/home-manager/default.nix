@@ -1,11 +1,10 @@
 {
   lib,
-  pkgs,
   config,
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkDefault mkIf;
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager;
 in
 {

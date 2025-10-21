@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkDefault mkIf;
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager.base;
 in
 {
@@ -55,7 +55,7 @@ in
       };
     };
 
-    home-manager.users.zekurio = { pkgs, lib, ... }: {
+    home-manager.users.zekurio = { pkgs, ... }: {
       home.username = "zekurio";
       home.homeDirectory = "/home/zekurio";
       home.stateVersion = "25.05";
