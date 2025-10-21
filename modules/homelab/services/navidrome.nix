@@ -29,6 +29,13 @@
     };
     users.groups.navidrome = {};
 
+    # SOPS secret for Spotify environment variables
+    sops.secrets.navidrome_env = {
+      owner = "navidrome";
+      group = "navidrome";
+      mode = "0400";
+    };
+
     services.navidrome = {
       enable = true;
       settings = {
@@ -63,6 +70,8 @@
       BindReadOnlyPaths = [
         "/mnt/fast-nvme"
       ];
+      # Load Spotify credentials from sops secrets
+      EnvironmentFile = config.sops.secrets.navidrome_env.path;
     };
 
     # Caddy virtual host configuration

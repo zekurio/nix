@@ -18,7 +18,7 @@
   config = lib.mkIf config.services.autobrr-wrapped.enable {
     services.autobrr = {
       enable = true;
-      secretFile = config.sops.secrets.autobrr-secret.path;
+      secretFile = config.sops.secrets.autobrr_secret.path;
       settings = {
         host = "0.0.0.0";
         port = config.services.autobrr-wrapped.port;
