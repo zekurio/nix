@@ -18,14 +18,10 @@
   config = lib.mkIf config.services.sonarr-wrapped.enable {
     services.sonarr = {
       enable = true;
+      group = "media";
     };
-
-    # Add sonarr user to media group
-    users.users.sonarr.extraGroups = [ "media" ];
-
-    # Ensure sonarr can access shared media library
+    users.users.sonarr.group = "media";
     systemd.services.sonarr.serviceConfig = {
-      SupplementaryGroups = [ "media" ];
       UMask = lib.mkForce "0002";
     };
 

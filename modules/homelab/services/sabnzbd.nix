@@ -18,18 +18,17 @@
   config = lib.mkIf config.services.sabnzbd-wrapped.enable {
     services.sabnzbd = {
       enable = true;
+      group = "media";
     };
 
-    # Add sabnzbd user to media group
-    users.users.sabnzbd.extraGroups = [ "media" ];
+    users.users.sabnzbd = {
+      group = "media";
+    };
 
-    # Allow SABnzbd to access shared media and downloads directories
     systemd.services.sabnzbd.serviceConfig = {
-      SupplementaryGroups = [ "media" ];
       UMask = lib.mkForce "0002";
     };
 
-    # Caddy virtual host configuration
     services.caddy-wrapper.virtualHosts."sabnzbd" = {
       domain = config.services.sabnzbd-wrapped.domain;
       extraConfig = ''

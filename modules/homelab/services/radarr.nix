@@ -18,15 +18,17 @@
   config = lib.mkIf config.services.radarr-wrapped.enable {
     services.radarr = {
       enable = true;
+      group = "media";
     };
 
-    # Add radarr user to media group
-    users.users.radarr.extraGroups = [ "media" ];
+    # Configure radarr user to use media as its primary group
+    users.users.radarr = {
+      group = "media";
+    };
 
-    # Set umask and add to media group for shared library access
+    # Set umask for shared library access
     systemd.services.radarr.serviceConfig = {
       UMask = lib.mkForce "0002";
-      SupplementaryGroups = [ "media" ];
     };
 
     # Caddy virtual host configuration with base URL

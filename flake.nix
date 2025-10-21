@@ -44,6 +44,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
@@ -97,6 +101,17 @@
               inputs.sops-nix.nixosModules.sops
               inputs.vpn-confinement.nixosModules.default
               ./machines/nixos/adam/configuration.nix
+              (import ./overlays inputs)
+            ];
+          };
+          tabris = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit inputs; };
+            modules = [
+              commonNixConfig
+              inputs.nixos-wsl.nixosModules.default
+              inputs.home-manager.nixosModules.home-manager
+              ./machines/nixos/tabris/configuration.nix
               (import ./overlays inputs)
             ];
           };
