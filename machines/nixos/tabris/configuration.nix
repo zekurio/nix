@@ -31,9 +31,6 @@ in
       LD_LIBRARY_PATH = "/usr/lib/wsl/lib:$LD_LIBRARY_PATH";
       SSH_AUTH_SOCK = "/mnt/wsl/ssh-agent.sock";
     };
-    systemPackages = with pkgs; [
-
-    ];
     shellAliases = {
       rebuild-tabris = "sudo nixos-rebuild switch --flake .#tabris";
       tabris-tarball = "nix build .#nixosConfigurations.tabris.config.system.build.tarballBuilder";
