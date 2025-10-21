@@ -51,6 +51,7 @@
 
   outputs = inputs@{ nixpkgs, nixpkgs-unstable, flake-parts, disko, ... }:
     let
+      lib = nixpkgs.lib;
       # Shared Nix configuration for all machines
       commonNixConfig = {
         nix.settings = {
@@ -74,9 +75,9 @@
         };
 
         nix.gc = {
-          automatic = true;
-          dates = "weekly";
-          options = "--delete-older-than 14d";
+          automatic = lib.mkDefault true;
+          dates = lib.mkDefault "weekly";
+          options = lib.mkDefault "--delete-older-than 14d";
         };
       };
     in
@@ -96,16 +97,6 @@
             inputs.vpn-confinement.nixosModules.default
             ./machines/nixos/adam/configuration.nix
             (import ./overlays inputs)
-          ];
-        };
-
-        tabris = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            commonNixConfig
-            inputs.home-manager.nixosModules.home-manager
-            ./machines/nixos/tabris/configuration.nix
           ];
         };
       };
