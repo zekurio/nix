@@ -11,6 +11,7 @@ in
   imports = [
     ./base.nix
     ./git.nix
+    ./dev.nix
   ];
 
   options.modules.homeManager = {

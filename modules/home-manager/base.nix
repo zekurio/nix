@@ -69,10 +69,6 @@ in
         zellij
         # Version control
         git
-        # Runtime environments
-        bun
-        nodejs_22
-        pnpm
         # Editors
         vim
         # Nix tools
