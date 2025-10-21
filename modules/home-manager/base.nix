@@ -78,6 +78,8 @@ in
         # Nix tools
         nil
         nixd
+        sops
+        age
       ];
 
       programs.fish = {
