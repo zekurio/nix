@@ -39,12 +39,8 @@ in
         # Python, yuck
         uv
 
-        # Development utilities
-        curl
-        jq
-        yq
-        httpie
-        postgresql
+        # AI agents
+        pkgs.unstable.codex
       ];
     };
   };
