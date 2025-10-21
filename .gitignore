@@ -1,0 +1,13 @@
+# Flake lock file (you may want to commit this)
+# flake.lock
+
+# Build results
+result
+result-*
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
