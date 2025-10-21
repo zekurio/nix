@@ -23,6 +23,7 @@
   config = lib.mkIf config.services.qbittorrent-wrapped.enable {
     services.qbittorrent = {
       enable = true;
+      group = "media";
       webuiPort = config.services.qbittorrent-wrapped.webuiPort;
       torrentingPort = config.services.qbittorrent-wrapped.torrentingPort;
       openFirewall = false; # Managed through VPN namespace
@@ -35,8 +36,14 @@
       extraArgs = [ "--confirm-legal-notice" ];
     };
 
-    # Add qbittorrent user to media group
-    users.users.qbittorrent.extraGroups = [ "media" ];
+    # Configure qBittorrent service account to use media as primary group
+    users.users.qbittorrent = {
+      group = "media";
+    };
+
+    systemd.services.qbittorrent.serviceConfig = {
+      UMask = lib.mkForce "0002";
+    };
 
     # Caddy virtual host configuration
     services.caddy-wrapper.virtualHosts."qbittorrent" = {

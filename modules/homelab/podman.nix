@@ -127,13 +127,13 @@ in
     # Create required directories for containers
     systemd.tmpfiles.rules = mkIf cfg.enable [
       # Podman directories
-      "d /var/lib/containers/jellyfin 0775 ${mediaUser} ${mediaGroup} -"
-      "d /var/cache/containers/jellyfin 0775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/fileflows/data 0775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/fileflows/logs 0775 ${mediaUser} ${mediaGroup} -"
-      "d /tmp/fileflows 0775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/configarr/config 0775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/configarr/repos 0775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/jellyfin 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/cache/containers/jellyfin 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/fileflows/data 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/fileflows/logs 2775 ${mediaUser} ${mediaGroup} -"
+      "d /tmp/fileflows 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/configarr/config 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/configarr/repos 2775 ${mediaUser} ${mediaGroup} -"
     ];
   };
 }

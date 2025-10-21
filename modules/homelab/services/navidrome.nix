@@ -36,16 +36,8 @@
         Address = "127.0.0.1";
         Port = config.services.navidrome-wrapped.port;
         BaseUrl = "/";
-        # Artwork and image cache configuration
-        ImageCacheFolder = "/var/cache/navidrome";
-        CoverArtPriority = "embedded, coverart.*, folder";
-        CoverJpegQuality = 90;
-        # Extract artist images from tags
-        ExtractArtistImage = true;
         # Scan interval for detecting new artwork
         ScanInterval = "5m";
-        # Enable artwork search and indexing
-        ArtworkDir = "";
       };
       openFirewall = true;
     };
