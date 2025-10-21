@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ lib, pkgs, ... }:
 let
   inherit (lib) mkDefault;
   wslUser = "zekurio";
@@ -32,22 +32,6 @@ in
       SSH_AUTH_SOCK = "/mnt/wsl/ssh-agent.sock";
     };
     systemPackages = with pkgs; [
-      bat
-      btop
-      coreutils
-      direnv
-      eza
-      git
-      nil
-      nix-output-monitor
-      nixfmt-rfc-style
-      ripgrep
-      socat
-      tmux
-      unzip
-      wget
-      wslu
-      zellij
     ];
     shellAliases = {
       rebuild-tabris = "sudo nixos-rebuild switch --flake .#tabris";
@@ -125,6 +109,8 @@ in
   };
 
   modules.homeManager.git.enable = mkDefault true;
+
+  modules.homeManager.dev.enable = mkDefault true;
 
   documentation.nixos.enable = mkDefault false;
 
