@@ -32,6 +32,7 @@ in
       SSH_AUTH_SOCK = "/mnt/wsl/ssh-agent.sock";
     };
     systemPackages = with pkgs; [
+
     ];
     shellAliases = {
       rebuild-tabris = "sudo nixos-rebuild switch --flake .#tabris";
