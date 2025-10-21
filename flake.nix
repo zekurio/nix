@@ -44,16 +44,12 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
   };
 
-  outputs = inputs@{ nixpkgs, nixpkgs-unstable, flake-parts, disko, ... }:
+  outputs = inputs@{ nixpkgs, flake-parts, disko, ... }:
     let
       lib = nixpkgs.lib;
       # Shared Nix configuration for all machines
@@ -88,31 +84,22 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
 
-      flake.nixosConfigurations = {
-        adam = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            commonNixConfig
-            disko.nixosModules.disko
-            inputs.home-manager.nixosModules.home-manager
-            inputs.autoaspm.nixosModules.default
-            inputs.sops-nix.nixosModules.sops
-            inputs.vpn-confinement.nixosModules.default
-            ./machines/nixos/adam/configuration.nix
-            (import ./overlays inputs)
-          ];
-        };
-
-        tabris = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            commonNixConfig
-            inputs.nixos-wsl.nixosModules.wsl
-            inputs.home-manager.nixosModules.home-manager
-            ./machines/wsl/tabris/configuration.nix
-          ];
+      flake = {
+        nixosConfigurations = {
+          adam = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit inputs; };
+            modules = [
+              commonNixConfig
+              disko.nixosModules.disko
+              inputs.home-manager.nixosModules.home-manager
+              inputs.autoaspm.nixosModules.default
+              inputs.sops-nix.nixosModules.sops
+              inputs.vpn-confinement.nixosModules.default
+              ./machines/nixos/adam/configuration.nix
+              (import ./overlays inputs)
+            ];
+          };
         };
       };
     };
