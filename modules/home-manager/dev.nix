@@ -39,6 +39,9 @@ in
         # Python, yuck
         uv
 
+        # Github CLI
+        gh
+
         # AI agents
         pkgs.unstable.codex
       ];
