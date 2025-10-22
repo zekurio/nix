@@ -79,7 +79,6 @@ in
           image = "revenz/fileflows:latest";
           autoStart = true;
           ports = [ "${toString cfg.fileflows.port}:5000" ];
-          user = "${shareUidStr}:${shareGidStr}";
 
           volumes = [
             "/run/podman/podman.sock:/var/run/docker.sock:ro"
