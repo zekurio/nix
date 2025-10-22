@@ -22,9 +22,7 @@
     };
 
     # Configure radarr user to use media as its primary group
-    users.users.radarr = {
-      group = "media";
-    };
+    users.users.radarr.group = "media";
 
     # Set umask for shared library access
     systemd.services.radarr.serviceConfig = {

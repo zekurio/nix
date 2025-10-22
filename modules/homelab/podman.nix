@@ -6,6 +6,10 @@ let
   cfg = config.virtualisation.podman-homelab;
   mediaGroup = "media";
   mediaUser = "zekurio";
+  mediaUid = attrByPath [ "users" "users" mediaUser "uid" ] 1000 config;
+  mediaGid = attrByPath [ "users" "groups" mediaGroup "gid" ] 991 config;
+  mediaUidStr = toString mediaUid;
+  mediaGidStr = toString mediaGid;
 in
 {
   options.virtualisation.podman-homelab = {
@@ -31,17 +35,6 @@ in
 
     configarr = {
       enable = mkEnableOption "Configarr container" // { default = false; };
-      environment = mkOption {
-        type = types.attrsOf types.str;
-        default = {};
-        description = "Environment variables for Configarr container";
-        example = literalExpression ''
-          {
-            SONARR_URL = "http://localhost:8989";
-            SONARR_API_KEY = "your-api-key";
-          }
-        '';
-      };
     };
   };
 
@@ -86,6 +79,7 @@ in
           image = "revenz/fileflows:latest";
           autoStart = true;
           ports = [ "${toString cfg.fileflows.port}:5000" ];
+          user = "${mediaUidStr}:${mediaGidStr}";
 
           volumes = [
             "/run/podman/podman.sock:/var/run/docker.sock:ro"
@@ -96,10 +90,10 @@ in
           ];
 
           environment = {
-            "TempPathHost" = "/tmp/fileflows";
-            "PUID" = "1000";
-            "PGID" = "991";
-            "UMASK" = "0002";
+            TempPathHost = "/tmp/fileflows";
+            PUID = mediaUidStr;
+            PGID = mediaGidStr;
+            UMASK = "0002";
           };
 
           extraOptions = [
@@ -118,8 +112,6 @@ in
             "/var/lib/containers/configarr/config:/app/config"
             "/var/lib/containers/configarr/repos:/app/repos"
           ];
-
-          environment = cfg.configarr.environment;
         };
       })
     ];
