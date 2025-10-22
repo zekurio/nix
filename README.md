@@ -1,73 +1,43 @@
 # nix-config
 
-These notes cover how to reinstall the `adam` host from a NixOS live environment by reusing the declarative `machines/nixos/adam/disko.nix` storage layout and this flake.
+## Machine Configs
 
-- Update `machines/nixos/adam/disko.nix` so `disko.devices.disk.main.device` matches the target drive (`/dev/nvme0n1`, `/dev/sda`, …) before you deploy.
-- Boot the target machine with the NixOS live ISO, connect it to the network, and discover its address (`ip a`).
-- On the live ISO console, set a temporary password for the `nixos` user so SSH will accept the login: `sudo passwd nixos`. Without a password or preloaded `authorized_keys`, the OpenSSH server refuses the connection.
-- Start the SSH daemon if it is not already running: `sudo systemctl start sshd`.
-- From your workstation, connect into the live session with agent forwarding so the forwarded key can clone this repo: `ssh -A nixos@<live-ip>`. Elevate to root with `sudo -i`.
-- Enter a shell that provides Git (the minimal ISO does not have it in `$PATH`): `nix shell nixpkgs#git -c $SHELL` (or `nix-shell -p git` if you prefer).
-- Fetch the configuration via SSH using your forwarded key: `git clone git@github.com:<account>/nix-config /root/nix-config && cd /root/nix-config`.
-- Install the system using nixos-anywhere:
-  ```bash
-  nix run github:nix-community/nixos-anywhere -- localhost --flake .#adam --extra-nixos-install-args '--no-root-passwd'
-  ```
-  nixos-anywhere handles the partitioning using the Disko configuration in the flake, mounts the root filesystem at `/mnt`, and runs `nixos-install` to copy the system and enable the flake.
-- After the installer finishes, unmount (`umount -R /mnt`), reboot, and SSH to the freshly provisioned host: `ssh root@<adam-ip>`.
-
-If you need to re-run the install, reboot back into the live ISO, SSH in again, and repeat the cloning and nixos-anywhere steps.
-
-## WSL Setup (tabris)
-
-The `tabris` WSL configuration includes Windows SSH Agent integration, allowing you to use SSH keys managed by Windows (including hardware keys) seamlessly in WSL.
-
-### Prerequisites
-
-1. **Install npiperelay on Windows** (required for SSH agent bridge):
-   ```powershell
-   # Using Scoop (recommended)
-   scoop install npiperelay
-   ```
-
-2. **Enable Windows SSH Agent** (PowerShell as Administrator):
-   ```powershell
-   Set-Service ssh-agent -StartupType Automatic
-   Start-Service ssh-agent
-   ```
-
-3. **Add your SSH key to Windows SSH Agent**:
-   ```powershell
-   ssh-add $env:USERPROFILE\.ssh\id_ed25519
-   ssh-add -l  # Verify keys are loaded
-   ```
-
-### Building and Installing
-
-1. **Update flake and build the WSL tarball**:
-   ```bash
-   nix flake update
-   nix build .#nixosConfigurations.tabris.config.system.build.tarball
-   ```
-
-2. **Import into WSL** (from PowerShell on Windows):
-   ```powershell
-   mkdir $env:USERPROFILE\WSL\NixOS-tabris
-   wsl --import NixOS-tabris $env:USERPROFILE\WSL\NixOS-tabris .\result\tarball\nixos-wsl-installer.tar.gz
-   wsl -d NixOS-tabris
-   ```
-
-3. **Verify SSH agent integration** (inside WSL):
-   ```bash
-   systemctl --user status ssh-agent-bridge
-   ssh-add -l  # Should show your Windows SSH keys
-   ```
-
-### Updating
-
-After making configuration changes:
-```bash
-sudo nixos-rebuild switch --flake /path/to/nix-config#tabris
+```txt
+machines
+└── nixos
+    ├── adam (homelab server)
+    └── tabris (wsl config)
 ```
 
-The SSH agent bridge service automatically detects npiperelay from Scoop, WinGet, or Chocolatey installations and creates a socket at `/mnt/wsl/ssh-agent.sock` that bridges to the Windows SSH Agent.
+## User Config
+
+### zekurio
+
+Default wheel user for both systems. Includes a base config that sets up the user, a shell config for fish and other CLI/TUI applications, and a dev config, to setup my preferred development environment.
+
+```txt
+modules/home-manager
+├── base.nix
+├── default.nix
+├── dev.nix
+└── git.nix
+```
+## Installation
+
+### adam
+
+#### Prerequisites
+
+- [Latest Minimal ISO](https://nixos.org/download/#nixos-iso)
+- A customized flake to fit your needs, you might want to change the user name and password. Also, check the disko.nix file for disk partitioning and formatting.
+
+#### Steps
+
+1. Boot the minimal ISO, become `root`, and connect to the network (configure Wi-Fi or ensure the Ethernet link is up).
+2. Enter a shell with Git available: `nix-shell -p git`.
+3. Clone this repository and `cd` into it: `git clone https://github.com/your-user/nix-config && cd nix-config`.
+4. Wipe and lay out the disks using the provided `disko` recipe: `nix run github:nix-community/disko -- --mode disko machines/nixos/adam/disko.nix`.
+5. Mount the target filesystem if `disko` did not do it automatically: `mount /dev/disk/by-label/nixos /mnt` and create `/mnt/boot` as needed.
+6. Copy or generate the age key expected by `sops-nix` under `/mnt/etc/sops/age/keys.txt` so secrets can decrypt at boot.
+7. Install the system from the flake: `nixos-install --flake .#adam`.
+8. Reboot into the new system, then run `nixos-rebuild switch --flake .#adam` to confirm future activations succeed.
