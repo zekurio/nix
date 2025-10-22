@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.radarr-wrapped = {
     enable = lib.mkEnableOption "Radarr movie manager with Caddy integration";
@@ -18,14 +22,14 @@
   config = lib.mkIf config.services.radarr-wrapped.enable {
     services.radarr = {
       enable = true;
-      group = "media";
+      user = shareUser;
+      group = shareGroup;
     };
-
-    # Configure radarr user to use media as its primary group
-    users.users.radarr.group = "media";
 
     # Set umask for shared library access
     systemd.services.radarr.serviceConfig = {
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
     };
 

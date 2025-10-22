@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.sabnzbd-wrapped = {
     enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";
@@ -18,14 +22,13 @@
   config = lib.mkIf config.services.sabnzbd-wrapped.enable {
     services.sabnzbd = {
       enable = true;
-      group = "media";
-    };
-
-    users.users.sabnzbd = {
-      group = "media";
+      user = shareUser;
+      group = shareGroup;
     };
 
     systemd.services.sabnzbd.serviceConfig = {
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
     };
 

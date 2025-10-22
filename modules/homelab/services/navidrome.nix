@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.navidrome-wrapped = {
     enable = lib.mkEnableOption "Navidrome music server with Caddy integration";
@@ -21,23 +25,17 @@
   };
 
   config = lib.mkIf config.services.navidrome-wrapped.enable {
-    # Configure navidrome user and group
-    users.users.navidrome = {
-      isSystemUser = true;
-      group = "navidrome";
-      extraGroups = [ "media" ];
-    };
-    users.groups.navidrome = {};
-
     # SOPS secret for Spotify environment variables
     sops.secrets.navidrome_env = {
-      owner = "navidrome";
-      group = "navidrome";
+      owner = shareUser;
+      group = shareGroup;
       mode = "0400";
     };
 
     services.navidrome = {
       enable = true;
+      user = shareUser;
+      group = shareGroup;
       settings = {
         MusicFolder = config.services.navidrome-wrapped.musicFolder;
         Address = "127.0.0.1";
@@ -51,12 +49,13 @@
 
     # Create cache directory with proper permissions
     systemd.tmpfiles.rules = [
-      "d /var/cache/navidrome 0775 navidrome navidrome -"
+      "d /var/cache/navidrome 0775 ${shareUser} ${shareGroup} -"
     ];
 
     # Ensure navidrome service can access music files with group permissions
     systemd.services.navidrome.serviceConfig = {
-      SupplementaryGroups = [ "media" ];
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
       # Use system library reading to avoid permission issues
       ProtectSystem = "strict";
