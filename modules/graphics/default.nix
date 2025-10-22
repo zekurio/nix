@@ -1,0 +1,6 @@
+{ ... }:
+{
+  imports = [
+    ./intel-arc.nix
+  ];
+}
