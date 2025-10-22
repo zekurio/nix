@@ -16,22 +16,14 @@
   };
 
   config = lib.mkIf config.services.prowlarr-wrapped.enable {
-    # Configure prowlarr user and group
     users.users.prowlarr = {
       isSystemUser = true;
       group = "prowlarr";
-      extraGroups = [ "media" ];
     };
     users.groups.prowlarr = {};
 
     services.prowlarr = {
       enable = true;
-    };
-
-    # Ensure prowlarr can access shared media library
-    systemd.services.prowlarr.serviceConfig = {
-      SupplementaryGroups = [ "media" ];
-      UMask = lib.mkForce "0002";
     };
 
     # Caddy virtual host configuration with base URL

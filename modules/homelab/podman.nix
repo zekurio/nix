@@ -4,12 +4,12 @@ with lib;
 
 let
   cfg = config.virtualisation.podman-homelab;
-  mediaGroup = "media";
-  mediaUser = "zekurio";
-  mediaUid = attrByPath [ "users" "users" mediaUser "uid" ] 1000 config;
-  mediaGid = attrByPath [ "users" "groups" mediaGroup "gid" ] 991 config;
-  mediaUidStr = toString mediaUid;
-  mediaGidStr = toString mediaGid;
+  shareGroup = "share";
+  shareUser = "share";
+  shareUid = attrByPath [ "users" "users" shareUser "uid" ] 995 config;
+  shareGid = attrByPath [ "users" "groups" shareGroup "gid" ] 995 config;
+  shareUidStr = toString shareUid;
+  shareGidStr = toString shareGid;
 in
 {
   options.virtualisation.podman-homelab = {
@@ -59,7 +59,7 @@ in
         jellyfin = {
           image = "ghcr.io/jellyfin/jellyfin:latest";
           autoStart = true;
-          user = "1000:1000";
+          user = "${shareUidStr}:${shareGidStr}";
           ports = [ "${toString cfg.jellyfin.port}:8096" ];
 
           volumes = [
@@ -79,11 +79,12 @@ in
           image = "revenz/fileflows:latest";
           autoStart = true;
           ports = [ "${toString cfg.fileflows.port}:5000" ];
-          user = "${mediaUidStr}:${mediaGidStr}";
+          user = "${shareUidStr}:${shareGidStr}";
 
           volumes = [
             "/run/podman/podman.sock:/var/run/docker.sock:ro"
             "/var/downloads:/downloads"
+            "/mnt/fast-nvme/media:/media"
             "/var/lib/containers/fileflows/data:/app/Data"
             "/var/lib/containers/fileflows/logs:/app/Logs"
             "/tmp/fileflows:/temp"
@@ -91,8 +92,8 @@ in
 
           environment = {
             TempPathHost = "/tmp/fileflows";
-            PUID = mediaUidStr;
-            PGID = mediaGidStr;
+            PUID = shareUidStr;
+            PGID = shareGidStr;
             UMASK = "0002";
           };
 
@@ -106,7 +107,7 @@ in
         configarr = {
           image = "ghcr.io/raydak-labs/configarr:latest";
           autoStart = false;
-          user = "1000:1000";
+          user = "${shareUidStr}:${shareGidStr}";
 
           volumes = [
             "/var/lib/containers/configarr/config:/app/config"
@@ -119,13 +120,13 @@ in
     # Create required directories for containers
     systemd.tmpfiles.rules = mkIf cfg.enable [
       # Podman directories
-      "d /var/lib/containers/jellyfin 2775 ${mediaUser} ${mediaGroup} -"
-      "d /var/cache/containers/jellyfin 2775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/fileflows/data 2775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/fileflows/logs 2775 ${mediaUser} ${mediaGroup} -"
-      "d /tmp/fileflows 2775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/configarr/config 2775 ${mediaUser} ${mediaGroup} -"
-      "d /var/lib/containers/configarr/repos 2775 ${mediaUser} ${mediaGroup} -"
+      "d /var/lib/containers/jellyfin 2775 ${shareUser} ${shareGroup} -"
+      "d /var/cache/containers/jellyfin 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/containers/fileflows/data 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/containers/fileflows/logs 2775 ${shareUser} ${shareGroup} -"
+      "d /tmp/fileflows 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/containers/configarr/config 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/containers/configarr/repos 2775 ${shareUser} ${shareGroup} -"
     ];
   };
 }

@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.sonarr-wrapped = {
     enable = lib.mkEnableOption "Sonarr TV show manager with Caddy integration";
@@ -18,10 +22,12 @@
   config = lib.mkIf config.services.sonarr-wrapped.enable {
     services.sonarr = {
       enable = true;
-      group = "media";
+      user = shareUser;
+      group = shareGroup;
     };
-    users.users.sonarr.group = "media";
     systemd.services.sonarr.serviceConfig = {
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
     };
 

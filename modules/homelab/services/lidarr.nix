@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.lidarr-wrapped = {
     enable = lib.mkEnableOption "Lidarr music manager with Caddy integration";
@@ -23,14 +27,14 @@
   config = lib.mkIf config.services.lidarr-wrapped.enable {
     services.lidarr = {
       enable = true;
+      user = shareUser;
+      group = shareGroup;
     };
-
-    # Add lidarr user to media group
-    users.users.lidarr.extraGroups = [ "media" ];
 
     # Ensure Lidarr can access shared media library through group permissions
     systemd.services.lidarr.serviceConfig = {
-      SupplementaryGroups = [ "media" ];
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
     };
 

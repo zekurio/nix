@@ -1,5 +1,9 @@
 { config, lib, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.qbittorrent-wrapped = {
     enable = lib.mkEnableOption "qBittorrent with VPN confinement";
@@ -23,7 +27,8 @@
   config = lib.mkIf config.services.qbittorrent-wrapped.enable {
     services.qbittorrent = {
       enable = true;
-      group = "media";
+      user = shareUser;
+      group = shareGroup;
       webuiPort = config.services.qbittorrent-wrapped.webuiPort;
       torrentingPort = config.services.qbittorrent-wrapped.torrentingPort;
       openFirewall = false; # Managed through VPN namespace
@@ -36,12 +41,9 @@
       extraArgs = [ "--confirm-legal-notice" ];
     };
 
-    # Configure qBittorrent service account to use media as primary group
-    users.users.qbittorrent = {
-      group = "media";
-    };
-
     systemd.services.qbittorrent.serviceConfig = {
+      User = shareUser;
+      Group = shareGroup;
       UMask = lib.mkForce "0002";
     };
 

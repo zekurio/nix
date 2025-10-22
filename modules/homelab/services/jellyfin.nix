@@ -1,5 +1,9 @@
 { config, lib, pkgs, ... }:
 
+let
+  shareUser = "share";
+  shareGroup = "share";
+in
 {
   options.services.jellyfin-wrapped = {
     enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
@@ -11,18 +15,11 @@
   };
 
   config = lib.mkIf config.services.jellyfin-wrapped.enable {
-    # Create jellyfin user and group
-    users.users.jellyfin = {
-      isSystemUser = true;
-      group = "jellyfin";
-      extraGroups = [ "media" ];
-    };
-    users.groups.jellyfin = {};
-
     services.jellyfin = {
       enable = false;
       openFirewall = true;
-      group = "jellyfin";
+      user = shareUser;
+      group = shareGroup;
     };
 
     # Use unstable jellyfin packages
