@@ -41,3 +41,7 @@ modules/home-manager
 6. Copy or generate the age key expected by `sops-nix` under `/mnt/etc/sops/age/keys.txt` so secrets can decrypt at boot.
 7. Install the system from the flake: `nixos-install --flake .#adam`.
 8. Reboot into the new system, then run `nixos-rebuild switch --flake .#adam` to confirm future activations succeed.
+
+### Live Environment Access
+
+Once `adam` is installed, all follow-up changes happen over SSH. Connect with `ssh zekurio@adam.lan` (or adjust the hostname/IP as needed) and escalate with `sudo -i` before running rebuilds. Remote deploys should target the live host, e.g. `nixos-rebuild switch --flake .#adam --target-host zekurio@adam.lan --use-remote-sudo`.
