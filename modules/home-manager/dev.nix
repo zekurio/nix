@@ -44,6 +44,7 @@ in
 
         # AI agents
         pkgs.unstable.codex
+        pkgs.unstable.opencode
       ];
     };
   };
