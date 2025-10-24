@@ -20,18 +20,34 @@
     loader = {
       timeout = 0;
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = lib.mkForce false;
+      systemd-boot.enable = true;
     };
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
     };
-     kernelPackages = pkgs.unstable.linuxPackages_latest;
+    initrd = {
+      verbose = false;
+    };
+    kernelParams = [
+      "quiet"
+      "splash"
+      "rd.systemd.show_status=false"
+      "rd.udev.log_level=3"
+      "udev.log_priority=3"
+      "boot.shell_on_fail"
+    ];
+    kernelModules = [ "kvm-amd" ];
   };
 
   hardware = {
     enableRedistributableFirmware = true;
-    cpu.amd.updateMicrocode = true;
+    bluetooth.enable = true;
+    cpu.amd = {
+      updateMicrocode = true;
+      ryzen-smu.enable = true;
+    };
+    xone.enable = true;
   };
 
   modules.graphics.amd.enable = true;
