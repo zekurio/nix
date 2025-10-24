@@ -83,6 +83,7 @@ in
         interactiveShellInit = ''
           set -g fish_greeting
           fish_add_path "/home/zekurio/.bun/bin"
+          set -gx LD_LIBRARY_PATH (printf "%s" ${lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib pkgs.zlib pkgs.glib ]}):$LD_LIBRARY_PATH
         '';
         plugins = [
           {
