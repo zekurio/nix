@@ -52,12 +52,6 @@ in
     };
   };
 
-
-  programs.nix-ld = {
-    enable = true;
-    package = pkgs.nix-ld-rs;
-  };
-
   systemd.user.services.ssh-agent-proxy = {
     description = "Windows SSH agent proxy";
     path = [ pkgs.wslu pkgs.coreutils pkgs.bash pkgs.socat ];
