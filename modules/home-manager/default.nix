@@ -10,8 +10,9 @@ in
 {
   imports = [
     ./base.nix
-    ./git.nix
     ./dev.nix
+    ./dotfiles.nix
+    ./git.nix
   ];
 
   options.modules.homeManager = {
