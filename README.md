@@ -45,3 +45,35 @@ modules/home-manager
 ### Live Environment Access
 
 Once `adam` is installed, all follow-up changes happen over SSH. Connect with `ssh zekurio@adam.lan` (or adjust the hostname/IP as needed) and escalate with `sudo -i` before running rebuilds. Remote deploys should target the live host, e.g. `nixos-rebuild switch --flake .#adam --target-host zekurio@adam.lan --use-remote-sudo`.
+
+## Backup Recovery
+
+Restic backups for `adam` target Backblaze B2 and are wired up by `modules/homelab/services/backups.nix`. To recover data:
+
+1. Become the backup user (defaults to `root`) and start a shell with restic available:
+   ```bash
+   sudo nix shell nixpkgs#restic -c bash
+   ```
+2. Load the secrets exposed by the module:
+   ```bash
+   set -a
+   source /run/secrets/restic_env
+   set +a
+   export RESTIC_PASSWORD_FILE=/run/secrets/restic_password
+   ```
+   Adjust the paths if `environmentSecretName` or `passwordSecretName` were overridden.
+3. Inspect available snapshots (restic tags backups with `adam`):
+   ```bash
+   restic snapshots --tag adam
+   ```
+4. Restore into a staging directory and pull only the paths you need:
+   ```bash
+   mkdir -p /var/restore
+   restic restore latest --tag adam --target /var/restore --include /var/lib/sonarr
+   ```
+   Swap `latest`, tags, or `--include/--exclude` filters to suit the snapshot and data you want.
+5. Move the recovered files back into place (stop services first if you overwrite live data), then clean up `/var/restore`.
+
+Optional checks:
+- `restic diff <snapshot-id> latest --tag adam --path /var/lib/sonarr` to review changes before restoring.
+- `restic mount /mnt/restic` for FUSE-based browsing (remember to unmount when finished).
