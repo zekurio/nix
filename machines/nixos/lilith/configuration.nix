@@ -22,10 +22,6 @@
       efi.canTouchEfiVariables = true;
       systemd-boot.enable = true;
     };
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-    };
     initrd = {
       verbose = false;
     };
@@ -52,6 +48,9 @@
 
   modules.graphics.amd.enable = true;
   modules.desktop.hyprland.enable = true;
+
+  modules.homeManager.dotfiles.enable = true;
+  modules.homeManager.dotfiles.hyprland.enable = true;
 
   users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
 
