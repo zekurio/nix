@@ -26,6 +26,7 @@
       enable = true;
       pkiBundle = "/var/lib/sbctl";
     };
+     kernelPackages = pkgs.unstable.linuxPackages_latest;
   };
 
   hardware = {
