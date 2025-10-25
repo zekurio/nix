@@ -141,7 +141,7 @@ in
             "$mod, TAB, exec, dms ipc call hypr toggleOverview"
 
             # Security
-            "$mod ALT, L, exec, dms ipc call lock lock"
+            "$mod, L, exec, dms ipc call lock lock"
             "$mod SHIFT, E, exit"
             "CTRL ALT, Delete, exec, dms ipc call processlist toggle"
 
