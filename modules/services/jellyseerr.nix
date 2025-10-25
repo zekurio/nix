@@ -1,5 +1,4 @@
-{ config, lib, pkgs, ... }:
-
+{ config, lib, pkgs, pkgsUnstable, ... }:
 {
   options.services.jellyseerr-wrapped = {
     enable = lib.mkEnableOption "Jellyseerr media request manager with Caddy integration";
@@ -20,7 +19,7 @@
       enable = true;
       port = config.services.jellyseerr-wrapped.port;
       openFirewall = true;
-      package = pkgs.unstable.jellyseerr;
+      package = pkgsUnstable.jellyseerr;
     };
 
     # Caddy virtual host configuration

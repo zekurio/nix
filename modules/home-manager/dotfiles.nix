@@ -106,14 +106,12 @@ in
 
           # Window rules
           windowrulev2 = [
-            "tile, class:^(org\\.wezfurlong\\.wezterm)$"
             "rounding 6, class:^(org\\.gnome\\.)"
             "noborder, class:^(org\\.gnome\\.)"
             "tile, class:^(gnome-control-center)$"
             "tile, class:^(pavucontrol)$"
             "tile, class:^(nm-connection-editor)$"
             "float, class:^(blueman-manager)$"
-            "float, class:^(org\\.gnome\\.Nautilus)$"
             "float, class:^(steam)$"
             "float, class:^(xdg-desktop-portal)$"
             "noborder, class:^(com\\.mitchellh\\.ghostty)$"

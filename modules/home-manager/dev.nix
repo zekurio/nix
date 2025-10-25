@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgsUnstable,
   ...
 }:
 let
@@ -43,8 +44,8 @@ in
         gh
 
         # AI agents
-        pkgs.unstable.codex
-        pkgs.unstable.opencode
+        pkgsUnstable.codex
+        pkgsUnstable.opencode
       ];
     };
   };
