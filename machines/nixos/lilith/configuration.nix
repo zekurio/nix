@@ -5,6 +5,7 @@
     ../../../modules/graphics
     ../../../modules/home-manager
     ../../../overlays
+    ../default.nix
   ];
 
   networking = {
@@ -82,18 +83,6 @@
 
   services.mullvad-vpn.enable = true;
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
-
-  # Nix configuration
-  nix = {
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = lib.mkForce "--delete-older-than 7d";
-    };
-    settings = {
-      auto-optimise-store = true;
-    };
-  };
 
   system.stateVersion = "25.05";
 }
