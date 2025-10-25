@@ -19,7 +19,7 @@
     loader = {
       timeout = 0;
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = true;
+      systemd-boot.enable = lib.mkForce false;
     };
     initrd = {
       verbose = false;
@@ -31,9 +31,18 @@
       "rd.udev.log_level=3"
       "udev.log_priority=3"
       "boot.shell_on_fail"
+      "acpi_enforce_resources=lax"
+      "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    kernelModules = [ "kvm-amd" ];
+    kernelModules = [ "kvm-amd" "it87" ];
+    extraModprobeConfig = ''
+      options it87 force_id=0x8628
+    '';
     kernelPackages = pkgs.linuxPackages_zen;
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/var/lib/sbctl";
+    };
   };
 
   hardware = {
@@ -61,6 +70,8 @@
     pkgs.sbctl
   ];
 
+  programs.coolercontrol.enable = true;
+
   services.openssh = {
     enable = lib.mkDefault true;
     settings = {
@@ -68,5 +79,21 @@
       PermitRootLogin = "no";
     };
   };
+
+  services.mullvad-vpn.enable = true;
+  services.mullvad-vpn.package = pkgs.mullvad-vpn;
+
+  # Nix configuration
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = lib.mkForce "--delete-older-than 7d";
+    };
+    settings = {
+      auto-optimise-store = true;
+    };
+  };
+
   system.stateVersion = "25.05";
 }

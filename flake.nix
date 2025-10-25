@@ -74,7 +74,6 @@
   outputs = inputs@{ nixpkgs, nixpkgs-unstable, flake-parts, disko, ... }:
     let
       lib = nixpkgs.lib;
-      # Helper to create pre-configured unstable pkgs with allowUnfree
       mkPkgsUnstable = system: import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
@@ -82,6 +81,8 @@
       pkgsUnstable = mkPkgsUnstable "x86_64-linux";
       # Shared Nix configuration for all machines
       commonNixConfig = {
+        nixpkgs.config.allowUnfree = true;
+
         nix.settings = {
           experimental-features = [ "nix-command" "flakes" ];
           trusted-users = [ "root" "@wheel" ];
