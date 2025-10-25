@@ -67,6 +67,8 @@ in
         btop
         eza
         fastfetch
+        jq
+        envsubst
         zellij
         # Version control
         git

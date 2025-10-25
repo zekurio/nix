@@ -71,9 +71,15 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, flake-parts, disko, ... }:
+  outputs = inputs@{ nixpkgs, nixpkgs-unstable, flake-parts, disko, ... }:
     let
       lib = nixpkgs.lib;
+      # Helper to create pre-configured unstable pkgs with allowUnfree
+      mkPkgsUnstable = system: import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      pkgsUnstable = mkPkgsUnstable "x86_64-linux";
       # Shared Nix configuration for all machines
       commonNixConfig = {
         nix.settings = {
@@ -110,7 +116,7 @@
         nixosConfigurations = {
           adam = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            specialArgs = { inherit inputs; };
+            specialArgs = { inherit inputs pkgsUnstable; };
             modules = [
               commonNixConfig
               disko.nixosModules.disko
@@ -124,7 +130,7 @@
           };
           tabris = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            specialArgs = { inherit inputs; };
+            specialArgs = { inherit inputs pkgsUnstable; };
             modules = [
               commonNixConfig
               inputs.nixos-wsl.nixosModules.default
@@ -135,7 +141,7 @@
           };
           lilith = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            specialArgs = { inherit inputs; };
+            specialArgs = { inherit inputs pkgsUnstable; };
             modules = [
               commonNixConfig
               inputs.disko.nixosModules.disko

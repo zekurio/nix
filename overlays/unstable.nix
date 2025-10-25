@@ -7,6 +7,5 @@ let
   };
 in
 {
-  unstable = unstablePkgs;
   quickshell = unstablePkgs.quickshell;
 }

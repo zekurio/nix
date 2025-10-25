@@ -50,6 +50,7 @@
   modules.desktop.hyprland.enable = true;
 
   modules.homeManager.bitwardenSsh.enable = true;
+  modules.homeManager.dev.enable = true;
   modules.homeManager.dotfiles.enable = true;
   modules.homeManager.dotfiles.hyprland.enable = true;
   modules.homeManager.dotfiles.ghostty.enable = true;
