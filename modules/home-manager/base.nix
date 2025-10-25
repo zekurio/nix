@@ -66,6 +66,7 @@ in
         bat
         btop
         eza
+        fastfetch
         zellij
         # Version control
         git
