@@ -70,8 +70,6 @@ in
         zellij
         # Version control
         git
-        # Editors
-        vim
         # Nix tools
         nil
         nixd

@@ -302,7 +302,7 @@ in
         enable = true;
         settings = {
           # Font Configuration
-          font-family = "GeistMono Nerd Font";
+          font-family = "Fira Code";
           font-size = 12;
 
           # Window Configuration
