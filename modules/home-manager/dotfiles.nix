@@ -14,11 +14,15 @@ in
     hyprland = {
       enable = mkEnableOption "Hyprland declarative configuration";
     };
+
+    ghostty = {
+      enable = mkEnableOption "Ghostty terminal emulator configuration";
+    };
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.zekurio = mkIf cfg.hyprland.enable {
-      wayland.windowManager.hyprland = {
+    home-manager.users.zekurio = {
+      wayland.windowManager.hyprland = mkIf cfg.hyprland.enable {
         enable = true;
         settings = {
           # Monitor configuration
@@ -290,6 +294,58 @@ in
           bindd = [
             "$mod, code:20, Expand window left, resizeactive, -100 0"
             "$mod, code:21, Shrink window left, resizeactive, 100 0"
+          ];
+        };
+      };
+
+      programs.ghostty = mkIf cfg.ghostty.enable {
+        enable = true;
+        settings = {
+          # Font Configuration
+          font-family = "GeistMono Nerd Font";
+          font-size = 12;
+
+          # Window Configuration
+          window-decoration = false;
+          window-padding-x = 12;
+          window-padding-y = 12;
+          background-opacity = 0.90;
+          background-blur-radius = 32;
+
+          # Cursor Configuration
+          cursor-style = "block";
+          cursor-style-blink = true;
+
+          # Scrollback
+          scrollback-limit = 3023;
+
+          # Terminal features
+          mouse-hide-while-typing = true;
+          copy-on-select = false;
+          confirm-close-surface = false;
+
+          # Material 3 UI elements
+          unfocused-split-opacity = 0.7;
+          unfocused-split-fill = "#44464f";
+
+          # Tab configuration
+          gtk-titlebar = false;
+
+          # Shell integration
+          shell-integration = "detect";
+          shell-integration-features = "cursor,sudo,title,no-cursor";
+
+          # Dank color generation
+          config-file = "./config-dankcolors";
+
+          # Key bindings for common actions
+          keybind = [
+            "ctrl+shift+n=new_window"
+            "ctrl+t=new_tab"
+            "ctrl+plus=increase_font_size:1"
+            "ctrl+minus=decrease_font_size:1"
+            "ctrl+zero=reset_font_size"
+            "shift+enter=text:\\n"
           ];
         };
       };
