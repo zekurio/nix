@@ -34,6 +34,7 @@
       "boot.shell_on_fail"
     ];
     kernelModules = [ "kvm-amd" ];
+    kernelPackages = pkgs.linuxPackages_zen;
   };
 
   hardware = {
@@ -51,6 +52,7 @@
 
   modules.homeManager.dotfiles.enable = true;
   modules.homeManager.dotfiles.hyprland.enable = true;
+  modules.homeManager.dotfiles.ghostty.enable = true;
 
   users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
 
