@@ -2,8 +2,11 @@
 {
   imports = [
     ./disko.nix
+    ../../../modules/desktop
+    ../../../modules/gaming
     ../../../modules/graphics
     ../../../modules/home-manager
+    ../../../modules/users
     ../../../overlays
     ../default.nix
   ];
@@ -53,11 +56,11 @@
       updateMicrocode = true;
       ryzen-smu.enable = true;
     };
-    xone.enable = true;
   };
 
   modules.graphics.amd.enable = true;
   modules.desktop.hyprland.enable = true;
+  modules.gaming.enable = true;
 
   modules.homeManager.bitwardenSsh.enable = true;
   modules.homeManager.dev.enable = true;
@@ -83,6 +86,7 @@
 
   services.mullvad-vpn.enable = true;
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
+  services.power-profiles-daemon.enable = true;
 
   system.stateVersion = "25.05";
 }
