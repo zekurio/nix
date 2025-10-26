@@ -39,6 +39,7 @@ in
 
           # Startup applications
           exec-once = [
+            "wl-clip-persist --clipboard both"
             "wl-paste --watch cliphist store &"
             "dms run"
             "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"

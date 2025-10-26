@@ -6,6 +6,7 @@ in
 {
   imports = [
     ../../../modules/home-manager
+    ../../../modules/users
     ../../../overlays
   ];
 

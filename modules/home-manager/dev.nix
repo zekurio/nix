@@ -19,29 +19,29 @@ in
 
   config = mkIf cfg.enable {
     home-manager.users.zekurio = { pkgs, ... }: {
-      home.packages = with pkgs; [
+      home.packages = [
         # Node.js ecosystem
-        nodejs_22
-        pnpm
-        bun
+        pkgs.nodejs_22
+        pkgs.pnpm
+        pkgsUnstable.bun
 
         # Go
-        go
-        golangci-lint
+        pkgs.go
+        pkgs.golangci-lint
 
         # Rust
-        rustup
+        pkgs.rustup
 
         # Build tools
-        pkg-config
-        cmake
-        gnumake
+        pkgs.pkg-config
+        pkgs.cmake
+        pkgs.gnumake
 
         # Python, yuck
-        uv
+        pkgs.uv
 
         # Github CLI
-        gh
+        pkgs.gh
 
         # AI agents
         pkgsUnstable.codex

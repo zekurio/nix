@@ -1,7 +1,6 @@
-{
-  lib,
-  config,
-  ...
+{ lib
+, config
+, ...
 }:
 let
   inherit (lib) mkEnableOption mkIf;
@@ -11,7 +10,6 @@ in
   imports = [
     ./base.nix
     ./bitwarden-ssh.nix
-    ./desktop.nix
     ./dev.nix
     ./dotfiles.nix
     ./git.nix
