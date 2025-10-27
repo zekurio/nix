@@ -21,7 +21,7 @@
 
   boot = {
     loader = {
-      timeout = 0;
+      timeout = 10;
       efi.canTouchEfiVariables = true;
       systemd-boot.enable = lib.mkForce false;
     };
@@ -64,14 +64,12 @@
 
   modules.homeManager.bitwardenSsh.enable = true;
   modules.homeManager.dev.enable = true;
-  modules.homeManager.dotfiles.enable = true;
-  modules.homeManager.dotfiles.hyprland.enable = true;
-  modules.homeManager.dotfiles.ghostty.enable = true;
 
   users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
 
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl
+    pkgs.cryptsetup
   ];
 
   programs.coolercontrol.enable = true;
@@ -87,6 +85,19 @@
   services.mullvad-vpn.enable = true;
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
   services.power-profiles-daemon.enable = true;
+  services.fwupd.enable = true;
+
+  systemd.services.disable-gpp0-acpi-wakeup = {
+    description = "Disable ACPI wake device GPP0";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "sysinit.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
+        echo GPP0 > /proc/acpi/wakeup
+      '';
+    };
+  };
 
   system.stateVersion = "25.05";
 }

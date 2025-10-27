@@ -11,7 +11,6 @@ in
     ./base.nix
     ./bitwarden-ssh.nix
     ./dev.nix
-    ./dotfiles.nix
     ./git.nix
   ];
 
