@@ -3,12 +3,10 @@
   config,
   pkgsUnstable,
   ...
-}:
-let
+}: let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager.dev;
-in
-{
+in {
   options.modules.homeManager.dev = {
     enable =
       mkEnableOption "Development tools and languages"
@@ -18,7 +16,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.zekurio = { pkgs, ... }: {
+    home-manager.users.zekurio = {pkgs, ...}: {
       home.packages = [
         # Node.js ecosystem
         pkgs.nodejs_22

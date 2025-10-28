@@ -2,12 +2,10 @@
   lib,
   config,
   ...
-}:
-let
+}: let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager.bitwardenSsh;
-in
-{
+in {
   options.modules.homeManager.bitwardenSsh = {
     enable = mkEnableOption "Bitwarden SSH agent socket configuration";
   };

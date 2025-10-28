@@ -1,12 +1,11 @@
-{ lib
-, config
-, ...
-}:
-let
+{
+  lib,
+  config,
+  ...
+}: let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager.base;
-in
-{
+in {
   options.modules.homeManager.base = {
     enable =
       mkEnableOption "Base user account and shell configuration"
@@ -16,7 +15,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.zekurio = { pkgs, ... }: {
+    home-manager.users.zekurio = {pkgs, ...}: {
       home.username = "zekurio";
       home.homeDirectory = "/home/zekurio";
       home.stateVersion = "25.05";
@@ -27,7 +26,7 @@ in
         bat
         btop
         eza
-        fastfetch
+        pfetch
         jq
         envsubst
         zellij
@@ -45,7 +44,7 @@ in
         interactiveShellInit = ''
           set -g fish_greeting
           fish_add_path "/home/zekurio/.bun/bin"
-          set -gx LD_LIBRARY_PATH (printf "%s" ${lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib pkgs.zlib pkgs.glib ]}):$LD_LIBRARY_PATH
+          set -gx LD_LIBRARY_PATH (printf "%s" ${lib.makeLibraryPath [pkgs.stdenv.cc.cc.lib pkgs.zlib pkgs.glib]}):$LD_LIBRARY_PATH
         '';
         plugins = [
           {
@@ -57,7 +56,7 @@ in
 
       programs.eza = {
         enable = true;
-        extraOptions = [ "--group-directories-first" "--icons=auto" ];
+        extraOptions = ["--group-directories-first" "--icons=auto"];
       };
     };
   };

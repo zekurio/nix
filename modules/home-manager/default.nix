@@ -1,12 +1,11 @@
-{ lib
-, config
-, ...
-}:
-let
+{
+  lib,
+  config,
+  ...
+}: let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager;
-in
-{
+in {
   imports = [
     ./base.nix
     ./bitwarden-ssh.nix

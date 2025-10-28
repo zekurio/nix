@@ -1,9 +1,11 @@
-{ lib, pkgs, ... }:
-let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) mkDefault;
   wslUser = "zekurio";
-in
-{
+in {
   imports = [
     ../../../modules/home-manager
     ../../../modules/users
@@ -55,7 +57,7 @@ in
 
   systemd.user.services.ssh-agent-proxy = {
     description = "Windows SSH agent proxy";
-    path = [ pkgs.wslu pkgs.coreutils pkgs.bash pkgs.socat ];
+    path = [pkgs.wslu pkgs.coreutils pkgs.bash pkgs.socat];
     serviceConfig = {
       ExecStartPre = [
         "${pkgs.coreutils}/bin/mkdir -p /mnt/wsl"
@@ -98,7 +100,7 @@ in
       StandardOutput = "journal";
       StandardError = "journal";
     };
-    wantedBy = [ "default.target" ];
+    wantedBy = ["default.target"];
   };
 
   modules.homeManager.git.enable = mkDefault true;

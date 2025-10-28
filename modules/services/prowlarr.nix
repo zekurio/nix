@@ -1,6 +1,8 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options.services.prowlarr-wrapped = {
     enable = lib.mkEnableOption "Prowlarr indexer manager with Caddy integration";
     domain = lib.mkOption {

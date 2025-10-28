@@ -2,12 +2,10 @@
   lib,
   config,
   ...
-}:
-let
+}: let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.homeManager.git;
-in
-{
+in {
   options.modules.homeManager.git = {
     enable =
       mkEnableOption "Git configuration with SSH signing"
@@ -17,7 +15,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.zekurio = { pkgs, ... }: {
+    home-manager.users.zekurio = {pkgs, ...}: {
       programs.git = {
         enable = true;
 

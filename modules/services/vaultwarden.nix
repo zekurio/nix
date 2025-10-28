@@ -1,6 +1,8 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options.services.vaultwarden-wrapped = {
     enable = lib.mkEnableOption "Vaultwarden password manager with Caddy integration";
     domain = lib.mkOption {

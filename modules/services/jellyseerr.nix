@@ -1,5 +1,10 @@
-{ config, lib, pkgs, pkgsUnstable, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  pkgsUnstable,
+  ...
+}: {
   options.services.jellyseerr-wrapped = {
     enable = lib.mkEnableOption "Jellyseerr media request manager with Caddy integration";
     domain = lib.mkOption {

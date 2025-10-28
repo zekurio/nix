@@ -1,22 +1,22 @@
-{ config, lib, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  ...
+}:
+with lib; let
   cfg = config.virtualisation.podman-homelab;
   shareGroup = "share";
   shareUser = "share";
-  shareUid = attrByPath [ "users" "users" shareUser "uid" ] 995 config;
-  shareGid = attrByPath [ "users" "groups" shareGroup "gid" ] 995 config;
+  shareUid = attrByPath ["users" "users" shareUser "uid"] 995 config;
+  shareGid = attrByPath ["users" "groups" shareGroup "gid"] 995 config;
   shareUidStr = toString shareUid;
   shareGidStr = toString shareGid;
-in
-{
+in {
   options.virtualisation.podman-homelab = {
     enable = mkEnableOption "Podman homelab containers";
 
     jellyfin = {
-      enable = mkEnableOption "Jellyfin container" // { default = true; };
+      enable = mkEnableOption "Jellyfin container" // {default = true;};
       port = mkOption {
         type = types.port;
         default = 8096;
@@ -25,7 +25,7 @@ in
     };
 
     fileflows = {
-      enable = mkEnableOption "FileFlows container" // { default = true; };
+      enable = mkEnableOption "FileFlows container" // {default = true;};
       port = mkOption {
         type = types.port;
         default = 19200;
@@ -34,7 +34,7 @@ in
     };
 
     configarr = {
-      enable = mkEnableOption "Configarr container" // { default = false; };
+      enable = mkEnableOption "Configarr container" // {default = false;};
     };
   };
 
@@ -60,7 +60,7 @@ in
           image = "ghcr.io/jellyfin/jellyfin:latest";
           autoStart = true;
           user = "${shareUidStr}:${shareGidStr}";
-          ports = [ "${toString cfg.jellyfin.port}:8096" ];
+          ports = ["${toString cfg.jellyfin.port}:8096"];
 
           volumes = [
             "/mnt/fast-nvme/media:/media"
@@ -78,7 +78,7 @@ in
         fileflows = {
           image = "revenz/fileflows:latest";
           autoStart = true;
-          ports = [ "${toString cfg.fileflows.port}:5000" ];
+          ports = ["${toString cfg.fileflows.port}:5000"];
 
           volumes = [
             "/run/podman/podman.sock:/var/run/docker.sock:ro"

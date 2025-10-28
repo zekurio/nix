@@ -1,10 +1,11 @@
-{ config, lib, ... }:
-
-let
+{
+  config,
+  lib,
+  ...
+}: let
   shareUser = "share";
   shareGroup = "share";
-in
-{
+in {
   options.services.sonarr-wrapped = {
     enable = lib.mkEnableOption "Sonarr TV show manager with Caddy integration";
     domain = lib.mkOption {
