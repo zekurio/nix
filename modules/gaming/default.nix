@@ -1,8 +1,11 @@
-{ lib, pkgs, config, ... }:
-let
-  cfg = config.modules.gaming;
-in
 {
+  lib,
+  pkgs,
+  config,
+  ...
+}: let
+  cfg = config.modules.gaming;
+in {
   options.modules.gaming = {
     enable = lib.mkEnableOption "Gaming tools: Steam, Heroic, Bottles, and xone driver";
 

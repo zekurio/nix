@@ -1,6 +1,4 @@
-inputs:
-
-{
+inputs: {
   nixpkgs.config.allowUnfree = true;
 
   nixpkgs.overlays = [

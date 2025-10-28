@@ -1,10 +1,11 @@
-{ config, lib, ... }:
-
-let
+{
+  config,
+  lib,
+  ...
+}: let
   shareUser = "share";
   shareGroup = "share";
-in
-{
+in {
   options.services.qbittorrent-wrapped = {
     enable = lib.mkEnableOption "qBittorrent with VPN confinement";
     domain = lib.mkOption {
@@ -38,7 +39,7 @@ in
       # (including password) directly in the web interface.
       # Changes will be saved to /var/lib/qBittorrent/qBittorrent/config/
 
-      extraArgs = [ "--confirm-legal-notice" ];
+      extraArgs = ["--confirm-legal-notice"];
     };
 
     systemd.services.qbittorrent.serviceConfig = {

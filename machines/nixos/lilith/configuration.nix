@@ -1,6 +1,10 @@
-{ lib, pkgs, ... }:
 {
+  lib,
+  pkgs,
+  ...
+}: {
   imports = [
+    ../default.nix
     ./disko.nix
     ../../../modules/desktop
     ../../../modules/gaming
@@ -8,14 +12,19 @@
     ../../../modules/home-manager
     ../../../modules/users
     ../../../overlays
-    ../default.nix
   ];
 
-  networking = {
-    hostName = "lilith";
-    useDHCP = lib.mkDefault true;
-    networkmanager.enable = true;
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    domains = [ "~." ];
+    fallbackDns = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
+    dnsovertls = "true";
   };
+
+  networking.networkmanager.enable = true;
+  networking.networkmanager.dns = "systemd-resolved";
+  networking.nameservers = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
 
   time.timeZone = lib.mkDefault "Europe/Vienna";
 
@@ -38,7 +47,7 @@
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    kernelModules = [ "kvm-amd" "it87" ];
+    kernelModules = ["kvm-amd" "it87"];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
@@ -58,14 +67,17 @@
     };
   };
 
-  modules.graphics.amd.enable = true;
-  modules.desktop.hyprland.enable = true;
-  modules.gaming.enable = true;
+  modules = {
+    desktop.hyprland.enable = true;
+    gaming.enable = true;
+    graphics.amd.enable = true;
+    homeManager = {
+      bitwardenSsh.enable = true;
+      dev.enable = true;
+    };
+  };
 
-  modules.homeManager.bitwardenSsh.enable = true;
-  modules.homeManager.dev.enable = true;
-
-  users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
+  users.users.zekurio.extraGroups = lib.mkAfter ["networkmanager"];
 
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl
@@ -74,23 +86,27 @@
 
   programs.coolercontrol.enable = true;
 
-  services.openssh = {
-    enable = lib.mkDefault true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
+  services = {
+    fwupd.enable = true;
+    gvfs.enable = true;
+    mullvad-vpn = {
+      enable = true;
+      package = pkgs.mullvad-vpn;
     };
+    openssh = {
+      enable = lib.mkDefault true;
+      settings = {
+        PasswordAuthentication = false;
+        PermitRootLogin = "no";
+      };
+    };
+    power-profiles-daemon.enable = true;
   };
-
-  services.mullvad-vpn.enable = true;
-  services.mullvad-vpn.package = pkgs.mullvad-vpn;
-  services.power-profiles-daemon.enable = true;
-  services.fwupd.enable = true;
 
   systemd.services.disable-gpp0-acpi-wakeup = {
     description = "Disable ACPI wake device GPP0";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "sysinit.target" ];
+    wantedBy = ["multi-user.target"];
+    after = ["sysinit.target"];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
