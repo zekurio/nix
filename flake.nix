@@ -69,6 +69,10 @@
       inputs.dgop.follows = "dgop";
       inputs.dms-cli.follows = "dms-cli";
     };
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
