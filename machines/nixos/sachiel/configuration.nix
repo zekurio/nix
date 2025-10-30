@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{ lib, pkgs, ... }: {
   imports = [
     ../default.nix
     ./disko.nix
@@ -22,7 +18,7 @@
     dnsovertls = "true";
   };
 
-  networking.hostName = "lilith";
+  networking.hostName = "sachiel";
   networking.networkmanager.enable = true;
   networking.networkmanager.dns = "systemd-resolved";
   networking.nameservers = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
@@ -31,9 +27,9 @@
 
   boot = {
     loader = {
-      timeout = 10;
+      timeout = 0;
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = lib.mkForce false;
+      systemd-boot.enable = true;
     };
     initrd = {
       verbose = false;
@@ -53,10 +49,10 @@
       options it87 force_id=0x8628
     '';
     kernelPackages = pkgs.linuxPackages_zen;
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-    };
+    # lanzaboote = {
+    #   enable = true;
+    #   pkiBundle = "/var/lib/sbctl";
+    # };
   };
 
   hardware = {
@@ -72,16 +68,16 @@
     desktop.hyprland = {
       enable = true;
       monitors = [
-        "DP-2,2560x1440@165,0x0,auto,vrr,1"
+        "eDP-1,1920x1080@120,0x0,auto,vrr,1"
       ];
       input = {
         kb_layout = "eu";
         numlock_by_default = true;
-        accel_profile = "flat";
+        accel_profile = "adaptive";
       };
     };
     gaming.enable = true;
-    graphics.amd.enable = true;
+    graphics.amd-nvidia.enable = true;
     homeManager = {
       bitwardenSsh.enable = true;
       dev.enable = true;
@@ -94,8 +90,6 @@
     pkgs.sbctl
     pkgs.cryptsetup
   ];
-
-  programs.coolercontrol.enable = true;
 
   services = {
     fwupd.enable = true;
@@ -112,18 +106,6 @@
       };
     };
     power-profiles-daemon.enable = true;
-  };
-
-  systemd.services.disable-gpp0-acpi-wakeup = {
-    description = "Disable ACPI wake device GPP0";
-    wantedBy = ["multi-user.target"];
-    after = ["sysinit.target"];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
-        echo GPP0 > /proc/acpi/wakeup
-      '';
-    };
   };
 
   system.stateVersion = "25.05";
