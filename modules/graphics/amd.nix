@@ -21,5 +21,18 @@ in {
     systemd.services.lactd.wantedBy = ["multi-user.target"];
     environment.variables.AMD_VULKAN_ICD = "RADV";
     hardware.firmware = with pkgs; [linux-firmware];
+    systemd.tmpfiles.rules =
+      let
+        rocmEnv = pkgs.symlinkJoin {
+          name = "rocm-combined";
+          paths = with pkgs.rocmPackages; [
+            clr
+            hipblas
+            rocblas
+          ];
+        };
+      in [
+        "L+    /opt/rocm   -    -    -     -    ${rocmEnv}"
+      ];
   };
 }
