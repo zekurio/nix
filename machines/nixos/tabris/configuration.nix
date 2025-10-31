@@ -9,7 +9,6 @@ in {
   imports = [
     ../../../modules/home-manager
     ../../../modules/users
-    ../../../overlays
   ];
 
   wsl = {
@@ -30,8 +29,10 @@ in {
   security.sudo.wheelNeedsPassword = mkDefault false;
 
   environment = {
-    variables = {
-      LD_LIBRARY_PATH = "/usr/lib/wsl/lib:$LD_LIBRARY_PATH";
+    variables = let
+      gccLibPath = lib.makeLibraryPath [ pkgs.stdenv.cc.cc ];
+    in {
+      LD_LIBRARY_PATH = "${gccLibPath}:/usr/lib/wsl/lib:$LD_LIBRARY_PATH";
       SSH_AUTH_SOCK = "/mnt/wsl/ssh-agent.sock";
     };
     shellAliases = {
@@ -104,6 +105,8 @@ in {
   };
 
   modules.homeManager.git.enable = mkDefault true;
+
+  modules.development.tooling.enable = mkDefault true;
 
   modules.homeManager.dev.enable = mkDefault true;
 

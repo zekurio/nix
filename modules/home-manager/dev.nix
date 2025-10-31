@@ -1,6 +1,5 @@
 { lib
 , config
-, pkgsUnstable
 , ...
 }:
 let
@@ -19,69 +18,48 @@ in
   config = mkIf cfg.enable {
     home-manager.users.zekurio = { pkgs, ... }:
       let
-        jsDevShell =
-          pkgs.writeShellApplication {
-            name = "js-devshell";
-            runtimeInputs = [
-              pkgs.coreutils
-              pkgs.nodejs_22
-              pkgs.pnpm
-              pkgsUnstable.bun
-            ];
-            text = ''
-              set -euo pipefail
-
-              if [ -z "''${XDG_DATA_HOME-}" ]; then
-                export XDG_DATA_HOME="$HOME/.local/share"
-              fi
-
-              export NODE_ENV=development
-              export NPM_CONFIG_PREFIX="$XDG_DATA_HOME/npm"
-              export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-              export COREPACK_HOME="$XDG_DATA_HOME/corepack"
-              export BUN_INSTALL="$HOME/.bun"
-
-              mkdir -p \
-                "$NPM_CONFIG_PREFIX/bin" \
-                "$PNPM_HOME" \
-                "$COREPACK_HOME" \
-                "$BUN_INSTALL/bin"
-
-              dev_path="${pkgs.nodejs_22}/bin:${pkgs.pnpm}/bin:${pkgsUnstable.bun}/bin"
-              export PATH="$NPM_CONFIG_PREFIX/bin:$PNPM_HOME:$BUN_INSTALL/bin:$PWD/node_modules/.bin:$dev_path:$PATH"
-
-              shell="''${SHELL:-${pkgs.fish}/bin/fish}"
-              exec "$shell" -i
-            '';
-          };
+        gccLibPath = lib.makeLibraryPath [ pkgs.stdenv.cc.cc ];
+        sessionPath = [
+          "$NPM_CONFIG_PREFIX/bin"
+          "$PNPM_HOME"
+          "$BUN_INSTALL/bin"
+        ];
       in
       {
-        home.packages =
-          [
-            jsDevShell
+        home.sessionVariables = {
+          XDG_DATA_HOME = lib.mkDefault "$HOME/.local/share";
+          NPM_CONFIG_PREFIX = "$XDG_DATA_HOME/npm";
+          PNPM_HOME = "$XDG_DATA_HOME/pnpm";
+          COREPACK_HOME = "$XDG_DATA_HOME/corepack";
+          BUN_INSTALL = "$HOME/.bun";
+        };
+        home.sessionVariablesExtra = ''
+          if [ -z "''${LD_LIBRARY_PATH-}" ]; then
+            export LD_LIBRARY_PATH="${gccLibPath}"
+          else
+            export LD_LIBRARY_PATH="${gccLibPath}:''${LD_LIBRARY_PATH}"
+          fi
+        '';
+        home.activation.ensureJsDevEnv = {
+          before = [ ];
+          after = [ "writeBoundary" ];
+          data = ''
+            set -euo pipefail
 
-            # Go
-            pkgs.go
-            pkgs.golangci-lint
+            xdg_data_home="''${XDG_DATA_HOME:-$HOME/.local/share}"
+            npm_prefix="''${NPM_CONFIG_PREFIX:-$xdg_data_home/npm}"
+            pnpm_home="''${PNPM_HOME:-$xdg_data_home/pnpm}"
+            corepack_home="''${COREPACK_HOME:-$xdg_data_home/corepack}"
+            bun_install="''${BUN_INSTALL:-$HOME/.bun}"
 
-            # Rust
-            pkgs.rustup
-
-            # Build tools
-            pkgs.pkg-config
-            pkgs.cmake
-            pkgs.gnumake
-
-            # Python, yuck
-            pkgs.uv
-
-            # Github CLI
-            pkgs.gh
-
-            # AI agents
-            pkgsUnstable.codex
-            pkgsUnstable.opencode
-          ];
+            mkdir -p \
+              "$npm_prefix/bin" \
+              "$pnpm_home" \
+              "$corepack_home" \
+              "$bun_install/bin"
+          '';
+        };
+        home.sessionPath = sessionPath;
       };
   };
 }

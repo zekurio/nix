@@ -10,8 +10,8 @@
     ../../../modules/gaming
     ../../../modules/graphics
     ../../../modules/home-manager
+    ../../../modules/virtualization
     ../../../modules/users
-    ../../../overlays
   ];
 
   services.resolved = {
@@ -76,16 +76,17 @@
       ];
       input = {
         kb_layout = "eu";
-        numlock_by_default = true;
         accel_profile = "flat";
       };
     };
+    development.tooling.enable = lib.mkDefault true;
     gaming.enable = true;
     graphics.amd.enable = true;
     homeManager = {
       bitwardenSsh.enable = true;
       dev.enable = true;
     };
+    virtualization.enable = true;
   };
 
   users.users.zekurio.extraGroups = lib.mkAfter ["networkmanager"];

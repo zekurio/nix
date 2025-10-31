@@ -6,6 +6,7 @@
     ../../../modules/gaming
     ../../../modules/graphics
     ../../../modules/home-manager
+    ../../../modules/virtualization
     ../../../modules/users
     ../../../overlays
   ];
@@ -33,6 +34,17 @@
     };
     initrd = {
       verbose = false;
+      systemd = {
+        enable = true;
+        tpm2.enable = true;
+      };
+      luks.devices = {
+        cryptroot = {
+          device = "/dev/disk/by-partlabel/root";
+          allowDiscards = true;
+          bypassWorkqueues = true;
+        };
+      };
     };
     kernelParams = [
       "quiet"
@@ -71,9 +83,9 @@
         "eDP-1,1920x1080@120,0x0,auto,vrr,1"
       ];
       input = {
-        kb_layout = "eu";
-        numlock_by_default = true;
+        kb_layout = "de";
         accel_profile = "adaptive";
+        touchpad.scroll_factor = 0.2;
       };
     };
     gaming.enable = true;
@@ -82,7 +94,12 @@
       bitwardenSsh.enable = true;
       dev.enable = true;
     };
+    virtualization.enable = true;
   };
+
+  security.tpm2.enable = true;
+
+  systemd.tpm2.enable = true;
 
   users.users.zekurio.extraGroups = lib.mkAfter ["networkmanager"];
 
