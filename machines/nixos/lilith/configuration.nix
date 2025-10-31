@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  pkgsUnstable,
   ...
 }: {
   imports = [
@@ -94,6 +95,8 @@
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl
     pkgs.cryptsetup
+    pkgs.blender-hip
+    pkgs.ollama-rocm
   ];
 
   programs.coolercontrol.enable = true;
