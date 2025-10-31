@@ -25,14 +25,6 @@ in {
       };
     };
 
-    bottles = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Install Bottles";
-      };
-    };
-
     xone = {
       enable = lib.mkOption {
         type = lib.types.bool;
@@ -46,8 +38,7 @@ in {
     programs.steam.enable = cfg.steam.enable;
 
     environment.systemPackages = lib.mkAfter (
-      (lib.optional cfg.heroic.enable pkgs.heroic)
-      ++ (lib.optional cfg.bottles.enable pkgs.bottles)
+      lib.optional cfg.heroic.enable pkgs.heroic
     );
 
     hardware.xone.enable = cfg.xone.enable;
