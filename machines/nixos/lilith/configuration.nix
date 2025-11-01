@@ -96,7 +96,7 @@
     pkgs.sbctl
     pkgs.cryptsetup
     pkgs.blender-hip
-    pkgs.ollama-rocm
+    pkgsUnstable.ollama-rocm
   ];
 
   programs.coolercontrol.enable = true;
