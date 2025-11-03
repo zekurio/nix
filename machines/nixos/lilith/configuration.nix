@@ -1,8 +1,7 @@
-{
-  lib,
-  pkgs,
-  pkgsUnstable,
-  ...
+{ lib
+, pkgs
+, pkgsUnstable
+, ...
 }: {
   imports = [
     ../default.nix
@@ -10,9 +9,7 @@
     ../../../modules/desktop
     ../../../modules/gaming
     ../../../modules/graphics
-    ../../../modules/home-manager
     ../../../modules/virtualization
-    ../../../modules/users
   ];
 
   services.resolved = {
@@ -49,7 +46,7 @@
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    kernelModules = ["kvm-amd" "it87"];
+    kernelModules = [ "kvm-amd" "it87" ];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
@@ -90,7 +87,7 @@
     virtualization.enable = true;
   };
 
-  users.users.zekurio.extraGroups = lib.mkAfter ["networkmanager"];
+  users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
 
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl
@@ -120,8 +117,8 @@
 
   systemd.services.disable-gpp0-acpi-wakeup = {
     description = "Disable ACPI wake device GPP0";
-    wantedBy = ["multi-user.target"];
-    after = ["sysinit.target"];
+    wantedBy = [ "multi-user.target" ];
+    after = [ "sysinit.target" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
