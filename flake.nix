@@ -76,12 +76,11 @@
   };
 
   outputs =
-    inputs @ {
-      self,
-      nixpkgs,
-      nixpkgs-unstable,
-      flake-parts,
-      ...
+    inputs @ { self
+    , nixpkgs
+    , nixpkgs-unstable
+    , flake-parts
+    , ...
     }:
     let
       lib = nixpkgs.lib;
@@ -93,6 +92,8 @@
 
       sharedModules = [
         ./modules/system
+        ./modules/home-manager
+        ./modules/users
         inputs.home-manager.nixosModules.home-manager
         (import ./overlays inputs)
       ];
@@ -110,6 +111,7 @@
             inputs.autoaspm.nixosModules.default
             inputs.sops-nix.nixosModules.sops
             inputs.vpn-confinement.nixosModules.default
+            ./modules/homelab
             ./machines/nixos/adam/configuration.nix
           ];
         };
@@ -138,8 +140,8 @@
             modules = sharedModules ++ host.modules;
           });
     in
-    flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux"];
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
 
       _module.args = {
         inherit inputs lib mkPkgsUnstable;

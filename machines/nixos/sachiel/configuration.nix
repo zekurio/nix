@@ -5,10 +5,7 @@
     ../../../modules/desktop
     ../../../modules/gaming
     ../../../modules/graphics
-    ../../../modules/home-manager
     ../../../modules/virtualization
-    ../../../modules/users
-    ../../../overlays
   ];
 
   services.resolved = {
@@ -53,13 +50,8 @@
       "rd.udev.log_level=3"
       "udev.log_priority=3"
       "boot.shell_on_fail"
-      "acpi_enforce_resources=lax"
-      "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    kernelModules = ["kvm-amd" "it87"];
-    extraModprobeConfig = ''
-      options it87 force_id=0x8628
-    '';
+    kernelModules = [ "kvm-amd" ];
     kernelPackages = pkgs.linuxPackages_zen;
     # lanzaboote = {
     #   enable = true;
@@ -101,7 +93,7 @@
 
   systemd.tpm2.enable = true;
 
-  users.users.zekurio.extraGroups = lib.mkAfter ["networkmanager"];
+  users.users.zekurio.extraGroups = lib.mkAfter [ "networkmanager" ];
 
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl

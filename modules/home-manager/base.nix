@@ -26,7 +26,7 @@ in {
         bat
         btop
         eza
-        pfetch
+        fastfetch
         jq
         envsubst
         zellij
