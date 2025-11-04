@@ -3,6 +3,7 @@
     ./autobrr.nix
     ./backups.nix
     ./caddy.nix
+    ./jellyfin.nix
     ./jellyseerr.nix
     ./navidrome.nix
     ./prowlarr.nix
