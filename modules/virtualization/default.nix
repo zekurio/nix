@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }: let
   cfg = config.modules.virtualization;
@@ -25,5 +26,9 @@ in {
       };
       oci-containers.backend = "podman";
     };
+
+    environment.systemPackages = with pkgs; [
+      podman-compose
+    ];
   };
 }
