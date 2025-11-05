@@ -34,10 +34,6 @@
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
-  shareUserOption =
-    lib.optional
-    (shareUidStr != null && shareGidStr != null)
-    "--user=${shareUidStr}:${shareGidStr}";
 in {
   options.services.fileflows-wrapped = {
     enable =
@@ -92,11 +88,9 @@ in {
         "/mnt/fast-nvme/media:/media"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
       ];
-      extraOptions =
-        [
-          "--device=/dev/dri:/dev/dri"
-        ]
-        ++ shareUserOption;
+      extraOptions = [
+        "--device=/dev/dri:/dev/dri"
+      ];
     };
 
     services.caddy-wrapper.virtualHosts."fileflows" = {
