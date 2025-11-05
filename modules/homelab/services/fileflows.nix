@@ -7,6 +7,8 @@
   shareUser = "share";
   shareGroup = "share";
   tempPath = "/tmp/fileflows";
+  dataPath = "/var/lib/fileflows/data";
+  logsPath = "/var/lib/fileflows/logs";
   shareUidValue =
     lib.attrByPath ["users" "users" shareUser "uid"] null config;
   shareGidValue =
@@ -70,6 +72,9 @@ in {
 
   config = lib.mkIf cfg.enable {
     systemd.tmpfiles.rules = [
+      "d /var/lib/fileflows 2775 ${shareUser} ${shareGroup} -"
+      "d ${dataPath} 2775 ${shareUser} ${shareGroup} -"
+      "d ${logsPath} 2775 ${shareUser} ${shareGroup} -"
       "d ${tempPath} 2775 ${shareUser} ${shareGroup} -"
     ];
 
@@ -79,8 +84,8 @@ in {
       ports = ["${toString cfg.port}:5000"];
       environment = envBase;
       volumes = [
-        "fileflows-data:/app/Data"
-        "fileflows-logs:/app/Logs"
+        "${dataPath}:/app/Data"
+        "${logsPath}:/app/Logs"
         "${tempPath}:/temp"
         "/var/downloads/completed:/completed"
         "/var/downloads/converted:/converted"
