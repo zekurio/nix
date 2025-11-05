@@ -7,17 +7,31 @@
   shareUser = "share";
   shareGroup = "share";
   tempPath = "/tmp/fileflows";
-  shareUid =
+  shareUidValue =
     lib.attrByPath ["users" "users" shareUser "uid"] config null;
-  shareGid =
+  shareGidValue =
     lib.attrByPath ["users" "groups" shareGroup "gid"] config null;
+  shareUidStr =
+    let
+      t = builtins.typeOf shareUidValue;
+    in
+      if t == "int" || t == "string"
+      then builtins.toString shareUidValue
+      else null;
+  shareGidStr =
+    let
+      t = builtins.typeOf shareGidValue;
+    in
+      if t == "int" || t == "string"
+      then builtins.toString shareGidValue
+      else null;
   envBase =
     {
       TempPathHost = tempPath;
       UMASK = "0002";
     }
-    // lib.optionalAttrs (shareUid != null) { PUID = builtins.toString shareUid; }
-    // lib.optionalAttrs (shareGid != null) { PGID = builtins.toString shareGid; };
+    // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
+    // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
 in {
   options.services.fileflows-wrapped = {
     enable =
