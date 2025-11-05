@@ -8,9 +8,9 @@
   shareGroup = "share";
   tempPath = "/tmp/fileflows";
   shareUidValue =
-    lib.attrByPath ["users" "users" shareUser "uid"] config null;
+    lib.attrByPath ["users" "users" shareUser "uid"] null config;
   shareGidValue =
-    lib.attrByPath ["users" "groups" shareGroup "gid"] config null;
+    lib.attrByPath ["users" "groups" shareGroup "gid"] null config;
   shareUidStr =
     let
       t = builtins.typeOf shareUidValue;
@@ -32,6 +32,10 @@
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
+  shareUserOption =
+    lib.optional
+    (shareUidStr != null && shareGidStr != null)
+    "--user=${shareUidStr}:${shareGidStr}";
 in {
   options.services.fileflows-wrapped = {
     enable =
@@ -83,9 +87,11 @@ in {
         "/mnt/fast-nvme/media:/media"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
       ];
-      extraOptions = [
-        "--device=/dev/dri:/dev/dri"
-      ];
+      extraOptions =
+        [
+          "--device=/dev/dri:/dev/dri"
+        ]
+        ++ shareUserOption;
     };
 
     services.caddy-wrapper.virtualHosts."fileflows" = {
