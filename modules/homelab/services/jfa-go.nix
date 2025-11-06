@@ -61,7 +61,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "hrfee/jfa-go";
+      default = "hrfee/jfa-go:unstable";
       description = "Container image to run for jfa-go";
     };
 
