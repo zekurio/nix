@@ -4,7 +4,6 @@
     ./backups.nix
     ./caddy.nix
     ./fileflows.nix
-    ./wizarr.nix
     ./jellyfin.nix
     ./jellyseerr.nix
     ./navidrome.nix
