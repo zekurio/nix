@@ -6,6 +6,7 @@
     ./fileflows.nix
     ./jellyfin.nix
     ./jellyseerr.nix
+    ./lidarr.nix
     ./navidrome.nix
     ./prowlarr.nix
     ./qbittorrent.nix
