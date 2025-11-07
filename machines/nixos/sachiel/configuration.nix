@@ -51,7 +51,9 @@
       "udev.log_priority=3"
       "boot.shell_on_fail"
     ];
-    kernelModules = [ "kvm-amd" ];
+    kernelModules = [ "kvm-amd" "zenpower" ];
+    extraModulePackages = [ pkgs.linuxPackages_zen.zenpower ];
+    blacklistedKernelModules = [ "k10temp" ];
     kernelPackages = pkgs.linuxPackages_zen;
     # lanzaboote = {
     #   enable = true;
