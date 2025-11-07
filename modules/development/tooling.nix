@@ -29,6 +29,8 @@ in
         pkg-config
         cmake
         gnumake
+        gcc
+        clang
 
         # Python toolchain loader
         uv

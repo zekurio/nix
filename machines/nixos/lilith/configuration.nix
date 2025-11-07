@@ -46,10 +46,12 @@
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    kernelModules = [ "kvm-amd" "it87" ];
+    kernelModules = [ "kvm-amd" "it87" "zenpower" ];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
+    extraModulePackages = [ pkgs.linuxPackages_zen.zenpower ];
+    blacklistedKernelModules = [ "k10temp" ];
     kernelPackages = pkgs.linuxPackages_zen;
     lanzaboote = {
       enable = true;
