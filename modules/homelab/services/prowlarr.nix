@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgsUnstable,
   ...
 }: {
   options.services.prowlarr-wrapped = {
@@ -26,6 +27,7 @@
 
     services.prowlarr = {
       enable = true;
+      package = pkgsUnstable.prowlarr;
     };
 
     # Caddy virtual host configuration with base URL
