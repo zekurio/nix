@@ -1,0 +1,49 @@
+name: Update Nix Flake
+
+on:
+  schedule:
+    # Run every Monday at 2 AM UTC
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix-path: nixpkgs=channel:nixos-unstable
+
+      - name: Update flake.lock
+        run: |
+          nix flake update
+
+      - name: Validate flake
+        run: |
+          nix flake check
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: update flake.lock"
+          title: "chore: update nix flake inputs"
+          body: |
+            Automated flake input updates
+
+            This PR updates the nix flake inputs to their latest versions.
+
+            Please review the changes and run `nix flake check` to ensure everything is valid.
+          branch: chore/update-flake
+          delete-branch: true
+          labels: |
+            chore
+            dependencies
