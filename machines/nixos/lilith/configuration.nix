@@ -1,6 +1,5 @@
 { lib
 , pkgs
-, pkgsUnstable
 , ...
 }: {
   imports = [
@@ -95,7 +94,7 @@
     pkgs.sbctl
     pkgs.cryptsetup
     pkgs.blender-hip
-    pkgsUnstable.ollama-rocm
+    pkgs.unstable.ollama-rocm
   ];
 
   programs.coolercontrol.enable = true;

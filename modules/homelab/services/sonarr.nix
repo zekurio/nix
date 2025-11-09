@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  pkgsUnstable,
+  pkgs,
   ...
 }: let
   shareUser = "share";
@@ -26,7 +26,7 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
-      package = pkgsUnstable.sonarr;
+      package = pkgs.unstable.sonarr;
     };
     systemd.services.sonarr.serviceConfig = {
       User = shareUser;

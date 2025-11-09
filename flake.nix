@@ -84,11 +84,6 @@
     }:
     let
       lib = nixpkgs.lib;
-      mkPkgsUnstable = system:
-        import nixpkgs-unstable {
-          inherit system;
-          config.allowUnfree = true;
-        };
 
       sharedModules = [
         ./modules/system
@@ -98,9 +93,8 @@
         (import ./overlays inputs)
       ];
 
-      mkSpecialArgs = system: {
+      mkSpecialArgs = {
         inherit inputs;
-        pkgsUnstable = mkPkgsUnstable system;
       };
 
       hosts = {
@@ -136,7 +130,7 @@
         lib.mapAttrs (_: host:
           nixpkgs.lib.nixosSystem {
             inherit (host) system;
-            specialArgs = mkSpecialArgs host.system;
+            specialArgs = mkSpecialArgs;
             modules = sharedModules ++ host.modules;
           });
     in
@@ -144,7 +138,7 @@
       systems = [ "x86_64-linux" ];
 
       _module.args = {
-        inherit inputs lib mkPkgsUnstable;
+        inherit inputs lib;
       };
 
       flake = {
