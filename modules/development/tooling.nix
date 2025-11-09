@@ -1,4 +1,4 @@
-{ lib, config, pkgs, pkgsUnstable, ... }:
+{ lib, config, pkgs, ... }:
 let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.development.tooling;
@@ -38,7 +38,7 @@ in
         # Github CLI
         gh
       ])
-      ++ (with pkgsUnstable; [
+      ++ (with pkgs.unstable; [
         bun
         codex
         opencode

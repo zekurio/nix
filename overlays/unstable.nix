@@ -4,5 +4,5 @@ inputs: final: prev: let
     config.allowUnfree = true;
   };
 in {
-  quickshell = unstablePkgs.quickshell;
+  unstable = unstablePkgs;
 }

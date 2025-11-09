@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  pkgsUnstable,
+  pkgs,
   ...
 }: let
   shareUser = "share";
@@ -26,7 +26,7 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
-      package = pkgsUnstable.radarr;
+      package = pkgs.unstable.radarr;
     };
 
     # Set umask for shared library access
