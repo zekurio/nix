@@ -89,6 +89,7 @@
         ./modules/system
         ./modules/home-manager
         ./modules/users
+        ./machines/nixos
         inputs.home-manager.nixosModules.home-manager
         (import ./overlays inputs)
       ];

@@ -16,14 +16,21 @@
       default = 2283;
       description = "Port for Immich to listen on";
     };
+    mediaLocation = lib.mkOption {
+      type = lib.types.str;
+      default = "/var/lib/immich";
+      description = "Location for Immich media files";
+    };
   };
 
   config = lib.mkIf config.services.immich-wrapped.enable {
     services.immich = {
       enable = true;
       host = "127.0.0.1";
+      openFirewall = true;
       port = config.services.immich-wrapped.port;
       package = pkgs.unstable.immich;
+      mediaLocation = config.services.immich-wrapped.mediaLocation;
     };
 
     users.users.immich.extraGroups = [ "video" "render" ];

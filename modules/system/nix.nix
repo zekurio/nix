@@ -3,7 +3,12 @@ let
   inherit (lib) mkDefault;
 in
 {
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    permittedInsecurePackages = [
+      "electron-36.9.5"
+    ];
+  };
 
   nix = {
     settings = {
