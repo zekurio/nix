@@ -70,8 +70,6 @@ in {
       BindReadOnlyPaths = [
         "/mnt/fast-nvme"
       ];
-      # Load Spotify credentials from sops secrets
-      EnvironmentFile = config.sops.secrets.navidrome_env.path;
     };
 
     # Caddy virtual host configuration

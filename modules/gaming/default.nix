@@ -7,7 +7,7 @@
   cfg = config.modules.gaming;
 in {
   options.modules.gaming = {
-    enable = lib.mkEnableOption "Gaming tools: Steam, Heroic, Bottles, and xone driver";
+    enable = lib.mkEnableOption "Gaming tools: Steam, Heroic, and xone driver";
 
     steam = {
       enable = lib.mkOption {
@@ -38,7 +38,7 @@ in {
     programs.steam.enable = cfg.steam.enable;
 
     environment.systemPackages = lib.mkAfter (
-      lib.optional cfg.heroic.enable pkgs.heroic
+      lib.optional cfg.heroic.enable pkgs.unstable.heroic
     );
 
     hardware.xone.enable = cfg.xone.enable;
