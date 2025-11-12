@@ -39,7 +39,7 @@ in {
       group = shareGroup;
       settings = {
         MusicFolder = config.services.navidrome-wrapped.musicFolder;
-        Address = "127.0.0.1";
+        Address = "0.0.0.0";
         Port = config.services.navidrome-wrapped.port;
         BaseUrl = "/";
         # Scan interval for detecting new artwork
