@@ -12,9 +12,6 @@ machines/nixos
 ├── lilith/
 │   ├── configuration.nix
 │   └── disko.nix
-├── sachiel/
-│   ├── configuration.nix
-│   └── disko.nix
 ├── tabris/
 │   └── configuration.nix
 └── default.nix
@@ -39,9 +36,8 @@ secrets/
 
 ## Hosts
 
-- `adam` – homelab server with Podman-managed media services, SOPS secrets, and Mullvad-confined qBittorrent.
+- `adam` – homelab server with the typical media services, SOPS managed secrets, and restic backups.
 - `lilith` – AMD desktop with Hyprland, gaming modules, and Secure Boot via Lanzaboote.
-- `sachiel` – dual-GPU laptop with Hyprland and hybrid graphics helpers.
 - `tabris` – NixOS-WSL environment; this is the only Windows-hosted configuration.
 
 ## Remote installation with nixos-anywhere
