@@ -9,7 +9,6 @@ in {
   imports = [
     ./base.nix
     ./bitwarden-ssh.nix
-    ./dev.nix
     ./git.nix
   ];
 

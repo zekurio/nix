@@ -106,7 +106,7 @@ in
 
   modules.development.tooling.enable = mkDefault true;
 
-  modules.homeManager.dev.enable = mkDefault true;
+
 
   documentation.nixos.enable = mkDefault false;
 

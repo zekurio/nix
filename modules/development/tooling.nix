@@ -1,6 +1,6 @@
 { lib, config, pkgs, ... }:
 let
-  inherit (lib) mkEnableOption mkIf;
+  inherit (lib) mkEnableOption mkIf mkAfter;
   cfg = config.modules.development.tooling;
 in
 {
@@ -13,35 +13,10 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages =
-      (with pkgs; [
-        nodejs_22
-        pnpm
-
-        # Go
-        go
-        golangci-lint
-
-        # Rust
-        rustup
-
-        # Build tools
-        pkg-config
-        cmake
-        gnumake
-        gcc
-        clang
-
-        # Python toolchain loader
-        uv
-
-        # Github CLI
-        gh
-      ])
-      ++ (with pkgs.unstable; [
-        bun
-        codex
-        opencode
-      ]);
+    environment.systemPackages = mkAfter [
+      pkgs.gh
+      pkgs.unstable.codex
+      pkgs.unstable.opencode
+    ];
   };
 }
