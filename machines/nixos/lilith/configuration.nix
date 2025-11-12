@@ -83,7 +83,6 @@
     graphics.amd.enable = true;
     homeManager = {
       bitwardenSsh.enable = true;
-      dev.enable = true;
     };
     virtualization.enable = true;
   };
