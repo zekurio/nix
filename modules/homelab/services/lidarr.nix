@@ -1,12 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{ config
+, lib
+, pkgs
+, ...
+}:
+let
   shareUser = "share";
   shareGroup = "share";
-in {
+in
+{
   options.services.lidarr-wrapped = {
     enable = lib.mkEnableOption "Lidarr music manager with Caddy integration";
     domain = lib.mkOption {

@@ -1,11 +1,12 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
+{ lib
+, config
+, pkgs
+, ...
+}:
+let
   cfg = config.modules.virtualization;
-in {
+in
+{
   options.modules.virtualization = {
     enable = lib.mkEnableOption "Podman virtualization stack";
 

@@ -1,16 +1,10 @@
-{
-  lib,
-  pkgs,
-  config,
-  ...
-}: let
-  inherit (lib) mkIf;
-  cfg = config.modules.homeManager.base;
-in {
-  config = mkIf cfg.enable {
-    nix.settings.trusted-users = ["zekurio"];
+{ pkgs
+, ...
+}: {
+  config = {
+    nix.settings.trusted-users = [ "zekurio" ];
 
-    environment.shells = with pkgs; [fish bashInteractive];
+    environment.shells = with pkgs; [ fish bashInteractive ];
     environment.variables.EDITOR = "vim";
 
     programs.fish.enable = true;

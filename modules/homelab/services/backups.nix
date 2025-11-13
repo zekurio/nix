@@ -1,10 +1,11 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{ config
+, lib
+, ...
+}:
+let
   cfg = config.services.backups.b2;
-in {
+in
+{
   options.services.backups.b2 = {
     enable = lib.mkEnableOption "Restic backups to Backblaze B2";
 
@@ -17,19 +18,19 @@ in {
 
     paths = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "Absolute paths that should be backed up.";
     };
 
     excludePaths = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "Paths that will be excluded from the backup.";
     };
 
     extraBackupArgs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "Additional flags passed to restic backup.";
     };
 
@@ -93,14 +94,15 @@ in {
       passwordSecret = cfg.passwordSecretName;
       pruneOpts = lib.mapAttrsToList (name: value: "--keep-${name} ${toString value}") cfg.pruneKeep;
       excludeArgs = map (path: "--exclude=${path}") cfg.excludePaths;
-    in {
+    in
+    {
       assertions = [
         {
           assertion = cfg.repository != "";
           message = "services.backups.b2.repository must be set when the service is enabled.";
         }
         {
-          assertion = cfg.paths != [];
+          assertion = cfg.paths != [ ];
           message = "services.backups.b2.paths must include at least one path.";
         }
       ];

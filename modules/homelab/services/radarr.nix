@@ -1,12 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{ config
+, lib
+, pkgs
+, ...
+}:
+let
   shareUser = "share";
   shareGroup = "share";
-in {
+in
+{
   options.services.radarr-wrapped = {
     enable = lib.mkEnableOption "Radarr movie manager with Caddy integration";
     domain = lib.mkOption {

@@ -1,8 +1,8 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{ config
+, lib
+, ...
+}:
+let
   cfg = config.services.fileflows-wrapped;
   shareUser = "share";
   shareGroup = "share";
@@ -10,23 +10,23 @@
   dataPath = "/var/lib/fileflows/data";
   logsPath = "/var/lib/fileflows/logs";
   shareUidValue =
-    lib.attrByPath ["users" "users" shareUser "uid"] null config;
+    lib.attrByPath [ "users" "users" shareUser "uid" ] null config;
   shareGidValue =
-    lib.attrByPath ["users" "groups" shareGroup "gid"] null config;
+    lib.attrByPath [ "users" "groups" shareGroup "gid" ] null config;
   shareUidStr =
     let
       t = builtins.typeOf shareUidValue;
     in
-      if t == "int" || t == "string"
-      then builtins.toString shareUidValue
-      else null;
+    if t == "int" || t == "string"
+    then builtins.toString shareUidValue
+    else null;
   shareGidStr =
     let
       t = builtins.typeOf shareGidValue;
     in
-      if t == "int" || t == "string"
-      then builtins.toString shareGidValue
-      else null;
+    if t == "int" || t == "string"
+    then builtins.toString shareGidValue
+    else null;
   envBase =
     {
       TempPathHost = tempPath;
@@ -34,7 +34,8 @@
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
-in {
+in
+{
   options.services.fileflows-wrapped = {
     enable =
       lib.mkEnableOption "FileFlows media automation service wrapped with Podman and Caddy integration";
@@ -77,7 +78,7 @@ in {
     virtualisation.oci-containers.containers.fileflows = {
       image = cfg.image;
       autoStart = true;
-      ports = ["${toString cfg.port}:5000"];
+      ports = [ "${toString cfg.port}:5000" ];
       environment = envBase;
       volumes = [
         "${dataPath}:/app/Data"
@@ -96,7 +97,7 @@ in {
     services.caddy-wrapper.virtualHosts."fileflows" = {
       domain = cfg.domain;
       extraConfig =
-        lib.optionalString (cfg.basicAuthUsers != {}) ''
+        lib.optionalString (cfg.basicAuthUsers != { }) ''
           basicauth {
             ${lib.concatStringsSep "\n" (lib.mapAttrsToList (user: hash: "  ${user} ${hash}") cfg.basicAuthUsers)}
           }

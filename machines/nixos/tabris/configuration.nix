@@ -101,9 +101,6 @@ in
     };
     wantedBy = [ "default.target" ];
   };
-
-  modules.homeManager.git.enable = mkDefault true;
-
   modules.development.tooling.enable = mkDefault true;
 
 

@@ -1,11 +1,12 @@
-{
-  lib,
-  pkgs,
-  config,
-  ...
-}: let
+{ lib
+, pkgs
+, config
+, ...
+}:
+let
   cfg = config.modules.gaming;
-in {
+in
+{
   options.modules.gaming = {
     enable = lib.mkEnableOption "Gaming tools and utilities";
   };

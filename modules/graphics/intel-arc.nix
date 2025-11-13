@@ -1,12 +1,13 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
+{ lib
+, config
+, pkgs
+, ...
+}:
+let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.graphics.intelArc;
-in {
+in
+{
   options.modules.graphics.intelArc = {
     enable = mkEnableOption "Intel ARC GPU support";
   };
@@ -15,8 +16,8 @@ in {
     hardware.graphics = {
       enable = true;
       extraPackages = with pkgs; [
-        intel-media-driver   # iHD VA-API (required)
-        vpl-gpu-rt           # oneVPL/QSV
+        intel-media-driver # iHD VA-API (required)
+        vpl-gpu-rt # oneVPL/QSV
         intel-compute-runtime # OpenCL/Level Zero (optional but useful)
         intel-graphics-compiler
         level-zero

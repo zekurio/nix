@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Configuration is split by host under `machines/nixos/<host>`, with each directory providing `configuration.nix`, optional `disko.nix`, and host-specific overrides. Shared NixOS modules live in `modules/homelab` (self-hosted services, Podman wrappers) and `modules/home-manager` (user env definitions). Reusable overlays sit in `overlays`, while secrets encrypted via SOPS are tracked in `secrets/*.yaml`. Flake entry points and inputs are managed in `flake.nix`; keep machine-specific logic out of this file.
+Configuration is split by host under `machines/nixos/<host>`, with each directory providing `configuration.nix`, optional `disko.nix`, and host-specific overrides. Shared NixOS modules live in `modules/homelab` (self-hosted services, Podman wrappers) and `modules/profiles/workstation.nix` (combined desktop + Home Manager profile). Reusable overlays sit in `overlays`, while secrets encrypted via SOPS are tracked in `secrets/*.yaml`. Flake entry points and inputs are managed in `flake.nix`; keep machine-specific logic out of this file. Most systems follow the stable `nixpkgs` channel, but `lilith` intentionally targets `nixpkgs-unstable` to keep its desktop stack consistent.
 
 ## Build, Test, and Development Commands
 - `nix flake check` — run flake audits and ensure imports, options, and formatter hooks are valid.

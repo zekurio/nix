@@ -1,7 +1,6 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }: {
   options.services.autobrr-wrapped = {
     enable = lib.mkEnableOption "autobrr torrent automation tool with Caddy integration";

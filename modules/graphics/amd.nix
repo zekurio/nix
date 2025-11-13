@@ -1,12 +1,13 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
+{ lib
+, config
+, pkgs
+, ...
+}:
+let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.graphics.amd;
-in {
+in
+{
   options.modules.graphics.amd = {
     enable = mkEnableOption "AMD GPU support";
   };
@@ -19,10 +20,10 @@ in {
       };
     };
 
-    environment.systemPackages = with pkgs; [lact];
-    systemd.packages = with pkgs; [lact];
-    systemd.services.lactd.wantedBy = ["multi-user.target"];
-    hardware.firmware = with pkgs; [linux-firmware];
+    environment.systemPackages = with pkgs; [ lact ];
+    systemd.packages = with pkgs; [ lact ];
+    systemd.services.lactd.wantedBy = [ "multi-user.target" ];
+    hardware.firmware = with pkgs; [ linux-firmware ];
     systemd.tmpfiles.rules =
       let
         rocmEnv = pkgs.symlinkJoin {
@@ -33,7 +34,8 @@ in {
             rocblas
           ];
         };
-      in [
+      in
+      [
         "L+    /opt/rocm   -    -    -     -    ${rocmEnv}"
       ];
   };

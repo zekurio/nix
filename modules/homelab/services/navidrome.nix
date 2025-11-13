@@ -1,11 +1,12 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{ config
+, lib
+, ...
+}:
+let
   shareUser = "share";
   shareGroup = "share";
-in {
+in
+{
   options.services.navidrome-wrapped = {
     enable = lib.mkEnableOption "Navidrome music server with Caddy integration";
     domain = lib.mkOption {
