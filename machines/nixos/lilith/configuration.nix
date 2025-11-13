@@ -79,7 +79,9 @@
       };
     };
     development.tooling.enable = lib.mkDefault true;
-    gaming.enable = true;
+    gaming = {
+      enable = true;
+    };
     graphics.amd.enable = true;
     homeManager = {
       bitwardenSsh.enable = true;
