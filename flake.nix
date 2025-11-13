@@ -59,15 +59,10 @@
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    dms-cli = {
-      url = "github:AvengeMedia/danklinux";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     dankMaterialShell = {
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.dgop.follows = "dgop";
-      inputs.dms-cli.follows = "dms-cli";
     };
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
@@ -87,8 +82,8 @@
 
       sharedModules = [
         ./modules/system
-        ./modules/home-manager
         ./modules/users
+        ./modules/profiles/workstation.nix
         ./machines/nixos
         inputs.home-manager.nixosModules.home-manager
         (import ./overlays inputs)
@@ -119,6 +114,7 @@
         };
         lilith = {
           system = "x86_64-linux";
+          pkgsInput = nixpkgs-unstable;
           modules = [
             inputs.disko.nixosModules.disko
             inputs.lanzaboote.nixosModules.lanzaboote
@@ -129,7 +125,10 @@
 
       mkSystem =
         lib.mapAttrs (_: host:
-          nixpkgs.lib.nixosSystem {
+          let
+            pkgsInput = host.pkgsInput or nixpkgs;
+          in
+          pkgsInput.lib.nixosSystem {
             inherit (host) system;
             specialArgs = mkSpecialArgs;
             modules = sharedModules ++ host.modules;

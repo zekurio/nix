@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }: {
   options.services.jellyseerr-wrapped = {
     enable = lib.mkEnableOption "Jellyseerr media request manager with Caddy integration";

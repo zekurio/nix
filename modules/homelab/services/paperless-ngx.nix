@@ -1,7 +1,6 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }: {
   options.services.paperless-ngx-wrapped = {
     enable = lib.mkEnableOption "Paperless-ngx document management system with Caddy integration";

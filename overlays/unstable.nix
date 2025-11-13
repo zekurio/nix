@@ -1,4 +1,5 @@
-inputs: final: prev: let
+inputs: final: prev:
+let
   unstablePkgs = import inputs.nixpkgs-unstable {
     system = prev.system;
     config = {
@@ -8,6 +9,7 @@ inputs: final: prev: let
       ];
     };
   };
-in {
+in
+{
   unstable = unstablePkgs;
 }

@@ -1,12 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{ config
+, lib
+, pkgs
+, ...
+}:
+let
   shareUser = "share";
   shareGroup = "share";
-in {
+in
+{
   options.services.jellyfin-wrapped = {
     enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
     domain = lib.mkOption {

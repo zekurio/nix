@@ -1,11 +1,12 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{ config
+, lib
+, ...
+}:
+let
   shareUser = "share";
   shareGroup = "share";
-in {
+in
+{
   options.services.sabnzbd-wrapped = {
     enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";
     domain = lib.mkOption {

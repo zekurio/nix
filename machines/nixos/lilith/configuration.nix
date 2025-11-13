@@ -5,7 +5,6 @@
   imports = [
     ../default.nix
     ./disko.nix
-    ../../../modules/desktop
     ../../../modules/gaming
     ../../../modules/graphics
     ../../../modules/virtualization
@@ -67,25 +66,24 @@
     };
   };
 
+  profiles.workstation.hyprland = {
+    enable = true;
+    monitors = [
+      "DP-2,2560x1440@165,0x0,auto,vrr,1"
+    ];
+    input = {
+      kb_layout = "eu";
+      accel_profile = "flat";
+    };
+  };
+
+  home-manager.users.zekurio.home.sessionVariables.SSH_AUTH_SOCK =
+    lib.mkForce "$HOME/.bitwarden-ssh-agent.sock";
+
   modules = {
-    desktop.hyprland = {
-      enable = true;
-      monitors = [
-        "DP-2,2560x1440@165,0x0,auto,vrr,1"
-      ];
-      input = {
-        kb_layout = "eu";
-        accel_profile = "flat";
-      };
-    };
     development.tooling.enable = lib.mkDefault true;
-    gaming = {
-      enable = true;
-    };
+    gaming.enable = true;
     graphics.amd.enable = true;
-    homeManager = {
-      bitwardenSsh.enable = true;
-    };
     virtualization.enable = true;
   };
 
@@ -95,7 +93,7 @@
     pkgs.sbctl
     pkgs.cryptsetup
     pkgs.blender-hip
-    pkgs.unstable.ollama-rocm
+    pkgs.ollama-rocm
   ];
 
   programs.coolercontrol.enable = true;

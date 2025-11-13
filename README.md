@@ -20,11 +20,10 @@ modules
 │   ├── default.nix
 │   ├── podman.nix
 │   └── services/
-├── home-manager/
-├── desktop/
 ├── development/
 ├── gaming/
 ├── graphics/
+├── profiles/
 ├── system/
 ├── users/
 └── virtualization/
@@ -32,12 +31,12 @@ overlays/
 secrets/
 ```
 
-`modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`. `modules/home-manager` defines the user environment layers, while `modules/system` and friends provide cross-host defaults. Secrets are encrypted with SOPS and stored under `secrets/*.yaml`.
+`modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`. `modules/profiles/workstation.nix` now combines the desktop environment and Home Manager configuration so user-facing software is installed entirely through Home Manager, while `modules/system` and friends provide cross-host defaults. Secrets are encrypted with SOPS and stored under `secrets/*.yaml`.
 
 ## Hosts
 
 - `adam` – homelab server with the typical media services, SOPS managed secrets, and restic backups.
-- `lilith` – AMD desktop with Hyprland, gaming modules, and Secure Boot via Lanzaboote.
+- `lilith` – AMD desktop with Hyprland, gaming modules, Secure Boot via Lanzaboote, and it follows `nixpkgs-unstable` outright.
 - `tabris` – NixOS-WSL environment; this is the only Windows-hosted configuration.
 
 ## Remote installation with nixos-anywhere

@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }: {
   options.services.prowlarr-wrapped = {
     enable = lib.mkEnableOption "Prowlarr indexer manager with Caddy integration";
@@ -23,7 +22,7 @@
       isSystemUser = true;
       group = "prowlarr";
     };
-    users.groups.prowlarr = {};
+    users.groups.prowlarr = { };
 
     services.prowlarr = {
       enable = true;
