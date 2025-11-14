@@ -1,6 +1,6 @@
 # nix-config
 
-Declarative NixOS and WSL configurations for the homelab, workstations, and developer environments that live on my machines. All hosts are built from a single flake with reusable modules and service wrappers.
+Declarative NixOS and WSL configurations for the homelab, workstations, and developer environments that live on my machines. All hosts are built from a single flake with reusable modules, service wrappers, and layered profiles.
 
 ## Layout
 
@@ -16,14 +16,15 @@ machines/nixos
 │   └── configuration.nix
 └── default.nix
 modules
+├── gaming/
+├── graphics/
 ├── homelab/
 │   ├── default.nix
 │   ├── podman.nix
 │   └── services/
-├── development/
-├── gaming/
-├── graphics/
 ├── profiles/
+│   ├── dev.nix
+│   └── desktop.nix
 ├── system/
 ├── users/
 └── virtualization/
@@ -31,13 +32,16 @@ overlays/
 secrets/
 ```
 
-`modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`. `modules/profiles/workstation.nix` now combines the desktop environment and Home Manager configuration so user-facing software is installed entirely through Home Manager, while `modules/system` and friends provide cross-host defaults. Secrets are encrypted with SOPS and stored under `secrets/*.yaml`.
+- `modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`.
+- `modules/profiles/dev.nix` provides the Home Manager driven developer experience (CLI packages, git defaults, fish plugins, SSH config).
+- `modules/profiles/desktop.nix` layers on the graphical stack (DankMaterialShell, Hyprland, desktop packages) and depends on the dev profile so GUI hosts inherit the same tooling.
+- `modules/system`, `modules/users`, and the service-specific trees supply cross-host defaults; secrets stay encrypted with SOPS under `secrets/*.yaml`.
 
 ## Hosts
 
 - `adam` – homelab server with the typical media services, SOPS managed secrets, and restic backups.
-- `lilith` – AMD desktop with Hyprland, gaming modules, Secure Boot via Lanzaboote, and it follows `nixpkgs-unstable` outright.
-- `tabris` – NixOS-WSL environment; this is the only Windows-hosted configuration.
+- `lilith` – AMD desktop that enables both the dev and desktop profiles; it layers gaming modules, Secure Boot via Lanzaboote, and follows `nixpkgs-unstable`.
+- `tabris` – pure dev-profile deployment inside NixOS-WSL; this is the only Windows-hosted configuration.
 
 ## Remote installation with nixos-anywhere
 

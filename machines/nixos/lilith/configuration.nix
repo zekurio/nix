@@ -66,14 +66,18 @@
     };
   };
 
-  profiles.workstation.hyprland = {
+  profiles.desktop = {
     enable = true;
-    monitors = [
-      "DP-2,2560x1440@165,0x0,auto,vrr,1"
-    ];
-    input = {
-      kb_layout = "eu";
-      accel_profile = "flat";
+    desktopPackageSet = pkgs;
+    hyprland = {
+      enable = true;
+      monitors = [
+        "DP-2,2560x1440@165,0x0,auto,vrr,1"
+      ];
+      input = {
+        kb_layout = "eu";
+        accel_profile = "flat";
+      };
     };
   };
 
@@ -81,7 +85,6 @@
     lib.mkForce "$HOME/.bitwarden-ssh-agent.sock";
 
   modules = {
-    development.tooling.enable = lib.mkDefault true;
     gaming.enable = true;
     graphics.amd.enable = true;
     virtualization.enable = true;

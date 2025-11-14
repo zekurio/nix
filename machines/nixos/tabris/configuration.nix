@@ -46,6 +46,8 @@ in
 
   programs.ssh.startAgent = false;
 
+  profiles.dev.enable = mkDefault true;
+
   services.openssh = {
     enable = mkDefault true;
     settings = {
@@ -101,10 +103,6 @@ in
     };
     wantedBy = [ "default.target" ];
   };
-  modules.development.tooling.enable = mkDefault true;
-
-
-
   documentation.nixos.enable = mkDefault false;
 
   system.stateVersion = "25.05";
