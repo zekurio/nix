@@ -111,6 +111,19 @@ in
                 $status$all
               '';
 
+              username = {
+                format = "[$user]($style) ";
+                show_always = true;
+                style_user = "bold yellow";
+              };
+
+              hostname = {
+                format = "@[$ssh_symbol$hostname]($style) ";
+                ssh_only = true;
+                ssh_symbol = "🌐 ";
+                style = "bold cyan";
+              };
+
               character = {
                 success_symbol = "[❯](red)[❯](yellow)[❯](green)";
                 error_symbol = "[❯](red)[❯](yellow)[❯](green)";
