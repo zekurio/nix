@@ -112,7 +112,6 @@ in
               $git_status\
               $cmd_duration\
               $line_break\
-              $python\
               $character"""
 
               [directory]
@@ -145,12 +144,6 @@ in
               [cmd_duration]
               format = "[$duration]($style) "
               style = "yellow"
-
-              [python]
-              format = "[$virtualenv]($style) "
-              style = "bright-black"
-              detect_extensions = []
-              detect_files = []
             '';
           };
 
