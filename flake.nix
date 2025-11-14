@@ -83,7 +83,8 @@
       sharedModules = [
         ./modules/system
         ./modules/users
-        ./modules/profiles/workstation.nix
+        ./modules/profiles/dev.nix
+        ./modules/profiles/desktop.nix
         ./machines/nixos
         inputs.home-manager.nixosModules.home-manager
         (import ./overlays inputs)
