@@ -35,9 +35,25 @@ let
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
+  explicitUidStr =
+    let
+      value = mediaShare.uid;
+      t = builtins.typeOf value;
+    in
+    if value != null && (t == "int" || t == "string")
+    then builtins.toString value
+    else null;
+  explicitGidStr =
+    let
+      value = mediaShare.gid;
+      t = builtins.typeOf value;
+    in
+    if value != null && (t == "int" || t == "string")
+    then builtins.toString value
+    else null;
   containerUser =
-    lib.optionalString (shareUidStr != null) (shareUidStr
-      + lib.optionalString (shareGidStr != null) ":${shareGidStr}");
+    lib.optionalString (explicitUidStr != null) (explicitUidStr
+      + lib.optionalString (explicitGidStr != null) ":${explicitGidStr}");
 in
 {
   options.services.fileflows-wrapped = {
