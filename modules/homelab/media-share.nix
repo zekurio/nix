@@ -172,7 +172,7 @@ in
 
     useBackupPaths = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = false;
       description = "Include services.backups.b2.paths entries (when available) in the permission fixup.";
     };
   };

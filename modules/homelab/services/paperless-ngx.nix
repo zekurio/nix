@@ -27,7 +27,7 @@
       settings = {
         PAPERLESS_URL = "https://${config.services.paperless-ngx-wrapped.domain}";
         PAPERLESS_OCR_LANGUAGE = "deu+eng";
-        PAPERLESS_TIME_ZONE = "Europe/Berlin";
+        PAPERLESS_TIME_ZONE = "Europe/Vienna";
         PAPERLESS_ENABLE_COMPRESSION = true;
         PAPERLESS_TASK_WORKERS = 2;
       };
