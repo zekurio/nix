@@ -4,17 +4,59 @@
 }:
 let
   cfg = config.services.fileflows-wrapped;
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
   tempPath = "/tmp/fileflows";
   dataPath = "/var/lib/fileflows/data";
   logsPath = "/var/lib/fileflows/logs";
+  shareUidValue =
+    lib.attrByPath [ "users" "users" shareUser "uid" ] null config;
+  shareGidValue =
+    lib.attrByPath [ "users" "groups" shareGroup "gid" ] null config;
+  shareUidStr =
+    let
+      t = builtins.typeOf shareUidValue;
+    in
+    if t == "int" || t == "string"
+    then builtins.toString shareUidValue
+    else null;
+  shareGidStr =
+    let
+      t = builtins.typeOf shareGidValue;
+    in
+    if t == "int" || t == "string"
+    then builtins.toString shareGidValue
+    else null;
   envBase =
     {
       TempPathHost = tempPath;
       UMASK = cfg.umask;
-    };
+    }
+    // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
+    // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
+  explicitUidStr =
+    let
+      value = mediaShare.uid;
+      t = builtins.typeOf value;
+    in
+    if value != null && (t == "int" || t == "string")
+    then builtins.toString value
+    else null;
+  explicitGidStr =
+    let
+      value = mediaShare.gid;
+      t = builtins.typeOf value;
+    in
+    if value != null && (t == "int" || t == "string")
+    then builtins.toString value
+    else null;
+  containerUser =
+    lib.optionalString (explicitUidStr != null) (explicitUidStr
+      + lib.optionalString (explicitGidStr != null) ":${explicitGidStr}");
 in
 {
-    options.services.fileflows-wrapped = {
+  options.services.fileflows-wrapped = {
     enable =
       lib.mkEnableOption "FileFlows media automation service wrapped with Podman and Caddy integration";
 
@@ -53,10 +95,10 @@ in
 
   config = lib.mkIf cfg.enable {
     systemd.tmpfiles.rules = [
-      "d /var/lib/fileflows 2775 root root -"
-      "d ${dataPath} 2775 root root -"
-      "d ${logsPath} 2775 root root -"
-      "d ${tempPath} 2775 root root -"
+      "d /var/lib/fileflows 2775 ${shareUser} ${shareGroup} -"
+      "d ${dataPath} 2775 ${shareUser} ${shareGroup} -"
+      "d ${logsPath} 2775 ${shareUser} ${shareGroup} -"
+      "d ${tempPath} 2775 ${shareUser} ${shareGroup} -"
     ];
 
     virtualisation.oci-containers.containers.fileflows =
@@ -76,6 +118,9 @@ in
         extraOptions = [
           "--device=/dev/dri:/dev/dri"
         ];
+      }
+      // lib.optionalAttrs (containerUser != "") {
+        user = containerUser;
       };
 
     services.caddy-wrapper.virtualHosts."fileflows" = {
