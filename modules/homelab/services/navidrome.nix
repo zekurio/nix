@@ -16,7 +16,7 @@ in
     };
     musicFolder = lib.mkOption {
       type = lib.types.str;
-      default = "/mnt/fast-nvme/media/music";
+      default = "/tank/media/music";
       description = "Path to music folder";
     };
     port = lib.mkOption {
@@ -69,7 +69,7 @@ in
       ];
       # Allow reading parent directories for traversal
       BindReadOnlyPaths = [
-        "/mnt/fast-nvme"
+        "/tank/media/music"
       ];
     };
 

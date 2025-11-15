@@ -54,7 +54,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "revenz/fileflows:latest";
+      default = "revenz/fileflows:25.11";
       description = "Container image to run for FileFlows";
     };
 
@@ -84,9 +84,8 @@ in
         "${dataPath}:/app/Data"
         "${logsPath}:/app/Logs"
         "${tempPath}:/temp"
-        "/var/downloads/completed:/completed"
-        "/var/downloads/converted:/converted"
-        "/mnt/fast-nvme/media:/media"
+        "/mnt/downloads/completed:/mnt/downloads/completed"
+        "/mnt/downloads/converted:/mnt/downloads/converted"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
       ];
       extraOptions = [
