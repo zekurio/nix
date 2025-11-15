@@ -3,8 +3,9 @@
 , ...
 }:
 let
-  shareUser = "share";
-  shareGroup = "share";
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
 in
 {
   options.services.sabnzbd-wrapped = {
@@ -31,7 +32,7 @@ in
     systemd.services.sabnzbd.serviceConfig = {
       User = shareUser;
       Group = shareGroup;
-      UMask = lib.mkForce "0002";
+      UMask = lib.mkForce mediaShare.umask;
     };
 
     services.caddy-wrapper.virtualHosts."sabnzbd" = {

@@ -4,8 +4,9 @@
 }:
 let
   cfg = config.services.fileflows-wrapped;
-  shareUser = "share";
-  shareGroup = "share";
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
   tempPath = "/tmp/fileflows";
   dataPath = "/var/lib/fileflows/data";
   logsPath = "/var/lib/fileflows/logs";
@@ -30,7 +31,7 @@ let
   envBase =
     {
       TempPathHost = tempPath;
-      UMASK = "0002";
+      UMASK = mediaShare.umask;
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };

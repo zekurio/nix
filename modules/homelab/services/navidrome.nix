@@ -3,8 +3,9 @@
 , ...
 }:
 let
-  shareUser = "share";
-  shareGroup = "share";
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
 in
 {
   options.services.navidrome-wrapped = {
@@ -58,7 +59,7 @@ in
     systemd.services.navidrome.serviceConfig = {
       User = shareUser;
       Group = shareGroup;
-      UMask = lib.mkForce "0002";
+      UMask = lib.mkForce mediaShare.umask;
       # Use system library reading to avoid permission issues
       ProtectSystem = "strict";
       ProtectHome = true;

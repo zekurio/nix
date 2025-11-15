@@ -4,8 +4,9 @@
 , ...
 }:
 let
-  shareUser = "share";
-  shareGroup = "share";
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
 in
 {
   options.services.sonarr-wrapped = {
@@ -32,7 +33,7 @@ in
     systemd.services.sonarr.serviceConfig = {
       User = shareUser;
       Group = shareGroup;
-      UMask = lib.mkForce "0002";
+      UMask = lib.mkForce mediaShare.umask;
     };
 
     # Caddy virtual host configuration with base URL
