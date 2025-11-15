@@ -35,6 +35,9 @@ let
     }
     // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
     // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
+  containerUser =
+    lib.optionalString (shareUidStr != null) (shareUidStr
+      + lib.optionalString (shareGidStr != null) ":${shareGidStr}");
 in
 {
   options.services.fileflows-wrapped = {
@@ -76,23 +79,27 @@ in
       "d ${tempPath} 2775 ${shareUser} ${shareGroup} -"
     ];
 
-    virtualisation.oci-containers.containers.fileflows = {
-      image = cfg.image;
-      autoStart = true;
-      ports = [ "${toString cfg.port}:5000" ];
-      environment = envBase;
-      volumes = [
-        "${dataPath}:/app/Data"
-        "${logsPath}:/app/Logs"
-        "${tempPath}:/temp"
-        "/mnt/downloads/completed:/mnt/downloads/completed"
-        "/mnt/downloads/converted:/mnt/downloads/converted"
-        "/run/podman/podman.sock:/var/run/docker.sock:ro"
-      ];
-      extraOptions = [
-        "--device=/dev/dri:/dev/dri"
-      ];
-    };
+    virtualisation.oci-containers.containers.fileflows =
+      {
+        image = cfg.image;
+        autoStart = true;
+        ports = [ "${toString cfg.port}:5000" ];
+        environment = envBase;
+        volumes = [
+          "${dataPath}:/app/Data"
+          "${logsPath}:/app/Logs"
+          "${tempPath}:/temp"
+          "/mnt/downloads/completed:/mnt/downloads/completed"
+          "/mnt/downloads/converted:/mnt/downloads/converted"
+          "/run/podman/podman.sock:/var/run/docker.sock:ro"
+        ];
+        extraOptions = [
+          "--device=/dev/dri:/dev/dri"
+        ];
+      }
+      // lib.optionalAttrs (containerUser != "") {
+        user = containerUser;
+      };
 
     services.caddy-wrapper.virtualHosts."fileflows" = {
       domain = cfg.domain;
