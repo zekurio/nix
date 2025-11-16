@@ -8,28 +8,38 @@ let
 in
 {
   options.modules.virtualization = {
-    enable = lib.mkEnableOption "Podman virtualization stack";
+    enable = lib.mkEnableOption "Docker virtualization stack";
 
-    podman = {
-      dockerCompat = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable docker-compatible socket for Podman";
+    docker = {
+      autoPrune = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether to periodically prune unused Docker resources.";
+        };
+        dates = lib.mkOption {
+          type = lib.types.str;
+          default = "daily";
+          description = "Systemd calendar specification used for Docker auto-prune.";
+        };
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
     virtualisation = {
-      podman = {
+      docker = {
         enable = true;
-        dockerCompat = cfg.podman.dockerCompat;
+        autoPrune = {
+          enable = cfg.docker.autoPrune.enable;
+          dates = cfg.docker.autoPrune.dates;
+        };
       };
-      oci-containers.backend = "podman";
+      oci-containers.backend = "docker";
     };
 
     environment.systemPackages = with pkgs; [
-      podman-compose
+      docker-compose
     ];
   };
 }
