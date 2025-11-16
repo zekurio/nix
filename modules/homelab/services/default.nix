@@ -3,7 +3,6 @@
     ./autobrr.nix
     ./backups.nix
     ./caddy.nix
-    ./fileflows.nix
     ./jellyfin.nix
     ./jellyseerr.nix
     ./lidarr.nix
