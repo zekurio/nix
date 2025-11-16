@@ -98,6 +98,11 @@ in
       default = [ "video" "render" ];
       description = "Additional groups assigned to the shared media user.";
     };
+    addDockerGroup = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Whether to add the shared media user to the docker group for container workflows.";
+    };
 
     collaborators = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -192,7 +197,11 @@ in
               home = cfg.home;
               createHome = true;
               description = cfg.description;
-              extraGroups = cfg.extraGroups;
+              extraGroups =
+                lib.unique (
+                  cfg.extraGroups
+                    ++ lib.optionals cfg.addDockerGroup [ "docker" ]
+                );
             }
             // lib.optionalAttrs (cfg.uid != null) { uid = cfg.uid; });
         }
