@@ -9,14 +9,10 @@ machines/nixos
 ├── adam/
 │   ├── configuration.nix
 │   └── disko.nix
-├── lilith/
-│   ├── configuration.nix
-│   └── disko.nix
 ├── tabris/
 │   └── configuration.nix
 └── default.nix
 modules
-├── gaming/
 ├── graphics/
 ├── homelab/
 │   ├── default.nix
@@ -24,7 +20,6 @@ modules
 │   └── services/
 ├── profiles/
 │   ├── dev.nix
-│   └── desktop.nix
 ├── system/
 ├── users/
 └── virtualization/
@@ -34,13 +29,11 @@ secrets/
 
 - `modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`.
 - `modules/profiles/dev.nix` provides the Home Manager driven developer experience (CLI packages, git defaults, fish plugins, SSH config).
-- `modules/profiles/desktop.nix` layers on the graphical stack (DankMaterialShell, Hyprland, desktop packages) and depends on the dev profile so GUI hosts inherit the same tooling.
 - `modules/system`, `modules/users`, and the service-specific trees supply cross-host defaults; secrets stay encrypted with SOPS under `secrets/*.yaml`.
 
 ## Hosts
 
 - `adam` – homelab server with the typical media services, SOPS managed secrets, and restic backups.
-- `lilith` – AMD desktop that enables both the dev and desktop profiles; it layers gaming modules, Secure Boot via Lanzaboote, and follows `nixpkgs-unstable`.
 - `tabris` – pure dev-profile deployment inside NixOS-WSL; this is the only Windows-hosted configuration.
 
 ## Remote installation with nixos-anywhere
@@ -83,9 +76,7 @@ ssh root@adam.lan reboot
 
 Adjust the key path if your age key lives elsewhere. Once the machine boots, confirm the activation works with `nixos-rebuild switch --flake .#adam --target-host root@adam.lan --use-remote-sudo`.
 
-### Lanzaboote first-boot note
 
-Lanzaboote and systemd-boot do not cooperate during the initial install. For hosts that enable Lanzaboote (currently `lilith`), provision the first image with `boot.loader.systemd-boot.enable = true` and `boot.lanzaboote.enable = false`. After the machine boots successfully, re-enable Lanzaboote in the configuration, rebuild, and enroll the Secure Boot keys (`sbctl sign-all && nixos-rebuild switch --flake .#lilith`).
 
 ## Working with the WSL config (tabris)
 
