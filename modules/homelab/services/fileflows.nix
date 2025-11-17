@@ -4,42 +4,25 @@
 }:
 let
   cfg = config.services.fileflows-wrapped;
-  mediaShare = config.modules.homelab.mediaShare;
-  shareUser = mediaShare.user;
-  shareGroup = mediaShare.group;
-
-  shareUidValue =
+  shareUser = "share";
+  shareGroup = "share";
+  tempPath = "/tmp/fileflows";
+  shareUid =
     lib.attrByPath [ "users" "users" shareUser "uid" ] null config;
-  shareGidValue =
+  shareGid =
     lib.attrByPath [ "users" "groups" shareGroup "gid" ] null config;
-
-  shareUidStr =
-    let
-      t = builtins.typeOf shareUidValue;
-    in
-    if t == "int" || t == "string"
-    then builtins.toString shareUidValue
-    else null;
-
-  shareGidStr =
-    let
-      t = builtins.typeOf shareGidValue;
-    in
-    if t == "int" || t == "string"
-    then builtins.toString shareGidValue
-    else null;
-
-  envVars =
+  envBase =
     {
-      TempPathHost = "/temp";
-      UMASK = mediaShare.umask;
+      TempPathHost = tempPath;
+      UMASK = "0002";
     }
-    // lib.optionalAttrs (shareUidStr != null) { PUID = shareUidStr; }
-    // lib.optionalAttrs (shareGidStr != null) { PGID = shareGidStr; };
+    // lib.optionalAttrs (shareUid != null) { PUID = builtins.toString shareUid; }
+    // lib.optionalAttrs (shareGid != null) { PGID = builtins.toString shareGid; };
 in
 {
   options.services.fileflows-wrapped = {
-    enable = lib.mkEnableOption "FileFlows media automation service with Caddy integration";
+    enable =
+      lib.mkEnableOption "FileFlows media automation service wrapped with Podman and Caddy integration";
 
     domain = lib.mkOption {
       type = lib.types.str;
@@ -59,90 +42,37 @@ in
       description = "Container image to run for FileFlows";
     };
 
-    tempDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/tmp/fileflows";
-      description = ''
-        Host directory for temporary transcoding files.
-        Defaults to /tmp/fileflows for automatic cleanup on reboot.
-        For best performance, ensure /tmp is mounted as tmpfs.
-      '';
-    };
-
     basicAuthUsers = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      default = { };
-      example = {
+      default = {
         admin = "$2a$14$c2HVFsuYsy1wGyGZFde9QOAN9SdcX6d5j9iBfL0MFU5FVcoB0.1sK";
       };
       description = "Map of usernames to bcrypt hashed passwords for securing the FileFlows UI.";
     };
-
-    volumes = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
-      default = {
-        "/mnt/downloads/completed" = "/completed";
-        "/mnt/downloads/converted" = "/converted";
-        "/mnt/downloads/incomplete" = "/incomplete";
-        "/tank/media" = "/media";
-      };
-      example = {
-        "/path/to/completed" = "/completed";
-        "/path/to/converted" = "/converted";
-        "/path/to/media" = "/media";
-      };
-      description = "Host path to container path mappings for FileFlows media volumes.";
-    };
-
-    enableHardwareAcceleration = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Enable hardware acceleration by passing through /dev/dri devices.";
-    };
-
-    enableDockerSocket = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Enable Docker socket access for container-based processing nodes.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    # Create Docker volumes and temporary directory (tmpfs for transcoding cache)
     systemd.tmpfiles.rules = [
-      "d /var/lib/fileflows 2775 ${shareUser} ${shareGroup} -"
-      "d ${cfg.tempDir} 2775 ${shareUser} ${shareGroup} -"
+      "d ${tempPath} 2775 ${shareUser} ${shareGroup} -"
     ];
-
-    # Add share user to docker group if Docker socket access is enabled
-    users.users.${shareUser} = lib.mkIf cfg.enableDockerSocket {
-      extraGroups = lib.mkAfter [ "docker" ];
-    };
 
     virtualisation.oci-containers.containers.fileflows = {
       image = cfg.image;
       autoStart = true;
       ports = [ "${toString cfg.port}:5000" ];
-      environment = envVars;
-      volumes =
-        [
-          "fileflows-data:/app/Data"
-          "fileflows-logs:/app/Logs"
-          "${cfg.tempDir}:/temp"
-        ]
-        ++ (lib.mapAttrsToList (host: container: "${host}:${container}") cfg.volumes)
-        ++ lib.optional cfg.enableDockerSocket "/run/podman/podman.sock:/var/run/docker.sock:ro";
-      extraOptions =
-        lib.optional cfg.enableHardwareAcceleration "--device=/dev/dri:/dev/dri";
-    };
-
-    # Ensure FileFlows service runs with correct user context
-    systemd.services.podman-fileflows = {
-      serviceConfig = {
-        User = lib.mkForce shareUser;
-        Group = lib.mkForce shareGroup;
-        UMask = lib.mkForce mediaShare.umask;
-      };
+      environment = envBase;
+      volumes = [
+        "fileflows-data:/app/Data"
+        "fileflows-logs:/app/Logs"
+        "${tempPath}:/temp"
+        "/mnt/downloads/completed:/completed"
+        "/mnt/downloads/converted:/converted"
+        "/tank/media:/media"
+        "/run/podman/podman.sock:/var/run/docker.sock:ro"
+      ];
+      extraOptions = [
+        "--device=/dev/dri:/dev/dri"
+      ];
     };
 
     services.caddy-wrapper.virtualHosts."fileflows" = {
@@ -150,7 +80,7 @@ in
       extraConfig =
         lib.optionalString (cfg.basicAuthUsers != { }) ''
           basicauth {
-            ${lib.concatStringsSep "\n    " (lib.mapAttrsToList (user: hash: "${user} ${hash}") cfg.basicAuthUsers)}
+            ${lib.concatStringsSep "\n" (lib.mapAttrsToList (user: hash: "  ${user} ${hash}") cfg.basicAuthUsers)}
           }
         '';
       reverseProxy = "localhost:${toString cfg.port}";
