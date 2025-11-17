@@ -51,10 +51,7 @@
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.2";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -66,6 +63,10 @@
     };
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    niri = {
+      url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -84,7 +85,6 @@
         ./modules/system
         ./modules/users
         ./modules/profiles/dev.nix
-        ./modules/profiles/desktop.nix
         ./machines/nixos
         inputs.home-manager.nixosModules.home-manager
         (import ./overlays inputs)
@@ -111,15 +111,6 @@
           modules = [
             inputs.nixos-wsl.nixosModules.default
             ./machines/nixos/tabris/configuration.nix
-          ];
-        };
-        lilith = {
-          system = "x86_64-linux";
-          pkgsInput = nixpkgs-unstable;
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.lanzaboote.nixosModules.lanzaboote
-            ./machines/nixos/lilith/configuration.nix
           ];
         };
       };
