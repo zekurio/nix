@@ -8,19 +8,19 @@ let
 in
 {
   options.modules.virtualization = {
-    enable = lib.mkEnableOption "Docker virtualization stack";
+    enable = lib.mkEnableOption "Rootless Podman virtualization stack";
 
-    docker = {
+    podman = {
       autoPrune = {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Whether to periodically prune unused Docker resources.";
+          description = "Whether to periodically prune unused Podman resources.";
         };
         dates = lib.mkOption {
           type = lib.types.str;
           default = "daily";
-          description = "Systemd calendar specification used for Docker auto-prune.";
+          description = "Systemd calendar specification used for Podman auto-prune.";
         };
       };
     };
@@ -28,18 +28,18 @@ in
 
   config = lib.mkIf cfg.enable {
     virtualisation = {
-      docker = {
+      podman = {
         enable = true;
         autoPrune = {
-          enable = cfg.docker.autoPrune.enable;
-          dates = cfg.docker.autoPrune.dates;
+          enable = cfg.podman.autoPrune.enable;
+          dates = cfg.podman.autoPrune.dates;
         };
       };
-      oci-containers.backend = "docker";
+      oci-containers.backend = "podman";
     };
 
     environment.systemPackages = with pkgs; [
-      docker-compose
+      podman-compose
     ];
   };
 }
