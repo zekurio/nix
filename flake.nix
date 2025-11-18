@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration with flake-parts";
+  description = "NixOS configurations for homelab and workstations";
 
   nixConfig = {
     extra-substituters = [
@@ -16,13 +16,17 @@
     ];
   };
 
+  # Flake inputs: external dependencies and frameworks
   inputs = {
+    # Core dependencies
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05?shallow=true";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+
+    # NixOS deployment and infrastructure
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,26 +36,31 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.disko.follows = "disko";
     };
-    autoaspm = {
-      url = "github:notthebee/AutoASPM";
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # System configuration management
+    home-manager = {
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
+
+    # Hardware and security
+    autoaspm = {
+      url = "github:notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
 
+    # Desktop and shell environments (unstable channel)
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -81,6 +90,7 @@
     let
       lib = nixpkgs.lib;
 
+      # Shared modules applied to all hosts
       sharedModules = [
         ./modules/system
         ./modules/users
@@ -94,6 +104,7 @@
         inherit inputs;
       };
 
+      # Host definitions with their specific modules and system architecture
       hosts = {
         adam = {
           system = "x86_64-linux";
@@ -115,6 +126,7 @@
         };
       };
 
+      # Build NixOS configurations from host definitions
       mkSystem =
         lib.mapAttrs (_: host:
           let
@@ -135,7 +147,6 @@
 
       flake = {
         overlays.default = import ./overlays inputs;
-
         nixosConfigurations = mkSystem hosts;
       };
     };

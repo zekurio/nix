@@ -1,55 +1,96 @@
 # nix-config
 
-Declarative NixOS and WSL configurations for the homelab, workstations, and developer environments that live on my machines. All hosts are built from a single flake with reusable modules, service wrappers, and layered profiles.
+Declarative NixOS and WSL configurations for homelab and workstation deployments. This repository demonstrates how to manage multiple machines from a single Nix flake using reusable modules, profiles, and secrets management.
 
-## Layout
+## Quick Start
 
-```text
-machines/nixos
-├── adam/
+**Want to see how this works?**
+- Review `flake.nix` for the overall structure and input dependencies
+- Check `machines/nixos/<host>/configuration.nix` to see host-specific settings
+- Run `nix flake check` to validate the configuration
+
+**Ready to deploy?**
+- For fresh machines: See [Remote Installation](#remote-installation-with-nixos-anywhere)
+- For existing machines: Run `nixos-rebuild switch --flake .#<host>`
+
+## Repository Structure
+
+```
+machines/nixos/           # Host-specific configurations
+├── adam/                 # Homelab server (bare metal)
 │   ├── configuration.nix
-│   └── disko.nix
-├── tabris/
+│   └── disko.nix         # Disk layout
+├── tabris/               # Development environment (WSL)
 │   └── configuration.nix
 └── default.nix
-modules
-├── graphics/
-├── homelab/
-│   ├── default.nix
-│   ├── podman.nix
-│   └── services/
+
+modules/                  # Reusable NixOS and Home Manager modules
+├── homelab/              # Self-hosted services (media stack, backups, etc.)
 ├── profiles/
-│   ├── dev.nix
-├── system/
-├── users/
-└── virtualization/
-overlays/
-secrets/
+│   └── dev.nix           # Developer tools and environment
+├── system/               # System-level defaults
+├── users/                # User configuration
+└── graphics/             # Display server setup
+
+overlays/                 # Custom package overlays
+secrets/                  # Encrypted SOPS configuration files
+flake.nix                 # Flake entry point and dependency management
 ```
 
-- `modules/homelab` collects self-hosted services (Arr stack, Vaultwarden, Navidrome, etc.) and the Podman wrapper used on `adam`.
-- `modules/profiles/dev.nix` provides the Home Manager driven developer experience (CLI packages, git defaults, fish plugins, SSH config).
-- `modules/system`, `modules/users`, and the service-specific trees supply cross-host defaults; secrets stay encrypted with SOPS under `secrets/*.yaml`.
+### What's Inside Each Directory
+
+- **`modules/homelab`** — Self-hosted services (Arr stack, Vaultwarden, Navidrome) and Podman wrappers. Only applied to `adam`.
+- **`modules/profiles/dev.nix`** — Home Manager driven developer experience: CLI tools, Git config, shell plugins, SSH setup.
+- **`modules/system` and `modules/users`** — Cross-host defaults for system settings and user management.
+- **`secrets/*.yaml`** — Encrypted with SOPS; decryption keys stored securely on each host.
 
 ## Hosts
 
-- `adam` – homelab server with the typical media services, SOPS managed secrets, and restic backups.
-- `tabris` – pure dev-profile deployment inside NixOS-WSL; this is the only Windows-hosted configuration.
+- **`adam`** — Homelab server running media services, backups, and VPN confinement. Uses bare-metal hardware with disk management via disko.
+- **`tabris`** — Pure development environment inside NixOS-WSL. Uses Home Manager profile only (no system services).
 
-## Remote installation with nixos-anywhere
+## Common Tasks
 
-The easiest way to deploy a fresh machine is to install over SSH from a controller that has Nix available.
+### Validate Configuration
 
-### 1. Prepare the target
+```bash
+nix flake check
+```
+
+Runs audits to ensure imports are correct and the flake is valid.
+
+### Build Without Switching
+
+```bash
+nixos-rebuild build --flake .#adam
+```
+
+Materializes the system closure for inspection. Useful before committing changes.
+
+### Apply Configuration Locally
+
+```bash
+nixos-rebuild switch --flake .#<host>
+```
+
+### Apply Configuration Remotely
+
+```bash
+nixos-rebuild switch --flake .#adam --target-host root@adam.lan --use-remote-sudo
+```
+
+## Remote Installation with nixos-anywhere
+
+Deploy a fresh machine over SSH from any Nix-enabled controller.
+
+### 1. Prepare the Target
 
 1. Boot the target host from the latest minimal NixOS ISO.
-2. Become `root`, configure networking (Wi-Fi or Ethernet), and start SSH: `systemctl start sshd`.
-3. Set a temporary root password (`passwd`) or provision an SSH key so the controller can connect.
-4. If the host uses `disko` (all bare-metal machines here do), verify the definitions in `machines/nixos/<host>/disko.nix` match the hardware before continuing.
+2. Become `root` and configure networking: `systemctl start sshd`.
+3. Set a temporary root password (`passwd`) or provision an SSH key.
+4. For bare-metal machines, verify `machines/nixos/<host>/disko.nix` matches the hardware layout.
 
-### 2. Run nixos-anywhere from the controller
-
-From the repository root on your workstation:
+### 2. Run nixos-anywhere
 
 ```bash
 nix run github:nix-community/nixos-anywhere -- \
@@ -59,13 +100,11 @@ nix run github:nix-community/nixos-anywhere -- \
   --no-reboot
 ```
 
-- Swap `adam` and the hostname/IP for the machine you are provisioning.
-- `--build-on-remote` avoids copying large closures over the network by compiling on the target.
-- Keep `--no-reboot` so you can upload secrets before the first boot.
+- Replace `adam` and the hostname/IP with your target machine.
+- `--build-on-remote` compiles on the target to avoid large network transfers.
+- `--no-reboot` allows you to upload secrets before the first boot.
 
-nixos-anywhere will apply the `disko` layout, generate hardware configuration, and install the system defined by the selected flake output.
-
-### 3. Seed SOPS keys and reboot
+### 3. Seed SOPS Keys and Reboot
 
 ```bash
 ssh root@adam.lan 'install -m 700 -d /var/lib/sops-nix'
@@ -74,54 +113,70 @@ ssh root@adam.lan 'chmod 600 /var/lib/sops-nix/key.txt'
 ssh root@adam.lan reboot
 ```
 
-Adjust the key path if your age key lives elsewhere. Once the machine boots, confirm the activation works with `nixos-rebuild switch --flake .#adam --target-host root@adam.lan --use-remote-sudo`.
+Confirm activation works after reboot:
 
+```bash
+nixos-rebuild switch --flake .#adam --target-host root@adam.lan --use-remote-sudo
+```
 
+## WSL Setup (tabris)
 
-## Working with the WSL config (tabris)
+`tabris` uses the official NixOS-WSL module for Windows Subsystem for Linux.
 
-`tabris` uses the official NixOS-WSL module. To create or refresh the tarball:
+### Create or Refresh the Tarball
 
 ```bash
 nix build .#nixosConfigurations.tabris.config.system.build.tarball
 wsl --import tabris "$HOME/WSL/tabris" result/nixos-wsl.tar.gz --version 2
 ```
 
-After importing, start the distribution and run `sudo nixos-rebuild switch --flake .#tabris` to pick up any local changes. Convenience aliases such as `rebuild-tabris` are defined inside the environment.
+### Update Configuration After Import
 
-## Day-to-day operations
+```bash
+sudo nixos-rebuild switch --flake .#tabris
+```
 
-- `nix flake check` – run repository checks before pushing changes.
-- `nixos-rebuild switch --flake .#<host>` – activate configuration locally or with `--target-host` for remote updates.
-- `nixos-rebuild build --flake .#adam` – build the closure without switching (useful for inspection).
-- `nix develop` or `nix shell` can provide the deployment toolchain when working from a rescue ISO.
+Shell aliases like `rebuild-tabris` are pre-defined for convenience.
 
-## Backup recovery (adam)
+## Backup and Recovery (adam)
 
 Restic backups are configured by `modules/homelab/services/backups.nix` and target Backblaze B2.
 
-1. Become the backup user (`root` by default) and enter a shell with restic available:
+### Restore Files
+
+1. Enter a shell with restic available:
    ```bash
    sudo nix shell nixpkgs#restic -c bash
    ```
-2. Load the secrets exposed by the module:
+
+2. Load backup credentials:
    ```bash
    set -a
    source /run/secrets/restic_env
    set +a
    export RESTIC_PASSWORD_FILE=/run/secrets/restic_password
    ```
-3. Inspect snapshots tagged for `adam`:
+
+3. List available snapshots:
    ```bash
    restic snapshots --tag adam
    ```
-4. Restore into a staging directory and pull what you need:
+
+4. Restore to a staging directory:
    ```bash
    mkdir -p /var/restore
    restic restore latest --tag adam --target /var/restore --include /var/lib/sonarr
    ```
-5. Move recovered files into place (stop services first if you overwrite live data) and clean up `/var/restore` when finished.
 
-Optional checks:
-- `restic diff <snapshot-id> latest --tag adam --path /var/lib/sonarr` to review changes.
-- `restic mount /mnt/restic` for FUSE-based browsing (remember to unmount after use).
+5. Move recovered files to their destination and clean up.
+
+### Optional: Inspect Changes
+
+```bash
+restic diff <snapshot-id> latest --tag adam --path /var/lib/sonarr
+restic mount /mnt/restic  # Browse with FUSE; remember to unmount
+```
+
+## Contributing
+
+See [AGENTS.md](AGENTS.md) for coding standards, testing guidelines, and commit practices.
