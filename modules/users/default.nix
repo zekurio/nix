@@ -4,8 +4,8 @@
   config = {
     nix.settings.trusted-users = [ "zekurio" ];
 
-    environment.shells = with pkgs; [ fish bashInteractive ];
-    environment.variables.EDITOR = "vim";
+    environment.shells = with pkgs; [ fish ];
+    environment.variables.EDITOR = "nano";
 
     programs.fish.enable = true;
     programs.nix-ld.enable = true;
