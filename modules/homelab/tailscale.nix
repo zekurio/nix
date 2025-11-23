@@ -41,6 +41,7 @@ in
 
   config = lib.mkIf cfg.enable {
     services.tailscale.enable = true;
+    services.tailscale.package = pkgs.unstable.tailscale;
     services.tailscale.useRoutingFeatures = cfg.useRoutingFeatures;
 
     system = lib.mkIf (!isNull cfg.publicInterface && builtins.elem cfg.useRoutingFeatures [ "server" "both" ]) {
