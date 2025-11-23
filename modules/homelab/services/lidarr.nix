@@ -13,6 +13,10 @@ let
       lyrics = { enable = true; };
     };
   };
+
+  beet-share = pkgs.writeShellScriptBin "beet-share" ''
+    exec /run/wrappers/bin/sudo -u ${shareUser} ${beets-with-plugins}/bin/beet "$@"
+  '';
 in
 {
   options.services.lidarr-wrapped = {
@@ -32,6 +36,7 @@ in
   config = lib.mkIf config.services.lidarr-wrapped.enable {
     environment.systemPackages = [
       beets-with-plugins
+      beet-share
       pkgs.streamrip
     ];
 
