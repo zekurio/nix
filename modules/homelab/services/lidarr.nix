@@ -7,6 +7,12 @@ let
   mediaShare = config.modules.homelab.mediaShare;
   shareUser = mediaShare.user;
   shareGroup = mediaShare.group;
+
+  beets-with-plugins = pkgs.beets.override {
+    pluginOverrides = {
+      lyrics = { enable = true; };
+    };
+  };
 in
 {
   options.services.lidarr-wrapped = {
@@ -24,6 +30,11 @@ in
   };
 
   config = lib.mkIf config.services.lidarr-wrapped.enable {
+    environment.systemPackages = [
+      beets-with-plugins
+      pkgs.streamrip
+    ];
+
     services.lidarr = {
       enable = true;
       user = shareUser;
