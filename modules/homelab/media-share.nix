@@ -15,7 +15,6 @@ let
   mediaDatasets = [
     "tank/anime"
     "tank/movies"
-    "tank/music"
     "tank/photos"
     "tank/tv"
   ];
@@ -26,13 +25,11 @@ let
     "/mnt/downloads/incomplete"
     "/tank/torrents"
     "/tank/torrents/incomplete"
-    "/tank/torrents/completed"
+    "/tank/torrents/complete"
   ];
 
   stateDirs = [
     "/var/lib/jellyfin"
-    "/var/lib/lidarr"
-    "/var/lib/navidrome"
     "/var/lib/qBittorrent"
     "/var/lib/radarr"
     "/var/lib/sabnzbd"
