@@ -17,7 +17,7 @@ in
     };
     musicFolder = lib.mkOption {
       type = lib.types.str;
-      default = "/tank/media/music";
+      default = "/tank/music";
       description = "Path to music folder";
     };
     port = lib.mkOption {
@@ -70,7 +70,7 @@ in
       ];
       # Allow reading parent directories for traversal
       BindReadOnlyPaths = [
-        "/tank/media/music"
+        config.services.navidrome-wrapped.musicFolder
       ];
     };
 

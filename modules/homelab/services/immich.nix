@@ -31,10 +31,5 @@
     };
 
     users.users.immich.extraGroups = [ "share" "video" "render" ];
-
-    # Ensure media directory exists
-    systemd.tmpfiles.rules = [
-      "d /tank/photos 0775 immich share -"
-    ];
   };
 }
