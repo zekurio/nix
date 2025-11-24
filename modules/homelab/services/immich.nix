@@ -1,5 +1,6 @@
 { config
 , lib
+, pkgs
 , ...
 }: {
   options.services.immich-wrapped = {
@@ -22,6 +23,7 @@
       host = "127.0.0.1";
       port = config.services.immich-wrapped.port;
       mediaLocation = "/tank/photos";
+      package = pkgs.unstable.immich;
     };
 
     # Caddy virtual host configuration
