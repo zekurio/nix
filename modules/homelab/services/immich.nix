@@ -20,8 +20,9 @@
   config = lib.mkIf config.services.immich-wrapped.enable {
     services.immich = {
       enable = true;
-      host = "127.0.0.1";
+      host = "0.0.0.0";
       port = config.services.immich-wrapped.port;
+      openFirewall = true;
       mediaLocation = "/tank/photos";
       package = pkgs.unstable.immich;
     };
