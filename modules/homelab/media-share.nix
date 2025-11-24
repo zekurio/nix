@@ -12,15 +12,18 @@ let
   shareUid = 995;
   shareGid = 995;
 
+  mediaDatasets = [
+    "tank/anime"
+    "tank/movies"
+    "tank/music"
+    "tank/photos"
+    "tank/tv"
+  ];
+
   mediaDirs = [
     "/mnt/downloads"
     "/mnt/downloads/complete"
     "/mnt/downloads/incomplete"
-    "/tank/music"
-    "/tank/movies"
-    "/tank/tv"
-    "/tank/anime"
-    "/tank/photos"
     "/tank/torrents"
     "/tank/torrents/incomplete"
     "/tank/torrents/completed"
@@ -35,6 +38,10 @@ let
     "/var/lib/sabnzbd"
     "/var/lib/sonarr"
   ];
+
+  mediaDatasetMounts = map (dataset: "/${dataset}") cfg.datasets;
+
+  managedPaths = mediaDirs ++ stateDirs ++ mediaDatasetMounts;
 
   directoryRules = map
     (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -")
@@ -85,6 +92,12 @@ in
       readOnly = true;
       description = "Default umask applied to media services.";
     };
+
+    datasets = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = mediaDatasets;
+      description = "ZFS datasets that should exist for media libraries.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -114,13 +127,45 @@ in
 
     systemd.tmpfiles.rules = directoryRules;
 
+    systemd.services.media-share-zfs-datasets = {
+      description = "Ensure ZFS datasets exist for media shares";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "zfs-import.target" ];
+      requires = [ "zfs-import.target" ];
+      serviceConfig.Type = "oneshot";
+      path = [
+        config.boot.zfs.package
+        pkgs.coreutils
+      ];
+      script = ''
+        set -euo pipefail
+
+        for dataset in ${lib.concatStringsSep " " cfg.datasets}; do
+          if ! zfs list -H -o name "$dataset" >/dev/null 2>&1; then
+            zfs create "$dataset"
+          fi
+
+          mountpoint="$(zfs get -H -o value mountpoint "$dataset")"
+          if [ "$mountpoint" = "legacy" ] || [ "$mountpoint" = "-" ]; then
+            continue
+          fi
+
+          install -d -m 2775 -o ${shareUser} -g ${shareGroup} "$mountpoint"
+        done
+      '';
+    };
+
     systemd.services.media-share-prepare = {
       description = "Ensure media directories exist for shared services";
       wantedBy = [ "multi-user.target" ];
-      after = [ "local-fs.target" ];
+      after = [
+        "local-fs.target"
+        "media-share-zfs-datasets.service"
+      ];
+      requires = [ "media-share-zfs-datasets.service" ];
       serviceConfig.Type = "oneshot";
       script = ''
-        for dir in ${lib.concatStringsSep " " (mediaDirs ++ stateDirs)}; do
+        for dir in ${lib.concatStringsSep " " managedPaths}; do
           ${pkgs.coreutils}/bin/install -d -m 2775 -o ${shareUser} -g ${shareGroup} "$dir"
         done
       '';
