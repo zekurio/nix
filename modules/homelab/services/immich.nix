@@ -26,6 +26,10 @@
       package = pkgs.unstable.immich;
     };
 
+    environment.systemPackages = [
+      pkgs.unstable.immich-go
+    ];
+
     # Caddy virtual host configuration
     services.caddy-wrapper.virtualHosts."immich" = {
       domain = config.services.immich-wrapped.domain;
