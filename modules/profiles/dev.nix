@@ -129,7 +129,6 @@ in
 
       environment.systemPackages = mkAfter [
         pkgs.gh
-        pkgs.unstable.codex
         pkgs.unstable.opencode
       ];
     };
