@@ -125,6 +125,8 @@ in
       script = ''
         for dir in ${lib.concatStringsSep " " managedPaths}; do
           ${pkgs.coreutils}/bin/install -d -m 2775 -o ${shareUser} -g ${shareGroup} "$dir"
+          ${pkgs.coreutils}/bin/chown ${shareUser}:${shareGroup} "$dir"
+          ${pkgs.coreutils}/bin/chmod 2775 "$dir"
         done
       '';
     };
