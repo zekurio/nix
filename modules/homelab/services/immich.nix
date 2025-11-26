@@ -23,7 +23,7 @@
       host = "0.0.0.0";
       port = config.services.immich-wrapped.port;
       openFirewall = true;
-      mediaLocation = "/tank/photos";
+      mediaLocation = "/tank/immich";
       package = pkgs.unstable.immich;
     };
 
