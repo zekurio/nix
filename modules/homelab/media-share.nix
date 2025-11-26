@@ -12,14 +12,10 @@ let
   shareUid = 995;
   shareGid = 995;
 
-  mediaDatasets = [
-    "tank/anime"
-    "tank/movies"
-    "tank/photos"
-    "tank/tv"
-  ];
-
   mediaDirs = [
+    "/tank/jellyfin/anime"
+    "/tank/jellyfin/movies"
+    "/tank/jellyfin/tv"
     "/mnt/downloads"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/radarr"
@@ -28,9 +24,9 @@ let
     "/mnt/downloads/converted/radarr"
     "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/incomplete"
-    "/tank/torrents"
-    "/tank/torrents/incomplete"
-    "/tank/torrents/complete"
+    "/tank/jellyfin/torrents"
+    "/tank/jellyfin/torrents/incomplete"
+    "/tank/jellyfin/torrents/complete"
   ];
 
   stateDirs = [
@@ -41,9 +37,7 @@ let
     "/var/lib/sonarr"
   ];
 
-  mediaDatasetMounts = map (dataset: "/${dataset}") cfg.datasets;
-
-  managedPaths = mediaDirs ++ stateDirs ++ mediaDatasetMounts;
+  managedPaths = mediaDirs ++ stateDirs;
 
   directoryRules = map
     (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -")
@@ -94,12 +88,6 @@ in
       readOnly = true;
       description = "Default umask applied to media services.";
     };
-
-    datasets = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = mediaDatasets;
-      description = "ZFS datasets that should exist for media libraries.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -129,42 +117,10 @@ in
 
     systemd.tmpfiles.rules = directoryRules;
 
-    systemd.services.media-share-zfs-datasets = {
-      description = "Ensure ZFS datasets exist for media shares";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "zfs-import.target" ];
-      requires = [ "zfs-import.target" ];
-      serviceConfig.Type = "oneshot";
-      path = [
-        config.boot.zfs.package
-        pkgs.coreutils
-      ];
-      script = ''
-        set -euo pipefail
-
-        for dataset in ${lib.concatStringsSep " " cfg.datasets}; do
-          if ! zfs list -H -o name "$dataset" >/dev/null 2>&1; then
-            zfs create "$dataset"
-          fi
-
-          mountpoint="$(zfs get -H -o value mountpoint "$dataset")"
-          if [ "$mountpoint" = "legacy" ] || [ "$mountpoint" = "-" ]; then
-            continue
-          fi
-
-          install -d -m 2775 -o ${shareUser} -g ${shareGroup} "$mountpoint"
-        done
-      '';
-    };
-
     systemd.services.media-share-prepare = {
       description = "Ensure media directories exist for shared services";
       wantedBy = [ "multi-user.target" ];
-      after = [
-        "local-fs.target"
-        "media-share-zfs-datasets.service"
-      ];
-      requires = [ "media-share-zfs-datasets.service" ];
+      after = [ "local-fs.target" ];
       serviceConfig.Type = "oneshot";
       script = ''
         for dir in ${lib.concatStringsSep " " managedPaths}; do
