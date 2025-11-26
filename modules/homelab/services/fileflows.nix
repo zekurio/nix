@@ -64,7 +64,7 @@ in
         "fileflows-data:/app/Data"
         "fileflows-logs:/app/Logs"
         "${tempPath}:/temp"
-        "/mnt/downloads/completed:/completed"
+        "/mnt/downloads/complete:/complete"
         "/mnt/downloads/converted:/converted"
         "/tank/media:/media"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
