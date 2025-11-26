@@ -22,6 +22,11 @@ let
   mediaDirs = [
     "/mnt/downloads"
     "/mnt/downloads/complete"
+    "/mnt/downloads/complete/radarr"
+    "/mnt/downloads/complete/sonarr"
+    "/mnt/downloads/converted"
+    "/mnt/downloads/converted/radarr"
+    "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/incomplete"
     "/tank/torrents"
     "/tank/torrents/incomplete"
