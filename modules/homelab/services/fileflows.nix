@@ -66,7 +66,7 @@ in
         "${tempPath}:/temp"
         "/mnt/downloads/complete:/complete"
         "/mnt/downloads/converted:/converted"
-        "/tank:/tank"
+        "/tank/jellyfin:/media"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
       ];
       extraOptions = [
