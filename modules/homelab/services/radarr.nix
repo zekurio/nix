@@ -28,7 +28,7 @@ in
       enable = true;
       user = shareUser;
       group = shareGroup;
-      package = pkgs.unstable.radarr;
+      package = pkgs.radarr;
     };
 
     # Set umask for shared library access
