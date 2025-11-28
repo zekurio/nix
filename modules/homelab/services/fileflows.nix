@@ -64,9 +64,9 @@ in
         "fileflows-data:/app/Data"
         "fileflows-logs:/app/Logs"
         "${tempPath}:/temp"
-        "/mnt/downloads/complete:/complete"
-        "/mnt/downloads/converted:/converted"
-        "/tank/jellyfin:/media"
+        "/mnt/downloads/complete:/mnt/downloads/complete"
+        "/mnt/downloads/converted:/mnt/downloads/converted"
+        "/tank/jellyfin:/tank/jellyfin"
         "/run/podman/podman.sock:/var/run/docker.sock:ro"
       ];
       extraOptions = [
