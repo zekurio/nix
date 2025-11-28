@@ -79,14 +79,14 @@ in
       enable = true;
       package = pkgs.caddy.withPlugins {
         plugins = [ "github.com/caddy-dns/cloudflare@v0.2.1" ];
-        hash = "sha256-3NTI1fMlkpDB2Q/Q/CznEafscypEjJAOmTfAqWhHK1w=";
+        hash = "sha256-Dvifm7rRwFfgXfcYvXcPDNlMaoxKd5h4mHEK6kJ+T4A=";
       };
       globalConfig = ''
         email ${cfg.email}
       '';
       virtualHosts =
         lib.mapAttrs
-          (domain: hostCfg: {
+          (_: hostCfg: {
             extraConfig = ''
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
               ${lib.optionalString (hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1)
