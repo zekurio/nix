@@ -19,7 +19,7 @@
   # Flake inputs: external dependencies and frameworks
   inputs = {
     # Core dependencies
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05?shallow=true";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11?shallow=true";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";

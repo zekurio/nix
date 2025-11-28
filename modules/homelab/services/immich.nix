@@ -24,11 +24,11 @@
       port = config.services.immich-wrapped.port;
       openFirewall = true;
       mediaLocation = "/tank/immich";
-      package = pkgs.unstable.immich;
+      package = pkgs.immich;
     };
 
     environment.systemPackages = [
-      pkgs.unstable.immich-go
+      pkgs.immich-go
     ];
 
     # Caddy virtual host configuration
