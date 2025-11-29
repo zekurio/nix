@@ -29,7 +29,7 @@
     loader = {
       timeout = 10;
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = true; # ENABLE WHEN DEPLOYING / DISABLE WHEN USING LANZABOOTE FOR SB
+      systemd-boot.enable = lib.mkForce false; # ENABLE WHEN DEPLOYING / DISABLE WHEN USING LANZABOOTE FOR SB
     };
     initrd = {
       verbose = false;
@@ -51,7 +51,7 @@
     blacklistedKernelModules = [ "k10temp" ];
     kernelPackages = pkgs.linuxPackages_zen;
     lanzaboote = {
-      enable = false; # ENABLE FOR SECURE BOOT / DISABLE WHEN DEPLOYING
+      enable = true; # ENABLE FOR SECURE BOOT / DISABLE WHEN DEPLOYING
       pkiBundle = "/var/lib/sbctl";
     };
   };
