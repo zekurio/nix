@@ -29,7 +29,7 @@
     loader = {
       timeout = 10;
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = lib.mkForce false;
+      systemd-boot.enable = true; # ENABLE WHEN DEPLOYING / DISABLE WHEN USING LANZABOOTE FOR SB
     };
     initrd = {
       verbose = false;
@@ -42,7 +42,6 @@
       "udev.log_priority=3"
       "boot.shell_on_fail"
       "acpi_enforce_resources=lax"
-      "amdgpu.ppfeaturemask=0xffffffff"
     ];
     kernelModules = [ "kvm-amd" "it87" "zenpower" ];
     extraModprobeConfig = ''
@@ -52,7 +51,7 @@
     blacklistedKernelModules = [ "k10temp" ];
     kernelPackages = pkgs.linuxPackages_zen;
     lanzaboote = {
-      enable = true;
+      enable = false; # ENABLE FOR SECURE BOOT / DISABLE WHEN DEPLOYING
       pkiBundle = "/var/lib/sbctl";
     };
   };

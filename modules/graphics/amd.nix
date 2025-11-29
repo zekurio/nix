@@ -20,6 +20,8 @@ in
       };
     };
 
+    boot.kernelParams = [ "amdgpu.ppfeaturemask=0xffffffff" ];
+
     environment.systemPackages = with pkgs; [ lact ];
     systemd.packages = with pkgs; [ lact ];
     systemd.services.lactd.wantedBy = [ "multi-user.target" ];

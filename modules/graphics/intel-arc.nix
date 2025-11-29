@@ -13,26 +13,24 @@ in
   };
 
   config = mkIf cfg.enable {
-    hardware.graphics = {
-      enable = true;
-      extraPackages = with pkgs; [
-        intel-media-driver # iHD VA-API (required)
-        vpl-gpu-rt # oneVPL/QSV
-        intel-compute-runtime # OpenCL/Level Zero (optional but useful)
-        intel-graphics-compiler
-        level-zero
-        ocl-icd
-        libva-utils
-      ];
-      extraPackages32 = with pkgs; [
-        intel-media-driver
-      ];
+    boot.kernelParams = [ "i915.enable_guc=3" ];
+
+    environment.sessionVariables = {
+      LIBVA_DRIVER_NAME = "iHD";
     };
 
-    environment.variables.LIBVA_DRIVER_NAME = "iHD";
+    hardware = {
+      enableAllFirmware = true;
+      enableRedistributableFirmware = true;
+      graphics = {
+        enable = true;
+        extraPackages = with pkgs; [
+          intel-media-driver # VA-API (iHD) userspace
+          vpl-gpu-rt # oneVPL (QSV) runtime
 
-    systemd.services.jellyfin.serviceConfig.Environment = [
-      "LIBVA_DRIVER_NAME=iHD"
-    ];
+          intel-compute-runtime # OpenCL (NEO) + Level Zero for Arc/Xe
+        ];
+      };
+    };
   };
 }
