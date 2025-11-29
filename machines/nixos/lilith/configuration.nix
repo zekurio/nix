@@ -69,15 +69,8 @@
   profiles.desktop = {
     enable = true;
     desktopPackageSet = pkgs;
-    hyprland = {
+    niri = {
       enable = true;
-      monitors = [
-        "DP-2,2560x1440@165,0x0,auto,vrr,1"
-      ];
-      input = {
-        kb_layout = "eu";
-        accel_profile = "flat";
-      };
     };
   };
 
