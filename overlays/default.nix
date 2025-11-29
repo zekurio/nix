@@ -3,6 +3,5 @@ inputs: {
     # Add overlays here
     (import ./jellyfin-ffmpeg.nix)
     (import ./unstable.nix inputs)
-    (import ./quickshell.nix inputs)
   ];
 }
