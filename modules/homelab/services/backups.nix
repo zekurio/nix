@@ -3,134 +3,222 @@
 , ...
 }:
 let
-  cfg = config.services.backups.b2;
-in
-{
-  options.services.backups.b2 = {
-    enable = lib.mkEnableOption "Restic backups to Backblaze B2";
+  b2Cfg = config.services.backups.b2;
+  localCfg = config.services.backups.local;
 
-    repository = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      example = "b2:backups:adam";
-      description = "Restic repository string, typically b2:<bucket>:<path>.";
-    };
-
-    paths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "Absolute paths that should be backed up.";
-    };
-
-    excludePaths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "Paths that will be excluded from the backup.";
-    };
-
-    extraBackupArgs = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "Additional flags passed to restic backup.";
-    };
-
-    pruneKeep = lib.mkOption {
-      type = lib.types.attrsOf lib.types.int;
-      default = {
-        daily = 7;
-        weekly = 4;
-        monthly = 12;
-      };
-      description = "Retention policy mapped to restic --keep-* switches.";
-    };
-
-    timer = lib.mkOption {
-      type = lib.types.str;
-      default = "daily";
-      description = "systemd OnCalendar expression used for scheduling backups.";
-    };
-
-    randomizedDelaySec = lib.mkOption {
-      type = lib.types.str;
-      default = "45m";
-      description = "RandomizedDelaySec applied to the backup timer.";
-    };
-
-    initialize = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Whether to initialize the repository automatically if it does not exist.";
-    };
-
-    user = lib.mkOption {
-      type = lib.types.str;
-      default = "root";
-      description = "User that performs the backups.";
-    };
-
-    environmentSecretName = lib.mkOption {
-      type = lib.types.str;
-      default = "restic_env";
-      description = "SOPS secret that provides B2 credentials as environment variables.";
-    };
-
-    passwordSecretName = lib.mkOption {
-      type = lib.types.str;
-      default = "restic_password";
-      description = "SOPS secret containing the restic repository password.";
-    };
-
-    unitName = lib.mkOption {
-      type = lib.types.str;
-      default = "backblaze-b2";
-      description = "Identifier used for the restic systemd units.";
-    };
+  # Shared option definitions to reduce duplication
+  mkPathsOption = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = "Absolute paths that should be backed up.";
   };
 
-  config = lib.mkIf cfg.enable (
+  mkExcludePathsOption = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = "Paths that will be excluded from the backup.";
+  };
+
+  mkExtraBackupArgsOption = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = "Additional flags passed to restic backup.";
+  };
+
+  mkPruneKeepOption = lib.mkOption {
+    type = lib.types.attrsOf lib.types.int;
+    default = {
+      daily = 7;
+      weekly = 4;
+      monthly = 12;
+    };
+    description = "Retention policy mapped to restic --keep-* switches.";
+  };
+
+  mkTimerOption = lib.mkOption {
+    type = lib.types.str;
+    default = "daily";
+    description = "systemd OnCalendar expression used for scheduling backups.";
+  };
+
+  mkRandomizedDelaySecOption = lib.mkOption {
+    type = lib.types.str;
+    default = "45m";
+    description = "RandomizedDelaySec applied to the backup timer.";
+  };
+
+  mkInitializeOption = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Whether to initialize the repository automatically if it does not exist.";
+  };
+
+  mkUserOption = lib.mkOption {
+    type = lib.types.str;
+    default = "root";
+    description = "User that performs the backups.";
+  };
+
+  mkPasswordSecretNameOption = lib.mkOption {
+    type = lib.types.str;
+    default = "restic_password";
+    description = "SOPS secret containing the restic repository password.";
+  };
+
+  # Helper to build restic backup configuration
+  mkResticBackup = { cfg, backupName, passwordSecret, environmentFile ? null }:
     let
-      backupName = cfg.unitName;
-      envSecret = cfg.environmentSecretName;
-      passwordSecret = cfg.passwordSecretName;
       pruneOpts = lib.mapAttrsToList (name: value: "--keep-${name} ${toString value}") cfg.pruneKeep;
       excludeArgs = map (path: "--exclude=${path}") cfg.excludePaths;
     in
     {
-      assertions = [
-        {
-          assertion = cfg.repository != "";
-          message = "services.backups.b2.repository must be set when the service is enabled.";
-        }
-        {
-          assertion = cfg.paths != [ ];
-          message = "services.backups.b2.paths must include at least one path.";
-        }
-      ];
+      inherit (cfg) paths repository initialize user;
+      passwordFile = config.sops.secrets.${passwordSecret}.path;
+      timerConfig = {
+        OnCalendar = cfg.timer;
+        RandomizedDelaySec = cfg.randomizedDelaySec;
+        Persistent = true;
+      };
+      pruneOpts = pruneOpts;
+      extraBackupArgs = cfg.extraBackupArgs ++ excludeArgs;
+    } // lib.optionalAttrs (environmentFile != null) {
+      inherit environmentFile;
+    };
+in
+{
+  options.services.backups = {
+    # Backblaze B2 backup configuration
+    b2 = {
+      enable = lib.mkEnableOption "Restic backups to Backblaze B2";
 
-      sops.secrets.${envSecret} = {
-        owner = cfg.user;
-        group = cfg.user;
-        mode = "0400";
+      repository = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        example = "b2:backups:adam";
+        description = "Restic repository string, typically b2:<bucket>:<path>.";
       };
 
-      sops.secrets.${passwordSecret} = {
-        owner = cfg.user;
-        group = cfg.user;
-        mode = "0400";
+      paths = mkPathsOption;
+      excludePaths = mkExcludePathsOption;
+      extraBackupArgs = mkExtraBackupArgsOption;
+      pruneKeep = mkPruneKeepOption;
+      timer = mkTimerOption;
+      randomizedDelaySec = mkRandomizedDelaySecOption;
+      initialize = mkInitializeOption;
+      user = mkUserOption;
+      passwordSecretName = mkPasswordSecretNameOption;
+
+      environmentSecretName = lib.mkOption {
+        type = lib.types.str;
+        default = "restic_env";
+        description = "SOPS secret that provides B2 credentials as environment variables.";
       };
 
-      services.restic.backups.${backupName} = {
-        inherit (cfg) paths repository initialize user;
-        passwordFile = config.sops.secrets.${passwordSecret}.path;
-        environmentFile = config.sops.secrets.${envSecret}.path;
-        timerConfig = {
-          OnCalendar = cfg.timer;
-          RandomizedDelaySec = cfg.randomizedDelaySec;
-          Persistent = true;
+      unitName = lib.mkOption {
+        type = lib.types.str;
+        default = "backblaze-b2";
+        description = "Identifier used for the restic systemd units.";
+      };
+    };
+
+    # Local ZFS backup configuration
+    local = {
+      enable = lib.mkEnableOption "Restic backups to local ZFS dataset";
+
+      repository = lib.mkOption {
+        type = lib.types.str;
+        default = "/tank/backup/restic";
+        example = "/tank/backup/restic";
+        description = "Local path to the restic repository (typically on a ZFS dataset).";
+      };
+
+      paths = mkPathsOption;
+      excludePaths = mkExcludePathsOption;
+      extraBackupArgs = mkExtraBackupArgsOption;
+      pruneKeep = mkPruneKeepOption;
+      timer = mkTimerOption;
+      randomizedDelaySec = mkRandomizedDelaySecOption;
+      initialize = mkInitializeOption;
+      user = mkUserOption;
+      passwordSecretName = mkPasswordSecretNameOption;
+
+      unitName = lib.mkOption {
+        type = lib.types.str;
+        default = "local-zfs";
+        description = "Identifier used for the restic systemd units.";
+      };
+    };
+  };
+
+  config = lib.mkMerge [
+    # B2 backup configuration
+    (lib.mkIf b2Cfg.enable (
+      let
+        backupName = b2Cfg.unitName;
+        envSecret = b2Cfg.environmentSecretName;
+        passwordSecret = b2Cfg.passwordSecretName;
+      in
+      {
+        assertions = [
+          {
+            assertion = b2Cfg.repository != "";
+            message = "services.backups.b2.repository must be set when the service is enabled.";
+          }
+          {
+            assertion = b2Cfg.paths != [ ];
+            message = "services.backups.b2.paths must include at least one path.";
+          }
+        ];
+
+        sops.secrets.${envSecret} = {
+          owner = b2Cfg.user;
+          group = b2Cfg.user;
+          mode = "0400";
         };
-        pruneOpts = pruneOpts;
-        extraBackupArgs = cfg.extraBackupArgs ++ excludeArgs;
-      };
-    }
-  );
+
+        sops.secrets.${passwordSecret} = {
+          owner = b2Cfg.user;
+          group = b2Cfg.user;
+          mode = "0400";
+        };
+
+        services.restic.backups.${backupName} = mkResticBackup {
+          cfg = b2Cfg;
+          inherit backupName passwordSecret;
+          environmentFile = config.sops.secrets.${envSecret}.path;
+        };
+      }
+    ))
+
+    # Local ZFS backup configuration
+    (lib.mkIf localCfg.enable (
+      let
+        backupName = localCfg.unitName;
+        passwordSecret = localCfg.passwordSecretName;
+      in
+      {
+        assertions = [
+          {
+            assertion = localCfg.repository != "";
+            message = "services.backups.local.repository must be set when the service is enabled.";
+          }
+          {
+            assertion = localCfg.paths != [ ];
+            message = "services.backups.local.paths must include at least one path.";
+          }
+        ];
+
+        sops.secrets.${passwordSecret} = {
+          owner = localCfg.user;
+          group = localCfg.user;
+          mode = "0400";
+        };
+
+        services.restic.backups.${backupName} = mkResticBackup {
+          cfg = localCfg;
+          inherit backupName passwordSecret;
+        };
+      }
+    ))
+  ];
 }
