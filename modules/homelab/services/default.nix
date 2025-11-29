@@ -7,6 +7,7 @@
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
+    ./media-share.nix
     ./navidrome.nix
     ./paperless-ngx.nix
     ./prowlarr.nix
@@ -14,6 +15,7 @@
     ./radarr.nix
     ./sabnzbd.nix
     ./sonarr.nix
+    ./tailscale.nix
     ./vaultwarden.nix
   ];
 }
