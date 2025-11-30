@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -207,6 +208,9 @@ in
     (lib.mkIf localCfg.enable (
       let
         backupName = localCfg.unitName;
+        pruneOpts = lib.mapAttrsToList (name: value: "--keep-${name} ${toString value}") localCfg.pruneKeep;
+        excludeArgs = map (path: "--exclude=${path}") localCfg.excludePaths;
+        passwordFile = "/run/keys/${backupName}-password";
       in
       {
         assertions = [
@@ -220,8 +224,40 @@ in
           }
         ];
 
-        services.restic.backups.${backupName} = mkResticBackup {
-          cfg = localCfg;
+        # Create a simple password file for local unencrypted backups
+        # Restic requires a password, but for local backups we can use a simple static one
+        systemd.tmpfiles.rules = [
+          "f ${passwordFile} 0400 ${localCfg.user} ${localCfg.user} - local-backup"
+        ];
+
+        systemd.services."${backupName}-password" = {
+          wantedBy = [ "multi-user.target" ];
+          before = [ "restic-backups-${backupName}.service" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = pkgs.writeScript "create-password" ''
+              #!${pkgs.bash}/bin/bash
+              echo -n "local-unencrypted-backup" > ${passwordFile}
+            '';
+          };
+        };
+
+        services.restic.backups.${backupName} = {
+          inherit (localCfg)
+            paths
+            repository
+            initialize
+            user
+            ;
+          inherit passwordFile;
+          timerConfig = {
+            OnCalendar = localCfg.timer;
+            RandomizedDelaySec = localCfg.randomizedDelaySec;
+            Persistent = true;
+          };
+          pruneOpts = pruneOpts;
+          extraBackupArgs = localCfg.extraBackupArgs ++ excludeArgs;
         };
       }
     ))
