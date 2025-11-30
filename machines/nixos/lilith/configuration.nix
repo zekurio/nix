@@ -1,7 +1,9 @@
-{ lib
-, pkgs
-, ...
-}: {
+{
+  lib,
+  pkgs,
+  ...
+}:
+{
   imports = [
     ../default.nix
     ./disko.nix
@@ -14,14 +16,20 @@
     enable = true;
     dnssec = "true";
     domains = [ "~." ];
-    fallbackDns = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
+    fallbackDns = [
+      "1.1.1.1#one.one.one.one"
+      "1.0.0.1#one.one.one.one"
+    ];
     dnsovertls = "true";
   };
 
   networking.hostName = "lilith";
   networking.networkmanager.enable = true;
   networking.networkmanager.dns = "systemd-resolved";
-  networking.nameservers = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
+  networking.nameservers = [
+    "1.1.1.1#one.one.one.one"
+    "1.0.0.1#one.one.one.one"
+  ];
 
   time.timeZone = lib.mkDefault "Europe/Vienna";
 
@@ -41,12 +49,11 @@
       "rd.udev.log_level=3"
       "udev.log_priority=3"
       "boot.shell_on_fail"
-      "acpi_enforce_resources=lax"
     ];
-    kernelModules = [ "kvm-amd" "it87" "zenpower" ];
-    extraModprobeConfig = ''
-      options it87 force_id=0x8628
-    '';
+    kernelModules = [
+      "kvm-amd"
+      "zenpower"
+    ];
     extraModulePackages = [ pkgs.linuxPackages_zen.zenpower ];
     blacklistedKernelModules = [ "k10temp" ];
     kernelPackages = pkgs.linuxPackages_zen;
@@ -86,12 +93,8 @@
 
   environment.systemPackages = lib.mkAfter [
     pkgs.sbctl
-    pkgs.cryptsetup
     pkgs.blender-hip
-    pkgs.ollama-rocm
   ];
-
-  programs.coolercontrol.enable = true;
 
   services = {
     fwupd.enable = true;

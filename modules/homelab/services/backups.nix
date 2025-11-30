@@ -1,6 +1,7 @@
-{ config
-, lib
-, ...
+{
+  config,
+  lib,
+  ...
 }:
 let
   b2Cfg = config.services.backups.b2;
@@ -66,14 +67,23 @@ let
   };
 
   # Helper to build restic backup configuration
-  mkResticBackup = { cfg, backupName, passwordSecret, environmentFile ? null }:
+  mkResticBackup =
+    {
+      cfg,
+      passwordSecret ? null,
+      environmentFile ? null,
+    }:
     let
       pruneOpts = lib.mapAttrsToList (name: value: "--keep-${name} ${toString value}") cfg.pruneKeep;
       excludeArgs = map (path: "--exclude=${path}") cfg.excludePaths;
     in
     {
-      inherit (cfg) paths repository initialize user;
-      passwordFile = config.sops.secrets.${passwordSecret}.path;
+      inherit (cfg)
+        paths
+        repository
+        initialize
+        user
+        ;
       timerConfig = {
         OnCalendar = cfg.timer;
         RandomizedDelaySec = cfg.randomizedDelaySec;
@@ -81,7 +91,11 @@ let
       };
       pruneOpts = pruneOpts;
       extraBackupArgs = cfg.extraBackupArgs ++ excludeArgs;
-    } // lib.optionalAttrs (environmentFile != null) {
+    }
+    // lib.optionalAttrs (passwordSecret != null) {
+      passwordFile = config.sops.secrets.${passwordSecret}.path;
+    }
+    // lib.optionalAttrs (environmentFile != null) {
       inherit environmentFile;
     };
 in
@@ -140,7 +154,6 @@ in
       randomizedDelaySec = mkRandomizedDelaySecOption;
       initialize = mkInitializeOption;
       user = mkUserOption;
-      passwordSecretName = mkPasswordSecretNameOption;
 
       unitName = lib.mkOption {
         type = lib.types.str;
@@ -184,17 +197,16 @@ in
 
         services.restic.backups.${backupName} = mkResticBackup {
           cfg = b2Cfg;
-          inherit backupName passwordSecret;
+          inherit passwordSecret;
           environmentFile = config.sops.secrets.${envSecret}.path;
         };
       }
     ))
 
-    # Local ZFS backup configuration
+    # Local ZFS backup configuration (unencrypted for easier restores)
     (lib.mkIf localCfg.enable (
       let
         backupName = localCfg.unitName;
-        passwordSecret = localCfg.passwordSecretName;
       in
       {
         assertions = [
@@ -208,15 +220,8 @@ in
           }
         ];
 
-        sops.secrets.${passwordSecret} = {
-          owner = localCfg.user;
-          group = localCfg.user;
-          mode = "0400";
-        };
-
         services.restic.backups.${backupName} = mkResticBackup {
           cfg = localCfg;
-          inherit backupName passwordSecret;
         };
       }
     ))
