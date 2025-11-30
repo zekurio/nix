@@ -1,19 +1,20 @@
-{ pkgs
-, ...
-}: {
+{
+  pkgs,
+  ...
+}:
+{
   config = {
     nix.settings.trusted-users = [ "zekurio" ];
 
-    environment.shells = with pkgs; [ fish ];
+    environment.shells = with pkgs; [ zsh ];
     environment.variables.EDITOR = "nano";
 
-    programs.fish.enable = true;
-    programs.nix-ld.enable = true;
+    programs.zsh.enable = true;
 
     users = {
       users = {
         zekurio = {
-          shell = pkgs.fish;
+          shell = pkgs.zsh;
           uid = 1000;
           isNormalUser = true;
           hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";

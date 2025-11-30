@@ -47,7 +47,7 @@
     # System configuration management
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -63,8 +63,8 @@
       url = "github:Maroka-chan/VPN-Confinement";
     };
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.2";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # Desktop shell and UI
@@ -81,13 +81,19 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+
+    # Nix User Repository
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs =
-    inputs @ {
-      nixpkgs
-    , flake-parts
-    , ...
+    inputs@{
+      nixpkgs,
+      flake-parts,
+      ...
     }:
     let
       lib = nixpkgs.lib;
@@ -133,23 +139,24 @@
             inputs.disko.nixosModules.disko
             inputs.lanzaboote.nixosModules.lanzaboote
             inputs.niri.nixosModules.niri
-            ./modules/profiles/desktop.nix
+            ./modules/profiles/desktop
             ./machines/nixos/lilith/configuration.nix
           ];
         };
       };
 
       # Build NixOS configurations from host definitions
-      mkSystem =
-        lib.mapAttrs (_: host:
-          let
-            pkgsInput = host.pkgsInput or nixpkgs;
-          in
-          pkgsInput.lib.nixosSystem {
-            inherit (host) system;
-            specialArgs = mkSpecialArgs;
-            modules = sharedModules ++ host.modules;
-          });
+      mkSystem = lib.mapAttrs (
+        _: host:
+        let
+          pkgsInput = host.pkgsInput or nixpkgs;
+        in
+        pkgsInput.lib.nixosSystem {
+          inherit (host) system;
+          specialArgs = mkSpecialArgs;
+          modules = sharedModules ++ host.modules;
+        }
+      );
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];

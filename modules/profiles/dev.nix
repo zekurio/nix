@@ -1,11 +1,11 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }:
 let
-  inherit
-    (lib)
+  inherit (lib)
     hasAttrByPath
     mkAfter
     mkEnableOption
@@ -16,8 +16,8 @@ let
 
   cfg = config.profiles.dev;
 
-  basePackages = pkgs':
-    with pkgs'; [
+  basePackages =
+    pkgs': with pkgs'; [
       age
       bat
       btop
@@ -34,11 +34,9 @@ let
 in
 {
   options.profiles.dev = {
-    enable =
-      mkEnableOption "Development profile powered by Home Manager"
-      // {
-        default = true;
-      };
+    enable = mkEnableOption "Development profile powered by Home Manager" // {
+      default = true;
+    };
 
     user = mkOption {
       type = types.str;
@@ -53,22 +51,23 @@ in
     };
   };
 
-  config =
-    mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = hasAttrByPath [ cfg.user ] config.users.users;
-          message = "profiles.dev.user must reference an existing entry in users.users";
-        }
-      ];
+  config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = hasAttrByPath [ cfg.user ] config.users.users;
+        message = "profiles.dev.user must reference an existing entry in users.users";
+      }
+    ];
 
-      home-manager = {
-        useGlobalPkgs = true;
-        useUserPackages = true;
-        backupFileExtension = "backup";
-      };
+    home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      backupFileExtension = "backup";
+    };
 
-      home-manager.users.${cfg.user} = { pkgs, ... }: {
+    home-manager.users.${cfg.user} =
+      { pkgs, ... }:
+      {
         home = {
           username = cfg.user;
           homeDirectory = "/home/${cfg.user}";
@@ -91,17 +90,23 @@ in
             ];
           };
 
-          fish = {
+          zsh = {
             enable = true;
-            interactiveShellInit = ''
-              set -g fish_greeting
+            autosuggestion.enable = true;
+            syntaxHighlighting.enable = true;
+            oh-my-zsh = {
+              enable = true;
+              plugins = [
+                "git"
+                "sudo"
+                "direnv"
+              ];
+              theme = "robbyrussell";
+            };
+            initContent = ''
+              # Disable greeting
+              unsetopt BEEP
             '';
-            plugins = [
-              {
-                name = "pure";
-                src = pkgs.fishPlugins.pure.src;
-              }
-            ];
           };
 
           git = {
@@ -127,9 +132,9 @@ in
         };
       };
 
-      environment.systemPackages = mkAfter [
-        pkgs.gh
-        pkgs.unstable.opencode
-      ];
-    };
+    environment.systemPackages = mkAfter [
+      pkgs.gh
+      pkgs.unstable.opencode
+    ];
+  };
 }
