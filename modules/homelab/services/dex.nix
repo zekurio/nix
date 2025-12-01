@@ -63,8 +63,7 @@
               "https://photos.zekurio.xyz/user-settings"
               "https://photos.zekurio.xyz/api/oauth/mobile-redirect"
               "app.immich:///oauth-callback"
-              # Future services
-              "https://docs.zekurio.xyz/callback"
+              "https://docs.zekurio.xyz/accounts/oidc/dex/login/callback/"
             ];
           }
           {
