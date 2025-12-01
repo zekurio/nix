@@ -55,9 +55,9 @@
         # Static clients - applications that use Dex for authentication
         staticClients = [
           {
-            id = "$DEX_CLIENT_ID_ZEKURIO";
+            id = "zekurio-services";
             secret = "$DEX_CLIENT_SECRET_ZEKURIO";
-            name = "Zekurio Services";
+            name = "services - zekurio.xyz";
             redirectURIs = [
               # Immich
               "https://photos.zekurio.xyz/auth/login"
@@ -71,9 +71,9 @@
             ];
           }
           {
-            id = "$DEX_CLIENT_ID_SCHNITZELFLIX";
+            id = "schnitzelflix-services";
             secret = "$DEX_CLIENT_SECRET_SCHNITZELFLIX";
-            name = "Schnitzelflix Services";
+            name = "services - schnitzelflix.xyz";
             redirectURIs = [
               "https://schnitzelflix.xyz/callback"
               "https://jellyfin.schnitzelflix.xyz/callback"
@@ -93,9 +93,7 @@
     # Required variables:
     #   GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
     #   GOOGLE_CLIENT_SECRET=GOCSPX-xxx
-    #   DEX_CLIENT_ID_ZEKURIO=zekurio-services
     #   DEX_CLIENT_SECRET_ZEKURIO=<random-secret>
-    #   DEX_CLIENT_ID_SCHNITZELFLIX=schnitzelflix-services
     #   DEX_CLIENT_SECRET_SCHNITZELFLIX=<random-secret>
     sops.secrets.dex_env = {
       mode = "0400";
