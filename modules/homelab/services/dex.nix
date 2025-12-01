@@ -31,7 +31,7 @@
         };
         storage = {
           type = "sqlite3";
-          config.file = "/var/lib/dex/dex.db";
+          config.file = "/var/lib/private/dex/dex.db";
         };
         oauth2 = {
           skipApprovalScreen = true;
@@ -85,10 +85,9 @@
       };
     };
 
-    # Ensure /var/lib/dex directory exists for SQLite database
-    systemd.tmpfiles.rules = [
-      "d /var/lib/dex 0750 root root -"
-    ];
+    # Add StateDirectory for dex to store SQLite database
+    # DynamicUser services use /var/lib/private/<name> with a symlink at /var/lib/<name>
+    systemd.services.dex.serviceConfig.StateDirectory = "dex";
 
     # SOPS secret for Dex environment file
     # Required variables:
