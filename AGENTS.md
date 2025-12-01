@@ -12,7 +12,6 @@
 | Host | Type | Key Features |
 |------|------|--------------|
 | `adam` | Homelab server | Podman services, backups, VPN |
-| `lilith` | Desktop workstation | Niri, AMD GPU, gaming, secure boot |
 | `tabris` | WSL dev environment | Home Manager only, no system services |
 
 ## Code Style & Conventions
@@ -23,7 +22,6 @@
   - `modules/`: Reusable modules (prefer over ad-hoc config).
   - `modules/homelab/`: Self-hosted services (adam only).
   - `modules/profiles/dev.nix`: Developer tools & shell setup.
-  - `modules/profiles/desktop/`: Full desktop environment (lilith).
   - `modules/gaming/`, `modules/graphics/`, `modules/virtualization/`: Hardware & feature modules.
   - `secrets/`: Managed via `sops-nix`. NEVER commit plain text.
 - **Flake**: Uses `flake-parts`. Update `flake.lock` only when necessary.
