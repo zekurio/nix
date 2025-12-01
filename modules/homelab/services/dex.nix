@@ -93,10 +93,6 @@
     };
 
     # SOPS secret for Dex environment file
-    # Required variables:
-    #   GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
-    #   GOOGLE_CLIENT_SECRET=GOCSPX-xxx
-    #   DEX_CLIENT_SECRET=<random-secret>
     sops.secrets.dex_env = {
       mode = "0400";
     };
