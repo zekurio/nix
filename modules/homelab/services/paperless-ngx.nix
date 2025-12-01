@@ -12,7 +12,7 @@ let
       APPS = [
         {
           provider_id = "dex";
-          name = "Sign in with Google";
+          name = "Google OAuth (dex)";
           client_id = "zekurio-services";
           secret = "@DEX_CLIENT_SECRET@";
           settings.server_url = "https://auth.zekurio.xyz";
