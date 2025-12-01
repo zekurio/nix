@@ -85,6 +85,11 @@
       };
     };
 
+    # Ensure /var/lib/dex directory exists for SQLite database
+    systemd.tmpfiles.rules = [
+      "d /var/lib/dex 0750 root root -"
+    ];
+
     # SOPS secret for Dex environment file
     # Required variables:
     #   GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
