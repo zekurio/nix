@@ -68,37 +68,40 @@ in
     };
 
     # Generate environment file with OIDC provider config at runtime
-    systemd.services.paperless-web.serviceConfig.ExecStartPre = lib.mkBefore [
-      "+${pkgs.writeShellScript "paperless-env-setup" ''
-        source ${config.sops.secrets.paperless_env.path}
-        mkdir -p /run/paperless
-        providerJson=${lib.escapeShellArg (builtins.toJSON oidcProviderConfig)}
-        providerJson="''${providerJson//@DEX_CLIENT_SECRET@/$DEX_CLIENT_SECRET}"
-        echo "PAPERLESS_SOCIALACCOUNT_PROVIDERS='$providerJson'" > /run/paperless/env
-        chown paperless:paperless /run/paperless/env
-        chmod 400 /run/paperless/env
-      ''}"
-    ];
+    systemd.services.paperless-config = {
+      description = "Generate Paperless environment config";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "paperless-env-setup" ''
+          source ${config.sops.secrets.paperless_env.path}
+          mkdir -p /run/paperless
+          providerJson=${lib.escapeShellArg (builtins.toJSON oidcProviderConfig)}
+          providerJson="''${providerJson//@DEX_CLIENT_SECRET@/$DEX_CLIENT_SECRET}"
+          echo "PAPERLESS_SOCIALACCOUNT_PROVIDERS='$providerJson'" > /run/paperless/env
+          chown paperless:paperless /run/paperless/env
+          chmod 400 /run/paperless/env
+        '';
+      };
+    };
 
-    systemd.services.paperless-web.serviceConfig.EnvironmentFile = lib.mkForce "/run/paperless/env";
+    systemd.services.paperless-web = {
+      requires = [ "paperless-config.service" ];
+      after = [ "paperless-config.service" ];
+      serviceConfig.EnvironmentFile = lib.mkForce "/run/paperless/env";
+    };
 
-    systemd.services.paperless-scheduler.serviceConfig.ExecStartPre = lib.mkBefore [
-      "+${pkgs.writeShellScript "paperless-scheduler-env-setup" ''
-        while [ ! -f /run/paperless/env ]; do sleep 0.1; done
-      ''}"
-    ];
+    systemd.services.paperless-scheduler = {
+      requires = [ "paperless-config.service" ];
+      after = [ "paperless-config.service" ];
+      serviceConfig.EnvironmentFile = lib.mkForce "/run/paperless/env";
+    };
 
-    systemd.services.paperless-scheduler.serviceConfig.EnvironmentFile =
-      lib.mkForce "/run/paperless/env";
-
-    systemd.services.paperless-task-queue.serviceConfig.ExecStartPre = lib.mkBefore [
-      "+${pkgs.writeShellScript "paperless-task-queue-env-setup" ''
-        while [ ! -f /run/paperless/env ]; do sleep 0.1; done
-      ''}"
-    ];
-
-    systemd.services.paperless-task-queue.serviceConfig.EnvironmentFile =
-      lib.mkForce "/run/paperless/env";
+    systemd.services.paperless-task-queue = {
+      requires = [ "paperless-config.service" ];
+      after = [ "paperless-config.service" ];
+      serviceConfig.EnvironmentFile = lib.mkForce "/run/paperless/env";
+    };
 
     systemd.tmpfiles.rules = [
       "d /var/lib/paperless/consume 0770 paperless paperless -"
