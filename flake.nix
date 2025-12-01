@@ -7,14 +7,12 @@
       "https://cachix.cachix.org"
       "https://nixpkgs.cachix.org"
       "https://nix-community.cachix.org"
-      "https://niri.cachix.org"
     ];
     extra-trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
       "nixpkgs.cachix.org-1:q91R6hxbwFvDqTSDKwDAV4T5PxqXGxswD8vhONFMeOE="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
     ];
     download-buffer-size = 1073741824;
   };
@@ -62,31 +60,6 @@
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-
-    # Desktop shell and UI
-    dgop = {
-      url = "github:AvengeMedia/dgop";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    dankMaterialShell = {
-      url = "github:AvengeMedia/DankMaterialShell";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-      inputs.dgop.follows = "dgop";
-    };
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-
-    # Nix User Repository
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
   };
 
   outputs =
@@ -130,17 +103,6 @@
           modules = [
             inputs.nixos-wsl.nixosModules.default
             ./machines/nixos/tabris/configuration.nix
-          ];
-        };
-        lilith = {
-          system = "x86_64-linux";
-          pkgsInput = inputs.nixpkgs-unstable;
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.lanzaboote.nixosModules.lanzaboote
-            inputs.niri.nixosModules.niri
-            ./modules/profiles/desktop
-            ./machines/nixos/lilith/configuration.nix
           ];
         };
       };
