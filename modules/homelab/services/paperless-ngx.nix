@@ -8,7 +8,7 @@ let
   # OIDC provider config without the secret - secret is added via environment file
   oidcProviderConfig = {
     openid_connect = {
-      OAUTH_PKCE_ENABLED = "true";
+      OAUTH_PKCE_ENABLED = true;
       APPS = [
         {
           provider_id = "dex";
@@ -74,7 +74,7 @@ in
         mkdir -p /run/paperless
         providerJson=${lib.escapeShellArg (builtins.toJSON oidcProviderConfig)}
         providerJson="''${providerJson//@DEX_CLIENT_SECRET@/$DEX_CLIENT_SECRET}"
-        echo "PAPERLESS_SOCIALACCOUNT_PROVIDERS=$providerJson" > /run/paperless/env
+        echo "PAPERLESS_SOCIALACCOUNT_PROVIDERS='$providerJson'" > /run/paperless/env
         chown paperless:paperless /run/paperless/env
         chmod 400 /run/paperless/env
       ''}"
