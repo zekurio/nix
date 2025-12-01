@@ -94,8 +94,6 @@
     #   DEX_CLIENT_ID_SCHNITZELFLIX=schnitzelflix-services
     #   DEX_CLIENT_SECRET_SCHNITZELFLIX=<random-secret>
     sops.secrets.dex_env = {
-      owner = "dex";
-      group = "dex";
       mode = "0400";
     };
 

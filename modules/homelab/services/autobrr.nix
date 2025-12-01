@@ -1,7 +1,14 @@
-{ config
-, lib
-, ...
-}: {
+{
+  config,
+  lib,
+  ...
+}:
+let
+  mediaShare = config.modules.homelab.mediaShare;
+  shareUser = mediaShare.user;
+  shareGroup = mediaShare.group;
+in
+{
   options.services.autobrr-wrapped = {
     enable = lib.mkEnableOption "autobrr torrent automation tool with Caddy integration";
     domain = lib.mkOption {
@@ -28,6 +35,13 @@
         logLevel = "INFO";
         checkForUpdates = true;
       };
+    };
+
+    # SOPS secret for autobrr session secret
+    sops.secrets.autobrr_secret = {
+      owner = shareUser;
+      group = shareGroup;
+      mode = "0400";
     };
 
     services.caddy-wrapper.virtualHosts."autobrr" = {
