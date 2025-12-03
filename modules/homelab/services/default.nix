@@ -10,7 +10,6 @@
     ./jellyfin.nix
     ./jellyseerr.nix
     ./media-share.nix
-    ./navidrome.nix
     ./paperless-ngx.nix
     ./prowlarr.nix
     ./qbittorrent.nix
