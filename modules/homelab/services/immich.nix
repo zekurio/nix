@@ -24,7 +24,13 @@
       port = config.services.immich-wrapped.port;
       openFirewall = true;
       mediaLocation = "/tank/immich";
-      package = pkgs.immich;
+      machine-learning = {
+        enable = true;
+        package = pkgs.immich-machine-learning.override {
+          acceleration = "openvino";
+        };
+      };
+      accelerationDevices = [ "/dev/dri/renderD128" ];
     };
 
     environment.systemPackages = [
