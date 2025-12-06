@@ -100,6 +100,7 @@
         };
         tabris = {
           system = "x86_64-linux";
+          pkgsInput = inputs.nixpkgs-unstable;
           modules = [
             inputs.nixos-wsl.nixosModules.default
             ./machines/nixos/tabris/configuration.nix
