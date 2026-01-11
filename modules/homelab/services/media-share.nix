@@ -9,7 +9,6 @@ let
 
   shareUser = "share";
   shareGroup = "share";
-  shareUmask = "0002";
   shareUid = 995;
   shareGid = 995;
 
@@ -51,46 +50,11 @@ in
       default = [ ];
       description = "Regular users that should be added to the shared media group.";
     };
-
-    user = lib.mkOption {
-      type = lib.types.str;
-      default = shareUser;
-      readOnly = true;
-      description = "Username used by media services.";
-    };
-
-    group = lib.mkOption {
-      type = lib.types.str;
-      default = shareGroup;
-      readOnly = true;
-      description = "Primary group used by media services.";
-    };
-
-    uid = lib.mkOption {
-      type = lib.types.int;
-      default = shareUid;
-      readOnly = true;
-      description = "Numeric UID assigned to the shared media user.";
-    };
-
-    gid = lib.mkOption {
-      type = lib.types.int;
-      default = shareGid;
-      readOnly = true;
-      description = "Numeric GID assigned to the shared media group.";
-    };
-
-    umask = lib.mkOption {
-      type = lib.types.str;
-      default = shareUmask;
-      readOnly = true;
-      description = "Default umask applied to media services.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
     users.groups.${shareGroup} = {
-      gid = cfg.gid;
+      gid = shareGid;
     };
 
     users.users = lib.mkMerge [
@@ -101,7 +65,7 @@ in
           home = "/var/lib/share";
           createHome = true;
           description = "Shared service account for media automation";
-          uid = cfg.uid;
+          uid = shareUid;
           extraGroups = [
             "video"
             "render"

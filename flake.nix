@@ -20,13 +20,11 @@
   # Flake inputs: external dependencies and frameworks
   inputs = {
     # Core dependencies
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11?shallow=true";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-
     # NixOS deployment and infrastructure
     disko = {
       url = "github:nix-community/disko";
@@ -37,100 +35,110 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.disko.follows = "disko";
     };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # System configuration management
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Hardware and security
-    autoaspm = {
-      url = "github:notthebee/AutoASPM";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/quickshell/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs =
-    inputs@{
-      nixpkgs,
-      flake-parts,
-      ...
-    }:
-    let
-      lib = nixpkgs.lib;
+  outputs = inputs @ {
+    nixpkgs,
+    flake-parts,
+    ...
+  }: let
+    lib = nixpkgs.lib;
 
-      # Shared modules applied to all hosts
-      sharedModules = [
-        ./modules/system
-        ./modules/users
-        ./modules/profiles/dev.nix
-        ./machines/nixos
-        inputs.home-manager.nixosModules.home-manager
-        (import ./overlays inputs)
-      ];
+    # Shared modules applied to all hosts
+    sharedModules = [
+      ./machines/nixos
+      inputs.home-manager.nixosModules.home-manager
+      (import ./overlays inputs)
+    ];
 
-      mkSpecialArgs = {
-        inherit inputs;
+    mkSpecialArgs = {
+      inherit inputs;
+    };
+
+    # Host definitions with their specific modules and system architecture
+    hosts = {
+      adam = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.sops-nix.nixosModules.sops
+          inputs.vpn-confinement.nixosModules.default
+          ./modules/homelab
+          ./machines/nixos/adam/configuration.nix
+        ];
       };
-
-      # Host definitions with their specific modules and system architecture
-      hosts = {
-        adam = {
-          system = "x86_64-linux";
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.autoaspm.nixosModules.default
-            inputs.sops-nix.nixosModules.sops
-            inputs.vpn-confinement.nixosModules.default
-            ./modules/homelab
-            ./machines/nixos/adam/configuration.nix
-          ];
-        };
-        tabris = {
-          system = "x86_64-linux";
-          pkgsInput = inputs.nixpkgs-unstable;
-          modules = [
-            inputs.nixos-wsl.nixosModules.default
-            ./machines/nixos/tabris/configuration.nix
-          ];
-        };
+      tabris = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.nixos-wsl.nixosModules.default
+          ./machines/nixos/tabris/configuration.nix
+        ];
       };
+      lilith = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.lanzaboote.nixosModules.lanzaboote
+          ./machines/nixos/lilith/configuration.nix
+        ];
+      };
+    };
 
-      # Build NixOS configurations from host definitions
-      mkSystem = lib.mapAttrs (
-        _: host:
-        let
-          pkgsInput = host.pkgsInput or nixpkgs;
-        in
-        pkgsInput.lib.nixosSystem {
+    # Build NixOS configurations from host definitions
+    mkSystem = lib.mapAttrs (
+      _: host:
+        nixpkgs.lib.nixosSystem {
           inherit (host) system;
           specialArgs = mkSpecialArgs;
           modules = sharedModules ++ host.modules;
         }
-      );
-    in
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
+    );
+  in
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux"];
 
       _module.args = {
         inherit inputs lib;
       };
 
+      perSystem = {pkgs, ...}: {
+        formatter = pkgs.alejandra;
+      };
+
       flake = {
         overlays.default = import ./overlays inputs;
         nixosConfigurations = mkSystem hosts;
+
+        packages.x86_64-linux = let
+          overlay = import ./overlays/jellyseerr-develop.nix inputs;
+          pkgs = nixpkgs.legacyPackages.x86_64-linux.extend overlay;
+        in {
+          jellyseerr = pkgs.jellyseerr;
+        };
       };
     };
 }

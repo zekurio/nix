@@ -1,111 +1,38 @@
-{ lib
-, pkgs
-, ...
-}:
-let
-  inherit (lib) mkDefault;
-  wslUser = "zekurio";
-in
 {
-  wsl = {
-    enable = true;
-    defaultUser = wslUser;
-    startMenuLaunchers = true;
-    tarball.configPath = ../../..;
-  };
-
-  networking = {
-    hostName = "tabris";
-    useDHCP = mkDefault true;
-    firewall.enable = mkDefault false;
-  };
-
-  time.timeZone = mkDefault "Europe/Vienna";
-
-  security.sudo.wheelNeedsPassword = mkDefault false;
-
-  environment = {
-    variables =
-      let
-        gccLibPath = lib.makeLibraryPath [ pkgs.stdenv.cc.cc ];
-      in
-      {
-        LD_LIBRARY_PATH = "${gccLibPath}:/usr/lib/wsl/lib:$LD_LIBRARY_PATH";
-        SSH_AUTH_SOCK = "/mnt/wsl/ssh-agent.sock";
-      };
-    shellAliases = {
-      rebuild-tabris = "sudo nixos-rebuild switch --flake .#tabris";
-      tabris-tarball = "nix build .#nixosConfigurations.tabris.config.system.build.tarballBuilder";
-    };
-  };
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
-
-  programs.nix-ld.enable = true;
-
-  programs.ssh.startAgent = false;
-
-  profiles.dev.enable = mkDefault true;
-
-  services.openssh = {
-    enable = mkDefault true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
-
-  systemd.user.services.ssh-agent-proxy = {
-    description = "Windows SSH agent proxy";
-    path = [ pkgs.wslu pkgs.coreutils pkgs.bash pkgs.socat ];
-    serviceConfig = {
-      ExecStartPre = [
-        "${pkgs.coreutils}/bin/mkdir -p /mnt/wsl"
-        "${pkgs.coreutils}/bin/rm -f /mnt/wsl/ssh-agent.sock"
-      ];
-      ExecStart = "${pkgs.writeShellScript "ssh-agent-proxy" ''
-        set -euo pipefail
-        set -x
-
-        WIN_USER="$("${pkgs.wslu}/bin/wslvar" USERNAME 2>/dev/null || echo "$USER")"
-
-        NPIPE_PATHS=(
-          "/mnt/c/ProgramData/chocolatey/bin/npiperelay.exe"
-          "/mnt/c/Users/$WIN_USER/scoop/apps/npiperelay/current/npiperelay.exe"
-        )
-
-        NPIPE_PATH=""
-        for path in "''${NPIPE_PATHS[@]}"; do
-          echo "Checking npiperelay at: $path"
-          if [ -f "$path" ]; then
-            NPIPE_PATH="$path"
-            break
-          fi
-        done
-
-        if [ -z "$NPIPE_PATH" ]; then
-          echo "npiperelay.exe not found in expected locations!"
-          exit 1
-        fi
-
-        echo "Using npiperelay from: $NPIPE_PATH"
-
-        exec ${pkgs.socat}/bin/socat -d UNIX-LISTEN:/mnt/wsl/ssh-agent.sock,fork,mode=600 \
-          EXEC:"$NPIPE_PATH -ei -s //./pipe/openssh-ssh-agent",nofork
-      ''}";
-      Restart = "always";
-      RestartSec = 5;
-      Type = "simple";
-      RuntimeDirectory = "ssh-agent";
-      StandardOutput = "journal";
-      StandardError = "journal";
-    };
-    wantedBy = [ "default.target" ];
-  };
-  documentation.nixos.enable = mkDefault false;
+  lib,
+  pkgs,
+  ...
+}: {
+  imports = [
+    ../default.nix
+  ];
 
   system.stateVersion = "25.05";
+
+  # Disable channels for flake-only setup
+  nix.channel.enable = false;
+
+  wsl = {
+    enable = true;
+    defaultUser = "zekurio";
+  };
+
+  modules.virtualization.enable = true;
+
+  # WSL2 SSH agent bridge to Windows ssh-agent.exe
+  # Requires Windows OpenSSH agent service to be running
+  home-manager.users.zekurio = {
+    home.packages = [pkgs.wsl2-ssh-agent];
+
+    programs.zsh.initContent = lib.mkAfter ''
+      # Initialize wsl2-ssh-agent for Windows SSH agent forwarding
+      if [[ -z "$SSH_AUTH_SOCK" ]]; then
+        export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+        if ! ${pkgs.socat}/bin/socat -u OPEN:/dev/null UNIX-CONNECT:"$SSH_AUTH_SOCK" &>/dev/null; then
+          rm -f "$SSH_AUTH_SOCK"
+          (setsid ${pkgs.wsl2-ssh-agent}/bin/wsl2-ssh-agent -socket "$SSH_AUTH_SOCK" &>/dev/null &)
+        fi
+      fi
+    '';
+  };
 }

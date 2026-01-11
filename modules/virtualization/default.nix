@@ -1,12 +1,11 @@
-{ lib
-, config
-, pkgs
-, ...
-}:
-let
-  cfg = config.modules.virtualization;
-in
 {
+  lib,
+  config,
+  pkgs,
+  ...
+}: let
+  cfg = config.modules.virtualization;
+in {
   options.modules.virtualization = {
     enable = lib.mkEnableOption "Rootless Podman virtualization stack";
 

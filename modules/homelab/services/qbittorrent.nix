@@ -1,30 +1,17 @@
-{ config
-, lib
-, ...
-}:
-let
-  mediaShare = config.modules.homelab.mediaShare;
-  shareUser = mediaShare.user;
-  shareGroup = mediaShare.group;
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  shareUser = "share";
+  shareGroup = "share";
+  shareUmask = "0002";
+  domain = "qbit.schnitzelflix.xyz";
+  webuiPort = 8080;
+  torrentingPort = 6881;
+in {
   options.services.qbittorrent-wrapped = {
     enable = lib.mkEnableOption "qBittorrent with VPN confinement";
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "qbit.schnitzelflix.xyz";
-      description = "Domain name for qBittorrent";
-    };
-    webuiPort = lib.mkOption {
-      type = lib.types.port;
-      default = 8080;
-      description = "Port for qBittorrent WebUI to listen on";
-    };
-    torrentingPort = lib.mkOption {
-      type = lib.types.port;
-      default = 6881;
-      description = "Port for incoming torrent connections";
-    };
   };
 
   config = lib.mkIf config.services.qbittorrent-wrapped.enable {
@@ -32,8 +19,8 @@ in
       enable = true;
       user = shareUser;
       group = shareGroup;
-      webuiPort = config.services.qbittorrent-wrapped.webuiPort;
-      torrentingPort = config.services.qbittorrent-wrapped.torrentingPort;
+      webuiPort = webuiPort;
+      torrentingPort = torrentingPort;
       openFirewall = false; # Managed through VPN namespace
 
       # Note: serverConfig is intentionally not set to allow persistent
@@ -41,19 +28,21 @@ in
       # (including password) directly in the web interface.
       # Changes will be saved to /var/lib/qBittorrent/qBittorrent/config/
 
-      extraArgs = [ "--confirm-legal-notice" ];
+      extraArgs = ["--confirm-legal-notice"];
     };
 
     systemd.services.qbittorrent.serviceConfig = {
       User = shareUser;
       Group = shareGroup;
-      UMask = lib.mkForce mediaShare.umask;
+      UMask = lib.mkForce shareUmask;
     };
 
     # Caddy virtual host configuration
     services.caddy-wrapper.virtualHosts."qbittorrent" = {
-      domain = config.services.qbittorrent-wrapped.domain;
-      reverseProxy = "192.168.15.1:${toString config.services.qbittorrent-wrapped.webuiPort}";
+      domain = domain;
+      extraConfig = ''
+        reverse_proxy 192.168.15.1:${toString webuiPort}
+      '';
     };
   };
 }
