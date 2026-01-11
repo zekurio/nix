@@ -1,26 +1,17 @@
-{ config
-, lib
-, pkgs
-, ...
-}:
-let
-  mediaShare = config.modules.homelab.mediaShare;
-  shareUser = mediaShare.user;
-  shareGroup = mediaShare.group;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  shareUser = "share";
+  shareGroup = "share";
+  shareUmask = "0002";
+  domain = "arr.schnitzelflix.xyz";
+  port = 8989;
+in {
   options.services.sonarr-wrapped = {
     enable = lib.mkEnableOption "Sonarr TV show manager with Caddy integration";
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "arr.schnitzelflix.xyz";
-      description = "Domain name for Sonarr";
-    };
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8989;
-      description = "Port for Sonarr to listen on";
-    };
   };
 
   config = lib.mkIf config.services.sonarr-wrapped.enable {
@@ -28,21 +19,21 @@ in
       enable = true;
       user = shareUser;
       group = shareGroup;
-      package = pkgs.sonarr;
     };
+
     systemd.services.sonarr.serviceConfig = {
       User = shareUser;
       Group = shareGroup;
-      UMask = lib.mkForce mediaShare.umask;
+      UMask = lib.mkForce shareUmask;
     };
 
     # Caddy virtual host configuration with base URL
     services.caddy-wrapper.virtualHosts."sonarr" = {
-      domain = config.services.sonarr-wrapped.domain;
+      domain = domain;
       extraConfig = ''
         redir /sonarr /sonarr/
         @sonarr path /sonarr*
-        reverse_proxy @sonarr localhost:${toString config.services.sonarr-wrapped.port} {
+        reverse_proxy @sonarr localhost:${toString port} {
           header_up Host {http.request.host}
           header_up X-Forwarded-Prefix /sonarr
         }

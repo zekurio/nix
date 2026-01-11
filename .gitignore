@@ -11,3 +11,9 @@ result-*
 *.swp
 *.swo
 *~
+
+# examples
+examples/
+
+# trash-guides
+files/adam/trash-guides/

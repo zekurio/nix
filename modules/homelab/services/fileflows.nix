@@ -1,87 +1,55 @@
-{ config
-, lib
-, ...
-}:
-let
-  cfg = config.services.fileflows-wrapped;
-  mediaShare = config.modules.homelab.mediaShare;
-  shareUser = mediaShare.user;
-  shareGroup = mediaShare.group;
-  tempPath = "/tmp/fileflows";
-  shareUid = mediaShare.uid;
-  shareGid = mediaShare.gid;
-  envBase =
-    {
-      TempPathHost = tempPath;
-      UMASK = "0002";
-      PUID = builtins.toString shareUid;
-      PGID = builtins.toString shareGid;
-    };
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  shareUser = "share";
+  shareGroup = "share";
+  shareUid = 995;
+  shareGid = 995;
+  port = 5000;
+  domain = "ff.schnitzelflix.xyz";
+in {
   options.services.fileflows-wrapped = {
-    enable =
-      lib.mkEnableOption "FileFlows media automation service wrapped with Podman and Caddy integration";
-
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "ff.schnitzelflix.xyz";
-      description = "Domain name for FileFlows";
-    };
-
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 5000;
-      description = "Host port for the FileFlows web UI";
-    };
-
-    image = lib.mkOption {
-      type = lib.types.str;
-      default = "revenz/fileflows:latest";
-      description = "Container image to run for FileFlows";
-    };
-
-    basicAuthUsers = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
-      default = {
-        admin = "$2a$14$c2HVFsuYsy1wGyGZFde9QOAN9SdcX6d5j9iBfL0MFU5FVcoB0.1sK";
-      };
-      description = "Map of usernames to bcrypt hashed passwords for securing the FileFlows UI.";
-    };
+    enable = lib.mkEnableOption "FileFlows media processing with Caddy integration";
   };
 
-  config = lib.mkIf cfg.enable {
-    systemd.tmpfiles.rules = [
-      "d ${tempPath} 2775 ${shareUser} ${shareGroup} -"
-    ];
-
+  config = lib.mkIf config.services.fileflows-wrapped.enable {
     virtualisation.oci-containers.containers.fileflows = {
-      image = cfg.image;
-      autoStart = true;
-      ports = [ "${toString cfg.port}:5000" ];
-      environment = envBase;
+      image = "revenz/fileflows";
+      ports = ["${toString port}:5000"];
+      environment = {
+        TempPathHost = "/tmp/fileflows";
+        TZ = "Europe/Vienna";
+        PUID = toString shareUid;
+        PGID = toString shareGid;
+      };
       volumes = [
-        "fileflows-data:/app/Data"
-        "fileflows-logs:/app/Logs"
-        "${tempPath}:/temp"
+        "/tmp/fileflows:/temp"
+        "fileflows_data:/app/Data"
+        "fileflows_logs:/app/Logs"
         "/mnt/downloads:/mnt/downloads"
-        "/tank/jellyfin:/tank/jellyfin"
-        "/run/podman/podman.sock:/var/run/docker.sock:ro"
+        "/tank/jellyfin:/media"
       ];
       extraOptions = [
         "--device=/dev/dri:/dev/dri"
       ];
     };
 
+    # Create required directories with proper permissions
+    systemd.tmpfiles.rules = [
+      "d /tmp/fileflows 2775 ${shareUser} ${shareGroup} -"
+    ];
+
+    # Caddy virtual host configuration with basic auth
     services.caddy-wrapper.virtualHosts."fileflows" = {
-      domain = cfg.domain;
-      extraConfig =
-        lib.optionalString (cfg.basicAuthUsers != { }) ''
-          basicauth {
-            ${lib.concatStringsSep "\n    " (lib.mapAttrsToList (user: hash: "${user} ${hash}") cfg.basicAuthUsers)}
-          }
-        '';
-      reverseProxy = "localhost:${toString cfg.port}";
+      inherit domain;
+      extraConfig = ''
+        basic_auth {
+          admin $2a$14$kp5H05ecqpOPcZViuQcAVuz4NrwbDk.f4uayB4ikcTD3BBNAKXDtu
+        }
+        reverse_proxy localhost:${toString port}
+      '';
     };
   };
 }
