@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./autobrr.nix
     ./caddy.nix

@@ -9,9 +9,6 @@
 
   system.stateVersion = "25.05";
 
-  # Disable channels for flake-only setup
-  nix.channel.enable = false;
-
   wsl = {
     enable = true;
     defaultUser = "zekurio";
