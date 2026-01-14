@@ -2,6 +2,7 @@
   inherit (lib) mkDefault;
 in {
   imports = [
+    ../../modules/home-manager
     ../../modules/users
     ../../modules/virtualization
   ];

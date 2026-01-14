@@ -3,8 +3,7 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.modules.homelab.mediaShare;
 
   shareUser = "share";
@@ -40,14 +39,13 @@ let
   managedPaths = mediaDirs ++ stateDirs;
 
   directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") (mediaDirs ++ stateDirs);
-in
-{
+in {
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
 
     collaborators = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ ];
+      default = [];
       description = "Regular users that should be added to the shared media group.";
     };
   };
@@ -73,7 +71,7 @@ in
         };
       }
       (lib.genAttrs cfg.collaborators (_: {
-        extraGroups = lib.mkAfter [ shareGroup ];
+        extraGroups = lib.mkAfter [shareGroup];
       }))
     ];
 
@@ -81,8 +79,8 @@ in
 
     systemd.services.media-share-prepare = {
       description = "Ensure media directories exist for shared services";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "local-fs.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["local-fs.target"];
       serviceConfig.Type = "oneshot";
       script = ''
         for dir in ${lib.concatStringsSep " " managedPaths}; do
