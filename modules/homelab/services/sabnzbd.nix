@@ -7,7 +7,7 @@
   shareGroup = "share";
   shareUmask = "0002";
   domain = "sab.schnitzelflix.xyz";
-  port = 8080;
+  port = 8081;
 in {
   options.services.sabnzbd-wrapped = {
     enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";
@@ -18,11 +18,14 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
+      settings.misc = {
+        port = port;
+        host = "127.0.0.1";
+        host_whitelist = domain;
+      };
     };
 
     systemd.services.sabnzbd.serviceConfig = {
-      User = shareUser;
-      Group = shareGroup;
       UMask = lib.mkForce shareUmask;
     };
 
