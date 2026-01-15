@@ -5,13 +5,16 @@
   modulesPath,
   lib,
   ...
-}: let
+}:
+let
   mainUser = "zekurio";
-in {
+in
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
     ../default.nix
+    inputs.dms.nixosModules.greeter
   ];
 
   # System Configuration
@@ -26,11 +29,11 @@ in {
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
+    extraModulePackages = [ config.boot.kernelPackages.zenpower ];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
-    blacklistedKernelModules = ["k10temp"];
+    blacklistedKernelModules = [ "k10temp" ];
     loader = {
       timeout = 3;
       efi.canTouchEfiVariables = true;
@@ -67,6 +70,7 @@ in {
     # AMD GPU
     graphics = {
       enable = true;
+      enable32Bit = true;
       extraPackages = with pkgs; [
         rocmPackages.clr.icd
       ];
@@ -85,7 +89,7 @@ in {
     networkmanager.enable = true;
     firewall = {
       enable = true;
-      allowedTCPPorts = [22];
+      allowedTCPPorts = [ 22 ];
     };
   };
 
@@ -163,11 +167,6 @@ in {
 
     # Desktop
     gnome.gnome-keyring.enable = true;
-    displayManager.dms-greeter = {
-      enable = true;
-      compositor.name = "niri";
-      configHome = "/home/${mainUser}";
-    };
 
     # Audio
     pipewire = {
@@ -198,24 +197,16 @@ in {
   programs = {
     # Desktop
     niri.enable = true;
-    dms-shell = {
+    dank-material-shell.greeter = {
       enable = true;
-      quickshell.package = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
-      systemd = {
-        enable = true;
-        restartIfChanged = true;
-      };
-      enableSystemMonitoring = true;
-      enableClipboard = true;
-      enableDynamicTheming = true;
-      enableAudioWavelength = true;
-      enableVPN = true;
+      compositor.name = "niri";
+      configHome = "/home/${mainUser}";
     };
 
     _1password.enable = true;
     _1password-gui = {
       enable = true;
-      polkitPolicyOwners = ["zekurio"];
+      polkitPolicyOwners = [ "zekurio" ];
     };
 
     coolercontrol.enable = true;
@@ -266,7 +257,6 @@ in {
     # Desktop
     _1password-cli
     _1password-gui
-    brave
     celluloid
     deezer-enhanced
     ghostty
@@ -290,6 +280,15 @@ in {
     rose-pine-cursor
   ];
 
+  environment.etc = {
+    "1password/custom_allowed_browsers" = {
+      text = ''
+        zen
+      '';
+      mode = "0755";
+    };
+  };
+
   fonts.packages = with pkgs; [
     inter
     fira-code
@@ -311,7 +310,7 @@ in {
   systemd.user.services = {
     udiskie = {
       description = "udiskie automounter for removable drives";
-      wantedBy = ["default.target"];
+      wantedBy = [ "default.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.udiskie}/bin/udiskie -a -n -s";
         Restart = "on-failure";
@@ -322,7 +321,7 @@ in {
   # XDG
   xdg.portal = {
     enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   system.stateVersion = "25.11"; # DO NOT CHANGE
