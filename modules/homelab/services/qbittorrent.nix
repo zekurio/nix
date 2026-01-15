@@ -21,7 +21,6 @@ in {
       group = shareGroup;
       webuiPort = webuiPort;
       torrentingPort = torrentingPort;
-      openFirewall = false; # Managed through VPN namespace
 
       # Note: serverConfig is intentionally not set to allow persistent
       # configuration through the WebUI. Configure qBittorrent settings
