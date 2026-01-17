@@ -5,7 +5,6 @@
 }: let
   shareUser = "share";
   shareGroup = "share";
-  shareUmask = "0002";
   domain = "sab.schnitzelflix.xyz";
   port = 8081;
 in {
@@ -18,16 +17,23 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
+      allowConfigWrite = true;
       settings.misc = {
         port = port;
         host = "127.0.0.1";
         host_whitelist = domain;
+        # Permissions for completed downloads
+        permissions = "775";
+        # Download directories
+        download_dir = "/mnt/downloads/incomplete";
+        complete_dir = "/mnt/downloads/complete";
       };
     };
 
-    systemd.services.sabnzbd.serviceConfig = {
-      UMask = lib.mkForce shareUmask;
-      StateDirectoryMode = lib.mkForce "2775";
+    # Ensure media-share directories and user exist before sabnzbd starts
+    systemd.services.sabnzbd = {
+      after = ["media-share-prepare.service"];
+      requires = ["media-share-prepare.service"];
     };
 
     services.caddy-wrapper.virtualHosts."sabnzbd" = {
