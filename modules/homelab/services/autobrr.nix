@@ -16,7 +16,7 @@ in {
   config = lib.mkIf config.services.autobrr-wrapped.enable {
     services.autobrr = {
       enable = true;
-      secretFile = config.sops.secrets.autobrr_env.path;
+      secretFile = config.sops.secrets.autobrr_session_secret.path;
       settings = {
         host = "0.0.0.0";
         port = port;
@@ -32,11 +32,22 @@ in {
       };
     };
 
-    # SOPS secret for autobrr environment (session secret + OIDC credentials)
-    sops.secrets.autobrr_env = {
-      owner = shareUser;
-      group = shareGroup;
-      mode = "0400";
+    # Load environment file with OIDC credentials
+    systemd.services.autobrr.serviceConfig.EnvironmentFile = config.sops.secrets.autobrr_oidc.path;
+
+    sops.secrets = {
+      # Session secret (just the raw secret value)
+      autobrr_session_secret = {
+        owner = shareUser;
+        group = shareGroup;
+        mode = "0400";
+      };
+      # OIDC credentials as environment variables
+      autobrr_oidc = {
+        owner = shareUser;
+        group = shareGroup;
+        mode = "0400";
+      };
     };
 
     services.caddy-wrapper.virtualHosts."autobrr" = {
