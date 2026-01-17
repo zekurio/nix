@@ -25,8 +25,13 @@ in {
       };
     };
 
+    systemd.tmpfiles.rules = [
+      "d /var/lib/sabnzbd 2775 ${shareUser} ${shareGroup} -"
+    ];
+
     systemd.services.sabnzbd.serviceConfig = {
       UMask = lib.mkForce shareUmask;
+      ReadWritePaths = ["/var/lib/sabnzbd"];
     };
 
     services.caddy-wrapper.virtualHosts."sabnzbd" = {
