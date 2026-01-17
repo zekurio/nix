@@ -248,36 +248,9 @@ in
     # System
     ryzen-monitor-ng
     lm_sensors
-    xwayland-satellite
     cifs-utils
-    udiskie
     wl-clip-persist
     sbctl
-
-    # Desktop
-    _1password-cli
-    _1password-gui
-    celluloid
-    deezer-enhanced
-    ghostty
-    heroic
-    jellyfin-desktop
-    loupe
-    nautilus
-    papers
-    protonplus
-    vesktop
-    zed-editor
-
-    # Gaming
-    mangohud
-
-    # Theming
-    adw-gtk3
-    papirus-icon-theme
-    kdePackages.breeze
-    qt6Packages.qt6ct
-    rose-pine-cursor
   ];
 
   environment.etc = {
