@@ -3,10 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   domain = "requests.schnitzelflix.xyz";
   port = 5055;
-in {
+in
+{
   options.services.jellyseerr-wrapped = {
     enable = lib.mkEnableOption "Jellyseerr media request manager with Caddy integration";
   };
@@ -22,7 +24,7 @@ in {
     # Caddy virtual host configuration
     services.caddy-wrapper.virtualHosts."jellyseerr" = {
       domain = domain;
-      reverseProxy = "localhost:${toString port}";
+      reverseProxy = "127.0.0.1:${toString port}";
     };
   };
 }

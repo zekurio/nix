@@ -2,13 +2,15 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   shareUser = "share";
   shareGroup = "share";
   shareUmask = "0002";
   domain = "arr.schnitzelflix.xyz";
   port = 8989;
-in {
+in
+{
   options.services.sonarr-wrapped = {
     enable = lib.mkEnableOption "Sonarr TV show manager with Caddy integration";
   };
@@ -35,7 +37,7 @@ in {
       extraConfig = ''
         redir /sonarr /sonarr/
         @sonarr path /sonarr*
-        reverse_proxy @sonarr localhost:${toString port} {
+        reverse_proxy @sonarr 127.0.0.1:${toString port} {
           header_up Host {http.request.host}
           header_up X-Forwarded-Prefix /sonarr
         }

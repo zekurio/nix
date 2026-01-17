@@ -2,14 +2,16 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   shareUser = "share";
   shareGroup = "share";
   shareUid = 995;
   shareGid = 995;
   port = 5000;
   domain = "ff.schnitzelflix.xyz";
-in {
+in
+{
   options.services.fileflows-wrapped = {
     enable = lib.mkEnableOption "FileFlows media processing with Caddy integration";
   };
@@ -17,7 +19,7 @@ in {
   config = lib.mkIf config.services.fileflows-wrapped.enable {
     virtualisation.oci-containers.containers.fileflows = {
       image = "revenz/fileflows";
-      ports = ["${toString port}:5000"];
+      ports = [ "${toString port}:5000" ];
       environment = {
         TempPathHost = "/tmp/fileflows";
         TZ = "Europe/Vienna";
@@ -48,7 +50,7 @@ in {
         basic_auth {
           admin $2a$14$kp5H05ecqpOPcZViuQcAVuz4NrwbDk.f4uayB4ikcTD3BBNAKXDtu
         }
-        reverse_proxy localhost:${toString port}
+        reverse_proxy 127.0.0.1:${toString port}
       '';
     };
   };
