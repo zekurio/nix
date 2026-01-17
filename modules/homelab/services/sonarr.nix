@@ -18,6 +18,9 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
+      settings = {
+        server.urlBase = "/sonarr";
+      };
     };
 
     systemd.services.sonarr.serviceConfig = {

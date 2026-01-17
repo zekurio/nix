@@ -6,6 +6,7 @@
   shareUser = "share";
   shareGroup = "share";
   domain = "arr.schnitzelflix.xyz";
+  oidcIssuer = "https://auth.zekurio.xyz";
   port = 7474;
 in {
   options.services.autobrr-wrapped = {
@@ -15,7 +16,7 @@ in {
   config = lib.mkIf config.services.autobrr-wrapped.enable {
     services.autobrr = {
       enable = true;
-      secretFile = config.sops.secrets.autobrr_secret.path;
+      secretFile = config.sops.secrets.autobrr_env.path;
       settings = {
         host = "0.0.0.0";
         port = port;
@@ -23,11 +24,16 @@ in {
         baseUrlModeLegacy = false;
         logLevel = "INFO";
         checkForUpdates = true;
+        # OIDC configuration with Pocket ID
+        oidcEnabled = true;
+        oidcIssuer = oidcIssuer;
+        oidcRedirectUrl = "https://${domain}/autobrr/api/auth/oidc/callback";
+        oidcDisableBuiltInLogin = true;
       };
     };
 
-    # SOPS secret for autobrr session secret
-    sops.secrets.autobrr_secret = {
+    # SOPS secret for autobrr environment (session secret + OIDC credentials)
+    sops.secrets.autobrr_env = {
       owner = shareUser;
       group = shareGroup;
       mode = "0400";
