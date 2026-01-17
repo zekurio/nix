@@ -19,6 +19,9 @@ in {
       enable = true;
       user = shareUser;
       group = shareGroup;
+      settings = {
+        server.urlBase = "/radarr";
+      };
     };
 
     # Set umask for shared library access

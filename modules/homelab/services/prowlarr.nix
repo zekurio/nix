@@ -20,6 +20,9 @@ in {
 
     services.prowlarr = {
       enable = true;
+      settings = {
+        server.urlBase = "/prowlarr";
+      };
     };
 
     # Caddy virtual host configuration with base URL
