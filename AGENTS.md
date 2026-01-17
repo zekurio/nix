@@ -238,7 +238,7 @@ nix fmt
 ```nix
 services.caddy-wrapper.virtualHosts."servicename" = {
   domain = "service.${domain}";
-  reverseProxy = "localhost:${toString port}";
+  reverseProxy = "127.0.0.1:${toString port}";
   extraConfig = ''
     # Optional Caddy directives
   '';

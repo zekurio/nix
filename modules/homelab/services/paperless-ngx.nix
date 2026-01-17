@@ -3,10 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   domain = "docs.zekurio.xyz";
   port = 8010;
-in {
+in
+{
   options.services.paperless-ngx-wrapped = {
     enable = lib.mkEnableOption "Paperless-ngx document management system with Caddy integration";
   };
@@ -39,14 +41,14 @@ in {
 
     services.caddy-wrapper.virtualHosts."paperless-ngx" = {
       domain = domain;
-      reverseProxy = "localhost:${toString port}";
+      reverseProxy = "127.0.0.1:${toString port}";
       extraConfig = ''
         @blocked path /admin/*
         respond @blocked "Forbidden" 403
       '';
     };
 
-    users.users.paperless.extraGroups = ["share"];
+    users.users.paperless.extraGroups = [ "share" ];
 
     sops.secrets.paperless_env = {
       owner = "paperless";

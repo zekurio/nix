@@ -2,10 +2,12 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   domain = "auth.zekurio.xyz";
   port = 1411;
-in {
+in
+{
   options.services.pocket-id-wrapped = {
     enable = lib.mkEnableOption "Pocket ID authentication server with Caddy integration";
   };
@@ -30,7 +32,7 @@ in {
 
     services.caddy-wrapper.virtualHosts."pocket-id" = {
       domain = domain;
-      reverseProxy = "localhost:${toString port}";
+      reverseProxy = "127.0.0.1:${toString port}";
     };
   };
 }

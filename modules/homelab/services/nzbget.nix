@@ -19,17 +19,11 @@ in
       enable = true;
       user = shareUser;
       group = shareGroup;
-      # settings = {
-      #   MainDir = "/mnt/downloads";
-      #   DestDir = "/mnt/downloads/complete";
-      #   InterDir = "/mnt/downloads/incomplete";
-      #   UMask = "0002";
-      # };
     };
 
     services.caddy-wrapper.virtualHosts."nzbget" = {
       inherit domain;
-      reverseProxy = "localhost:${toString port}";
+      reverseProxy = "127.0.0.1:${toString port}";
     };
   };
 }

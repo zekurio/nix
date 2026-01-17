@@ -3,10 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   domain = "arr.schnitzelflix.xyz";
   port = 9696;
-in {
+in
+{
   options.services.prowlarr-wrapped = {
     enable = lib.mkEnableOption "Prowlarr indexer manager with Caddy integration";
   };
@@ -16,7 +18,7 @@ in {
       isSystemUser = true;
       group = "prowlarr";
     };
-    users.groups.prowlarr = {};
+    users.groups.prowlarr = { };
 
     services.prowlarr = {
       enable = true;
@@ -31,7 +33,7 @@ in {
       extraConfig = ''
         redir /prowlarr /prowlarr/
         @prowlarr path /prowlarr*
-        reverse_proxy @prowlarr localhost:${toString port} {
+        reverse_proxy @prowlarr 127.0.0.1:${toString port} {
           header_up Host {http.request.host}
           header_up X-Forwarded-Prefix /prowlarr
         }

@@ -3,13 +3,15 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   shareUser = "share";
   shareGroup = "share";
   shareUmask = "0002";
   domain = "schnitzelflix.xyz";
   port = 8096;
-in {
+in
+{
   options.services.jellyfin-wrapped = {
     enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
   };
@@ -46,9 +48,8 @@ in {
 
     services.caddy-wrapper.virtualHosts."jellyfin" = {
       domain = domain;
-      reverseProxy = "localhost:${toString port}";
-      extraConfig = ''
-      '';
+      reverseProxy = "127.0.0.1:${toString port}";
+      extraConfig = "";
     };
   };
 }
