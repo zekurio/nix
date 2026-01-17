@@ -27,9 +27,7 @@ in {
 
     services.caddy-wrapper.virtualHosts."nzbget" = {
       inherit domain;
-      extraConfig = ''
-        reverse_proxy localhost:${toString port}
-      '';
+      reverseProxy = "localhost:${toString port}";
     };
   };
 }
