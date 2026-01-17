@@ -32,7 +32,6 @@
     "/var/lib/jellyfin"
     "/var/lib/qBittorrent"
     "/var/lib/radarr"
-    "/var/lib/sabnzbd"
     "/var/lib/sonarr"
   ];
 
