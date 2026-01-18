@@ -106,14 +106,6 @@
           ./machines/nixos/tabris/configuration.nix
         ];
       };
-      lilith = {
-        system = "x86_64-linux";
-        modules = [
-          inputs.disko.nixosModules.disko
-          inputs.lanzaboote.nixosModules.lanzaboote
-          ./machines/nixos/lilith/configuration.nix
-        ];
-      };
     };
 
     # Build NixOS configurations from host definitions
