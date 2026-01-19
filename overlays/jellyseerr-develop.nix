@@ -10,7 +10,7 @@ in {
       owner = "seerr-team";
       repo = "seerr";
       rev = "develop";
-      hash = "sha256-qdYWfNZVl+sefvj9fpsG61RGoCc35Tlk2s5W+xiDlgc=";
+      hash = "sha256-J2CpJj1q//lzQ8nE8VbFfIYe94VZLUPXN/kuKIf3FPg=";
     };
 
     pnpmDeps = prev.fetchPnpmDeps {
