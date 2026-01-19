@@ -17,7 +17,6 @@ in {
   config = lib.mkIf config.services.fileflows-wrapped.enable {
     virtualisation.oci-containers.containers.fileflows = {
       image = "revenz/fileflows";
-      ports = ["${toString port}:5000"];
       environment = {
         TempPathHost = "/tmp/fileflows";
         TZ = "Europe/Vienna";
@@ -32,6 +31,7 @@ in {
         "/tank/jellyfin:/media"
       ];
       extraOptions = [
+        "--network=host"
         "--device=/dev/dri:/dev/dri"
       ];
     };

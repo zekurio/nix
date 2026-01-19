@@ -67,7 +67,6 @@ in {
 
     virtualisation.oci-containers.containers.jellysweep = {
       image = "ghcr.io/jon4hz/jellysweep:latest";
-      ports = ["${toString port}:3002"];
       environment = {
         JELLYSWEEP_LISTEN = "0.0.0.0:3002";
         JELLYSWEEP_AUTH_JELLYFIN_ENABLED = "true";
@@ -78,6 +77,7 @@ in {
         "/etc/jellysweep/config.yml:/app/config.yml:ro"
         "/tank/jellyfin:/tank/jellyfin:ro"
       ];
+      extraOptions = ["--network=host"];
     };
 
     sops.secrets.jellysweep_env = {};
