@@ -13,6 +13,7 @@ in {
   config = lib.mkIf config.services.streamystats-wrapped.enable {
     virtualisation.oci-containers.containers.streamystats = {
       image = "docker.io/fredrikburmester/streamystats-v2-aio:latest";
+      ports = ["${toString port}:3000"];
       environment = {
         POSTGRES_USER = "postgres";
         POSTGRES_PASSWORD = "postgres";
@@ -22,7 +23,6 @@ in {
       };
       environmentFiles = [config.sops.secrets.streamystats_env.path];
       volumes = ["streamystats_data:/var/lib/postgresql/data"];
-      extraOptions = ["--network=host"];
     };
 
     sops.secrets.streamystats_env = {};
