@@ -18,16 +18,9 @@ in {
         JELLYSWEEP_LISTEN = "0.0.0.0:3002";
         JELLYSWEEP_DRY_RUN = "true";
         JELLYSWEEP_AUTH_JELLYFIN_ENABLED = "true";
-        JELLYSWEEP_STREAMYSTATS_URL = "http://streamystats:3000";
       };
       environmentFiles = [config.sops.secrets.jellysweep_env.path];
       volumes = ["jellysweep_data:/app/data"];
-      extraOptions = ["--network=homelab"];
-    };
-
-    systemd.services.podman-jellysweep = {
-      requires = ["podman-network-homelab.service"];
-      after = ["podman-network-homelab.service"];
     };
 
     sops.secrets.jellysweep_env = {};

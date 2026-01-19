@@ -23,12 +23,6 @@ in {
       };
       environmentFiles = [config.sops.secrets.streamystats_env.path];
       volumes = ["streamystats_data:/var/lib/postgresql/data"];
-      extraOptions = ["--network=homelab"];
-    };
-
-    systemd.services.podman-streamystats = {
-      requires = ["podman-network-homelab.service"];
-      after = ["podman-network-homelab.service"];
     };
 
     sops.secrets.streamystats_env = {};
