@@ -3,12 +3,10 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   domain = "arr.schnitzelflix.xyz";
   port = 9696;
-in
-{
+in {
   options.services.prowlarr-wrapped = {
     enable = lib.mkEnableOption "Prowlarr indexer manager with Caddy integration";
   };
@@ -18,7 +16,7 @@ in
       isSystemUser = true;
       group = "prowlarr";
     };
-    users.groups.prowlarr = { };
+    users.groups.prowlarr = {};
 
     services.prowlarr = {
       enable = true;

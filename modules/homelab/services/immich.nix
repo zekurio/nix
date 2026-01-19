@@ -3,12 +3,10 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   domain = "photos.zekurio.xyz";
   port = 2283;
-in
-{
+in {
   options.services.immich-wrapped = {
     enable = lib.mkEnableOption "Immich photo management with Caddy integration";
   };
@@ -21,7 +19,7 @@ in
       openFirewall = true;
       mediaLocation = "/tank/immich";
       machine-learning.enable = true;
-      accelerationDevices = [ "/dev/dri/renderD128" ];
+      accelerationDevices = ["/dev/dri/renderD128"];
       environment = {
         MACHINE_LEARNING_WORKERS = "1";
       };

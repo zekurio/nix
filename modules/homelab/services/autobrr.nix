@@ -2,15 +2,13 @@
   config,
   lib,
   ...
-}:
-let
+}: let
   shareUser = "share";
   shareGroup = "share";
   domain = "arr.schnitzelflix.xyz";
   oidcIssuer = "https://auth.zekurio.xyz";
   port = 7474;
-in
-{
+in {
   options.services.autobrr-wrapped = {
     enable = lib.mkEnableOption "autobrr torrent automation tool with Caddy integration";
   };

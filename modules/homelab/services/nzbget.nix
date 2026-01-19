@@ -2,14 +2,12 @@
   config,
   lib,
   ...
-}:
-let
+}: let
   shareUser = "share";
   shareGroup = "share";
   domain = "nzb.schnitzelflix.xyz";
   port = 6789;
-in
-{
+in {
   options.services.nzbget-wrapped = {
     enable = lib.mkEnableOption "NZBGet Usenet downloader with Caddy integration";
   };

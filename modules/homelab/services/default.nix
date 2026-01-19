@@ -6,6 +6,7 @@
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
+    ./jellysweep.nix
     ./media-share.nix
     ./nzbget.nix
     ./paperless-ngx.nix
@@ -14,5 +15,6 @@
     ./qbittorrent.nix
     ./radarr.nix
     ./sonarr.nix
+    ./streamystats.nix
   ];
 }

@@ -12,10 +12,12 @@ final: prev: let
     pname = "${pname}-node_modules";
     inherit version src;
 
-    impureEnvVars = prev.lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
-    ];
+    impureEnvVars =
+      prev.lib.fetchers.proxyImpureEnvVars
+      ++ [
+        "GIT_PROXY_COMMAND"
+        "SOCKS_SERVER"
+      ];
 
     nativeBuildInputs = [
       prev.bun
@@ -160,11 +162,11 @@ in {
         --add-flags "run" \
         --add-flags "$out/lib/opencode/dist/src/index.js" \
         --prefix PATH : ${
-          prev.lib.makeBinPath [
-            prev.fzf
-            prev.ripgrep
-          ]
-        } \
+        prev.lib.makeBinPath [
+          prev.fzf
+          prev.ripgrep
+        ]
+      } \
         --argv0 opencode
 
       runHook postInstall
@@ -186,7 +188,8 @@ in {
         fi
       done
 
-      ${prev.lib.optionalString
+      ${
+        prev.lib.optionalString
         (
           (prev.stdenvNoCC.buildPlatform.canExecute prev.stdenvNoCC.hostPlatform)
           && (prev.stdenvNoCC.hostPlatform.system != "x86_64-darwin")
