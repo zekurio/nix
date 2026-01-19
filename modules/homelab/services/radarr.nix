@@ -3,15 +3,13 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   shareUser = "share";
   shareGroup = "share";
   shareUmask = "0002";
   domain = "arr.schnitzelflix.xyz";
   port = 7878;
-in
-{
+in {
   options.services.radarr-wrapped = {
     enable = lib.mkEnableOption "Radarr movie manager with Caddy integration";
   };
