@@ -25,6 +25,11 @@ in {
       extraOptions = ["--network=homelab"];
     };
 
+    systemd.services.podman-jellysweep = {
+      requires = ["podman-network-homelab.service"];
+      after = ["podman-network-homelab.service"];
+    };
+
     sops.secrets.jellysweep_env = {};
 
     services.caddy-wrapper.virtualHosts."jellysweep" = {
