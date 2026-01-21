@@ -81,7 +81,7 @@ in {
 - **Option names**: Use kebab-case (`enable`, `openFirewall`)
 - **Variable names**: Use camelCase (`shareUser`, `networkIP`)
 - **Module names**: Use kebab-case with descriptive names (`jellyfin.nix`, `qbittorrent.nix`)
-- **Host names**: Use lowercase, memorable names (`adam`, `lilith`, `tabris`)
+- **Host names**: Use lowercase, memorable names (`adam`)
 - **Wrapped services**: Use `-wrapped` suffix (`jellyfin-wrapped`, `caddy-wrapper`)
 
 ### Attribute Sets
@@ -197,8 +197,6 @@ system.stateVersion = "25.05";
 │   └── nixos/
 │       ├── default.nix    # Shared machine modules
 │       ├── adam/          # Homelab server config
-│       ├── lilith/        # Desktop/workstation config
-│       └── tabris/        # WSL config
 ├── modules/
 │   ├── homelab/           # Homelab services
 │   │   ├── default.nix

@@ -7,7 +7,6 @@ NixOS configurations for my homelab
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server |
-| `lilith` | Gaming Desktop & Workstation |
 
 ## Installation runbook (NixOS)
 
