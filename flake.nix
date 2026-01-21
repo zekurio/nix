@@ -99,13 +99,6 @@
           ./machines/nixos/adam/configuration.nix
         ];
       };
-      tabris = {
-        system = "x86_64-linux";
-        modules = [
-          inputs.nixos-wsl.nixosModules.default
-          ./machines/nixos/tabris/configuration.nix
-        ];
-      };
     };
 
     # Build NixOS configurations from host definitions
