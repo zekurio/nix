@@ -13,7 +13,7 @@ in {
   config = lib.mkIf config.services.jellysweep-wrapped.enable {
     # Config file for jellysweep (library config cannot be set via env vars)
     environment.etc."jellysweep/config.yml".text = ''
-      dry_run: true
+      dry_run: false
       libraries:
         "Filme":
           enabled: true
