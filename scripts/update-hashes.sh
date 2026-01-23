@@ -5,7 +5,6 @@
 #   ./scripts/update-hashes.sh [component]
 #
 # Components:
-#   opencode     - Update opencode overlay (fetches GitHub + attempts build for FOD hash)
 #   jellyseerr   - Update jellyseerr overlay (fetches GitHub develop branch)
 #   caddy        - Update caddy plugin hash (attempts build)
 #   all          - Update all components (default)
@@ -76,90 +75,6 @@ get_current_hash() {
     local file="$1"
     local pattern="$2"
     grep -oP "$pattern" "$file" | head -1
-}
-
-# Update opencode overlay
-update_opencode() {
-    log_info "Updating opencode..."
-    local file="$REPO_ROOT/overlays/opencode.nix"
-    
-    if [[ ! -f "$file" ]]; then
-        log_error "opencode.nix not found at $file"
-        return 1
-    fi
-    
-    # Get current version
-    local current_version
-    current_version=$(grep -oP 'version = "\K[^"]+' "$file" | head -1)
-    log_info "Current opencode version: $current_version"
-    
-    # Check for latest release
-    log_info "Fetching latest opencode release..."
-    local latest_version
-    latest_version=$(curl -s "https://api.github.com/repos/anomalyco/opencode/releases/latest" | grep -oP '"tag_name":\s*"v\K[^"]+' | head -1)
-    
-    if [[ -z "$latest_version" ]]; then
-        log_warn "Could not fetch latest version, using current: $current_version"
-        latest_version="$current_version"
-    else
-        log_info "Latest opencode version: $latest_version"
-    fi
-    
-    # Update version in file
-    if [[ "$current_version" != "$latest_version" ]]; then
-        sed -i "s|version = \"$current_version\"|version = \"$latest_version\"|g" "$file"
-        log_success "Updated version: $current_version -> $latest_version"
-    fi
-    
-    # Prefetch GitHub source
-    log_info "Prefetching opencode source..."
-    local prefetch_output
-    prefetch_output=$(nix run nixpkgs#nix-prefetch-github -- anomalyco opencode --rev "v$latest_version" 2>&1) || true
-    
-    local new_src_hash
-    new_src_hash=$(extract_github_hash "$prefetch_output")
-    
-    if [[ -n "$new_src_hash" ]]; then
-        local current_src_hash
-        current_src_hash=$(grep -A5 'src = prev.fetchFromGitHub' "$file" | grep -oP 'hash = "\Ksha256-[A-Za-z0-9+/=]+' | head -1)
-        if [[ -n "$current_src_hash" ]]; then
-            replace_hash "$file" "$current_src_hash" "$new_src_hash"
-        fi
-    else
-        log_warn "Could not extract source hash from prefetch output"
-    fi
-    
-    # Attempt build to get node_modules FOD hash
-    log_info "Attempting build to discover node_modules hash..."
-    log_info "(This may take a while and will likely fail - that's expected)"
-    
-    local build_output
-    build_output=$(nix build "$REPO_ROOT#nixosConfigurations.adam.pkgs.opencode" --impure 2>&1) || true
-    
-    local new_fod_hash
-    new_fod_hash=$(extract_hash_from_error "$build_output")
-    
-    if [[ -n "$new_fod_hash" ]]; then
-        local current_fod_hash
-        current_fod_hash=$(grep -oP 'outputHash = "\Ksha256-[A-Za-z0-9+/=]+' "$file" | head -1)
-        if [[ -n "$current_fod_hash" ]]; then
-            replace_hash "$file" "$current_fod_hash" "$new_fod_hash"
-            
-            # Try building again with new hash
-            log_info "Retrying build with updated node_modules hash..."
-            build_output=$(nix build "$REPO_ROOT#nixosConfigurations.adam.pkgs.opencode" --impure 2>&1) || true
-            
-            # Check if there's another hash error (shouldn't be, but just in case)
-            new_fod_hash=$(extract_hash_from_error "$build_output")
-            if [[ -n "$new_fod_hash" && "$new_fod_hash" != "$current_fod_hash" ]]; then
-                replace_hash "$file" "$(grep -oP 'outputHash = "\Ksha256-[A-Za-z0-9+/=]+' "$file" | head -1)" "$new_fod_hash"
-            fi
-        fi
-    else
-        log_info "No FOD hash error found - build may have succeeded or failed for other reasons"
-    fi
-    
-    log_success "opencode update complete"
 }
 
 # Update jellyseerr overlay
@@ -263,11 +178,8 @@ main() {
     log_info "Starting hash update for: $component"
     log_info "Repository root: $REPO_ROOT"
     echo
-    
+
     case "$component" in
-        opencode)
-            update_opencode
-            ;;
         jellyseerr)
             update_jellyseerr
             ;;
@@ -275,15 +187,13 @@ main() {
             update_caddy
             ;;
         all)
-            update_opencode
-            echo
             update_jellyseerr
             echo
             update_caddy
             ;;
         *)
             log_error "Unknown component: $component"
-            echo "Usage: $0 [opencode|jellyseerr|caddy|all]"
+            echo "Usage: $0 [jellyseerr|caddy|all]"
             exit 1
             ;;
     esac

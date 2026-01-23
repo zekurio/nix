@@ -14,12 +14,15 @@
   mediaDirs = [
     "/tank/jellyfin/anime"
     "/tank/jellyfin/movies"
+    "/tank/jellyfin/music"
     "/tank/jellyfin/tv"
     "/mnt/downloads"
     "/mnt/downloads/complete"
+    "/mnt/downloads/complete/lidarr"
     "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/sonarr"
     "/mnt/downloads/converted"
+    "/mnt/downloads/converted/lidarr"
     "/mnt/downloads/converted/radarr"
     "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/incomplete"
@@ -30,6 +33,7 @@
 
   stateDirs = [
     "/var/lib/jellyfin"
+    "/var/lib/lidarr"
     "/var/lib/qBittorrent"
     "/var/lib/radarr"
     "/var/lib/sonarr"

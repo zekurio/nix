@@ -25,8 +25,8 @@ in {
       };
       volumes = [
         "/tmp/fileflows:/temp"
-        "fileflows_data:/app/Data"
-        "fileflows_logs:/app/Logs"
+        "/var/lib/fileflows/data:/app/Data"
+        "/var/lib/fileflows/logs:/app/Logs"
         "/mnt/downloads:/mnt/downloads"
         "/tank/jellyfin:/media"
       ];
@@ -39,6 +39,9 @@ in {
     # Create required directories with proper permissions
     systemd.tmpfiles.rules = [
       "d /tmp/fileflows 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/fileflows 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/fileflows/data 2775 ${shareUser} ${shareGroup} -"
+      "d /var/lib/fileflows/logs 2775 ${shareUser} ${shareGroup} -"
     ];
 
     # Caddy virtual host configuration with basic auth
