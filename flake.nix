@@ -44,9 +44,6 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    vpn-confinement = {
-      url = "github:Maroka-chan/VPN-Confinement";
-    };
   };
 
   outputs =
@@ -76,7 +73,6 @@
           modules = [
             inputs.disko.nixosModules.disko
             inputs.sops-nix.nixosModules.sops
-            inputs.vpn-confinement.nixosModules.default
             ./modules/homelab
             ./machines/nixos/adam/configuration.nix
           ];
