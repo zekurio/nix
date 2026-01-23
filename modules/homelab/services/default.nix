@@ -7,6 +7,7 @@
     ./jellyfin.nix
     ./jellyseerr.nix
     ./jellysweep.nix
+    ./lidarr.nix
     ./media-share.nix
     ./nzbget.nix
     ./paperless-ngx.nix

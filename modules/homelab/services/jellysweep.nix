@@ -73,7 +73,7 @@ in {
       };
       environmentFiles = [config.sops.secrets.jellysweep_env.path];
       volumes = [
-        "jellysweep_data:/app/data"
+        "/var/lib/jellysweep:/app/data"
         "/etc/jellysweep/config.yml:/app/config.yml:ro"
         "/tank/jellyfin:/tank/jellyfin:ro"
       ];
@@ -81,6 +81,10 @@ in {
     };
 
     sops.secrets.jellysweep_env = {};
+
+    systemd.tmpfiles.rules = [
+      "d /var/lib/jellysweep 0700 root root -"
+    ];
 
     services.caddy-wrapper.virtualHosts."jellysweep" = {
       domain = domain;

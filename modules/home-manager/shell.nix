@@ -28,7 +28,6 @@ in {
         jq
         nil
         nixd
-        opencode
         sops
         uv
         zellij

@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   shareUser = "share";
@@ -14,8 +15,17 @@ in {
   };
 
   config = lib.mkIf config.services.sonarr-wrapped.enable {
-    services.sonarr = {
+    services.sonarr = let
+      sqlite-3-50 = pkgs.sqlite.overrideAttrs (old: {
+        version = "3.50.0";
+        src = pkgs.fetchurl {
+          url = "https://sqlite.org/2025/sqlite-autoconf-3500000.tar.gz";
+          sha256 = "09w32b04wbh1d5zmriwla7a02r93nd6vf3xqycap92a3yajpdirv";
+        };
+      });
+    in {
       enable = true;
+      package = pkgs.sonarr.override { sqlite = sqlite-3-50; };
       user = shareUser;
       group = shareGroup;
       settings = {

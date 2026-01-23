@@ -22,10 +22,14 @@ in {
         NODE_ENV = "production";
       };
       environmentFiles = [config.sops.secrets.streamystats_env.path];
-      volumes = ["streamystats_data:/var/lib/postgresql/data"];
+      volumes = ["/var/lib/streamystats:/var/lib/postgresql/data"];
     };
 
     sops.secrets.streamystats_env = {};
+
+    systemd.tmpfiles.rules = [
+      "d /var/lib/streamystats 0700 root root -"
+    ];
 
     services.caddy-wrapper.virtualHosts."streamystats" = {
       domain = domain;

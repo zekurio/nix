@@ -2,7 +2,6 @@ inputs: {
   nixpkgs.overlays = [
     (import ./jellyfin-ffmpeg.nix)
     (import ./jellyseerr-develop.nix inputs)
-    (import ./opencode.nix)
     (final: prev: {
       vesktop = prev.vesktop.overrideAttrs (old: {
         preBuild = ''
