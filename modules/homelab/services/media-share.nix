@@ -22,10 +22,6 @@ let
     "/mnt/downloads/complete/lidarr"
     "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/sonarr"
-    "/mnt/downloads/converted"
-    "/mnt/downloads/converted/lidarr"
-    "/mnt/downloads/converted/radarr"
-    "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/incomplete"
   ];
 

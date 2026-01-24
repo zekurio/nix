@@ -59,7 +59,6 @@
       sharedModules = [
         ./machines/nixos
         inputs.home-manager.nixosModules.home-manager
-        (import ./overlays inputs)
       ];
 
       mkSpecialArgs = {
@@ -103,17 +102,7 @@
         };
 
       flake = {
-        overlays.default = import ./overlays inputs;
         nixosConfigurations = mkSystem hosts;
-
-        packages.x86_64-linux =
-          let
-            overlay = import ./overlays/jellyseerr-develop.nix inputs;
-            pkgs = nixpkgs.legacyPackages.x86_64-linux.extend overlay;
-          in
-          {
-            jellyseerr = pkgs.jellyseerr;
-          };
       };
     };
 }
