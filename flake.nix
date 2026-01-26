@@ -44,6 +44,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    autoaspm = {
+      url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -72,6 +76,7 @@
           modules = [
             inputs.disko.nixosModules.disko
             inputs.sops-nix.nixosModules.sops
+            inputs.autoaspm.nixosModules.default
             ./modules/homelab
             ./machines/nixos/adam/configuration.nix
           ];
