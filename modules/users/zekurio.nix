@@ -7,11 +7,11 @@
     defaultEditor = true;
   };
 
-  programs.zsh.enable = true;
+  programs.fish.enable = true;
 
   users = {
     users.zekurio = {
-      shell = pkgs.zsh;
+      shell = pkgs.fish;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";
@@ -41,6 +41,10 @@
     backupFileExtension = "backup";
 
     users.zekurio = {
+      imports = [
+        ../home-manager
+      ];
+
       home = {
         username = "zekurio";
         homeDirectory = "/home/zekurio";

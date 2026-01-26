@@ -44,6 +44,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -79,6 +83,13 @@
             inputs.autoaspm.nixosModules.default
             ./modules/homelab
             ./machines/nixos/adam/configuration.nix
+          ];
+        };
+        tabris = {
+          system = "x86_64-linux";
+          modules = [
+            inputs.nixos-wsl.nixosModules.default
+            ./machines/nixos/tabris/configuration.nix
           ];
         };
       };

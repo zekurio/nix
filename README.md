@@ -7,6 +7,7 @@ NixOS configurations for my homelab
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server |
+| `tabris` | WSL dev box |
 
 ## Installation runbook (NixOS)
 
