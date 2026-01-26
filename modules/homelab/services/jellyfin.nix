@@ -35,6 +35,9 @@ in {
     ];
 
     systemd.services.jellyfin = {
+      environment = {
+        LIBVA_DRIVER_NAME = "iHD";
+      };
       serviceConfig = {
         UMask = lib.mkForce shareUmask;
         ReadWritePaths = [
