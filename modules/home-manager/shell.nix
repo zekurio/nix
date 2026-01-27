@@ -3,16 +3,16 @@
   lib,
   config,
   ...
-}:
-let
+}: let
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
-in
-{
+in {
   options.modules.hm.shell = {
-    enable = lib.mkEnableOption "shell configuration" // {
-      default = true;
-    };
+    enable =
+      lib.mkEnableOption "shell configuration"
+      // {
+        default = true;
+      };
   };
 
   config = lib.mkIf cfg.enable {

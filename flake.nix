@@ -21,6 +21,10 @@
   inputs = {
     # Core dependencies
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
+    configarr = {
+      url = "github:raydak-labs/configarr";
+      flake = false;
+    };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -54,68 +58,64 @@
     };
   };
 
-  outputs =
-    inputs@{
-      nixpkgs,
-      flake-parts,
-      ...
-    }:
-    let
-      lib = nixpkgs.lib;
+  outputs = inputs @ {
+    nixpkgs,
+    flake-parts,
+    ...
+  }: let
+    lib = nixpkgs.lib;
 
-      # Shared modules applied to all hosts
-      sharedModules = [
-        ./machines/nixos
-        inputs.home-manager.nixosModules.home-manager
-      ];
+    # Shared modules applied to all hosts
+    sharedModules = [
+      ./machines/nixos
+      inputs.home-manager.nixosModules.home-manager
+    ];
 
-      mkSpecialArgs = {
-        inherit inputs;
+    mkSpecialArgs = {
+      inherit inputs;
+    };
+
+    # Host definitions with their specific modules and system architecture
+    hosts = {
+      adam = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.sops-nix.nixosModules.sops
+          inputs.autoaspm.nixosModules.default
+          ./modules/homelab
+          ./machines/nixos/adam/configuration.nix
+        ];
       };
-
-      # Host definitions with their specific modules and system architecture
-      hosts = {
-        adam = {
-          system = "x86_64-linux";
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.sops-nix.nixosModules.sops
-            inputs.autoaspm.nixosModules.default
-            ./modules/homelab
-            ./machines/nixos/adam/configuration.nix
-          ];
-        };
-        tabris = {
-          system = "x86_64-linux";
-          modules = [
-            inputs.nixos-wsl.nixosModules.default
-            ./machines/nixos/tabris/configuration.nix
-          ];
-        };
+      tabris = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.nixos-wsl.nixosModules.default
+          ./machines/nixos/tabris/configuration.nix
+        ];
       };
+    };
 
-      # Build NixOS configurations from host definitions
-      mkSystem = lib.mapAttrs (
-        _: host:
+    # Build NixOS configurations from host definitions
+    mkSystem = lib.mapAttrs (
+      _: host:
         nixpkgs.lib.nixosSystem {
           inherit (host) system;
           specialArgs = mkSpecialArgs;
           modules = sharedModules ++ host.modules;
         }
-      );
-    in
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
+    );
+  in
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux"];
 
       _module.args = {
         inherit inputs lib;
       };
 
-      perSystem =
-        { pkgs, ... }:
-        {
-          formatter = pkgs.alejandra;
-        };
+      perSystem = {pkgs, ...}: {
+        formatter = pkgs.alejandra;
+      };
 
       flake = {
         nixosConfigurations = mkSystem hosts;

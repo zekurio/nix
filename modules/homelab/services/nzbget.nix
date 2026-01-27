@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  shareUser = "share";
-  shareGroup = "share";
   domain = "nzb.schnitzelflix.xyz";
   port = 6789;
+  serviceUser = "nzbget";
+  serviceGroup = "nzbget";
   deleteSamplesScript = pkgs.writeTextFile {
     name = "DeleteSamples.py";
     executable = true;
@@ -96,13 +96,11 @@ in {
   config = lib.mkIf config.services.nzbget-wrapped.enable {
     services.nzbget = {
       enable = true;
-      user = shareUser;
-      group = shareGroup;
     };
 
     systemd.tmpfiles.rules = [
-      "d /var/lib/nzbget/scripts 2775 ${shareUser} ${shareGroup} -"
-      "C /var/lib/nzbget/scripts/DeleteSamples.py 0755 ${shareUser} ${shareGroup} - ${deleteSamplesScript}"
+      "d /var/lib/nzbget/scripts 2775 ${serviceUser} ${serviceGroup} -"
+      "C /var/lib/nzbget/scripts/DeleteSamples.py 0755 ${serviceUser} ${serviceGroup} - ${deleteSamplesScript}"
     ];
 
     services.caddy-wrapper.virtualHosts."nzbget" = {

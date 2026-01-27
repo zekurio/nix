@@ -4,11 +4,11 @@
   pkgs,
   ...
 }: let
-  shareUser = "share";
-  shareGroup = "share";
   shareUmask = "0002";
   domain = "schnitzelflix.xyz";
   port = 8096;
+  serviceUser = "jellyfin";
+  serviceGroup = "jellyfin";
 in {
   options.services.jellyfin-wrapped = {
     enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
@@ -17,8 +17,6 @@ in {
   config = lib.mkIf config.services.jellyfin-wrapped.enable {
     services.jellyfin = {
       enable = true;
-      user = shareUser;
-      group = shareGroup;
       openFirewall = true;
       dataDir = "/var/lib/jellyfin";
       cacheDir = "/var/cache/jellyfin";
@@ -31,7 +29,7 @@ in {
     ];
 
     systemd.tmpfiles.rules = [
-      "d /var/cache/jellyfin 2775 ${shareUser} ${shareGroup} -"
+      "d /var/cache/jellyfin 2775 ${serviceUser} ${serviceGroup} -"
     ];
 
     systemd.services.jellyfin = {
@@ -46,6 +44,11 @@ in {
         ];
       };
     };
+
+    users.users.jellyfin.extraGroups = [
+      "render"
+      "video"
+    ];
 
     services.caddy-wrapper.virtualHosts."jellyfin" = {
       domain = domain;
