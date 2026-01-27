@@ -3,8 +3,6 @@
   lib,
   ...
 }: let
-  shareUser = "share";
-  shareGroup = "share";
   shareUmask = "0002";
   domain = "arr.schnitzelflix.xyz";
   port = 7878;
@@ -16,8 +14,6 @@ in {
   config = lib.mkIf config.services.radarr-wrapped.enable {
     services.radarr = {
       enable = true;
-      user = shareUser;
-      group = shareGroup;
       settings = {
         server.urlBase = "/radarr";
       };
@@ -25,8 +21,6 @@ in {
 
     # Set umask for shared library access
     systemd.services.radarr.serviceConfig = {
-      User = shareUser;
-      Group = shareGroup;
       UMask = lib.mkForce shareUmask;
     };
 

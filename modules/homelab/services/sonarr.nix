@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  shareUser = "share";
-  shareGroup = "share";
   shareUmask = "0002";
   domain = "arr.schnitzelflix.xyz";
   port = 8989;
@@ -25,17 +23,13 @@ in {
       });
     in {
       enable = true;
-      package = pkgs.sonarr.override { sqlite = sqlite-3-50; };
-      user = shareUser;
-      group = shareGroup;
+      package = pkgs.sonarr.override {sqlite = sqlite-3-50;};
       settings = {
         server.urlBase = "/sonarr";
       };
     };
 
     systemd.services.sonarr.serviceConfig = {
-      User = shareUser;
-      Group = shareGroup;
       UMask = lib.mkForce shareUmask;
     };
 

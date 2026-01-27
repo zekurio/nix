@@ -1,11 +1,10 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./caddy.nix
+    ./configarr.nix
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
-    ./lidarr.nix
     ./media-share.nix
     ./nzbget.nix
     ./paperless-ngx.nix

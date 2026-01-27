@@ -11,12 +11,6 @@ in {
   };
 
   config = lib.mkIf config.services.prowlarr-wrapped.enable {
-    users.users.prowlarr = {
-      isSystemUser = true;
-      group = "prowlarr";
-    };
-    users.groups.prowlarr = {};
-
     services.prowlarr = {
       enable = true;
       settings = {

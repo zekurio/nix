@@ -3,8 +3,7 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.modules.homelab.mediaShare;
 
   shareUser = "share";
@@ -19,30 +18,19 @@ let
     "/tank/jellyfin/tv"
     "/mnt/downloads"
     "/mnt/downloads/complete"
-    "/mnt/downloads/complete/lidarr"
     "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/sonarr"
     "/mnt/downloads/incomplete"
   ];
 
-  stateDirs = [
-    "/var/lib/jellyfin"
-    "/var/lib/lidarr"
-    "/var/lib/radarr"
-    "/var/lib/sonarr"
-  ];
-
-  managedPaths = mediaDirs ++ stateDirs;
-
-  directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") (mediaDirs ++ stateDirs);
-in
-{
+  directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") mediaDirs;
+in {
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
 
     collaborators = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ ];
+      default = ["zekurio"];
       description = "Regular users that should be added to the shared media group.";
     };
   };
@@ -67,25 +55,19 @@ in
           ];
         };
       }
+      (lib.genAttrs [
+          "jellyfin"
+          "nzbget"
+          "radarr"
+          "sonarr"
+        ] (_: {
+          extraGroups = lib.mkAfter [shareGroup];
+        }))
       (lib.genAttrs cfg.collaborators (_: {
-        extraGroups = lib.mkAfter [ shareGroup ];
+        extraGroups = lib.mkAfter [shareGroup];
       }))
     ];
 
     systemd.tmpfiles.rules = directoryRules;
-
-    systemd.services.media-share-prepare = {
-      description = "Ensure media directories exist for shared services";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "local-fs.target" ];
-      serviceConfig.Type = "oneshot";
-      script = ''
-        for dir in ${lib.concatStringsSep " " managedPaths}; do
-          ${pkgs.coreutils}/bin/install -d -m 2775 -o ${shareUser} -g ${shareGroup} "$dir"
-          ${pkgs.coreutils}/bin/chown ${shareUser}:${shareGroup} "$dir"
-          ${pkgs.coreutils}/bin/chmod 2775 "$dir"
-        done
-      '';
-    };
   };
 }
