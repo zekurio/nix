@@ -12,5 +12,6 @@
     ./prowlarr.nix
     ./radarr.nix
     ./sonarr.nix
+    ./streamystats.nix
   ];
 }
