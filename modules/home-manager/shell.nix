@@ -21,9 +21,10 @@ in {
       atuin
       bat
       btop
+      claude-code
       eza
       envsubst
-      pfetch-rs
+      fastfetch
       git
       jq
       nil
