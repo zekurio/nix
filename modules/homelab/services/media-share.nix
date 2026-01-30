@@ -19,7 +19,7 @@
     "/mnt/downloads"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/radarr-anime"
-    "/mnt/downloads/complete/sonarr"
+    "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/sonarr-anime"
     "/mnt/downloads/complete/sonarr"
     "/mnt/downloads/converted"
