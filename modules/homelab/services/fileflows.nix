@@ -48,9 +48,6 @@ in {
     services.caddy-wrapper.virtualHosts."fileflows" = {
       inherit domain;
       extraConfig = ''
-        basic_auth {
-          admin $2a$14$kp5H05ecqpOPcZViuQcAVuz4NrwbDk.f4uayB4ikcTD3BBNAKXDtu
-        }
         reverse_proxy 127.0.0.1:${toString port}
       '';
     };
