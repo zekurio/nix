@@ -12,15 +12,12 @@
   shareGid = 995;
 
   mediaDirs = [
-    "/tank/jellyfin/sonarr"
-    "/tank/jellyfin/sonarr-anime"
-    "/tank/jellyfin/radarr"
-    "/tank/jellyfin/radarr-anime"
+    "/tank/media/shows"
+    "/tank/media/anime"
+    "/tank/media/movies"
     "/mnt/downloads"
     "/mnt/downloads/complete"
-    "/mnt/downloads/complete/radarr-anime"
     "/mnt/downloads/complete/radarr"
-    "/mnt/downloads/complete/sonarr-anime"
     "/mnt/downloads/complete/sonarr"
     "/mnt/downloads/converted"
     "/mnt/downloads/incomplete"
