@@ -28,7 +28,7 @@ in {
         "/var/lib/fileflows/data:/app/Data"
         "/var/lib/fileflows/logs:/app/Logs"
         "/mnt/downloads:/mnt/downloads"
-        "/tank/jellyfin:/media"
+        "/tank/media:/media"
       ];
       extraOptions = [
         "--network=host"
