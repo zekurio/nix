@@ -21,7 +21,6 @@ in {
       atuin
       bat
       btop
-      claude-code
       eza
       envsubst
       fastfetch
@@ -77,6 +76,14 @@ in {
           gpg.format = "ssh";
           "gpg \"ssh\"".program = "/run/current-system/sw/bin/ssh-keygen";
         };
+      };
+
+      claude-code = {
+        enable = true;
+      };
+
+      opencode = {
+        enable = true;
       };
 
       ssh = {
