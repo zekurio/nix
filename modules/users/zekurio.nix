@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   # System-level user configuration
   nix.settings.trusted-users = ["zekurio"];
 
@@ -39,6 +43,9 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
+    extraSpecialArgs = {
+      inherit inputs;
+    };
 
     users.zekurio = {
       imports = [

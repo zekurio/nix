@@ -56,6 +56,22 @@
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/quickshell/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -92,6 +108,14 @@
         modules = [
           inputs.nixos-wsl.nixosModules.default
           ./machines/nixos/tabris/configuration.nix
+        ];
+      };
+      lilith = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          # inputs.lanzaboote.nixosModules.lanzaboote
+          ./machines/nixos/lilith/configuration.nix
         ];
       };
     };
