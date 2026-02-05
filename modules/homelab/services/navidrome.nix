@@ -15,7 +15,7 @@ in {
       enable = true;
       openFirewall = true;
       settings = {
-        Address = "127.0.0.1";
+        Address = "0.0.0.0";
         Port = port;
         MusicFolder = "/tank/media/music";
       };

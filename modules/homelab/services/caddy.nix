@@ -86,6 +86,7 @@ in {
       };
       globalConfig = ''
         email ${acmeEmail}
+        acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       '';
       virtualHosts =
         lib.mapAttrs (_: hostCfg: {
