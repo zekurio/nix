@@ -57,6 +57,7 @@ in {
         enable = true;
 
         interactiveShellInit = ''
+          fish_add_path "/home/zekurio/.local/bin"
           atuin init fish | source
         '';
       };
