@@ -31,6 +31,7 @@ in {
       nil
       nixd
       sops
+      streamrip
       uv
       zellij
 

@@ -7,15 +7,19 @@
 }: let
   cfg = config.services.configarr;
 
-  configarrPkgs = pkgs
+  configarrPkgs =
+    pkgs
     // {
-      pnpm = pkgs.pnpm // {
-        configHook = pkgs.pnpmConfigHook;
-        fetchDeps = pkgs.fetchPnpmDeps;
-      };
+      pnpm =
+        pkgs.pnpm
+        // {
+          configHook = pkgs.pnpmConfigHook;
+          fetchDeps = pkgs.fetchPnpmDeps;
+        };
     };
 
-  configarrPackage = (import (inputs.configarr + "/pkgs/nix/package.nix") {
+  configarrPackage =
+    (import (inputs.configarr + "/pkgs/nix/package.nix") {
       inherit (configarrPkgs) lib;
       pkgs = configarrPkgs;
     })

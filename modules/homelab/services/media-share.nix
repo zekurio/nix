@@ -15,12 +15,16 @@
     "/tank/media/shows"
     "/tank/media/anime"
     "/tank/media/movies"
+    "/tank/media/music"
     "/mnt/downloads"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/radarr"
+    "/mnt/downloads/complete/lidarr"
+    "/mnt/downloads/complete/slskd"
     "/mnt/downloads/complete/sonarr"
     "/mnt/downloads/converted"
     "/mnt/downloads/incomplete"
+    "/mnt/downloads/incomplete/slskd"
   ];
 
   directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") mediaDirs;
@@ -57,8 +61,11 @@ in {
       }
       (lib.genAttrs [
           "jellyfin"
+          "lidarr"
+          "navidrome"
           "nzbget"
           "radarr"
+          "slskd"
           "sonarr"
         ] (_: {
           extraGroups = lib.mkAfter [shareGroup];
