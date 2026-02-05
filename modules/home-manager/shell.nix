@@ -99,6 +99,10 @@ in {
         enable = true;
       };
 
+      jujutsu = {
+        enable = true;
+      };
+
       ssh = {
         enable = true;
         enableDefaultConfig = false;
