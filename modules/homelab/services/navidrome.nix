@@ -13,6 +13,7 @@ in {
   config = lib.mkIf config.services.navidrome-wrapped.enable {
     services.navidrome = {
       enable = true;
+      openFirewall = true;
       settings = {
         Address = "127.0.0.1";
         Port = port;
