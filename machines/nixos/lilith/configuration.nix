@@ -213,6 +213,7 @@ in
   # Environment
   environment.sessionVariables = {
     AMD_VULKAN_ICD = "RADV";
+    MESA_SHADER_CACHE_MAX_SIZE = "12G";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     QT_QPA_PLATFORM = "wayland";
     QT_QPA_PLATFORMTHEME = "gtk3";
