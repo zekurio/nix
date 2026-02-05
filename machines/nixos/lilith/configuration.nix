@@ -94,51 +94,6 @@ in
     };
   };
 
-  # Storage & Filesystems
-  fileSystems = {
-    "/mnt/vault" = {
-      device = "//192.168.0.2/vault";
-      fsType = "cifs";
-      options = [
-        "credentials=/home/zekurio/.smb/creds"
-        "vers=3.0"
-        "iocharset=utf8"
-        "uid=1000" # zekurio
-        "gid=100" # users
-        "_netdev"
-        "noauto,x-systemd.automount"
-      ];
-    };
-
-    "/mnt/media" = {
-      device = "//192.168.0.2/media";
-      fsType = "cifs";
-      options = [
-        "credentials=/home/zekurio/.smb/creds"
-        "vers=3.0"
-        "iocharset=utf8"
-        "uid=1000"
-        "gid=100"
-        "_netdev"
-        "noauto,x-systemd.automount"
-      ];
-    };
-
-    "/mnt/datadrop" = {
-      device = "//192.168.0.2/datadrop";
-      fsType = "cifs";
-      options = [
-        "credentials=/home/zekurio/.smb/creds"
-        "vers=3.0"
-        "iocharset=utf8"
-        "uid=1000"
-        "gid=100"
-        "_netdev"
-        "noauto,x-systemd.automount"
-      ];
-    };
-  };
-
   # Security
   security = {
     rtkit.enable = true; # Real-time scheduling for audio
@@ -161,7 +116,6 @@ in
     # Hardware
     lact.enable = true; # AMD GPU control
     power-profiles-daemon.enable = true;
-    blueman.enable = true;
     udisks2.enable = true;
     scx = {
       enable = true;
