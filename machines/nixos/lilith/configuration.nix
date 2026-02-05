@@ -5,9 +5,12 @@
   modulesPath,
   lib,
   ...
-}: let
+}:
+let
   mainUser = "zekurio";
-in {
+  nfsServer = "192.168.0.2";
+in
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
@@ -27,11 +30,11 @@ in {
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
+    extraModulePackages = [ config.boot.kernelPackages.zenpower ];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
-    blacklistedKernelModules = ["k10temp"];
+    blacklistedKernelModules = [ "k10temp" ];
     loader = {
       timeout = 3;
       efi.canTouchEfiVariables = true;
@@ -53,6 +56,37 @@ in {
       size = 16 * 1024;
     }
   ];
+
+  # NFS mounts
+  fileSystems = {
+    "/mnt/vault" = {
+      device = "${nfsServer}:/tank/vault";
+      fsType = "nfs";
+      options = [
+        "x-systemd.automount"
+        "noauto"
+        "x-systemd.idle-timeout=600"
+      ];
+    };
+    "/mnt/media" = {
+      device = "${nfsServer}:/tank/media";
+      fsType = "nfs";
+      options = [
+        "x-systemd.automount"
+        "noauto"
+        "x-systemd.idle-timeout=600"
+      ];
+    };
+    "/mnt/downloads" = {
+      device = "${nfsServer}:/mnt/downloads";
+      fsType = "nfs";
+      options = [
+        "x-systemd.automount"
+        "noauto"
+        "x-systemd.idle-timeout=600"
+      ];
+    };
+  };
 
   time.timeZone = "Europe/Vienna";
 
@@ -86,9 +120,10 @@ in {
   networking = {
     hostName = "lilith";
     networkmanager.enable = true;
+    nameservers = [ "192.168.0.2" ];
     firewall = {
       enable = true;
-      allowedTCPPorts = [22];
+      allowedTCPPorts = [ 22 ];
     };
   };
 
@@ -161,7 +196,7 @@ in {
     _1password.enable = true;
     _1password-gui = {
       enable = true;
-      polkitPolicyOwners = ["zekurio"];
+      polkitPolicyOwners = [ "zekurio" ];
     };
 
     coolercontrol.enable = true;
@@ -172,19 +207,6 @@ in {
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       localNetworkGameTransfers.openFirewall = true;
-    };
-    gamemode = {
-      enable = true;
-      settings = {
-        general = {
-          renice = 10;
-        };
-        gpu = {
-          apply_gpu_optimisations = "accept-responsibility";
-          gpu_device = 0;
-          amd_performance_level = "high";
-        };
-      };
     };
   };
 
@@ -238,7 +260,7 @@ in {
   systemd.user.services = {
     udiskie = {
       description = "udiskie automounter for removable drives";
-      wantedBy = ["default.target"];
+      wantedBy = [ "default.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.udiskie}/bin/udiskie -a -n -s";
         Restart = "on-failure";
@@ -249,7 +271,7 @@ in {
   # XDG
   xdg.portal = {
     enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   system.stateVersion = "25.11"; # DO NOT CHANGE

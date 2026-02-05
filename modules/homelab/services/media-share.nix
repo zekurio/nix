@@ -16,6 +16,7 @@
     "/tank/media/anime"
     "/tank/media/movies"
     "/tank/media/music"
+    "/tank/media/import"
     "/mnt/downloads"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/radarr"
