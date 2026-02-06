@@ -91,15 +91,36 @@ in {
         ];
       };
 
+      jujutsu = {
+        enable = true;
+        settings = lib.mkMerge [
+          {
+            user = {
+              name = "Michael Schwieger";
+              email = "git@zekurio.xyz";
+            };
+            signing = {
+              behavior = "own";
+              backend = "ssh";
+              key = signingKey;
+            };
+          }
+          # Desktop: use 1Password's op-ssh-sign
+          (lib.mkIf isDesktop {
+            signing.backends.ssh.program = "${lib.getExe' pkgs._1password-gui "op-ssh-sign"}";
+          })
+          # Non-desktop: use ssh-keygen which reads from SSH_AUTH_SOCK (forwarded agent)
+          (lib.mkIf (!isDesktop) {
+            signing.backends.ssh.program = "/run/current-system/sw/bin/ssh-keygen";
+          })
+        ];
+      };
+
       claude-code = {
         enable = true;
       };
 
       opencode = {
-        enable = true;
-      };
-
-      jujutsu = {
         enable = true;
       };
 
