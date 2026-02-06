@@ -11,6 +11,7 @@
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
   profilePicture = "/var/lib/slskd/profile.jpg";
+  nsPath = config.modules.wireguard-netns.namespacePath;
 
   # Beets import script triggered by slskd on download completion
   slskdImportFiles = pkgs.writeShellScript "slskd-import-files" ''
@@ -21,7 +22,7 @@
   '';
 in {
   options.services.slskd-wrapped = {
-    enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
+    enable = lib.mkEnableOption "slskd Soulseek client with VPN and Caddy integration";
   };
 
   config = lib.mkIf cfg.enable {
@@ -34,7 +35,6 @@ in {
         soulseek = {
           description = "new to soulseek. sharing what I have. most is ripped from tidal/deezer or torrents.";
           picture = profilePicture;
-          listen_port = 50300;
         };
         directories = {
           downloads = downloadDir;
@@ -68,13 +68,23 @@ in {
       };
     };
 
-    # Grant slskd access to media and download paths
-    systemd.services.slskd.serviceConfig.ReadWritePaths = [
-      musicDir
-      downloadDir
-      incompleteDir
-      "/var/lib/beets"
-    ];
+    # Run slskd inside the VPN namespace
+    systemd.services.slskd = {
+      requires = ["wg-netns.service"];
+      after = ["wg-netns.service"];
+      serviceConfig = {
+        NetworkNamespacePath = nsPath;
+        BindReadOnlyPaths = [
+          "/etc/netns/vpn/resolv.conf:/etc/resolv.conf"
+        ];
+        ReadWritePaths = [
+          musicDir
+          downloadDir
+          incompleteDir
+          "/var/lib/beets"
+        ];
+      };
+    };
 
     # SOPS secret for slskd credentials
     sops.secrets.slskd_env = {
