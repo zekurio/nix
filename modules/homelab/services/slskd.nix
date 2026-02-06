@@ -17,7 +17,7 @@
     cd /var/lib/beets
     HOME=/var/lib/beets ${lib.getExe pkgs.beets} \
       -c ${config.services.beets-wrapped.configFile} \
-      import -m -q ${downloadDir}
+      import -m -A -q ${downloadDir}
   '';
 in {
   options.services.slskd-wrapped = {
@@ -55,7 +55,10 @@ in {
           ];
           run = {
             executable = "${lib.getExe pkgs.bash}";
-            command = "-c ${slskdImportFiles}";
+            arglist = [
+              "-c"
+              "${slskdImportFiles}"
+            ];
           };
         };
         web = {
