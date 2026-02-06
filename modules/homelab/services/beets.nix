@@ -31,9 +31,10 @@
       move = false;
       autotag = true;
       bell = true;
-      log = "/dev/null";
-      quiet = true;
-      quiet_fallback = "asis";
+      log = "${beetsDir}/import.log";
+      quiet = false;
+      none_rec_action = "ask";
+      quiet_fallback = "skip";
     };
 
     original_date = true;
