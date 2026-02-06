@@ -86,6 +86,30 @@ in {
       };
     };
 
+    # Socket proxy to expose slskd web UI from VPN namespace to host
+    systemd.sockets.slskd-proxy = {
+      description = "Socket for proxy to slskd web UI";
+      wantedBy = ["sockets.target"];
+      listenStreams = [
+        (toString webPort)
+      ];
+    };
+
+    systemd.services.slskd-proxy = {
+      description = "Proxy to slskd web UI in VPN namespace";
+      requires = ["slskd.service" "slskd-proxy.socket"];
+      after = ["slskd.service" "slskd-proxy.socket"];
+      unitConfig = {
+        JoinsNamespaceOf = "slskd.service";
+      };
+      serviceConfig = {
+        User = config.services.slskd.user;
+        Group = config.services.slskd.group;
+        ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=5min 127.0.0.1:${toString webPort}";
+        PrivateNetwork = true;
+      };
+    };
+
     # SOPS secret for slskd credentials
     sops.secrets.slskd_env = {
       owner = config.services.slskd.user;
