@@ -131,7 +131,14 @@ in {
           Host *
               IdentityAgent ${onePassPath}
         '';
-        matchBlocks."*".compression = true;
+        matchBlocks = {
+          "*".compression = true;
+          "adam" = {
+            hostname = "192.168.0.2";
+            user = "zekurio";
+            forwardAgent = true;
+          };
+        };
       };
     };
   };
