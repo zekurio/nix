@@ -11,15 +11,6 @@
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
   profilePicture = "/var/lib/slskd/profile.jpg";
-
-  # Beets import script triggered by slskd on download completion
-  slskdImportFiles = pkgs.writeShellScript "slskd-import-files" ''
-    umask 0002
-    cd /var/lib/beets
-    HOME=/var/lib/beets ${lib.getExe pkgs.beets} \
-      -c ${config.services.beets-wrapped.configFile} \
-      import -m -A -q ${downloadDir}
-  '';
 in {
   options.services.slskd-wrapped = {
     enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
@@ -48,19 +39,6 @@ in {
             "\\.DS_Store$"
           ];
         };
-        integration.scripts.slskd-import-files = {
-          on = [
-            "DownloadDirectoryComplete"
-            "DownloadFileComplete"
-          ];
-          run = {
-            executable = "${lib.getExe pkgs.bash}";
-            arglist = [
-              "-c"
-              "${slskdImportFiles}"
-            ];
-          };
-        };
         web = {
           port = webPort;
           https.disabled = true;
@@ -73,7 +51,6 @@ in {
       musicDir
       downloadDir
       incompleteDir
-      "/var/lib/beets"
     ];
 
     # SOPS secret for slskd credentials
