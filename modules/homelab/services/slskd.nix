@@ -10,6 +10,7 @@
   musicDir = "/tank/media/music";
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
+  profilePicture = "/var/lib/slskd/profile.jpg";
 
   # Beets import script triggered by slskd on download completion
   slskdImportFiles = pkgs.writeShellScript "slskd-import-files" ''
@@ -30,6 +31,10 @@ in {
       domain = null;
       environmentFile = config.sops.secrets.slskd_env.path;
       settings = {
+        soulseek = {
+          description = "new to soulseek. sharing what I have. most is ripped from tidal/deezer or torrents.";
+          picture = profilePicture;
+        };
         directories = {
           downloads = downloadDir;
           incomplete = incompleteDir;
