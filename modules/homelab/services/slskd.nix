@@ -26,6 +26,7 @@ in {
   config = lib.mkIf cfg.enable {
     services.slskd = {
       enable = true;
+      openFirewall = true;
       domain = null;
       environmentFile = config.sops.secrets.slskd_env.path;
       settings = {
