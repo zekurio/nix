@@ -34,6 +34,7 @@ in {
         soulseek = {
           description = "new to soulseek. sharing what I have. most is ripped from tidal/deezer or torrents.";
           picture = profilePicture;
+          listen_port = 50300;
         };
         directories = {
           downloads = downloadDir;
