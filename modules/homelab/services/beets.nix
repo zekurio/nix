@@ -11,7 +11,7 @@
 
   beetsConfig = {
     directory = musicDir;
-    library = "${musicDir}/beets.db";
+    library = "${beetsDir}/beets.db";
 
     plugins = [
       "duplicates"
