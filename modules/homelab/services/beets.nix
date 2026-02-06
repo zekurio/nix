@@ -14,6 +14,7 @@
     library = "${beetsDir}/beets.db";
 
     plugins = [
+      "musicbrainz"
       "duplicates"
     ];
 
