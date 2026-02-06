@@ -106,6 +106,8 @@ in {
 
     systemd.tmpfiles.rules = [
       "d ${beetsDir} 2775 share share -"
+      # Default ACL: new files inherit group rw so slskd (in share group) can write beets.db
+      "a+ ${beetsDir} - - - - default:group::rwx"
     ];
   };
 }

@@ -14,6 +14,7 @@
 
   # Beets import script triggered by slskd on download completion
   slskdImportFiles = pkgs.writeShellScript "slskd-import-files" ''
+    umask 0002
     cd /var/lib/beets
     HOME=/var/lib/beets ${lib.getExe pkgs.beets} \
       -c ${config.services.beets-wrapped.configFile} \
