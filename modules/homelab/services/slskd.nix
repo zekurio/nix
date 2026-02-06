@@ -11,7 +11,6 @@
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
   profilePicture = "/var/lib/slskd/profile.jpg";
-  nsPath = config.modules.wireguard-netns.namespacePath;
 
   # Beets import script triggered by slskd on download completion
   slskdImportFiles = pkgs.writeShellScript "slskd-import-files" ''
@@ -22,7 +21,7 @@
   '';
 in {
   options.services.slskd-wrapped = {
-    enable = lib.mkEnableOption "slskd Soulseek client with VPN and Caddy integration";
+    enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
   };
 
   config = lib.mkIf cfg.enable {
@@ -68,47 +67,13 @@ in {
       };
     };
 
-    # Run slskd inside the VPN namespace
-    systemd.services.slskd = {
-      requires = ["wg-netns.service"];
-      after = ["wg-netns.service"];
-      serviceConfig = {
-        NetworkNamespacePath = nsPath;
-        BindReadOnlyPaths = [
-          "/etc/netns/vpn/resolv.conf:/etc/resolv.conf"
-        ];
-        ReadWritePaths = [
-          musicDir
-          downloadDir
-          incompleteDir
-          "/var/lib/beets"
-        ];
-      };
-    };
-
-    # Socket proxy to expose slskd web UI from VPN namespace to host
-    systemd.sockets.slskd-proxy = {
-      description = "Socket for proxy to slskd web UI";
-      wantedBy = ["sockets.target"];
-      listenStreams = [
-        (toString webPort)
-      ];
-    };
-
-    systemd.services.slskd-proxy = {
-      description = "Proxy to slskd web UI in VPN namespace";
-      requires = ["slskd.service" "slskd-proxy.socket"];
-      after = ["slskd.service" "slskd-proxy.socket"];
-      unitConfig = {
-        JoinsNamespaceOf = "slskd.service";
-      };
-      serviceConfig = {
-        User = config.services.slskd.user;
-        Group = config.services.slskd.group;
-        ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=5min 127.0.0.1:${toString webPort}";
-        PrivateNetwork = true;
-      };
-    };
+    # Grant slskd access to media and download paths
+    systemd.services.slskd.serviceConfig.ReadWritePaths = [
+      musicDir
+      downloadDir
+      incompleteDir
+      "/var/lib/beets"
+    ];
 
     # SOPS secret for slskd credentials
     sops.secrets.slskd_env = {
