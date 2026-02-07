@@ -8,6 +8,7 @@
   port = 3010;
   containerPort = 3000;
   appUrl = "https://${domain}";
+  containerUser = "0:0";
 in {
   options.services.jellything-wrapped = {
     enable = lib.mkEnableOption "Jellything invite service with Caddy integration";
@@ -16,6 +17,7 @@ in {
   config = lib.mkIf cfg.enable {
     virtualisation.oci-containers.containers.jellything = {
       image = "ghcr.io/zekurio/jellything:latest";
+      user = containerUser;
       ports = ["${toString port}:${toString containerPort}"];
       environment = {
         NODE_ENV = "production";
