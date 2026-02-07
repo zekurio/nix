@@ -30,6 +30,7 @@ in
       jq
       nil
       nixd
+      ripgrep
       sops
       streamrip
       uv

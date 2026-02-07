@@ -7,6 +7,7 @@
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
+    ./jellything.nix
     ./lidarr.nix
     ./media-share.nix
     ./navidrome.nix
