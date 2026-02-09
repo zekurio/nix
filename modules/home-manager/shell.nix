@@ -27,6 +27,7 @@ in
       envsubst
       fastfetch
       git
+      gh
       jq
       nil
       nixd
@@ -66,6 +67,7 @@ in
 
       git = {
         enable = true;
+        lfs.enable = true;
         signing = {
           key = signingKey;
           signByDefault = true;

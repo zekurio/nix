@@ -36,16 +36,26 @@ in {
     loader = {
       timeout = 3;
       efi.canTouchEfiVariables = true;
-      systemd-boot = {
+      systemd-boot.enable = false;
+      limine = {
         enable = true;
-        configurationLimit = 3;
+        maxGenerations = 3;
+        resolution = "2560x1440x32";
+        secureBoot.enable = true;
+        style = {
+          interface.resolution = "2560x1440";
+          wallpapers = [../../../assets/limine.jpeg];
+        };
+        extraConfig = ''
+          remember_last_entry: yes
+        '';
+        extraEntries = ''
+          /Windows 11
+            protocol: efi
+            path: boot():/EFI/Microsoft/Boot/Bootmgfw.efi
+        '';
       };
     };
-    # TODO: switch back to lanzaboote once ready
-    # lanzaboote = {
-    #   enable = true;
-    #   pkiBundle = "/var/lib/sbctl";
-    # };
   };
 
   swapDevices = [
@@ -232,6 +242,7 @@ in {
   environment.etc = {
     "1password/custom_allowed_browsers" = {
       text = ''
+        helium
         zen
       '';
       mode = "0755";

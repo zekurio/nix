@@ -2,6 +2,7 @@
   inherit (lib) mkDefault;
 in {
   imports = [
+    ../../overlays
     ../../modules/users
     ../../modules/virtualization
   ];
