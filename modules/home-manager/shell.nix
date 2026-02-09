@@ -60,6 +60,7 @@ in
         enable = true;
 
         interactiveShellInit = ''
+          set fish_greeting
           fish_add_path "/home/zekurio/.local/bin"
           atuin init fish | source
         '';
