@@ -131,12 +131,6 @@ in
               agent = "build";
               model = "opencode/kimi-k2.5-free";
             };
-            yeet = {
-              template = "Stage and commit all changes to whatever branch is checked out";
-              description = "Yeet the changes to upstream";
-              agent = "build";
-              model = "opencode/kimi-k2.5-free";
-            };
           };
         };
       };

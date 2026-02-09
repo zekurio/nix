@@ -142,7 +142,13 @@
       };
 
       perSystem = {pkgs, ...}: {
-        formatter = pkgs.alejandra;
+        formatter = pkgs.writeShellApplication {
+          name = "nix-fmt";
+          runtimeInputs = [pkgs.alejandra];
+          text = ''
+            exec alejandra . "$@"
+          '';
+        };
       };
 
       flake = {
