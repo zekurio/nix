@@ -23,7 +23,6 @@
     "/mnt/downloads/complete/lidarr"
     "/mnt/downloads/complete/slskd"
     "/mnt/downloads/complete/sonarr"
-    "/mnt/downloads/converted"
     "/mnt/downloads/incomplete"
     "/mnt/downloads/incomplete/slskd"
   ];
