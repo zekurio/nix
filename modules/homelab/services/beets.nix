@@ -17,6 +17,8 @@ let
       "musicbrainz"
       "duplicates"
       "ftintitle"
+      "fetchart"
+      "embedart"
     ];
     import = {
       write = true;

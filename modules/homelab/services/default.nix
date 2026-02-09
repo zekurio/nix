@@ -17,7 +17,6 @@
     ./radarr.nix
     ./slskd.nix
     ./sonarr.nix
-    ./streamystats.nix
     ./wireguard-netns.nix
   ];
 }
