@@ -1,9 +1,9 @@
 {
   config,
   lib,
-  pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.homelab.mediaShare;
 
   shareUser = "share";
@@ -16,25 +16,27 @@
     "/tank/media/anime"
     "/tank/media/movies"
     "/tank/media/music"
-    "/tank/media/import"
     "/mnt/downloads"
+    "/mnt/downloads/converted"
     "/mnt/downloads/complete"
-    "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/lidarr"
+    "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/slskd"
     "/mnt/downloads/complete/sonarr"
+    "/mnt/downloads/complete/streamrip"
     "/mnt/downloads/incomplete"
     "/mnt/downloads/incomplete/slskd"
   ];
 
   directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") mediaDirs;
-in {
+in
+{
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
 
     collaborators = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = ["zekurio"];
+      default = [ "zekurio" ];
       description = "Regular users that should be added to the shared media group.";
     };
   };
@@ -59,7 +61,8 @@ in {
           ];
         };
       }
-      (lib.genAttrs [
+      (lib.genAttrs
+        [
           "jellyfin"
           "lidarr"
           "navidrome"
@@ -67,11 +70,13 @@ in {
           "radarr"
           "slskd"
           "sonarr"
-        ] (_: {
-          extraGroups = lib.mkAfter [shareGroup];
-        }))
+        ]
+        (_: {
+          extraGroups = lib.mkAfter [ shareGroup ];
+        })
+      )
       (lib.genAttrs cfg.collaborators (_: {
-        extraGroups = lib.mkAfter [shareGroup];
+        extraGroups = lib.mkAfter [ shareGroup ];
       }))
     ];
 

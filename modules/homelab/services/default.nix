@@ -1,8 +1,10 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ./beets.nix
     ./caddy.nix
     ./configarr.nix
+    ./fileflows.nix
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
