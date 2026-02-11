@@ -18,6 +18,8 @@ let
     "/tank/media/music"
     "/mnt/downloads"
     "/mnt/downloads/converted"
+    "/mnt/downloads/converted/radarr"
+    "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/lidarr"
     "/mnt/downloads/complete/radarr"
