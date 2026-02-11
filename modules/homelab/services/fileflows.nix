@@ -30,7 +30,7 @@ in
         "/var/lib/fileflows/data:/app/Data"
         "/var/lib/fileflows/logs:/app/Logs"
         "/mnt/downloads:/mnt/downloads"
-        "/tank/media:/media"
+        "/tank/media:/tank/media"
       ];
       extraOptions = [
         "--network=host"
