@@ -3,12 +3,11 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.services.beets-wrapped;
   musicDir = "/tank/media/music";
   beetsDir = "/var/lib/beets";
-  settingsFormat = pkgs.formats.yaml { };
+  settingsFormat = pkgs.formats.yaml {};
 
   beetsConfig = {
     directory = musicDir;
@@ -45,8 +44,7 @@ let
   beetWrapped = pkgs.writeScriptBin "beet-wrapped" ''
     sudo -u share BEETSDIR=${beetsDir} ${lib.getExe pkgs.beets} -c ${beetsConfigFile} "$@"
   '';
-in
-{
+in {
   options.services.beets-wrapped = {
     enable = lib.mkEnableOption "Beets music organizer";
 
@@ -60,7 +58,7 @@ in
   config = lib.mkIf cfg.enable {
     services.beets-wrapped.configFile = beetsConfigFile;
 
-    environment.systemPackages = [ beetWrapped ];
+    environment.systemPackages = [beetWrapped];
 
     systemd.tmpfiles.rules = [
       "d ${beetsDir} 2775 share share -"
