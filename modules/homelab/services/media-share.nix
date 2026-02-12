@@ -2,8 +2,7 @@
   config,
   lib,
   ...
-}:
-let
+}: let
   cfg = config.modules.homelab.mediaShare;
 
   shareUser = "share";
@@ -31,14 +30,13 @@ let
   ];
 
   directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") mediaDirs;
-in
-{
+in {
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
 
     collaborators = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "zekurio" ];
+      default = ["zekurio"];
       description = "Regular users that should be added to the shared media group.";
     };
   };
@@ -63,7 +61,8 @@ in
           ];
         };
       }
-      (lib.genAttrs
+      (
+        lib.genAttrs
         [
           "jellyfin"
           "lidarr"
@@ -74,11 +73,11 @@ in
           "sonarr"
         ]
         (_: {
-          extraGroups = lib.mkAfter [ shareGroup ];
+          extraGroups = lib.mkAfter [shareGroup];
         })
       )
       (lib.genAttrs cfg.collaborators (_: {
-        extraGroups = lib.mkAfter [ shareGroup ];
+        extraGroups = lib.mkAfter [shareGroup];
       }))
     ];
 
