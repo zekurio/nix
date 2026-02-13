@@ -32,7 +32,16 @@
     nftables.enable = true;
     firewall = {
       enable = true;
-      allowedTCPPorts = [22];
+      allowedTCPPorts = [
+        22
+        80
+        443
+      ];
+      allowedUDPPorts = [
+        443
+        51820
+        21820
+      ];
     };
   };
 
