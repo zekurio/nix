@@ -122,6 +122,14 @@
           ./machines/nixos/lilith/configuration.nix
         ];
       };
+      sahaquiel = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.sops-nix.nixosModules.sops
+          ./machines/nixos/sahaquiel/configuration.nix
+        ];
+      };
     };
 
     # Build NixOS configurations from host definitions

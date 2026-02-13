@@ -25,7 +25,6 @@ in {
       btop
       eza
       envsubst
-      fastfetch
       git
       gh
       jq
@@ -122,7 +121,6 @@ in {
 
       opencode = {
         enable = true;
-        package = pkgs.opencode;
 
         settings = {
           command = {
@@ -130,7 +128,6 @@ in {
               template = "If not in a feature branch, switch to a new branch and stage all changes. Commit the changes following the project's commit guidelines. Push the changes and file a pull request using the github CLI.";
               description = "Commit and push all changes to the repository with a PR";
               agent = "build";
-              model = "opencode/kimi-k2.5-free";
             };
           };
         };
