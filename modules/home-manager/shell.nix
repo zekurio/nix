@@ -147,6 +147,14 @@ in {
             user = "zekurio";
             forwardAgent = true;
           };
+          "sahaquiel" = {
+            hostname = "46.225.140.83";
+            user = "zekurio";
+            forwardAgent = true;
+            setEnv = {
+              TERM = "xterm-256color";
+            };
+          };
         };
       };
     };
