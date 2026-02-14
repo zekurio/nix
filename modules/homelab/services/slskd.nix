@@ -13,6 +13,13 @@
   profilePicture = "/var/lib/slskd/profile.jpg";
   beetsDir = "/var/lib/beets";
 
+  fixMusicPermissionsScript = pkgs.writeShellScript "slskd-fix-music-permissions" ''
+    set -eu
+
+    ${pkgs.findutils}/bin/find ${musicDir} -type d -exec ${pkgs.coreutils}/bin/chmod 2775 {} +
+    ${pkgs.findutils}/bin/find ${musicDir} -type f ! -perm -g+r -exec ${pkgs.coreutils}/bin/chmod g+r {} +
+  '';
+
   # Import script triggered by slskd on download completion
   beetImportScript = pkgs.writeShellScript "slskd-beet-import" ''
     BEETSDIR=${beetsDir} ${lib.getExe pkgs.beets} -c ${config.services.beets-wrapped.configFile} import ${downloadDir}
@@ -104,6 +111,30 @@ in {
       incompleteDir
       beetsDir
     ];
+
+    # Ensure files in shared music tree stay readable for slskd uploads
+    systemd.services.slskd-fix-music-permissions = {
+      description = "Fix shared music permissions for slskd";
+      before = ["slskd.service"];
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = fixMusicPermissionsScript;
+      };
+    };
+
+    systemd.timers.slskd-fix-music-permissions = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+      };
+    };
+
+    systemd.services.slskd = {
+      wants = ["slskd-fix-music-permissions.service"];
+      after = ["slskd-fix-music-permissions.service"];
+    };
 
     # SOPS secret for slskd credentials
     sops.secrets.slskd_env = {
