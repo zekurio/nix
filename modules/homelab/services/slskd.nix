@@ -104,13 +104,16 @@ in {
       };
     };
 
-    # Grant slskd access to media, download, and beets paths
-    systemd.services.slskd.serviceConfig.ReadWritePaths = [
-      musicDir
-      downloadDir
-      incompleteDir
-      beetsDir
-    ];
+    # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
+    systemd.services.slskd.serviceConfig = {
+      ReadOnlyPaths = lib.mkForce [];
+      ReadWritePaths = [
+        musicDir
+        downloadDir
+        incompleteDir
+        beetsDir
+      ];
+    };
 
     # Ensure files in shared music tree stay readable for slskd uploads
     systemd.services.slskd-fix-music-permissions = {
