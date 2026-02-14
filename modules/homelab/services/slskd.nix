@@ -22,7 +22,7 @@
 
   # Import script triggered by slskd on download completion
   beetImportScript = pkgs.writeShellScript "slskd-beet-import" ''
-    BEETSDIR=${beetsDir} ${lib.getExe pkgs.beets} -c ${config.services.beets-wrapped.configFile} import ${downloadDir}
+    BEETSDIR=${beetsDir} ${lib.getExe pkgs.beets} -c ${config.services.beets-wrapped.configFile} import -A --flat ${downloadDir}
   '';
 in {
   options.services.slskd-wrapped = {
@@ -90,7 +90,6 @@ in {
         integration.scripts.beet-import = {
           on = [
             "DownloadDirectoryComplete"
-            "DownloadFileComplete"
           ];
           run = {
             executable = "${pkgs.bash}/bin/bash";
@@ -106,6 +105,7 @@ in {
 
     # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
     systemd.services.slskd.serviceConfig = {
+      UMask = "0002";
       ReadOnlyPaths = lib.mkForce [];
       ReadWritePaths = [
         musicDir
