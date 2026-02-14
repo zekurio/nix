@@ -19,11 +19,6 @@
     ${pkgs.findutils}/bin/find ${musicDir} -type d -exec ${pkgs.coreutils}/bin/chmod 2775 {} +
     ${pkgs.findutils}/bin/find ${musicDir} -type f ! -perm -g+r -exec ${pkgs.coreutils}/bin/chmod g+r {} +
   '';
-
-  # Import script triggered by slskd on download completion
-  beetImportScript = pkgs.writeShellScript "slskd-beet-import" ''
-    BEETSDIR=${beetsDir} ${lib.getExe pkgs.beets} -c ${config.services.beets-wrapped.configFile} import -A --flat ${downloadDir}
-  '';
 in {
   options.services.slskd-wrapped = {
     enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
@@ -85,16 +80,6 @@ in {
             "Thumbs.db$"
             "\\.DS_Store$"
           ];
-        };
-        # Run beets import on download completion
-        integration.scripts.beet-import = {
-          on = [
-            "DownloadDirectoryComplete"
-          ];
-          run = {
-            executable = "${pkgs.bash}/bin/bash";
-            command = "-c ${beetImportScript}";
-          };
         };
         web = {
           port = webPort;
