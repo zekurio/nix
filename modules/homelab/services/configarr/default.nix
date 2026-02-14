@@ -43,14 +43,14 @@ in {
 
     configFile = lib.mkOption {
       type = lib.types.str;
-      default = "/etc/configarr/config.yml";
-      description = "Path to configarr config.yml";
+      default = "/etc/configarr/config.yaml";
+      description = "Path to configarr config file";
     };
 
     configText = lib.mkOption {
       type = lib.types.lines;
-      default = "";
-      description = "Configarr config.yml contents";
+      default = builtins.readFile ./config.yaml;
+      description = "Configarr config file contents";
     };
 
     secretsFile = lib.mkOption {

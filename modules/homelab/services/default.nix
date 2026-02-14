@@ -2,7 +2,7 @@
   imports = [
     ./beets.nix
     ./caddy.nix
-    ./configarr.nix
+    ./configarr
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
