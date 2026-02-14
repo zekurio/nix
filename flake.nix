@@ -122,6 +122,13 @@
           ./machines/nixos/lilith/configuration.nix
         ];
       };
+      sachiel = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          ./machines/nixos/sachiel/configuration.nix
+        ];
+      };
     };
 
     # Build NixOS configurations from host definitions
