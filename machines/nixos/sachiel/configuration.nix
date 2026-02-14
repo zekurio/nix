@@ -3,7 +3,6 @@
   pkgs,
   inputs,
   modulesPath,
-  lib,
   ...
 }: let
   mainUser = "zekurio";
@@ -21,18 +20,7 @@ in {
     kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [
       "kvm-amd"
-      "zenpower"
-      "it87"
     ];
-    kernelParams = [
-      "acpi_enforce_resources=lax"
-      "amdgpu.ppfeaturemask=0xffffffff"
-    ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
-    extraModprobeConfig = ''
-      options it87 force_id=0x8628
-    '';
-    blacklistedKernelModules = ["k10temp"];
     loader = {
       timeout = 3;
       efi.canTouchEfiVariables = true;
@@ -40,20 +28,26 @@ in {
       limine = {
         enable = true;
         maxGenerations = 3;
-        resolution = "2560x1440x32";
         secureBoot.enable = true;
         style = {
-          interface.resolution = "2560x1440";
+          interface.resolution = "1920x1080";
           wallpapers = [../../../assets/limine.jpeg];
         };
         extraConfig = ''
           remember_last_entry: yes
         '';
-        extraEntries = ''
-          /Windows 11
-            protocol: efi
-            path: boot():/EFI/Microsoft/Boot/Bootmgfw.efi
-        '';
+      };
+    };
+    initrd = {
+      systemd = {
+        enable = true;
+        tpm2.enable = true;
+      };
+      luks.devices.cryptroot = {
+        crypttabExtraOpts = [
+          "tpm2-device=auto"
+          "tpm2-pcrs=7+11"
+        ];
       };
     };
   };
@@ -108,15 +102,29 @@ in {
       ryzen-smu.enable = true;
     };
 
-    # AMD GPU
+    # Hybrid graphics (AMD iGPU + NVIDIA dGPU)
     graphics = {
       enable = true;
       enable32Bit = true;
-      extraPackages = with pkgs; [
-        rocmPackages.clr.icd
-      ];
     };
-    amdgpu.overdrive.enable = true;
+    nvidia = {
+      open = false;
+      nvidiaSettings = true;
+      modesetting.enable = true;
+      powerManagement = {
+        enable = true;
+        finegrained = true;
+      };
+      prime = {
+        # TODO: replace with values from `lspci -D -d ::03xx` on sachiel
+        amdgpuBusId = "PCI:0@0:0:0";
+        nvidiaBusId = "PCI:1@0:0:0";
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+      };
+    };
 
     bluetooth = {
       enable = true;
@@ -126,7 +134,7 @@ in {
 
   # Networking
   networking = {
-    hostName = "lilith";
+    hostName = "sachiel";
     networkmanager.enable = true;
     nameservers = ["192.168.0.2"];
     firewall = {
@@ -138,11 +146,17 @@ in {
   # Security
   security = {
     rtkit.enable = true; # Real-time scheduling for audio
+    tpm2.enable = true;
     pam.services.greetd.enableGnomeKeyring = true;
   };
 
   # Services
   services = {
+    xserver.videoDrivers = [
+      "amdgpu"
+      "nvidia"
+    ];
+
     # System
     openssh = {
       enable = true;
@@ -155,7 +169,6 @@ in {
     accounts-daemon.enable = true;
 
     # Hardware
-    lact.enable = true; # AMD GPU control
     power-profiles-daemon.enable = true;
     udisks2.enable = true;
     scx = {
@@ -208,19 +221,10 @@ in {
     };
 
     coolercontrol.enable = true;
-
-    # Gaming
-    steam = {
-      enable = true;
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-      localNetworkGameTransfers.openFirewall = true;
-    };
   };
 
   # Environment
   environment.sessionVariables = {
-    AMD_VULKAN_ICD = "RADV";
     MESA_SHADER_CACHE_MAX_SIZE = "12G";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     QT_QPA_PLATFORM = "wayland";
@@ -258,8 +262,10 @@ in {
   ];
 
   # Modules
-  home-manager.users.zekurio.modules.hm.desktop.enable = true;
-  home-manager.users.zekurio.modules.hm.gaming.enable = true;
+  home-manager.users.zekurio.modules.hm.desktop = {
+    enable = true;
+    keyboardLayout = "de";
+  };
   modules.virtualization.enable = true;
 
   # Systemd
