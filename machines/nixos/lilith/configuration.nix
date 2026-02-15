@@ -58,12 +58,20 @@
     AMD_VULKAN_ICD = "RADV";
   };
 
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.amd
+    ryzen-monitor-ng
+  ];
+
   modules.workstation = {
     common.enable = true;
     desktop.enable = true;
     nfsClient.enable = true;
     bootLimine.enable = true;
-    coolercontrol.enable = true;
+    hardware = {
+      enable = true;
+      coolercontrol.enable = true;
+    };
     gaming.enable = true;
   };
 
