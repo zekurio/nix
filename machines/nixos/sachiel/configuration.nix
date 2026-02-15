@@ -17,7 +17,7 @@
     kernelPackages = pkgs.linuxPackages_zen;
     kernelParams = [
       "mem_sleep_default=deep"
-      "d resume_offset=110143488"
+      "resume_offset=110143488"
     ];
     resumeDevice = "/dev/mapper/cryptroot";
     kernelModules = [
