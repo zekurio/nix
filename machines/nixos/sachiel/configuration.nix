@@ -1,9 +1,11 @@
 {
+  lib,
   pkgs,
   inputs,
   modulesPath,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
@@ -13,6 +15,11 @@
 
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
+    kernelParams = [
+      "mem_sleep_default=deep"
+      "d resume_offset=110143488"
+    ];
+    resumeDevice = "/dev/mapper/cryptroot";
     kernelModules = [
       "kvm-amd"
     ];
@@ -40,8 +47,7 @@
       finegrained = true;
     };
     prime = {
-      # TODO: replace with values from `lspci -D -d ::03xx` on sachiel
-      amdgpuBusId = "PCI:0@0:0:0";
+      amdgpuBusId = "PCI:4@0:0:0";
       nvidiaBusId = "PCI:1@0:0:0";
       offload = {
         enable = true;
@@ -52,11 +58,45 @@
 
   networking.hostName = "sachiel";
 
+  powerManagement.enable = true;
+
+  swapDevices = lib.mkForce [
+    {
+      device = "/var/lib/swapfile";
+      size = 32 * 1024;
+    }
+  ];
+
   security.tpm2.enable = true;
+
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchExternalPower = "suspend-then-hibernate";
+    HandleLidSwitchDocked = "ignore";
+    HandlePowerKey = "suspend-then-hibernate";
+  };
+
+  systemd.sleep.extraConfig = ''
+    AllowSuspend=yes
+    AllowHibernation=yes
+    AllowSuspendThenHibernate=yes
+    HibernateDelaySec=60min
+  '';
 
   services.xserver.videoDrivers = [
     "amdgpu"
     "nvidia"
+  ];
+
+  services.upower.enable = true;
+
+  environment.sessionVariables = {
+    AMD_VULKAN_ICD = "RADV";
+  };
+
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.amd
+    ryzen-monitor-ng
   ];
 
   modules.workstation = {
@@ -67,6 +107,7 @@
     };
     nfsClient.enable = true;
     bootLimine.enable = true;
+    hardware.enable = true;
   };
 
   system.stateVersion = "25.11"; # DO NOT CHANGE
