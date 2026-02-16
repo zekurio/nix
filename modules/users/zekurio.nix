@@ -49,7 +49,7 @@
 
     users.zekurio = {
       imports = [
-        ../home-manager
+        ../workstation/hm
       ];
 
       home = {

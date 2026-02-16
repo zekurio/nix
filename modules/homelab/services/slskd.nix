@@ -7,6 +7,9 @@
   cfg = config.services.slskd-wrapped;
   domain = "slskd.zekurio.xyz";
   webPort = 5030;
+  listenPort = 50300;
+  socksAddress = "10.100.0.1";
+  socksPort = 1080;
   musicDir = "/tank/media/music";
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
@@ -68,6 +71,13 @@ in {
         soulseek = {
           description = "new to soulseek. sharing what I have. most is ripped from tidal/deezer or torrents.";
           picture = profilePicture;
+          listen_port = listenPort;
+          # Route all Soulseek connections through VPS so the server sees VPS IP
+          connection.proxy = {
+            enabled = true;
+            address = socksAddress;
+            port = socksPort;
+          };
         };
         directories = {
           downloads = downloadDir;
@@ -87,6 +97,11 @@ in {
         };
       };
     };
+
+    # Ensure profile picture is readable by slskd
+    systemd.tmpfiles.rules = [
+      "z ${profilePicture} 0644 ${config.services.slskd.user} ${config.services.slskd.group} -"
+    ];
 
     # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
     systemd.services.slskd.serviceConfig = {
