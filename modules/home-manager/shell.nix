@@ -3,18 +3,18 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.modules.hm.shell;
   isDesktop = config.modules.hm.desktop.enable;
   onePassPath = "~/.1password/agent.sock";
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
-in {
+in
+{
   options.modules.hm.shell = {
-    enable =
-      lib.mkEnableOption "shell configuration"
-      // {
-        default = true;
-      };
+    enable = lib.mkEnableOption "shell configuration" // {
+      default = true;
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -146,8 +146,8 @@ in {
             user = "zekurio";
             forwardAgent = true;
           };
-          "sahaquiel" = {
-            hostname = "46.225.140.83";
+          "shamshel" = {
+            hostname = "46.224.128.128";
             user = "zekurio";
             forwardAgent = true;
             setEnv = {

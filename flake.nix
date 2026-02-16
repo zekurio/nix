@@ -129,6 +129,14 @@
           ./machines/nixos/sachiel/configuration.nix
         ];
       };
+      shamshel = {
+        system = "x86_64-linux";
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.sops-nix.nixosModules.sops
+          ./machines/nixos/shamshel/configuration.nix
+        ];
+      };
     };
 
     # Build NixOS configurations from host definitions

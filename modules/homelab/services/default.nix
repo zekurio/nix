@@ -3,6 +3,7 @@
     ./beets.nix
     ./caddy.nix
     ./configarr
+    ./frp.nix
     ./immich.nix
     ./jellyfin.nix
     ./jellyseerr.nix
