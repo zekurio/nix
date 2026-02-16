@@ -2,12 +2,10 @@
   config,
   modulesPath,
   ...
-}:
-let
+}: let
   serverPort = 7000;
   slskdPort = 50300;
-in
-{
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
@@ -38,7 +36,7 @@ in
   sops = {
     defaultSopsFile = ../../../secrets/shamshel.yaml;
     age.keyFile = "/var/lib/sops-nix/key.txt";
-    secrets = { };
+    secrets = {};
   };
 
   # FRP server
@@ -70,7 +68,7 @@ in
   system.autoUpgrade = {
     enable = true;
     flake = "github:zekurio/nix#shamshel";
-    dates = "daily";
+    dates = "Sun *-*-* 03:00:00";
     randomizedDelaySec = "45min";
     allowReboot = true;
   };

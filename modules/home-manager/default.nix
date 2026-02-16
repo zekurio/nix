@@ -1,7 +1,7 @@
 {
   imports = [
     ./shell.nix
-    ./desktop.nix
+    ./desktop
     ./gaming.nix
   ];
 }
