@@ -1,8 +1,13 @@
 keys:
   - &adam age1308nxr6h57dvujczq29kc8du8qylnma8m5utn905en758qck0fwssmytrm
+  - &shamshel age173sms75yp82dq5jd5akequp6gg0d7xhqr757wg9gdp65lnf5d5hqryumcg
 
 creation_rules:
   - path_regex: secrets/adam\.yaml$
     key_groups:
       - age:
           - *adam
+  - path_regex: secrets/shamshel\.yaml$
+    key_groups:
+      - age:
+          - *shamshel
