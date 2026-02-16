@@ -85,8 +85,8 @@ in {
   # Lightweight SOCKS5 proxy for slskd to route Soulseek connections through VPS
   systemd.services.microsocks = {
     description = "Lightweight SOCKS5 proxy (WireGuard only)";
-    after = ["network-online.target"];
-    wants = ["network-online.target"];
+    after = ["wireguard-wg-adam.service"];
+    requires = ["wireguard-wg-adam.service"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {
       ExecStart = "${pkgs.microsocks}/bin/microsocks -i 10.100.0.1 -p ${toString socksPort}";
