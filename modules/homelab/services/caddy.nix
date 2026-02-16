@@ -89,6 +89,16 @@ in {
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} {
           resolvers 1.1.1.1 1.0.0.1
         }
+        servers {
+          listener_wrappers {
+            proxy_protocol {
+              timeout 5s
+              allow 127.0.0.1/32
+            }
+            tls
+          }
+          trusted_proxies static 127.0.0.1/32
+        }
       '';
       virtualHosts =
         lib.mapAttrs (_: hostCfg: {
