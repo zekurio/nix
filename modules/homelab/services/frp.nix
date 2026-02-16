@@ -31,6 +31,7 @@ in {
             localIP = "127.0.0.1";
             localPort = 80;
             remotePort = 80;
+            transport.proxyProtocolVersion = "v2";
           }
           {
             name = "https";
@@ -38,6 +39,7 @@ in {
             localIP = "127.0.0.1";
             localPort = 443;
             remotePort = 443;
+            transport.proxyProtocolVersion = "v2";
           }
           {
             name = "slskd";
