@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.frp-wrapped;
-  serverAddr = "shamshel.zekurio.xyz";
+  serverAddr = "46.224.128.128";
   serverPort = 7000;
   slskdPort = 50300;
 in {

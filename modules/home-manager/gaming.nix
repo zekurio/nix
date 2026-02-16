@@ -30,6 +30,7 @@ in {
     '';
 
     home.packages = with pkgs; [
+      faugus-launcher
       heroic
       mangohud
       protonplus
