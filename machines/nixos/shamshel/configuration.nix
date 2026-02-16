@@ -34,6 +34,7 @@ in {
         slskdPort
       ];
       allowedUDPPorts = [wgPort];
+      interfaces.wg-adam.allowedTCPPorts = [socksPort];
     };
 
     # Point-to-point WireGuard tunnel to adam (homelab)
