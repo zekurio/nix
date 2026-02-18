@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.slskd-wrapped;
   domain = "slskd.zekurio.xyz";
   webPort = 5030;
@@ -22,7 +23,8 @@
     ${pkgs.findutils}/bin/find ${musicDir} -type d -exec ${pkgs.coreutils}/bin/chmod 2775 {} +
     ${pkgs.findutils}/bin/find ${musicDir} -type f ! -perm -g+r -exec ${pkgs.coreutils}/bin/chmod g+r {} +
   '';
-in {
+in
+{
   options.services.slskd-wrapped = {
     enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
   };
@@ -34,19 +36,17 @@ in {
       domain = null;
       environmentFile = config.sops.secrets.slskd_env.path;
       settings = {
-        # Upstream NixOS module declares typed options without defaults,
-        # which breaks nix eval. Set sensible defaults here.
         flags.force_share_scan = false;
-        rooms = [];
-        filters.search.request = [];
+        rooms = [ ];
+        filters.search.request = [ ];
         global = {
           upload = {
-            slots = 20;
-            speed_limit = 10000;
+            slots = 30;
+            speed_limit = 4096;
           };
           download = {
             slots = 500;
-            speed_limit = 10000;
+            speed_limit = 32768;
           };
         };
         retention = {
@@ -69,7 +69,7 @@ in {
         };
 
         soulseek = {
-          description = "new to soulseek. sharing what I have. most is ripped from tidal/deezer or torrents.";
+          description = "new to soulseek. sharing what I have. if something does not work/is locked let me know.";
           picture = profilePicture;
           listen_port = listenPort;
           # Route all Soulseek connections through VPS so the server sees VPS IP
@@ -84,7 +84,7 @@ in {
           incomplete = incompleteDir;
         };
         shares = {
-          directories = [musicDir];
+          directories = [ musicDir ];
           filters = [
             "\\.ini$"
             "Thumbs.db$"
@@ -106,7 +106,7 @@ in {
     # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
     systemd.services.slskd.serviceConfig = {
       UMask = "0002";
-      ReadOnlyPaths = lib.mkForce [];
+      ReadOnlyPaths = lib.mkForce [ ];
       ReadWritePaths = [
         musicDir
         downloadDir
@@ -118,8 +118,8 @@ in {
     # Ensure files in shared music tree stay readable for slskd uploads
     systemd.services.slskd-fix-music-permissions = {
       description = "Fix shared music permissions for slskd";
-      before = ["slskd.service"];
-      wantedBy = ["multi-user.target"];
+      before = [ "slskd.service" ];
+      wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = fixMusicPermissionsScript;
@@ -127,7 +127,7 @@ in {
     };
 
     systemd.timers.slskd-fix-music-permissions = {
-      wantedBy = ["timers.target"];
+      wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "hourly";
         Persistent = true;
@@ -135,8 +135,8 @@ in {
     };
 
     systemd.services.slskd = {
-      wants = ["slskd-fix-music-permissions.service"];
-      after = ["slskd-fix-music-permissions.service"];
+      wants = [ "slskd-fix-music-permissions.service" ];
+      after = [ "slskd-fix-music-permissions.service" ];
     };
 
     # SOPS secret for slskd credentials
