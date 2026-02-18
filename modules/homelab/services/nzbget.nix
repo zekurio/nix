@@ -96,6 +96,10 @@ in {
   config = lib.mkIf config.services.nzbget-wrapped.enable {
     services.nzbget = {
       enable = true;
+      settings = {
+        # ensure downloaded files are group-writable (share group can process them)
+        UMask = "0002";
+      };
     };
 
     systemd.tmpfiles.rules = [

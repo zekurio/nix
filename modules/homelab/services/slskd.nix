@@ -3,8 +3,7 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.services.slskd-wrapped;
   domain = "slskd.zekurio.xyz";
   webPort = 5030;
@@ -23,8 +22,7 @@ let
     ${pkgs.findutils}/bin/find ${musicDir} -type d -exec ${pkgs.coreutils}/bin/chmod 2775 {} +
     ${pkgs.findutils}/bin/find ${musicDir} -type f ! -perm -g+r -exec ${pkgs.coreutils}/bin/chmod g+r {} +
   '';
-in
-{
+in {
   options.services.slskd-wrapped = {
     enable = lib.mkEnableOption "slskd Soulseek client with Caddy integration";
   };
@@ -37,8 +35,8 @@ in
       environmentFile = config.sops.secrets.slskd_env.path;
       settings = {
         flags.force_share_scan = false;
-        rooms = [ ];
-        filters.search.request = [ ];
+        rooms = [];
+        filters.search.request = [];
         global = {
           upload = {
             slots = 30;
@@ -84,7 +82,7 @@ in
           incomplete = incompleteDir;
         };
         shares = {
-          directories = [ musicDir ];
+          directories = [musicDir];
           filters = [
             "\\.ini$"
             "Thumbs.db$"
@@ -106,7 +104,7 @@ in
     # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
     systemd.services.slskd.serviceConfig = {
       UMask = "0002";
-      ReadOnlyPaths = lib.mkForce [ ];
+      ReadOnlyPaths = lib.mkForce [];
       ReadWritePaths = [
         musicDir
         downloadDir
@@ -118,8 +116,8 @@ in
     # Ensure files in shared music tree stay readable for slskd uploads
     systemd.services.slskd-fix-music-permissions = {
       description = "Fix shared music permissions for slskd";
-      before = [ "slskd.service" ];
-      wantedBy = [ "multi-user.target" ];
+      before = ["slskd.service"];
+      wantedBy = ["multi-user.target"];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = fixMusicPermissionsScript;
@@ -127,7 +125,7 @@ in
     };
 
     systemd.timers.slskd-fix-music-permissions = {
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         OnCalendar = "hourly";
         Persistent = true;
@@ -135,8 +133,8 @@ in
     };
 
     systemd.services.slskd = {
-      wants = [ "slskd-fix-music-permissions.service" ];
-      after = [ "slskd-fix-music-permissions.service" ];
+      wants = ["slskd-fix-music-permissions.service"];
+      after = ["slskd-fix-music-permissions.service"];
     };
 
     # SOPS secret for slskd credentials
