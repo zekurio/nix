@@ -41,7 +41,7 @@
     modesetting.enable = true;
     powerManagement = {
       enable = true;
-      finegrained = true;
+      finegrained = false; # finegrained conflicts with system suspend on PRIME offload setups
     };
     prime = {
       amdgpuBusId = "PCI:4@0:0:0";
@@ -69,8 +69,9 @@
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchExternalPower = "suspend-then-hibernate";
-    HandleLidSwitchDocked = "ignore";
+    HandleLidSwitchDocked = "suspend-then-hibernate";
     HandlePowerKey = "suspend-then-hibernate";
+    LidSwitchIgnoreInhibited = "no";
   };
 
   systemd.sleep.extraConfig = ''
@@ -79,6 +80,14 @@
     AllowSuspendThenHibernate=yes
     HibernateDelaySec=60min
   '';
+
+  # nvidia-suspend/hibernate.service only declare Before= for their respective
+  # units; suspend-then-hibernate is not covered, so add the missing ordering.
+  systemd.services = {
+    nvidia-suspend.before = ["systemd-suspend-then-hibernate.service"];
+    nvidia-hibernate.before = ["systemd-suspend-then-hibernate.service"];
+    nvidia-resume.after = ["systemd-suspend-then-hibernate.service"];
+  };
 
   services.xserver.videoDrivers = [
     "amdgpu"
