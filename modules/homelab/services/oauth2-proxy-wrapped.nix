@@ -27,8 +27,6 @@
     "--oidc-issuer-url=${oidcIssuerUrl}"
     "--client-id=${clientId}"
     "--http-address=127.0.0.1:${toString port}"
-    # Forward-auth mode: return 202 for authenticated requests, no real upstream
-    "--upstream=static://202"
     "--cookie-domain=${cookieDomain}"
     "--whitelist-domain=${cookieDomain}"
     # Allow any email; Pocket ID manages which users can access each client
