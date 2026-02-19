@@ -16,7 +16,7 @@ in {
       settings = {
         server.urlBase = "/prowlarr";
         # delegate auth to the Caddy / Pocket ID forward-auth layer
-        server.authenticationMethod = "External";
+        auth.method = "External";
       };
     };
 

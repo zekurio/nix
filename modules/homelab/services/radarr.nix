@@ -17,7 +17,7 @@ in {
       settings = {
         server.urlBase = "/radarr";
         # delegate auth to the Caddy / Pocket ID forward-auth layer
-        server.authenticationMethod = "External";
+        auth.method = "External";
       };
     };
 
