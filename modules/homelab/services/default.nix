@@ -12,6 +12,7 @@
     ./media-share.nix
     ./navidrome.nix
     ./nzbget.nix
+    ./oauth2-proxy-wrapped.nix
     ./paperless-ngx.nix
     ./pocket-id.nix
     ./prowlarr.nix

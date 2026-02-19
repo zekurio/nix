@@ -15,12 +15,15 @@ in {
       enable = true;
       settings = {
         server.urlBase = "/prowlarr";
+        # delegate auth to the Caddy / Pocket ID forward-auth layer
+        server.authenticationMethod = "External";
       };
     };
 
     # Caddy virtual host configuration with base URL
     services.caddy-wrapper.virtualHosts."prowlarr" = {
       inherit domain;
+      forwardAuth = "127.0.0.1:4180";
       extraConfig = ''
         redir /prowlarr /prowlarr/
         @prowlarr path /prowlarr*

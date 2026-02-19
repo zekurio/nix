@@ -16,6 +16,8 @@ in {
       enable = true;
       settings = {
         server.urlBase = "/radarr";
+        # delegate auth to the Caddy / Pocket ID forward-auth layer
+        server.authenticationMethod = "External";
       };
     };
 
@@ -27,6 +29,7 @@ in {
     # Caddy virtual host configuration with base URL
     services.caddy-wrapper.virtualHosts."radarr" = {
       inherit domain;
+      forwardAuth = "127.0.0.1:4180";
       extraConfig = ''
         redir /radarr /radarr/
         @radarr path /radarr*

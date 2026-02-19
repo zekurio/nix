@@ -99,6 +99,9 @@ in {
       settings = {
         # ensure downloaded files are group-writable (share group can process them)
         UMask = "0002";
+        # disable built-in auth — Caddy / Pocket ID forward-auth is the gate
+        ControlUsername = "";
+        ControlPassword = "";
       };
     };
 
@@ -109,6 +112,7 @@ in {
 
     services.caddy-wrapper.virtualHosts."nzbget" = {
       inherit domain;
+      forwardAuth = "127.0.0.1:4180";
       reverseProxy = "127.0.0.1:${toString port}";
     };
   };

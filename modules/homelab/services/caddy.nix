@@ -26,6 +26,7 @@
         } or {
           reverseProxies = [];
           extraConfigs = [];
+          forwardAuth = null;
         };
       # Make matchers unique to avoid conflicts
       uniqueExtraConfig =
@@ -40,6 +41,11 @@
             existing.reverseProxies
             ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
           extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
+          # First non-null forwardAuth across all entries for this domain wins
+          forwardAuth =
+            if hostCfg.forwardAuth != null
+            then hostCfg.forwardAuth
+            else existing.forwardAuth;
         };
       }
   ) {} (builtins.attrNames cfg.virtualHosts);
@@ -68,6 +74,11 @@ in {
               type = lib.types.lines;
               default = "";
               description = "Extra Caddy configuration for this virtual host";
+            };
+            forwardAuth = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "oauth2-proxy address for forward auth (e.g. 127.0.0.1:4180). When set, all requests to this domain (except /oauth2/*) are gated behind Pocket ID.";
             };
           };
         }
@@ -103,6 +114,22 @@ in {
       virtualHosts =
         lib.mapAttrs (_: hostCfg: {
           extraConfig = ''
+            header {
+              X-Robots-Tag "noindex, nofollow"
+            }
+            ${lib.optionalString (hostCfg.forwardAuth != null) ''
+              handle /oauth2/* {
+                reverse_proxy ${hostCfg.forwardAuth}
+              }
+              @not_oauth2 not path /oauth2/*
+              forward_auth @not_oauth2 ${hostCfg.forwardAuth} {
+                uri /oauth2/auth
+                copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
+              }
+              handle_errors 401 {
+                redir /oauth2/start?rd={http.request.uri} 302
+              }
+            ''}
             ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
             ${lib.optionalString (
               hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
