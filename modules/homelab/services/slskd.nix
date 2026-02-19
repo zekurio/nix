@@ -147,6 +147,7 @@ in {
     # Caddy reverse proxy
     services.caddy-wrapper.virtualHosts."slskd" = {
       inherit domain;
+      forwardAuth = "127.0.0.1:4181";
       reverseProxy = "127.0.0.1:${toString webPort}";
     };
   };

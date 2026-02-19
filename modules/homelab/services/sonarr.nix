@@ -26,6 +26,8 @@ in {
       package = pkgs.sonarr.override {sqlite = sqlite-3-50;};
       settings = {
         server.urlBase = "/sonarr";
+        # delegate auth to the Caddy / Pocket ID forward-auth layer
+        server.authenticationMethod = "External";
       };
     };
 
@@ -36,6 +38,7 @@ in {
     # Caddy virtual host configuration with base URL
     services.caddy-wrapper.virtualHosts."sonarr" = {
       domain = domain;
+      forwardAuth = "127.0.0.1:4180";
       extraConfig = ''
         redir /sonarr /sonarr/
         @sonarr path /sonarr*

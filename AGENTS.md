@@ -1,6 +1,6 @@
 # AGENTS.md
 
-NixOS flake configuration repository managing five hosts. The entire codebase is Nix --
+NixOS flake configuration repository managing four hosts. The entire codebase is Nix --
 there are no shell scripts, no test suites, and no CI/CD pipelines.
 
 | Host | Role | Key traits |
@@ -8,7 +8,6 @@ there are no shell scripts, no test suites, and no CI/CD pipelines.
 | `adam` | Homelab server | ZFS, Intel QSV, 18+ wrapped services, Caddy, Samba/NFS, SOPS secrets |
 | `tabris` | WSL dev box | NixOS-WSL, minimal config |
 | `lilith` | Desktop workstation | AMD GPU, Limine boot, Niri compositor, gaming |
-| `sachiel` | Laptop workstation | LUKS+TPM2, AMD+NVIDIA PRIME, suspend-then-hibernate |
 | `shamshel` | VPS | QEMU guest, FRP server, SOPS secrets, auto-upgrade |
 
 ## Build / Format / Evaluate Commands
@@ -52,8 +51,6 @@ machines/nixos/
   tabris/configuration.nix     # WSL dev box
   lilith/configuration.nix     # Desktop workstation
   lilith/disko.nix
-  sachiel/configuration.nix    # Laptop workstation
-  sachiel/disko.nix            # LUKS encrypted disk layout
   shamshel/configuration.nix   # VPS
   shamshel/disko.nix
 modules/
