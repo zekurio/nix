@@ -125,9 +125,10 @@ in {
               forward_auth @not_oauth2 ${hostCfg.forwardAuth} {
                 uri /oauth2/auth
                 copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
-              }
-              handle_errors 401 {
-                redir /oauth2/start?rd={http.request.uri} 302
+                @unauthorized status 401
+                handle_response @unauthorized {
+                  redir * /oauth2/start?rd={http.request.uri} 302
+                }
               }
             ''}
             ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
