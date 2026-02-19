@@ -121,6 +121,14 @@ in {
               handle /oauth2/* {
                 reverse_proxy ${hostCfg.forwardAuth}
               }
+              # Requests carrying the shared bypass token skip OIDC entirely
+              @bypass header X-Bypass-Token {env.CADDY_BYPASS_TOKEN}
+              handle @bypass {
+                ${lib.concatStringsSep "\n    " hostCfg.extraConfigs}
+                ${lib.optionalString (
+                hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
+              ) "reverse_proxy ${builtins.head hostCfg.reverseProxies}"}
+              }
               @not_oauth2 not path /oauth2/*
               forward_auth @not_oauth2 ${hostCfg.forwardAuth} {
                 uri /oauth2/auth
