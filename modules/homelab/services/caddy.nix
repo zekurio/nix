@@ -121,7 +121,7 @@ in {
               handle /oauth2/* {
                 reverse_proxy ${hostCfg.forwardAuth}
               }
-              @not_oauth2 not path /oauth2/* /api/*
+              @not_oauth2 not path /oauth2/*
               forward_auth @not_oauth2 ${hostCfg.forwardAuth} {
                 uri /oauth2/auth
                 copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
