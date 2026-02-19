@@ -12,8 +12,8 @@
 
   # Client IDs are public identifiers — fill these in after creating the OIDC
   # clients in Pocket ID. Secrets live in the SOPS env files below.
-  clientIdSchnitzelflix = ""; # TODO: paste from Pocket ID
-  clientIdZekurio = ""; # TODO: paste from Pocket ID
+  clientIdSchnitzelflix = "80266961-c063-4ad5-89aa-6db676a78654";
+  clientIdZekurio = "b69058a1-6a3d-4f1e-8217-4f654fac27de";
 
   portSchnitzelflix = 4180;
   portZekurio = 4181;

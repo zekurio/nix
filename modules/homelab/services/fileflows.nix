@@ -10,9 +10,6 @@
   shareGid = 995;
   port = 5000;
   domain = "ff.schnitzelflix.xyz";
-  # Client ID is a public identifier — fill in after creating the OIDC client
-  # in Pocket ID. The client secret lives in the SOPS secret below.
-  oidcClientId = ""; # TODO: paste from Pocket ID
 in {
   options.services.fileflows-wrapped = {
     enable = lib.mkEnableOption "FileFlows media processing with Caddy integration";
@@ -26,12 +23,7 @@ in {
         TZ = "Europe/Vienna";
         PUID = toString shareUid;
         PGID = toString shareGid;
-        # Native OIDC — Pocket ID as the identity provider
-        OidcAuthority = "https://auth.zekurio.xyz";
-        OidcClientId = oidcClientId;
-        OidcCallbackAddress = "https://${domain}";
       };
-      environmentFiles = [config.sops.secrets.fileflows_oidc_env.path];
       volumes = [
         "/tmp/fileflows:/temp"
         "/var/lib/fileflows/data:/app/Data"
@@ -43,11 +35,6 @@ in {
         "--network=host"
         "--device=/dev/dri:/dev/dri"
       ];
-    };
-
-    sops.secrets.fileflows_oidc_env = {
-      # container runs as shareUid/shareGid; caddy/podman reads the secret
-      mode = "0444";
     };
 
     systemd.tmpfiles.rules = [
