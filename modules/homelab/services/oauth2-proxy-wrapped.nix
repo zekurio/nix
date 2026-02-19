@@ -37,8 +37,6 @@
     "--proxy-prefix=/oauth2"
     # Skip auth check on oauth2-proxy's own routes
     "--skip-auth-regex=^/oauth2/"
-    # Allow API clients (e.g. nzb360) to bypass OIDC; apps enforce their own API key
-    "--skip-auth-regex=^/api/"
   ];
 
   mkService = {
