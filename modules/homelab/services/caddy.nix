@@ -123,7 +123,7 @@ in {
               }
               # Bypass token: skip OIDC for API clients (e.g. nzb360)
               @not_bypass {
-                not header X-Bypass-Token {env.CADDY_BYPASS_TOKEN}
+                not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
                 not path /oauth2/*
               }
               forward_auth @not_bypass ${hostCfg.forwardAuth} {
