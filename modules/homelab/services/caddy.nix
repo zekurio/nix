@@ -121,16 +121,12 @@ in {
               handle /oauth2/* {
                 reverse_proxy ${hostCfg.forwardAuth}
               }
-              # Requests carrying the shared bypass token skip OIDC entirely
-              @bypass header X-Bypass-Token {env.CADDY_BYPASS_TOKEN}
-              handle @bypass {
-                ${lib.concatStringsSep "\n    " hostCfg.extraConfigs}
-                ${lib.optionalString (
-                hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
-              ) "reverse_proxy ${builtins.head hostCfg.reverseProxies}"}
+              # Bypass token: skip OIDC for API clients (e.g. nzb360)
+              @not_bypass {
+                not header X-Bypass-Token {env.CADDY_BYPASS_TOKEN}
+                not path /oauth2/*
               }
-              @not_oauth2 not path /oauth2/*
-              forward_auth @not_oauth2 ${hostCfg.forwardAuth} {
+              forward_auth @not_bypass ${hostCfg.forwardAuth} {
                 uri /oauth2/auth
                 copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
                 @unauthorized status 401
