@@ -3,7 +3,8 @@
   pkgs,
   modulesPath,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
@@ -21,11 +22,11 @@
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
+    extraModulePackages = [ config.boot.kernelPackages.zenpower ];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
-    blacklistedKernelModules = ["k10temp"];
+    blacklistedKernelModules = [ "k10temp" ];
 
     loader.limine = {
       resolution = "2560x1440x32";
@@ -47,7 +48,7 @@
 
   networking = {
     hostName = "lilith";
-    nameservers = ["192.168.0.2"];
+    nameservers = [ "192.168.0.2" ];
   };
 
   services.lact.enable = true;
@@ -71,6 +72,7 @@
       coolercontrol.enable = true;
     };
     gaming.enable = true;
+    vpn.enable = true;
   };
 
   system.stateVersion = "25.11"; # DO NOT CHANGE
