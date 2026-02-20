@@ -92,6 +92,7 @@ in {
         web = {
           port = webPort;
           https.disabled = true;
+          authentication.disabled = true;
         };
       };
     };
