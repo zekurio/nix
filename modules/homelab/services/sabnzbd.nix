@@ -2,16 +2,14 @@
   config,
   lib,
   ...
-}:
-let
+}: let
   cfg = config.services.sabnzbd-wrapped;
   domain = "sab.schnitzelflix.xyz";
   port = 6789;
   serviceUser = "sabnzbd";
   serviceGroup = "sabnzbd";
   shareUmask = "0002";
-in
-{
+in {
   options.services.sabnzbd-wrapped = {
     enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";
   };
@@ -27,6 +25,8 @@ in
         misc = {
           host = "0.0.0.0";
           port = port;
+          username = "";
+          password = "";
           html_login = false;
           inet_exposure = "api+web (locally no auth)";
           complete_dir = "/mnt/downloads/complete";
