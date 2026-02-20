@@ -9,27 +9,6 @@
   port = 6789;
   serviceUser = "nzbget";
   serviceGroup = "nzbget";
-  serverSecretNames = [
-    "nzbget_server1_active"
-    "nzbget_server1_name"
-    "nzbget_server1_level"
-    "nzbget_server1_optional"
-    "nzbget_server1_group"
-    "nzbget_server1_host"
-    "nzbget_server1_encryption"
-    "nzbget_server1_port"
-    "nzbget_server1_username"
-    "nzbget_server1_password"
-    "nzbget_server1_join_group"
-    "nzbget_server1_connections"
-    "nzbget_server1_retention"
-    "nzbget_server1_cert_verification"
-    "nzbget_server1_ip_version"
-  ];
-  authSecretNames = [
-    "nzbget_control_username"
-    "nzbget_control_password"
-  ];
   deleteSamplesScript = pkgs.writeTextFile {
     name = "DeleteSamples.py";
     executable = true;
@@ -118,80 +97,7 @@ in {
   config = lib.mkIf cfg.enable {
     services.nzbget = {
       enable = true;
-      settings = {
-        # ensure downloaded files are group-writable (share group can process them)
-        UMask = "0002";
-        # reduce disk fragmentation and avoid tiny system write buffers
-        ArticleCache = "100";
-        WriteBuffer = "1024";
-        # Caddy / Pocket ID is the gate, so keep NZBGet TLS off on localhost
-        SecureControl = "no";
-
-        # Category settings imported from adam
-        "Category1.Name" = "radarr";
-        "Category1.DestDir" = "/mnt/downloads/complete/radarr";
-        "Category1.Unpack" = "yes";
-        "Category1.Extensions" = "";
-        "Category1.Aliases" = "";
-
-        "Category2.Name" = "sonarr";
-        "Category2.DestDir" = "/mnt/downloads/complete/sonarr";
-        "Category2.Unpack" = "yes";
-        "Category2.Extensions" = "";
-        "Category2.Aliases" = "";
-
-        "Category3.Name" = "lidarr";
-        "Category3.DestDir" = "/mnt/downloads/complete/lidarr";
-        "Category3.Unpack" = "yes";
-        "Category3.Extensions" = "";
-        "Category3.Aliases" = "";
-
-        "Category4.Name" = "manual";
-        "Category4.DestDir" = "/mnt/downloads/complete/manual";
-        "Category4.Unpack" = "yes";
-        "Category4.Extensions" = "";
-        "Category4.Aliases" = "";
-      };
     };
-
-    # Keep auth and Usenet provider secrets out of the Nix store
-    systemd.services.nzbget.preStart = lib.mkAfter ''
-      setConfOption() {
-        key="$1"
-        value="$2"
-        escapedValue="$(printf '%s' "$value" | ${pkgs.gnused}/bin/sed -e 's/[\\/&|]/\\&/g')"
-
-        if ${pkgs.gnugrep}/bin/grep -q "^$key=" /var/lib/nzbget/nzbget.conf; then
-          ${pkgs.gnused}/bin/sed -i "s|^$key=.*|$key=$escapedValue|" /var/lib/nzbget/nzbget.conf
-        else
-          printf '%s=%s\n' "$key" "$value" >>/var/lib/nzbget/nzbget.conf
-        fi
-      }
-
-      setConfOption "ControlUsername" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_control_username.path})"
-      setConfOption "ControlPassword" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_control_password.path})"
-      setConfOption "Server1.Active" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_active.path})"
-      setConfOption "Server1.Name" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_name.path})"
-      setConfOption "Server1.Level" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_level.path})"
-      setConfOption "Server1.Optional" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_optional.path})"
-      setConfOption "Server1.Group" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_group.path})"
-      setConfOption "Server1.Host" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_host.path})"
-      setConfOption "Server1.Encryption" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_encryption.path})"
-      setConfOption "Server1.Port" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_port.path})"
-      setConfOption "Server1.Username" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_username.path})"
-      setConfOption "Server1.Password" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_password.path})"
-      setConfOption "Server1.JoinGroup" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_join_group.path})"
-      setConfOption "Server1.Connections" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_connections.path})"
-      setConfOption "Server1.Retention" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_retention.path})"
-      setConfOption "Server1.CertVerification" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_cert_verification.path})"
-      setConfOption "Server1.IpVersion" "$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.nzbget_server1_ip_version.path})"
-    '';
-
-    sops.secrets = lib.genAttrs (authSecretNames ++ serverSecretNames) (_: {
-      owner = "root";
-      group = "root";
-      mode = "0400";
-    });
 
     systemd.tmpfiles.rules = [
       "d /var/lib/nzbget/scripts 2775 ${serviceUser} ${serviceGroup} -"
