@@ -11,7 +11,7 @@
     ./jellything.nix
     ./media-share.nix
     ./navidrome.nix
-    ./nzbget.nix
+    ./sabnzbd.nix
     ./oauth2-proxy-wrapped.nix
     ./paperless-ngx.nix
     ./pocket-id.nix
