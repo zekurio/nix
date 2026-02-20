@@ -18,6 +18,7 @@
       "ftintitle"
       "fetchart"
       "embedart"
+      "lyrics"
     ];
     import = {
       write = true;
@@ -36,6 +37,9 @@
     ftintitle = {
       auto = true;
       drop = false;
+    };
+    lyrics = {
+      auto = true;
     };
   };
 
