@@ -17,9 +17,6 @@
     "/tank/media/movies"
     "/tank/media/music"
     "/mnt/downloads"
-    "/mnt/downloads/converted"
-    "/mnt/downloads/converted/radarr"
-    "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/complete"
     "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/slskd"
@@ -97,7 +94,7 @@ in {
 
     systemd.tmpfiles.rules = directoryRules ++ aclRules;
 
-    # Fix already-existing content (created by FileFlows, downloaders, etc.)
+    # Fix already-existing content (created by downloaders, etc.)
     systemd.services.mediaShare-fixperms = lib.mkIf fixExisting {
       description = "Normalize media share permissions and ACLs";
       wantedBy = ["multi-user.target"];
