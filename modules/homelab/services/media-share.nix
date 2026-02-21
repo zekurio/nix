@@ -21,6 +21,9 @@
     "/mnt/downloads/complete/radarr"
     "/mnt/downloads/complete/slskd"
     "/mnt/downloads/complete/sonarr"
+    "/mnt/downloads/converted"
+    "/mnt/downloads/converted/radarr"
+    "/mnt/downloads/converted/sonarr"
     "/mnt/downloads/incomplete"
     "/mnt/downloads/incomplete/slskd"
   ];
