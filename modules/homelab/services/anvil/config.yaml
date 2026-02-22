@@ -31,9 +31,9 @@ folders:
       - "(?i)sample"
       - "_UNPACK_"
     encode_config:
-      quality: 96
+      quality: 97
       target_quality_mode: vmaf
-      max_encoded_percent: 90
+      max_encoded_percent: 95
       preset: 0
       pixel_format: yuv420p10le
       encoder: hevc_qsv
@@ -63,9 +63,9 @@ folders:
       - "(?i)sample"
       - "_UNPACK_"
     encode_config:
-      quality: 96
+      quality: 97
       target_quality_mode: vmaf
-      max_encoded_percent: 90
+      max_encoded_percent: 95
       preset: 0
       pixel_format: yuv420p10le
       encoder: hevc_qsv
