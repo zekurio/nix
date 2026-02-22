@@ -32,18 +32,12 @@ in {
 
     secretsFile = lib.mkOption {
       type = lib.types.str;
-      default = config.sops.secrets.anvil_secrets.path;
+      default = config.sops.secrets.configarr_secrets.path;
       description = "Path to anvil secrets YAML";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    sops.secrets.anvil_secrets = {
-      owner = "anvil";
-      group = "anvil";
-      mode = "0400";
-    };
-
     services.anvil = {
       enable = true;
       configFile = configFilePath;
@@ -53,11 +47,15 @@ in {
       dbPath = "${stateDir}/anvil.db";
     };
 
-    systemd.services.anvil.serviceConfig = {
-      PermissionsStartOnly = true;
-      ExecStartPre = [
-        "${pkgs.coreutils}/bin/install -D -m 0640 -o ${config.services.anvil.user} -g ${config.services.anvil.group} ${configTextFile} ${configFilePath}"
-      ];
+    systemd.services.anvil = {
+      after = ["sops-install-secrets.service"];
+      wants = ["sops-install-secrets.service"];
+      serviceConfig = {
+        PermissionsStartOnly = true;
+        ExecStartPre = [
+          "${pkgs.coreutils}/bin/install -D -m 0640 -o ${config.services.anvil.user} -g ${config.services.anvil.group} ${configTextFile} ${configFilePath}"
+        ];
+      };
     };
   };
 }
