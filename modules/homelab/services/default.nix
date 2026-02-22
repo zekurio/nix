@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./anvil
     ./beets.nix
     ./caddy.nix
     ./configarr

@@ -23,7 +23,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     configarr = {
       url = "github:raydak-labs/configarr";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    anvil = {
+      url = "github:zekurio/anvil";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
