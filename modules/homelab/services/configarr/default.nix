@@ -6,44 +6,23 @@
   ...
 }: let
   cfg = config.services.configarr;
-
-  configarrPkgs =
-    pkgs
-    // {
-      pnpm =
-        pkgs.pnpm
-        // {
-          configHook = pkgs.pnpmConfigHook;
-          fetchDeps = pkgs.fetchPnpmDeps;
-        };
-    };
-
-  configarrPackage =
-    (import (inputs.configarr + "/pkgs/nix/package.nix") {
-      inherit (configarrPkgs) lib;
-      pkgs = configarrPkgs;
-    })
-    .overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [configarrPkgs.pnpm];
-    });
-
   stateDir = "/var/lib/configarr";
   configFilePath = toString cfg.configFile;
   secretsFilePath = toString cfg.secretsFile;
-  etcConfigPath = lib.removePrefix "/etc/" configFilePath;
+  configTextFile = pkgs.writeText "configarr-config.yaml" cfg.configText;
 in {
   options.services.configarr = {
     enable = lib.mkEnableOption "Configarr sync for *arr services";
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = configarrPackage;
+      default = inputs.configarr.packages.${pkgs.system}.default;
       description = "Configarr package to use";
     };
 
     configFile = lib.mkOption {
       type = lib.types.str;
-      default = "/etc/configarr/config.yaml";
+      default = "${stateDir}/config.yaml";
       description = "Path to configarr config file";
     };
 
@@ -67,13 +46,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = cfg.configText == "" || lib.hasPrefix "/etc/" configFilePath;
-        message = "services.configarr.configFile must be under /etc when configText is set.";
-      }
-    ];
-
     users.groups.configarr = {};
 
     users.users.configarr = {
@@ -82,13 +54,6 @@ in {
       home = stateDir;
       createHome = true;
       description = "Configarr service account";
-    };
-
-    environment.etc = lib.mkIf (cfg.configText != "") {
-      "${etcConfigPath}" = {
-        text = cfg.configText;
-        mode = "0644";
-      };
     };
 
     sops.secrets.configarr_secrets = {
@@ -106,8 +71,12 @@ in {
         Type = "oneshot";
         User = "configarr";
         Group = "configarr";
+        PermissionsStartOnly = true;
         WorkingDirectory = stateDir;
         StateDirectory = "configarr";
+        ExecStartPre = lib.optionals (cfg.configText != "") [
+          "${pkgs.coreutils}/bin/install -D -m 0640 -o configarr -g configarr ${configTextFile} ${configFilePath}"
+        ];
         ExecStart = lib.getExe cfg.package;
       };
       environment = {
