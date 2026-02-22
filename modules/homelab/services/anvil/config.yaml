@@ -31,7 +31,7 @@ folders:
       - "(?i)sample"
       - "_UNPACK_"
     encode_config:
-      quality: 97
+      quality: 96
       target_quality_mode: vmaf
       max_encoded_percent: 95
       preset: 0
@@ -63,7 +63,7 @@ folders:
       - "(?i)sample"
       - "_UNPACK_"
     encode_config:
-      quality: 97
+      quality: 96
       target_quality_mode: vmaf
       max_encoded_percent: 95
       preset: 0
