@@ -3,6 +3,9 @@ runtime:
   temp_dir: /var/tmp/anvil
   scan_interval: 30s
   workers: 3
+  permissions:
+    directory_mode: "0775"
+    file_mode: "0664"
 
 arr_instances:
   - name: sonarr
