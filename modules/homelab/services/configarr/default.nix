@@ -7,6 +7,7 @@
 }: let
   cfg = config.services.configarr;
   stateDir = "/var/lib/configarr";
+  reposDir = "${stateDir}/repos";
   configFilePath = toString cfg.configFile;
   secretsFilePath = toString cfg.secretsFile;
   configTextFile = pkgs.writeText "configarr-config.yaml" cfg.configText;
@@ -71,12 +72,15 @@ in {
         Type = "oneshot";
         User = "configarr";
         Group = "configarr";
-        PermissionsStartOnly = true;
         WorkingDirectory = stateDir;
         StateDirectory = "configarr";
-        ExecStartPre = lib.optionals (cfg.configText != "") [
-          "${pkgs.coreutils}/bin/install -D -m 0640 -o configarr -g configarr ${configTextFile} ${configFilePath}"
-        ];
+        ExecStartPre =
+          [
+            "${pkgs.bash}/bin/bash -euc 'if [ -d \"${reposDir}\" ]; then for repo in \"${reposDir}\"/*; do [ -d \"$repo/.git\" ] || continue; ${pkgs.git}/bin/git -C \"$repo\" reset --hard HEAD; ${pkgs.git}/bin/git -C \"$repo\" clean -fd; done; fi'"
+          ]
+          ++ lib.optionals (cfg.configText != "") [
+            "${pkgs.coreutils}/bin/install -D -m 0640 ${configTextFile} ${configFilePath}"
+          ];
         ExecStart = lib.getExe cfg.package;
       };
       environment = {
