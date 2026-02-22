@@ -2,7 +2,7 @@ runtime:
   database_path: /var/lib/anvil/anvil.db
   temp_dir: /var/tmp/anvil
   scan_interval: 30s
-  workers: 1
+  workers: 3
 
 arr_instances:
   - name: sonarr
