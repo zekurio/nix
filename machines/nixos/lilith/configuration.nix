@@ -40,6 +40,7 @@
 
   hardware = {
     graphics.extraPackages = with pkgs; [
+      mesa
       rocmPackages.clr.icd
     ];
     amdgpu.overdrive.enable = true;
@@ -54,6 +55,8 @@
 
   environment.sessionVariables = {
     AMD_VULKAN_ICD = "RADV";
+    LIBVA_DRIVER_NAME = "radeonsi";
+    MOZ_ENABLE_WAYLAND = "1";
   };
 
   environment.systemPackages = with pkgs; [
