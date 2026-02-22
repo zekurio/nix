@@ -32,12 +32,18 @@ in {
 
     secretsFile = lib.mkOption {
       type = lib.types.str;
-      default = config.sops.secrets.configarr_secrets.path;
+      default = config.sops.secrets.anvil_secrets.path;
       description = "Path to anvil secrets YAML";
     };
   };
 
   config = lib.mkIf cfg.enable {
+    sops.secrets.anvil_secrets = {
+      owner = "anvil";
+      group = "anvil";
+      mode = "0400";
+    };
+
     services.anvil = {
       enable = true;
       configFile = configFilePath;
