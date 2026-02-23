@@ -47,7 +47,7 @@ folders:
       crop_detect:
         window: 25s
         limit: 24
-        round: 1
+        round: 2
       audio_processing:
         disable: false
         languages_to_keep: ["deu"]
@@ -70,7 +70,7 @@ folders:
     encode_config:
       quality: 97
       target_quality_mode: vmaf
-      max_encoded_percent: 90
+      max_encoded_percent: 80
       preset: 2
       pixel_format: yuv420p10le
       encoder: hevc_qsv
