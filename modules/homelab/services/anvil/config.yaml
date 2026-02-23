@@ -36,7 +36,7 @@ folders:
     encode_config:
       quality: 96
       target_quality_mode: vmaf
-      max_encoded_percent: 95
+      max_encoded_percent: 80
       preset: 0
       pixel_format: yuv420p10le
       encoder: hevc_qsv
@@ -56,6 +56,8 @@ folders:
           codec: libopus
           bitrate: 96000
           per_channel: true
+      dolby_vision:
+        enabled: true
 
   - path: /mnt/downloads/complete/radarr
     type: downloads
@@ -66,9 +68,9 @@ folders:
       - "(?i)sample"
       - "_UNPACK_"
     encode_config:
-      quality: 96
+      quality: 97
       target_quality_mode: vmaf
-      max_encoded_percent: 95
+      max_encoded_percent: 90
       preset: 0
       pixel_format: yuv420p10le
       encoder: hevc_qsv
@@ -88,3 +90,5 @@ folders:
           codec: libopus
           bitrate: 96000
           per_channel: true
+      dolby_vision:
+        enabled: true
