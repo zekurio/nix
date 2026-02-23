@@ -53,6 +53,12 @@ in {
       supplementaryGroups = ["share"];
       tempDir = "/var/tmp/anvil";
       dbPath = "${stateDir}/anvil.db";
+
+      runtimePackages = with pkgs; [
+        ab-av1
+        jellyfin-ffmpeg
+        dovi-tool
+      ];
     };
 
     systemd.services.anvil = {
