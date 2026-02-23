@@ -25,10 +25,6 @@
       url = "github:raydak-labs/configarr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    anvil = {
-      url = "github:zekurio/anvil";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
