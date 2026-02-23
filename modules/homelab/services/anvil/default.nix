@@ -48,6 +48,8 @@ in {
       enable = true;
       configFile = configFilePath;
       secretsFile = secretsFilePath;
+      openFirewall = true;
+      firewallPort = 46845;
       supplementaryGroups = ["share"];
       tempDir = "/var/tmp/anvil";
       dbPath = "${stateDir}/anvil.db";

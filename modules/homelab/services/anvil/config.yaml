@@ -7,6 +7,13 @@ runtime:
     directory_mode: "0775"
     file_mode: "0664"
 
+web:
+  enabled: true
+  listen: 0.0.0.0:46845
+  read_timeout: 15s
+  write_timeout: 15s
+  idle_timeout: 60s
+
 arr_instances:
   - name: sonarr
     type: sonarr
