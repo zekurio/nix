@@ -72,6 +72,10 @@
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -116,13 +120,6 @@
           inputs.disko.nixosModules.disko
           # inputs.lanzaboote.nixosModules.lanzaboote
           ./machines/nixos/lilith/configuration.nix
-        ];
-      };
-      sachiel = {
-        system = "x86_64-linux";
-        modules = [
-          inputs.disko.nixosModules.disko
-          ./machines/nixos/sachiel/configuration.nix
         ];
       };
       shamshel = {
