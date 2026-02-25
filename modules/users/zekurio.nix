@@ -25,7 +25,6 @@
         "video"
         "podman"
         "input"
-        "gamemode"
       ];
       group = "zekurio";
       openssh.authorizedKeys.keys = [
@@ -49,7 +48,7 @@
 
     users.zekurio = {
       imports = [
-        ../workstation/hm
+        ../shell/hm
       ];
 
       home = {
