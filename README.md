@@ -1,6 +1,6 @@
 # nix-config
 
-NixOS configurations for my homelab and workstations
+NixOS configurations for my homelab and servers
 
 ## Hosts
 
@@ -8,8 +8,7 @@ NixOS configurations for my homelab and workstations
 |------|-------------|
 | `adam` | Homelab server (ZFS, Intel QSV, Caddy, Samba/NFS) |
 | `tabris` | WSL dev box |
-| `lilith` | Desktop workstation (AMD GPU, Niri compositor) |
-| `shamshel` | VPS (FRP server, auto-upgrade) |
+| `lilith` | VPS (FRP server, auto-upgrade) |
 
 ## Installation runbook (NixOS)
 
@@ -23,7 +22,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 Partition and mount the drives using [disko](https://github.com/nix-community/disko)
 
 ```bash
-HOST=adam  # adam, lilith, shamshel
+HOST=adam  # adam, lilith
 DISK='/dev/disk/by-id/<your-disk-id>'
 
 curl -o /tmp/disko.nix \
@@ -55,10 +54,10 @@ reboot
 
 ### Remote deployment with nixos-anywhere
 
-For remote hosts (e.g. `shamshel`), use [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) instead:
+For remote hosts (e.g. `lilith`), use [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) instead:
 
 ```bash
-nix run github:nix-community/nixos-anywhere -- --flake .#shamshel root@<ip>
+nix run github:nix-community/nixos-anywhere -- --flake .#lilith root@<ip>
 ```
 
 ### WSL (tabris)

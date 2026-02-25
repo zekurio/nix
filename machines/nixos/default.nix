@@ -5,7 +5,6 @@ in {
     ../../overlays
     ../../modules/users
     ../../modules/virtualization
-    ../../modules/workstation
   ];
 
   i18n = {

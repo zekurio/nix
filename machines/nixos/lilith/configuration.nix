@@ -3,79 +3,122 @@
   pkgs,
   modulesPath,
   ...
-}: {
+}: let
+  serverPort = 7000;
+  slskdPort = 50300;
+  wgPort = 51820;
+  wgAddress = "10.100.0.1/24";
+  socksPort = 1080;
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
+    (modulesPath + "/profiles/qemu-guest.nix")
     ./disko.nix
     ../default.nix
   ];
 
-  boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
-    kernelModules = [
-      "kvm-amd"
-      "zenpower"
-      "it87"
-    ];
-    kernelParams = [
-      "acpi_enforce_resources=lax"
-      "amdgpu.ppfeaturemask=0xffffffff"
-    ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
-    extraModprobeConfig = ''
-      options it87 force_id=0x8628
-    '';
-    blacklistedKernelModules = ["k10temp"];
+  # Boot configuration (disko handles grub device via EF02 partition)
+  boot.loader.grub.enable = true;
+  boot.initrd.availableKernelModules = ["ext4"];
 
-    loader.limine = {
-      resolution = "2560x1440x32";
-      style.interface.resolution = "2560x1440";
-      extraEntries = ''
-        /Windows 11
-          protocol: efi
-          path: boot():/EFI/Microsoft/Boot/Bootmgfw.efi
-      '';
-    };
-  };
-
-  hardware = {
-    graphics.extraPackages = with pkgs; [
-      mesa
-      rocmPackages.clr.icd
-    ];
-    amdgpu.overdrive.enable = true;
-  };
-
+  # Networking configuration
   networking = {
     hostName = "lilith";
-    nameservers = ["192.168.0.2"];
-  };
-
-  services.lact.enable = true;
-
-  environment.sessionVariables = {
-    AMD_VULKAN_ICD = "RADV";
-    LIBVA_DRIVER_NAME = "radeonsi";
-    MOZ_ENABLE_WAYLAND = "1";
-  };
-
-  environment.systemPackages = with pkgs; [
-    nvtopPackages.amd
-    ryzen-monitor-ng
-  ];
-
-  modules.workstation = {
-    common.enable = true;
-    desktop.enable = true;
-    nfsClient.enable = true;
-    bootLimine.enable = true;
-    hardware = {
+    useDHCP = true;
+    firewall = {
       enable = true;
-      coolercontrol.enable = true;
+      allowedTCPPorts = [
+        80
+        443
+        serverPort
+        slskdPort
+      ];
+      allowedUDPPorts = [wgPort];
+      interfaces.wg-adam.allowedTCPPorts = [socksPort];
     };
-    gaming.enable = true;
-    vpn.enable = true;
+
+    # Point-to-point WireGuard tunnel to adam (homelab)
+    # Allows adam's slskd to route Soulseek traffic through VPS via SOCKS5
+    wireguard.interfaces.wg-adam = {
+      ips = [wgAddress];
+      listenPort = wgPort;
+      privateKeyFile = config.sops.secrets.wg_private_key.path;
+      peers = [
+        {
+          publicKey = "ujYESfLRaJuMc6rOI3REhq+9Fw8++voHe/fVzesuhnk=";
+          allowedIPs = ["10.100.0.2/32"];
+        }
+      ];
+    };
   };
 
-  system.stateVersion = "25.11"; # DO NOT CHANGE
+  # SOPS secrets configuration
+  sops = {
+    defaultSopsFile = ../../../secrets/lilith.yaml;
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    secrets = {};
+  };
+
+  # FRP server
+  services.frp.instances.default = {
+    enable = true;
+    role = "server";
+    environmentFiles = [config.sops.secrets.frp_env.path];
+    settings = {
+      bindPort = serverPort;
+      auth = {
+        method = "token";
+        token = "{{ .Envs.FRP_TOKEN }}";
+      };
+    };
+  };
+
+  sops.secrets.frp_env = {
+    mode = "0400";
+  };
+
+  sops.secrets.wg_private_key = {
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
+
+  # Lightweight SOCKS5 proxy for slskd to route Soulseek connections through VPS
+  systemd.services.microsocks = {
+    description = "Lightweight SOCKS5 proxy (WireGuard only)";
+    after = ["wireguard-wg-adam.service"];
+    requires = ["wireguard-wg-adam.service"];
+    wantedBy = ["multi-user.target"];
+    serviceConfig = {
+      ExecStart = "${pkgs.microsocks}/bin/microsocks -i 10.100.0.1 -p ${toString socksPort}";
+      DynamicUser = true;
+      Restart = "always";
+      RestartSec = 5;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+    };
+  };
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
+
+  system.autoUpgrade = {
+    enable = true;
+    flake = "github:zekurio/nix#lilith";
+    dates = "Sun *-*-* 03:00:00";
+    randomizedDelaySec = "45min";
+    allowReboot = true;
+  };
+
+  time.timeZone = "Europe/Vienna";
+
+  # DO NOT TOUCH THIS
+  system.stateVersion = "25.05";
 }

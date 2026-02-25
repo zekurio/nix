@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for homelab and workstations";
+  description = "NixOS configurations for homelab and servers";
 
   nixConfig = {
     extra-substituters = [
@@ -29,15 +29,10 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    # NixOS deployment and infrastructure
+    # NixOS infrastructure
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-anywhere = {
-      url = "github:nix-community/nixos-anywhere";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.disko.follows = "disko";
     };
     # System configuration management
     home-manager = {
@@ -54,22 +49,6 @@
     };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/quickshell/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     codex-cli-nix = {
@@ -118,16 +97,8 @@
         system = "x86_64-linux";
         modules = [
           inputs.disko.nixosModules.disko
-          # inputs.lanzaboote.nixosModules.lanzaboote
-          ./machines/nixos/lilith/configuration.nix
-        ];
-      };
-      shamshel = {
-        system = "x86_64-linux";
-        modules = [
-          inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
-          ./machines/nixos/shamshel/configuration.nix
+          ./machines/nixos/lilith/configuration.nix
         ];
       };
     };
