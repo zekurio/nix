@@ -17,7 +17,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = inputs.configarr.packages.${pkgs.system}.default;
+      default = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default;
       description = "Configarr package to use";
     };
 
