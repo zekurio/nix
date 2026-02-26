@@ -14,6 +14,7 @@ in {
   config = lib.mkIf cfg.enable {
     virtualisation.oci-containers.containers.fileflows = {
       image = "revenz/fileflows";
+      autoRemoveOnStop = false;
       ports = ["${toString port}:${toString port}"];
       devices = ["/dev/dri:/dev/dri"];
       environment = {
