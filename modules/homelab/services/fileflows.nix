@@ -15,7 +15,6 @@ in {
     virtualisation.oci-containers.containers.fileflows = {
       image = "revenz/fileflows";
       autoRemoveOnStop = false;
-      ports = ["${toString port}:${toString port}"];
       devices = ["/dev/dri:/dev/dri"];
       environment = {
         TempPathHost = "/tmp/fileflows";
@@ -31,7 +30,10 @@ in {
         "/mnt/downloads:/mnt/downloads"
         "/tank/media:/tank/media"
       ];
-      extraOptions = ["--restart=unless-stopped"];
+      extraOptions = [
+        "--restart=unless-stopped"
+        "--network=host"
+      ];
     };
 
     systemd.tmpfiles.rules = [
