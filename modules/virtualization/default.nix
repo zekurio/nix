@@ -29,6 +29,7 @@ in {
     virtualisation = {
       podman = {
         enable = true;
+        dockerSocket.enable = true;
         autoPrune = {
           enable = cfg.podman.autoPrune.enable;
           dates = cfg.podman.autoPrune.dates;

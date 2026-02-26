@@ -24,7 +24,7 @@ in {
         PGID = "995";
       };
       volumes = [
-        "/var/run/docker.sock:/var/run/docker.sock:ro"
+        "/run/podman/podman.sock:/var/run/docker.sock:ro"
         "/tmp/fileflows:/temp"
         "fileflows_data:/app/Data"
         "fileflows_logs:/app/Logs"
