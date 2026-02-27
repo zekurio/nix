@@ -31,9 +31,15 @@ sonarr:
             score: 0
           - name: "[German] HD Bluray + WEB"
             score: -35000
+          - name: "[German] UHD Bluray + WEB"
+            score: 0
       - trash_ids:
           - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
         assign_scores_to:
+          - name: "[German] Anime HD Bluray + WEB"
+            score: 0
+          - name: "[German] HD Bluray + WEB"
+            score: 0
           - name: "[German] UHD Bluray + WEB"
             score: -35000
       - trash_ids:
@@ -83,9 +89,15 @@ radarr:
             score: 0
           - name: "[German] HD Bluray + WEB"
             score: -35000
+          - name: "[German] UHD Bluray + WEB"
+            score: 0
       - trash_ids:
           - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
         assign_scores_to:
+          - name: "[German] Anime HD Bluray + WEB"
+            score: 0
+          - name: "[German] HD Bluray + WEB"
+            score: 0
           - name: "[German] UHD Bluray + WEB"
             score: -35000
       - trash_ids:
