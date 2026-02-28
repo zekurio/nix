@@ -20,10 +20,10 @@ in {
       user = containerUser;
       ports = ["${toString port}:${toString containerPort}"];
       environment = {
-        NODE_ENV = "production";
+        DENO_ENV = "production";
         LOG_LEVEL = "debug";
-        DATABASE_URL = "/app/data/jellything.db";
-        CONFIG_PATH = "/app/config/config.json";
+        DB_PATH = "/app/data/jellything.db";
+        CONFIG_FILE = "/app/config/config.json";
         APP_URL = appUrl;
       };
       environmentFiles = [config.sops.secrets.jellything_env.path];
