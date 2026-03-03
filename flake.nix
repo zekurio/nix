@@ -20,49 +20,48 @@
   # Flake inputs: external dependencies and frameworks
   inputs = {
     # Core dependencies
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11?shallow=true";
     configarr = {
       url = "github:raydak-labs/configarr";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
+      inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
     };
     # NixOS infrastructure
     disko = {
       url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     # System configuration management
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 
-  outputs = inputs @ {
-    nixpkgs,
-    flake-parts,
-    ...
-  }: let
-    lib = nixpkgs.lib;
+  outputs = inputs @ {flake-parts, ...}: let
+    unstable = inputs."nixpkgs-unstable";
+    stable = inputs."nixpkgs-stable";
+    lib = unstable.lib;
 
     # Shared modules applied to all hosts
     sharedModules = [
@@ -78,6 +77,7 @@
     hosts = {
       adam = {
         system = "x86_64-linux";
+        channel = "unstable";
         modules = [
           inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
@@ -88,6 +88,7 @@
       };
       tabris = {
         system = "x86_64-linux";
+        channel = "unstable";
         modules = [
           inputs.nixos-wsl.nixosModules.default
           ./machines/nixos/tabris/configuration.nix
@@ -95,6 +96,7 @@
       };
       lilith = {
         system = "x86_64-linux";
+        channel = "stable";
         modules = [
           inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
@@ -105,8 +107,13 @@
 
     # Build NixOS configurations from host definitions
     mkSystem = lib.mapAttrs (
-      _: host:
-        nixpkgs.lib.nixosSystem {
+      _: host: let
+        pkgsInput =
+          if host.channel == "stable"
+          then stable
+          else unstable;
+      in
+        pkgsInput.lib.nixosSystem {
           inherit (host) system;
           specialArgs = mkSpecialArgs;
           modules = sharedModules ++ host.modules;
@@ -120,7 +127,9 @@
         inherit inputs lib;
       };
 
-      perSystem = {pkgs, ...}: {
+      perSystem = {system, ...}: let
+        pkgs = import unstable {inherit system;};
+      in {
         formatter = pkgs.writeShellApplication {
           name = "nix-fmt";
           runtimeInputs = [pkgs.alejandra];
