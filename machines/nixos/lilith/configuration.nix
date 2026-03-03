@@ -60,10 +60,9 @@ in {
   };
 
   # FRP server
-  services.frp.instances.default = {
+  services.frp = {
     enable = true;
     role = "server";
-    environmentFiles = [config.sops.secrets.frp_env.path];
     settings = {
       bindPort = serverPort;
       auth = {
@@ -76,6 +75,8 @@ in {
   sops.secrets.frp_env = {
     mode = "0400";
   };
+
+  systemd.services.frp.serviceConfig.EnvironmentFile = [config.sops.secrets.frp_env.path];
 
   sops.secrets.wg_private_key = {
     owner = "root";
