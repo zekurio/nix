@@ -52,10 +52,6 @@
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
   };
 
   outputs = inputs @ {flake-parts, ...}: let
