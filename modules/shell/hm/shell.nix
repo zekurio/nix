@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }: let
   cfg = config.modules.hm.shell;
@@ -33,7 +32,6 @@ in {
       sops
       uv
       zellij
-      inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # fish stuff
       fishPlugins.pure
@@ -119,7 +117,7 @@ in {
         matchBlocks = {
           "*".compression = true;
           "adam" = {
-            hostname = "192.168.0.2";
+            hostname = "adam.local";
             user = "zekurio";
             forwardAgent = true;
           };
