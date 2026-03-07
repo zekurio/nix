@@ -6,7 +6,7 @@
     ./frp.nix
     ./immich.nix
     ./jellyfin.nix
-    ./jellyseerr.nix
+    ./seerr.nix
     ./jellything.nix
     ./media-share.nix
     ./navidrome.nix
