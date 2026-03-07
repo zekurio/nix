@@ -26,7 +26,8 @@ in {
     };
 
     systemd.tmpfiles.rules = [
-      "d /var/lib/seerr 0755 root root -"
+      # The image runs as node:node (1000:1000) and needs write access to /app/config.
+      "d /var/lib/seerr 0755 1000 1000 -"
     ];
 
     services.caddy-wrapper.virtualHosts."seerr" = {
