@@ -20,7 +20,7 @@ in {
       user = containerUser;
       ports = ["${toString port}:${toString containerPort}"];
       environment = {
-        DENO_ENV = "production";
+        NODE_ENV = "production";
         LOG_LEVEL = "debug";
         DB_PATH = "/app/data/jellything.db";
         CONFIG_FILE = "/app/config/config.json";
