@@ -30,6 +30,12 @@ in {
       "d /var/lib/seerr 0755 1000 1000 -"
     ];
 
+    # Allow the Podman bridge to reach local Sonarr/Radarr instances via host.containers.internal.
+    networking.firewall.interfaces.podman0.allowedTCPPorts = [
+      7878
+      8989
+    ];
+
     services.caddy-wrapper.virtualHosts."seerr" = {
       inherit domain;
       reverseProxy = "127.0.0.1:${toString port}";
