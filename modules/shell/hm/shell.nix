@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }: let
   cfg = config.modules.hm.shell;
@@ -16,6 +17,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    home.sessionPath = [
+      "$HOME/.local/bin"
+    ];
+
     home.packages = with pkgs; [
       age
       atuin
@@ -32,11 +37,18 @@ in {
       sops
       uv
       zellij
-
-      # fish stuff
       fishPlugins.pure
       fishPlugins.z
     ];
+
+    sops = {
+      age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+      defaultSopsFile = ../../../secrets/zekurio-shell.env;
+      defaultSopsFormat = "dotenv";
+      secrets.gh-cli-env = {
+        key = "";
+      };
+    };
 
     programs = {
       direnv = {
@@ -99,6 +111,7 @@ in {
 
       opencode = {
         enable = true;
+        package = inputs."opencode-nix".packages.${pkgs.system}.opencode;
 
         settings = {
           command = {
@@ -125,9 +138,6 @@ in {
             hostname = "46.224.128.128";
             user = "zekurio";
             forwardAgent = true;
-            setEnv = {
-              TERM = "xterm-256color";
-            };
           };
         };
       };

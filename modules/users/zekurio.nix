@@ -48,6 +48,7 @@
 
     users.zekurio = {
       imports = [
+        inputs.sops-nix.homeManagerModules.sops
         ../shell/hm
       ];
 
