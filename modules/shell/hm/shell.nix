@@ -130,6 +130,14 @@ in {
         package = inputs."opencode-nix".packages.${pkgs.system}.opencode;
 
         settings = {
+          theme = "one-dark";
+
+          server = {
+            port = 4096;
+            hostname = "0.0.0.0";
+            mdns = true;
+          };
+
           permission = {
             bash = {
               "*" = "allow"; # might end up dangerous
@@ -142,13 +150,8 @@ in {
 
           command = {
             pr = {
-              template = "Move our changes to a new branch, stage all changes, commit them following the project's commit guidelines, and push the changes using the gh CLI. Follow the project's contribution guidelines for PRs, or look up past PRs for examples.";
-              description = "Commit and push all changes to the repository with a PR";
-              agent = "build";
-            };
-            resolve = {
-              template = "PR $1 has received comments from reviewers. Address them, commit the changes, and push the updated branch to resolve them. Use the gh CLI to resolve them in gh as well.";
-              description = "Resolve a review comments";
+              template = "Move our changes to a new branch, stage all changes, commit them following the project's commit guidelines, and push the changes using the gh CLI. Follow the project's contribution guidelines for PRs, or look up past PRs for examples before creating a draft PR using the gh CLI.";
+              description = "Commit and push all changes to remote, file a draft PR as well";
               agent = "build";
             };
           };
