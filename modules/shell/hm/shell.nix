@@ -30,7 +30,6 @@ in {
 
     home.packages = with pkgs; [
       age
-      atuin
       bat
       btop
       eza
@@ -43,8 +42,6 @@ in {
       sops
       uv
       zellij
-      fishPlugins.pure
-      fishPlugins.z
     ];
 
     sops = {
@@ -61,6 +58,11 @@ in {
         };
       };
 
+      atuin = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+
       direnv = {
         enable = true;
         nix-direnv.enable = true;
@@ -74,19 +76,30 @@ in {
         ];
       };
 
-      fish = {
+      zsh = {
         enable = true;
+        autosuggestion.enable = true;
+        enableCompletion = true;
+        syntaxHighlighting.enable = true;
 
-        interactiveShellInit = ''
-          set fish_greeting
-          fish_add_path "/home/zekurio/.local/bin"
-          atuin init fish | source
+        oh-my-zsh = {
+          enable = true;
+          theme = "af-magic";
+          plugins = [
+            "git"
+          ];
+        };
 
-          # Load GH_TOKEN from sops-decrypted secret
-          if test -r "${config.sops.secrets.gh-token.path}"
-            set -gx GH_TOKEN (string trim (cat "${config.sops.secrets.gh-token.path}"))
-          end
+        initContent = lib.mkBefore ''
+          if [[ -r "${config.sops.secrets.gh-token.path}" ]]; then
+            export GH_TOKEN="$(<"${config.sops.secrets.gh-token.path}")"
+          fi
         '';
+      };
+
+      carapace = {
+        enable = true;
+        enableZshIntegration = true;
       };
 
       git = {
@@ -127,10 +140,13 @@ in {
 
       opencode = {
         enable = true;
-        package = inputs."opencode-nix".packages.${pkgs.system}.opencode;
+        package = inputs."opencode-nix".packages.${pkgs.stdenv.hostPlatform.system}.opencode;
 
         settings = {
           theme = "one-dark";
+          plugin = [
+            "opencode-antigravity-auth@latest"
+          ];
 
           server = {
             port = 4096;

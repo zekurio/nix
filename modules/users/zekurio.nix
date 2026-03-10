@@ -11,11 +11,13 @@
     defaultEditor = true;
   };
 
-  programs.fish.enable = true;
+  programs.zsh.enable = true;
 
   users = {
+    defaultUserShell = pkgs.zsh;
+
     users.zekurio = {
-      shell = pkgs.fish;
+      shell = pkgs.zsh;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";
