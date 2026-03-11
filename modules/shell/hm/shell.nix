@@ -163,7 +163,6 @@ in {
 
         settings = {
           plugin = [
-            "opencode-antigravity-auth@latest"
             "@simonwjackson/opencode-direnv"
           ];
 
