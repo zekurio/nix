@@ -6,6 +6,7 @@
   networking.hostName = "tabris";
 
   modules.virtualization.enable = true;
+  modules.users.zekurio.opencodeWeb.enable = true;
 
   wsl = {
     enable = true;
