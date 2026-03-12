@@ -43,7 +43,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     virtualisation.oci-containers.containers.jellything = {
-      image = "ghcr.io/zekurio/jellything:latest";
+      image = "ghcr.io/zekurio/jellything:unstable";
       user = containerUser;
       ports = ["${toString port}:${toString containerPort}"];
       environment = {
