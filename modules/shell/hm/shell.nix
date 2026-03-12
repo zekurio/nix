@@ -64,7 +64,12 @@ in {
     ];
 
     sops = {
-      age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+      age = {
+        keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+        generateKey = false;
+        sshKeyPaths = [];
+      };
+      gnupg.sshKeyPaths = [];
       defaultSopsFile = ../../../secrets/zekurio-shell.yaml;
       secrets.gh-token = {};
     };

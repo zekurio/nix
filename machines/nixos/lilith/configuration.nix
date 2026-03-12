@@ -55,7 +55,12 @@ in {
   # SOPS secrets configuration
   sops = {
     defaultSopsFile = ../../../secrets/lilith.yaml;
-    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age = {
+      keyFile = "/var/lib/sops-nix/key.txt";
+      generateKey = false;
+      sshKeyPaths = [];
+    };
+    gnupg.sshKeyPaths = [];
     secrets = {};
   };
 
