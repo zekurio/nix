@@ -17,7 +17,7 @@ in {
       ports = ["${toString port}:${toString port}"];
       environment = {
         LOG_LEVEL = "debug";
-        TZ = "Asia/Tashkent";
+        TZ = "Europe/Vienna";
         PORT = toString port;
       };
       volumes = [
