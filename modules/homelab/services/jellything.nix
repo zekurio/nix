@@ -31,6 +31,12 @@ in {
       ];
     };
 
+    systemd.tmpfiles.rules = [
+      "d /var/lib/jellything 0755 root root -"
+      "d /var/lib/jellything/data 0755 root root -"
+      "d /var/lib/jellything/config 0755 root root -"
+    ];
+
     services.caddy-wrapper.virtualHosts."jellything" = {
       inherit domain;
       reverseProxy = "127.0.0.1:${toString port}";
