@@ -25,8 +25,8 @@ in {
       user = containerUser;
       ports = ["${toString port}:${toString containerPort}"];
       volumes = [
-        "jellything_data:/app/data"
-        "jellything_config:/app/config"
+        "/var/lib/jellything/data:/app/data"
+        "/var/lib/jellything/config:/app/config"
         "/var/lib/jellyfin:/jf:ro"
       ];
     };
