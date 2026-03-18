@@ -68,6 +68,11 @@ in {
         autosuggestion.enable = true;
         enableCompletion = true;
         syntaxHighlighting.enable = true;
+        initExtra = ''
+          if [[ -o interactive ]] && [[ -z "''${ZELLIJ-}" ]] && [[ "$TERM" != "dumb" ]]; then
+            eval "$(zellij setup --generate-auto-start zsh)"
+          fi
+        '';
 
         oh-my-zsh = {
           enable = true;
