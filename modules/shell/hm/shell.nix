@@ -8,23 +8,6 @@
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
   opencodeConfigDir = ../../../config/opencode;
-  opencodeServicePath = lib.concatStringsSep ":" [
-    "${config.home.homeDirectory}/.local/bin"
-    "/etc/profiles/per-user/${config.home.username}/bin"
-    "/run/wrappers/bin"
-    "/run/current-system/sw/bin"
-    "/nix/var/nix/profiles/default/bin"
-    "/nix/profile/bin"
-  ];
-  opencodeWebStart = pkgs.writeShellScript "opencode-web-start" ''
-    export PATH="${opencodeServicePath}:$PATH"
-
-    if [ -r "${config.sops.secrets.gh-token.path}" ]; then
-      export GH_TOKEN="$(<"${config.sops.secrets.gh-token.path}")"
-    fi
-
-    exec "${config.programs.opencode.package}/bin/opencode" web --hostname 127.0.0.1 --port 4096
-  '';
 in {
   options.modules.hm.shell = {
     enable =
@@ -32,8 +15,6 @@ in {
       // {
         default = true;
       };
-
-    opencodeWeb.enable = lib.mkEnableOption "OpenCode web user service";
   };
 
   config = lib.mkIf cfg.enable {
@@ -63,25 +44,7 @@ in {
       zellij
     ];
 
-    sops = {
-      age = {
-        keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-        generateKey = false;
-        sshKeyPaths = [];
-      };
-      gnupg.sshKeyPaths = [];
-      defaultSopsFile = ../../../secrets/zekurio-shell.yaml;
-      secrets.gh-token = {};
-    };
-
     programs = {
-      gh = {
-        enable = true;
-        settings = {
-          git_protocol = "ssh";
-        };
-      };
-
       atuin = {
         enable = true;
         enableZshIntegration = true;
@@ -114,11 +77,6 @@ in {
           ];
         };
 
-        initContent = lib.mkBefore ''
-          if [[ -r "${config.sops.secrets.gh-token.path}" ]]; then
-            export GH_TOKEN="$(<"${config.sops.secrets.gh-token.path}")"
-          fi
-        '';
       };
 
       carapace = {
@@ -214,23 +172,6 @@ in {
           };
         };
       };
-    };
-
-    systemd.user.services.opencode-web = lib.mkIf cfg.opencodeWeb.enable {
-      Unit = {
-        Description = "OpenCode web server";
-        After = ["default.target"];
-      };
-
-      Service = {
-        ExecStart = opencodeWebStart;
-        Environment = ["BROWSER=${pkgs.coreutils}/bin/true"];
-        Restart = "on-failure";
-        RestartSec = 5;
-        WorkingDirectory = config.home.homeDirectory;
-      };
-
-      Install.WantedBy = ["default.target"];
     };
   };
 }

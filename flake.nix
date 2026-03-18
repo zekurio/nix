@@ -52,6 +52,18 @@
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/quickshell/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     opencode-nix = {
       url = "github:dan-online/opencode-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -101,6 +113,14 @@
           inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
           ./machines/nixos/lilith/configuration.nix
+        ];
+      };
+      sachiel = {
+        system = "x86_64-linux";
+        channel = "unstable";
+        modules = [
+          inputs.disko.nixosModules.disko
+          ./machines/nixos/sachiel/configuration.nix
         ];
       };
     };
