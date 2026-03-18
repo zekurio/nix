@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   pkgs,
   modulesPath,
   ...
@@ -10,10 +9,6 @@
   wgPort = 51820;
   wgAddress = "10.100.0.1/24";
   socksPort = 1080;
-  unstablePkgs = import inputs.nixpkgs-unstable {
-    inherit (pkgs.stdenv.hostPlatform) system;
-    config.allowUnfree = true;
-  };
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -119,10 +114,6 @@ in {
       PermitRootLogin = "no";
     };
   };
-
-  environment.systemPackages = [
-    unstablePkgs.zeroclaw
-  ];
 
   system.autoUpgrade = {
     enable = true;
