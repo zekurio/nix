@@ -9,7 +9,6 @@
     ./seerr.nix
     ./jellything.nix
     ./media-share.nix
-    ./navidrome.nix
     ./sabnzbd.nix
     ./oauth2-proxy-wrapped.nix
     ./paperless-ngx.nix

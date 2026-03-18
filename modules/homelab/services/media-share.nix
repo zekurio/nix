@@ -84,7 +84,7 @@ in {
           ];
         };
       }
-      (lib.genAttrs ["jellyfin" "navidrome" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
+      (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
         extraGroups = lib.mkAfter [shareGroup];
       }))
       (lib.genAttrs cfg.collaborators (_: {
