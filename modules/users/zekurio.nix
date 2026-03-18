@@ -1,16 +1,8 @@
 {
   pkgs,
-  lib,
-  config,
   inputs,
   ...
-}: let
-  cfg = config.modules.users.zekurio;
-in {
-  options.modules.users.zekurio = {
-    opencodeWeb.enable = lib.mkEnableOption "OpenCode web user service for zekurio";
-  };
-
+}: {
   config = {
     # System-level user configuration
     nix.settings.trusted-users = ["zekurio"];
@@ -29,7 +21,6 @@ in {
         shell = pkgs.zsh;
         uid = 1000;
         isNormalUser = true;
-        linger = cfg.opencodeWeb.enable;
         hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";
         extraGroups = [
           "wheel"
@@ -58,13 +49,12 @@ in {
         inherit inputs;
       };
 
-      users.zekurio = {
-        imports = [
-          inputs.sops-nix.homeManagerModules.sops
-          ../shell/hm
-        ];
-
-        modules.hm.shell.opencodeWeb.enable = cfg.opencodeWeb.enable;
+        users.zekurio = {
+          imports = [
+            inputs.sops-nix.homeManagerModules.sops
+            ../shell/hm
+            ../workstation/hm
+          ];
 
         home = {
           username = "zekurio";

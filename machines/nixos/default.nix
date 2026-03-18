@@ -4,6 +4,7 @@ in {
   imports = [
     ../../overlays
     ../../modules/users
+    ../../modules/workstation
     ../../modules/virtualization
   ];
 
