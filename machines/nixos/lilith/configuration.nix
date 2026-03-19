@@ -115,9 +115,9 @@ in {
     };
   };
 
-  # Accept SSH sessions coming from Ghostty, which sets TERM=xterm-ghostty.
+  # Accept SSH sessions coming from Kitty, which sets TERM=xterm-kitty.
   environment.systemPackages = [
-    pkgs.ghostty.terminfo
+    pkgs.kitty.terminfo
   ];
 
   system.autoUpgrade = {

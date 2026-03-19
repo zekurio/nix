@@ -60,10 +60,6 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

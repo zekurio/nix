@@ -28,6 +28,7 @@
           "video"
           "podman"
           "input"
+          "i2c"
         ];
         group = "zekurio";
         openssh.authorizedKeys.keys = [
