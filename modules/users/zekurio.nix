@@ -12,13 +12,13 @@
       defaultEditor = true;
     };
 
-    programs.zsh.enable = true;
+    environment.shells = [pkgs.nushell];
 
     users = {
-      defaultUserShell = pkgs.zsh;
+      defaultUserShell = pkgs.nushell;
 
       users.zekurio = {
-        shell = pkgs.zsh;
+        shell = pkgs.nushell;
         uid = 1000;
         isNormalUser = true;
         hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";
@@ -53,7 +53,6 @@
           imports = [
             inputs.sops-nix.homeManagerModules.sops
             ../shell/hm
-            ../workstation/hm
           ];
 
         home = {

@@ -4,17 +4,17 @@
   config,
   inputs,
   ...
-}: let
+}:
+let
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
   opencodeConfigDir = ../../../config/opencode;
-in {
+in
+{
   options.modules.hm.shell = {
-    enable =
-      lib.mkEnableOption "shell configuration"
-      // {
-        default = true;
-      };
+    enable = lib.mkEnableOption "shell configuration" // {
+      default = true;
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -32,8 +32,8 @@ in {
       age
       bat
       btop
-      eza
       envsubst
+      gh
       git
       jq
       nil
@@ -47,41 +47,32 @@ in {
     programs = {
       atuin = {
         enable = true;
-        enableZshIntegration = true;
+        enableNushellIntegration = true;
       };
 
       direnv = {
         enable = true;
+        enableNushellIntegration = true;
         nix-direnv.enable = true;
       };
 
-      eza = {
+      nushell = {
         enable = true;
-        extraOptions = [
-          "--group-directories-first"
-          "--icons=auto"
-        ];
-      };
-
-      zsh = {
-        enable = true;
-        autosuggestion.enable = true;
-        enableCompletion = true;
-        syntaxHighlighting.enable = true;
-
-        oh-my-zsh = {
-          enable = true;
-          theme = "af-magic";
-          plugins = [
-            "git"
-          ];
+        settings = {
+          show_banner = false;
+          history.file_format = "sqlite";
         };
-
       };
 
       carapace = {
         enable = true;
-        enableZshIntegration = true;
+        enableNushellIntegration = true;
+      };
+
+      starship = {
+        enable = true;
+        enableNushellIntegration = true;
+        presets = ["jetpack"];
       };
 
       git = {

@@ -4,13 +4,19 @@ in {
   imports = [
     ../../overlays
     ../../modules/users
-    ../../modules/workstation
     ../../modules/virtualization
   ];
 
   i18n = {
     defaultLocale = "en_US.UTF-8";
-    supportedLocales = ["en_US.UTF-8/UTF-8"];
+    supportedLocales = [
+      "en_US.UTF-8/UTF-8"
+      "de_AT.UTF-8/UTF-8"
+      "de_DE.UTF-8/UTF-8"
+    ];
+    extraLocaleSettings = {
+      LC_TIME = "de_AT.UTF-8";
+    };
   };
 
   nixpkgs.config = {
