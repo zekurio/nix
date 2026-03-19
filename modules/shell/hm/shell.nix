@@ -8,7 +8,6 @@
 let
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
-  opencodeConfigDir = ../../../config/opencode;
 in
 {
   options.modules.hm.shell = {
@@ -21,8 +20,6 @@ in
     home.file.".config/git/allowed_signers".text = ''
       git@zekurio.xyz ${signingKey}
     '';
-    home.file.".config/opencode/skills/frontend-design/SKILL.md".source =
-      opencodeConfigDir + /skills/frontend-design/SKILL.md;
 
     home.sessionPath = [
       "$HOME/.local/bin"
@@ -32,6 +29,7 @@ in
       age
       bat
       btop
+      inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
       envsubst
       gh
       git
@@ -107,41 +105,6 @@ in
             backend = "ssh";
             key = signingKey;
             backends.ssh.program = "/run/current-system/sw/bin/ssh-keygen";
-          };
-        };
-      };
-
-      opencode = {
-        enable = true;
-        package = inputs."opencode-nix".packages.${pkgs.stdenv.hostPlatform.system}.opencode;
-
-        settings = {
-          plugin = [
-            "@simonwjackson/opencode-direnv"
-          ];
-
-          server = {
-            port = 4096;
-            hostname = "127.0.0.1";
-            mdns = false;
-          };
-
-          permission = {
-            bash = {
-              "*" = "allow"; # might end up dangerous
-              "rm *" = "ask";
-            };
-            skill = {
-              "*" = "allow";
-            };
-          };
-
-          command = {
-            pr = {
-              template = "Move our changes to a new branch, stage all changes, commit them following the project's commit guidelines, and push the changes using the gh CLI. Follow the project's contribution guidelines for PRs, or look up past PRs for examples before creating a draft PR using the gh CLI.";
-              description = "Commit and push all changes to remote, file a draft PR as well";
-              agent = "build";
-            };
           };
         };
       };

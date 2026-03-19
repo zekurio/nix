@@ -315,13 +315,20 @@ in
       XCURSOR_SIZE = "32";
     };
 
-    user.services.udiskie = {
-      description = "udiskie automounter for removable drives";
-      wantedBy = [ "default.target" ];
-      serviceConfig = {
-        ExecStart = "${pkgs.udiskie}/bin/udiskie -a -n -s";
-        Restart = "on-failure";
+    user = {
+      services = {
+        gcr-ssh-agent.enable = false;
+        udiskie = {
+          description = "udiskie automounter for removable drives";
+          wantedBy = [ "default.target" ];
+          serviceConfig = {
+            ExecStart = "${pkgs.udiskie}/bin/udiskie -a -n -s";
+            Restart = "on-failure";
+          };
+        };
       };
+
+      sockets.gcr-ssh-agent.enable = false;
     };
   };
 

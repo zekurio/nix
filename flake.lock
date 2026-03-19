@@ -20,13 +20,34 @@
         "url": "https://git.notthebe.ee/notthebee/AutoASPM"
       }
     },
+    "codex-cli-nix": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773692150,
+        "narHash": "sha256-w95aHT9Q1Q3GfE4TR2El80g1Zn1wFOtMDhQhn5NQngo=",
+        "owner": "sadjow",
+        "repo": "codex-cli-nix",
+        "rev": "26a2d3fff58bd3d18e203f5e96f092c2f997883c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sadjow",
+        "repo": "codex-cli-nix",
+        "type": "github"
+      }
+    },
     "configarr": {
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": [
           "nixpkgs-unstable"
         ],
-        "systems": "systems"
+        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1773738626,
@@ -140,7 +161,7 @@
     },
     "flake-utils": {
       "inputs": {
-        "systems": "systems_2"
+        "systems": "systems"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -245,27 +266,6 @@
         "type": "github"
       }
     },
-    "opencode-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1773638145,
-        "narHash": "sha256-Umqd+Kx+3Iu648PtpCYzKruEYRnDKDLXBdUhuuutlEI=",
-        "owner": "dan-online",
-        "repo": "opencode-nix",
-        "rev": "ebc0d13737e94e46287f7980157db4536afba567",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dan-online",
-        "repo": "opencode-nix",
-        "type": "github"
-      }
-    },
     "quickshell": {
       "inputs": {
         "nixpkgs": [
@@ -311,6 +311,7 @@
     "root": {
       "inputs": {
         "autoaspm": "autoaspm",
+        "codex-cli-nix": "codex-cli-nix",
         "configarr": "configarr",
         "disko": "disko",
         "dms": "dms",
@@ -319,7 +320,6 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "opencode-nix": "opencode-nix",
         "quickshell": "quickshell_2",
         "sops-nix": "sops-nix",
         "zen-browser": "zen-browser"
