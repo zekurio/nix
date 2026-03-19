@@ -1,7 +1,6 @@
 keys:
   - &adam age1308nxr6h57dvujczq29kc8du8qylnma8m5utn905en758qck0fwssmytrm
   - &lilith age173sms75yp82dq5jd5akequp6gg0d7xhqr757wg9gdp65lnf5d5hqryumcg
-  - &zekurio age1mgjl3uwllzluxx93m4rty0673k575dm9nnda3hyam90zme8954vqvjpphx
 
 creation_rules:
   - path_regex: secrets/adam\.yaml$
@@ -12,7 +11,3 @@ creation_rules:
     key_groups:
       - age:
           - *lilith
-  - path_regex: secrets/zekurio-shell\.yaml$
-    key_groups:
-      - age:
-          - *zekurio
