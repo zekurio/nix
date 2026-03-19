@@ -14,21 +14,6 @@ let
     path = ../../../assets/limine.jpeg;
     name = "limine.jpeg";
   };
-  zenBrowser = inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    extraPolicies = {
-      Preferences = {
-        "gfx.webrender.all" = {
-          Value = true;
-        };
-        "media.ffmpeg.vaapi.enabled" = {
-          Value = true;
-        };
-        "media.hardware-video-decoding.enabled" = {
-          Value = true;
-        };
-      };
-    };
-  };
 in
 {
   imports = [
@@ -143,6 +128,11 @@ in
     accounts-daemon.enable = true;
     gnome.gnome-keyring.enable = true;
     lact.enable = true;
+    hardware.openrgb = {
+      enable = true;
+      package = pkgs.openrgb-with-all-plugins;
+      motherboard = "amd";
+    };
     power-profiles-daemon.enable = true;
 
     pipewire = {
@@ -224,8 +214,8 @@ in
     MESA_SHADER_CACHE_MAX_SIZE = "12G";
     MOZ_ENABLE_WAYLAND = "1";
     QT_QPA_PLATFORM = "wayland";
-    QT_QPA_PLATFORMTHEME = "gtk3";
-    QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+    QT_QPA_PLATFORMTHEME = "qt6ct";
+    QT_QPA_PLATFORMTHEME_QT6 = "qt6ct";
     SSH_AUTH_SOCK = "/home/${mainUser}/.1password/agent.sock";
     XCURSOR_SIZE = "32";
     XCURSOR_THEME = "BreezeX-RosePine-Linux";
@@ -236,11 +226,14 @@ in
     ddcutil
     lm_sensors
     nvtopPackages.amd
+    openrgb-with-all-plugins
     pciutils
     ryzen-monitor-ng
     sbctl
     wl-clip-persist
   ];
+
+  services.udev.packages = [ pkgs.openrgb-with-all-plugins ];
 
   environment.etc =
     let
@@ -341,7 +334,6 @@ in
     imports = [ inputs.dms.homeModules.dank-material-shell ];
 
     home.packages = with pkgs; [
-      zenBrowser
       brave
       _1password-cli
       _1password-gui
@@ -363,6 +355,7 @@ in
       matugen
       papirus-icon-theme
       kdePackages.breeze
+      libsForQt5.qt5ct
       qt6Packages.qt6ct
       rose-pine-cursor
     ];
@@ -380,34 +373,36 @@ in
         enableVPN = true;
       };
 
-      ghostty = {
+      kitty = {
         enable = true;
-        enableFishIntegration = true;
+        shellIntegration.mode = null;
         settings = {
-          font-family = "JetBrainsMono Nerd Font";
-          font-size = 12;
-          window-decoration = false;
-          window-padding-x = 12;
-          window-padding-y = 12;
-          background-opacity = 1.0;
-          background-blur-radius = 32;
-          cursor-style = "block";
-          cursor-style-blink = true;
-          scrollback-limit = 3023;
-          mouse-hide-while-typing = true;
-          copy-on-select = false;
-          confirm-close-surface = false;
-          app-notifications = "no-clipboard-copy,no-config-reload";
-          keybind = "ctrl+t=unbind";
-          gtk-tabs-location = "hidden";
-          unfocused-split-opacity = 0.7;
-          unfocused-split-fill = "#44464f";
-          gtk-titlebar = false;
-          shell-integration = "detect";
-          shell-integration-features = "cursor,sudo,title,no-cursor";
-          gtk-single-instance = true;
-          theme = "dankcolors";
+          font_size = 12.0;
+          window_padding_width = 12;
+          background_opacity = 1.0;
+          background_blur = 32;
+          hide_window_decorations = "yes";
+          cursor_shape = "block";
+          cursor_blink_interval = 1;
+          scrollback_lines = 3000;
+          copy_on_select = "yes";
+          strip_trailing_spaces = "smart";
+          tab_bar_style = "hidden";
+          tab_bar_align = "left";
+          shell_integration = "enabled";
         };
+        keybindings = {
+          "ctrl+shift+n" = "new_window";
+          "ctrl+t" = "no_op";
+          "ctrl+plus" = "change_font_size all +1.0";
+          "ctrl+minus" = "change_font_size all -1.0";
+          "ctrl+0" = "change_font_size all 0";
+        };
+        extraConfig = ''
+          # Dank color generation
+          include dank-tabs.conf
+          include dank-theme.conf
+        '';
       };
 
       ssh.matchBlocks."*" = {
