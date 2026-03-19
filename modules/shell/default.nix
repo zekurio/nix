@@ -67,25 +67,6 @@ in
         enableNushellIntegration = true;
       };
 
-      starship = {
-        enable = true;
-        enableNushellIntegration = true;
-        settings = {
-          username = {
-            show_always = false;
-            style_user = "dimmed cyan";
-            style_root = "bold red";
-            format = "[$user]($style)";
-          };
-          hostname = {
-            ssh_only = true;
-            ssh_symbol = "";
-            style = "dimmed cyan";
-            format = "[@$hostname]($style) ";
-          };
-        };
-      };
-
       git = {
         enable = true;
         signing = {
