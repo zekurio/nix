@@ -115,6 +115,11 @@ in {
     };
   };
 
+  # Accept SSH sessions coming from Ghostty, which sets TERM=xterm-ghostty.
+  environment.systemPackages = [
+    pkgs.ghostty.terminfo
+  ];
+
   system.autoUpgrade = {
     enable = true;
     flake = "github:zekurio/nix#lilith";
