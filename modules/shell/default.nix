@@ -21,6 +21,27 @@ in
       git@zekurio.xyz ${signingKey}
     '';
 
+    home.file.".codex/config.toml".text = ''
+      model = "gpt-5.4"
+      model_reasoning_effort = "medium"
+      personality = "friendly"
+      approval_policy = "never"
+      sandbox_mode = "danger-full-access"
+      approvals_reviewer = "user"
+
+      [projects."/home/zekurio"]
+      trust_level = "trusted"
+
+      [notice]
+      hide_full_access_warning = true
+
+      [notice.model_migrations]
+      "gpt-5.3-codex" = "gpt-5.4"
+
+      [tui]
+      theme = "ansi"
+    '';
+
     home.sessionPath = [
       "$HOME/.local/bin"
     ];
@@ -56,9 +77,6 @@ in
 
       nushell = {
         enable = true;
-        plugins = with pkgs.nushellPlugins; [
-          highlight
-        ];
         settings = {
           show_banner = false;
           history.file_format = "sqlite";
