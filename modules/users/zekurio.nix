@@ -49,11 +49,10 @@
         inherit inputs;
       };
 
-        users.zekurio = {
-          imports = [
-            inputs.sops-nix.homeManagerModules.sops
-            ../shell/hm
-          ];
+      users.zekurio = {
+        imports = [
+          ../shell
+        ];
 
         home = {
           username = "zekurio";
