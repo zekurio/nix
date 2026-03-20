@@ -4,42 +4,21 @@
   config,
   inputs,
   ...
-}:
-let
+}: let
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
-in
-{
+in {
   options.modules.hm.shell = {
-    enable = lib.mkEnableOption "shell configuration" // {
-      default = true;
-    };
+    enable =
+      lib.mkEnableOption "shell configuration"
+      // {
+        default = true;
+      };
   };
 
   config = lib.mkIf cfg.enable {
     home.file.".config/git/allowed_signers".text = ''
       git@zekurio.xyz ${signingKey}
-    '';
-
-    home.file.".codex/config.toml".text = ''
-      model = "gpt-5.4"
-      model_reasoning_effort = "medium"
-      personality = "friendly"
-      approval_policy = "never"
-      sandbox_mode = "danger-full-access"
-      approvals_reviewer = "user"
-
-      [projects."/home/zekurio"]
-      trust_level = "trusted"
-
-      [notice]
-      hide_full_access_warning = true
-
-      [notice.model_migrations]
-      "gpt-5.3-codex" = "gpt-5.4"
-
-      [tui]
-      theme = "ansi"
     '';
 
     home.sessionPath = [

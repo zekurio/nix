@@ -17,5 +17,6 @@
     ./radarr.nix
     ./slskd.nix
     ./sonarr.nix
+    ./streamystats.nix
   ];
 }

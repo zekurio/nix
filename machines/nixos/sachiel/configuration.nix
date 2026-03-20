@@ -5,8 +5,7 @@
   pkgs,
   modulesPath,
   ...
-}:
-let
+}: let
   mainUser = "zekurio";
   keyboardLayout = "eu";
   desktopConfigDir = ../../../config/sachiel;
@@ -14,13 +13,10 @@ let
     path = ../../../assets/limine.jpeg;
     name = "limine.jpeg";
   };
-in
-{
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
-    ../default.nix
-    inputs.dms.nixosModules.greeter
   ];
 
   boot = {
@@ -34,11 +30,11 @@ in
       "acpi_enforce_resources=lax"
       "amdgpu.ppfeaturemask=0xffffffff"
     ];
-    extraModulePackages = [ config.boot.kernelPackages.zenpower ];
+    extraModulePackages = [config.boot.kernelPackages.zenpower];
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
-    blacklistedKernelModules = [ "k10temp" ];
+    blacklistedKernelModules = ["k10temp"];
 
     loader = {
       timeout = 3;
@@ -52,7 +48,7 @@ in
         secureBoot.enable = true;
         style = {
           interface.resolution = "2560x1440";
-          wallpapers = [ limineWallpaper ];
+          wallpapers = [limineWallpaper];
           wallpaperStyle = "stretched";
           graphicalTerminal = {
             background = "FF000000";
@@ -94,11 +90,11 @@ in
 
   networking = {
     hostName = "sachiel";
-    nameservers = [ "192.168.0.2" ];
+    nameservers = ["192.168.0.2"];
     networkmanager.enable = true;
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 22 ];
+      allowedTCPPorts = [22];
     };
   };
 
@@ -113,7 +109,16 @@ in
 
   security = {
     rtkit.enable = true;
-    pam.services.greetd.enableGnomeKeyring = true;
+    pam.services = {
+      greetd = {
+        enableGnomeKeyring = true;
+        startSession = true;
+      };
+      "dms-greeter" = {
+        enableGnomeKeyring = true;
+        startSession = true;
+      };
+    };
   };
 
   services = {
@@ -176,7 +181,7 @@ in
     _1password.enable = true;
     _1password-gui = {
       enable = true;
-      polkitPolicyOwners = [ mainUser ];
+      polkitPolicyOwners = [mainUser];
     };
     coolercontrol.enable = true;
     gamemode = {
@@ -193,6 +198,7 @@ in
       };
     };
     gamescope.enable = true;
+    dsearch.enable = true;
     niri.enable = true;
     steam = {
       enable = true;
@@ -200,11 +206,12 @@ in
       dedicatedServer.openFirewall = true;
       localNetworkGameTransfers.openFirewall = true;
     };
-    dank-material-shell.greeter = {
-      enable = true;
-      compositor.name = "niri";
-      configHome = "/home/${mainUser}";
-    };
+  };
+
+  services.displayManager.dms-greeter = {
+    enable = true;
+    compositor.name = "niri";
+    configHome = "/home/${mainUser}";
   };
 
   environment.sessionVariables = {
@@ -233,34 +240,32 @@ in
     wl-clip-persist
   ];
 
-  services.udev.packages = [ pkgs.openrgb-with-all-plugins ];
+  services.udev.packages = [pkgs.openrgb-with-all-plugins];
 
-  environment.etc =
-    let
-      bravePolicies = builtins.toJSON {
-        BraveRewardsDisabled = true;
-        BraveWalletDisabled = true;
-        BraveVPNDisabled = 1;
-        BraveAIChatEnabled = false;
-        NewTabPageLocation = "https://kagi.com";
-        TorDisabled = true;
-        PasswordManagerEnabled = false;
-        BlockThirdPartyCookies = true;
-        EnableDoNotTrack = true;
-      };
-    in
-    {
-      "1password/custom_allowed_browsers" = {
-        text = ''
-          zen
-          brave
-        '';
-        mode = "0755";
-      };
-
-      "brave/policies/managed/workstation.json".text = bravePolicies;
-      "opt/brave.com/brave/policies/managed/workstation.json".text = bravePolicies;
+  environment.etc = let
+    bravePolicies = builtins.toJSON {
+      BraveRewardsDisabled = true;
+      BraveWalletDisabled = true;
+      BraveVPNDisabled = 1;
+      BraveAIChatEnabled = false;
+      NewTabPageLocation = "https://kagi.com";
+      TorDisabled = true;
+      PasswordManagerEnabled = false;
+      BlockThirdPartyCookies = true;
+      EnableDoNotTrack = true;
     };
+  in {
+    "1password/custom_allowed_browsers" = {
+      text = ''
+        zen
+        brave
+      '';
+      mode = "0755";
+    };
+
+    "brave/policies/managed/workstation.json".text = bravePolicies;
+    "opt/brave.com/brave/policies/managed/workstation.json".text = bravePolicies;
+  };
 
   fonts.packages = with pkgs; [
     inter
@@ -313,7 +318,7 @@ in
         gcr-ssh-agent.enable = false;
         udiskie = {
           description = "udiskie automounter for removable drives";
-          wantedBy = [ "default.target" ];
+          wantedBy = ["default.target"];
           serviceConfig = {
             ExecStart = "${pkgs.udiskie}/bin/udiskie -a -n -s";
             Restart = "on-failure";
@@ -327,11 +332,11 @@ in
 
   xdg.portal = {
     enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
   };
 
   home-manager.users.${mainUser} = {
-    imports = [ inputs.dms.homeModules.dank-material-shell ];
+    imports = [inputs.dms.homeModules.dank-material-shell];
 
     home.packages = with pkgs; [
       brave
@@ -377,6 +382,7 @@ in
         enable = true;
         shellIntegration.mode = null;
         settings = {
+          font_family = "JetBrainsMono Nerd Font Mono";
           font_size = 12.0;
           window_padding_width = 12;
           background_opacity = 1.0;
@@ -435,7 +441,7 @@ in
 
       "matugen/templates/zed-colors.json".source = desktopConfigDir + /matugen-templates/zed-colors.json;
 
-      "niri/config.kdl".text = lib.replaceStrings [ "@keyboardLayout@" ] [ keyboardLayout ] (
+      "niri/config.kdl".text = lib.replaceStrings ["@keyboardLayout@"] [keyboardLayout] (
         builtins.readFile (desktopConfigDir + /niri-config.kdl)
       );
 
