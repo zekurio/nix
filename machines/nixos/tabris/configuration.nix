@@ -1,8 +1,4 @@
 {pkgs, ...}: {
-  imports = [
-    ../default.nix
-  ];
-
   networking.hostName = "tabris";
 
   modules.virtualization.enable = true;

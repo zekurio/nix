@@ -14,7 +14,6 @@ in {
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko.nix
-    ../default.nix
   ];
 
   # Boot configuration (disko handles grub device via EF02 partition)

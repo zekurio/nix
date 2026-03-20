@@ -1,4 +1,8 @@
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) mkDefault;
 in {
   imports = [
@@ -22,6 +26,14 @@ in {
   nixpkgs.config = {
     allowUnfree = true;
   };
+
+  environment.systemPackages = with pkgs; [
+    bubblewrap
+  ];
+
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
+  ];
 
   programs.nix-ld.enable = true;
 
