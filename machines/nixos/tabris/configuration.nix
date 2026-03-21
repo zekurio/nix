@@ -2,7 +2,6 @@
   networking.hostName = "tabris";
 
   modules.virtualization.enable = true;
-  home-manager.users.zekurio.modules.hm.shell.packages.dev.enable = true;
 
   wsl = {
     enable = true;
