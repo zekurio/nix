@@ -52,7 +52,7 @@
 
       users.zekurio = {
         imports = [
-          ../shell
+          ../home-manager
         ];
 
         home = {

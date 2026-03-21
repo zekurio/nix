@@ -17,7 +17,7 @@ in {
     ./disko.nix
   ];
 
-  home-manager.users.${mainUser}.modules.hm.shell.packages.dev.enable = false;
+  home-manager.users.${mainUser}.modules.hm.dev.enable = false;
 
   # Boot configuration (disko handles grub device via EF02 partition)
   boot.loader.grub.enable = true;

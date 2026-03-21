@@ -2,10 +2,9 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }: let
-  cfg = config.modules.hm.shell;
+  cfg = config.modules.hm.core;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
   cliPackages = with pkgs; [
     age
@@ -19,33 +18,19 @@
     sops
     zellij
   ];
-  devPackages = with pkgs; [
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-    nil
-    nixd
-    uv
-  ];
 in {
-  options.modules.hm.shell = {
+  options.modules.hm.core = {
     enable =
-      lib.mkEnableOption "shell configuration"
+      lib.mkEnableOption "core shell configuration"
       // {
         default = true;
       };
 
-    packages = {
-      cli.enable =
-        lib.mkEnableOption "day-to-day CLI/sysadmin packages"
-        // {
-          default = true;
-        };
-
-      dev.enable =
-        lib.mkEnableOption "development packages"
-        // {
-          default = true;
-        };
-    };
+    packages.cli.enable =
+      lib.mkEnableOption "day-to-day CLI/sysadmin packages"
+      // {
+        default = true;
+      };
   };
 
   config = lib.mkIf cfg.enable {
@@ -57,9 +42,7 @@ in {
       "$HOME/.local/bin"
     ];
 
-    home.packages =
-      lib.optionals cfg.packages.cli.enable cliPackages
-      ++ lib.optionals cfg.packages.dev.enable devPackages;
+    home.packages = lib.optionals cfg.packages.cli.enable cliPackages;
 
     programs = {
       atuin = {
