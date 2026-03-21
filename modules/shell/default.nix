@@ -7,6 +7,24 @@
 }: let
   cfg = config.modules.hm.shell;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
+  cliPackages = with pkgs; [
+    age
+    bat
+    btop
+    envsubst
+    gh
+    git
+    jq
+    ripgrep
+    sops
+    zellij
+  ];
+  devPackages = with pkgs; [
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    nil
+    nixd
+    uv
+  ];
 in {
   options.modules.hm.shell = {
     enable =
@@ -14,6 +32,20 @@ in {
       // {
         default = true;
       };
+
+    packages = {
+      cli.enable =
+        lib.mkEnableOption "day-to-day CLI/sysadmin packages"
+        // {
+          default = true;
+        };
+
+      dev.enable =
+        lib.mkEnableOption "development packages"
+        // {
+          default = true;
+        };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -25,22 +57,9 @@ in {
       "$HOME/.local/bin"
     ];
 
-    home.packages = with pkgs; [
-      age
-      bat
-      btop
-      inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-      envsubst
-      gh
-      git
-      jq
-      nil
-      nixd
-      ripgrep
-      sops
-      uv
-      zellij
-    ];
+    home.packages =
+      lib.optionals cfg.packages.cli.enable cliPackages
+      ++ lib.optionals cfg.packages.dev.enable devPackages;
 
     programs = {
       atuin = {
