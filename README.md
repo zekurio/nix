@@ -9,7 +9,6 @@ NixOS configurations for my homelab, servers, and workstation
 | `adam` | Homelab server (ZFS, Intel QSV, Caddy, Samba/NFS) |
 | `tabris` | WSL dev box |
 | `lilith` | VPS (FRP server, auto-upgrade) |
-| `sachiel` | Desktop workstation |
 
 ## Installation runbook (NixOS)
 
@@ -23,7 +22,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 Partition and mount the drives using [disko](https://github.com/nix-community/disko)
 
 ```bash
-HOST=adam  # adam, lilith, sachiel
+HOST=adam  # adam, lilith
 DISK='/dev/disk/by-id/<your-disk-id>'
 
 curl -o /tmp/disko.nix \

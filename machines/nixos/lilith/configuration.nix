@@ -4,6 +4,7 @@
   modulesPath,
   ...
 }: let
+  mainUser = "zekurio";
   serverPort = 7000;
   slskdPort = 50300;
   wgPort = 51820;
@@ -15,6 +16,8 @@ in {
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko.nix
   ];
+
+  home-manager.users.${mainUser}.modules.hm.shell.packages.dev.enable = false;
 
   # Boot configuration (disko handles grub device via EF02 partition)
   boot.loader.grub.enable = true;
