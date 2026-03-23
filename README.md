@@ -67,3 +67,5 @@ Follow the [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) setup guide, 
 ```bash
 sudo nixos-rebuild switch --flake .#tabris
 ```
+
+`tabris` uses Bash as the login shell for WSL compatibility, then `exec`s into Nushell for top-level interactive sessions.
