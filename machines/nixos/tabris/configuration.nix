@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   networking.hostName = "tabris";
 
   modules.virtualization.enable = true;
@@ -9,6 +9,11 @@
   };
 
   environment = {
+    shells = lib.mkAfter [
+      pkgs.bashInteractive
+      pkgs.nushell
+    ];
+
     systemPackages = [
       pkgs.wsl2-ssh-agent
     ];
@@ -16,6 +21,18 @@
     sessionVariables = {
       SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/wsl2-ssh-agent.sock";
     };
+  };
+
+  users.defaultUserShell = lib.mkForce pkgs.bashInteractive;
+  users.users.zekurio.shell = lib.mkForce pkgs.bashInteractive;
+
+  home-manager.users.zekurio.programs.bash = {
+    enable = true;
+    initExtra = ''
+      if [[ $- == *i* ]] && [[ ''${SHLVL:-0} -eq 1 ]] && command -v nu >/dev/null 2>&1; then
+        exec nu
+      fi
+    '';
   };
 
   systemd.user.services.wsl2-ssh-agent = {
