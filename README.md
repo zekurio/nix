@@ -26,7 +26,7 @@ HOST=adam  # adam, lilith
 DISK='/dev/disk/by-id/<your-disk-id>'
 
 curl -o /tmp/disko.nix \
-    "https://raw.githubusercontent.com/zekurio/nix/main/machines/nixos/${HOST}/disko.nix"
+    "https://raw.githubusercontent.com/zekurio/nix/main/modules/hosts/${HOST}/disko.nix"
 sed -i "s|device = \"/dev/disk/by-id/[^\"]*\"|device = \"${DISK}\"|" /tmp/disko.nix
 nix --experimental-features "nix-command flakes" run github:nix-community/disko \
     -- -m destroy,format,mount /tmp/disko.nix

@@ -1,22 +1,22 @@
-{...}: {
+{
   imports = [
-    ./beets.nix
-    ./caddy.nix
+    ./beets
+    ./caddy
     ./configarr
-    ./frp.nix
-    ./immich.nix
-    ./jellyfin.nix
-    ./seerr.nix
-    ./jellything.nix
-    ./media-share.nix
-    ./sabnzbd.nix
-    ./oauth2-proxy-wrapped.nix
-    ./paperless-ngx.nix
-    ./pocket-id.nix
-    ./prowlarr.nix
-    ./radarr.nix
-    ./slskd.nix
-    ./sonarr.nix
-    ./streamystats.nix
+    ./frp
+    ./immich
+    ./jellyfin
+    ./jellything
+    ./media-share
+    ./oauth2-proxy
+    ./paperless-ngx
+    ./pocket-id
+    ./prowlarr
+    ./radarr
+    ./sabnzbd
+    ./seerr
+    ./slskd
+    ./sonarr
+    ./streamystats
   ];
 }
