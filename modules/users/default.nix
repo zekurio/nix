@@ -1,5 +1,5 @@
 {
   imports = [
-    ./zekurio.nix
+    ./zekurio
   ];
 }
