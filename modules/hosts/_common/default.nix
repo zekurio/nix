@@ -1,0 +1,58 @@
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  inherit (lib) mkDefault;
+in {
+  imports = [
+    ../../nixpkgs/overlays
+    ../../users
+    ../../virtualization
+  ];
+
+  i18n = {
+    defaultLocale = "de_AT.UTF-8";
+    supportedLocales = [
+      "de_AT.UTF-8/UTF-8"
+      "en_US.UTF-8/UTF-8"
+    ];
+    extraLocaleSettings = {
+      LC_TIME = "de_AT.UTF-8";
+    };
+  };
+
+  nixpkgs.config = {
+    allowUnfree = true;
+  };
+
+  environment.systemPackages = with pkgs; [
+    bubblewrap
+  ];
+
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
+  ];
+
+  programs.nix-ld.enable = true;
+
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      trusted-users = [
+        "root"
+        "@wheel"
+      ];
+      auto-optimise-store = true;
+    };
+
+    gc = {
+      automatic = mkDefault true;
+      dates = mkDefault "weekly";
+      options = mkDefault "--delete-older-than 7d";
+    };
+  };
+}

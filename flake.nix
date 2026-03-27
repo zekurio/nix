@@ -60,67 +60,13 @@
 
   outputs = inputs @ {flake-parts, ...}: let
     unstable = inputs."nixpkgs-unstable";
-    stable = inputs."nixpkgs-stable";
     lib = unstable.lib;
-
-    # Shared modules applied to all hosts
-    sharedModules = [
-      ./machines/nixos
-      inputs.home-manager.nixosModules.home-manager
-    ];
-
-    mkSpecialArgs = {
-      inherit inputs;
-    };
-
-    # Host definitions with their specific modules and system architecture
-    hosts = {
-      adam = {
-        system = "x86_64-linux";
-        channel = "unstable";
-        modules = [
-          inputs.disko.nixosModules.disko
-          inputs.sops-nix.nixosModules.sops
-          inputs.autoaspm.nixosModules.default
-          ./modules/homelab
-          ./machines/nixos/adam/configuration.nix
-        ];
-      };
-      tabris = {
-        system = "x86_64-linux";
-        channel = "unstable";
-        modules = [
-          inputs.nixos-wsl.nixosModules.default
-          ./machines/nixos/tabris/configuration.nix
-        ];
-      };
-      lilith = {
-        system = "x86_64-linux";
-        channel = "stable";
-        modules = [
-          inputs.disko.nixosModules.disko
-          inputs.sops-nix.nixosModules.sops
-          ./machines/nixos/lilith/configuration.nix
-        ];
-      };
-    };
-
-    # Build NixOS configurations from host definitions
-    mkSystem = lib.mapAttrs (
-      _: host: let
-        pkgsInput =
-          if host.channel == "stable"
-          then stable
-          else unstable;
-      in
-        pkgsInput.lib.nixosSystem {
-          inherit (host) system;
-          specialArgs = mkSpecialArgs;
-          modules = sharedModules ++ host.modules;
-        }
-    );
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [
+        ./modules/hosts
+      ];
+
       systems = ["x86_64-linux"];
 
       _module.args = {
@@ -139,8 +85,6 @@
         };
       };
 
-      flake = {
-        nixosConfigurations = mkSystem hosts;
-      };
+      flake = {};
     };
 }

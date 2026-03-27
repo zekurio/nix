@@ -5,14 +5,14 @@
   inputs,
   ...
 }: let
-  cfg = config.services.configarr;
+  cfg = config.services.homelab.configarr;
   stateDir = "/var/lib/configarr";
   reposDir = "${stateDir}/repos";
   configFilePath = toString cfg.configFile;
   secretsFilePath = toString cfg.secretsFile;
   configTextFile = pkgs.writeText "configarr-config.yaml" cfg.configText;
 in {
-  options.services.configarr = {
+  options.services.homelab.configarr = {
     enable = lib.mkEnableOption "Configarr sync for *arr services";
 
     package = lib.mkOption {
