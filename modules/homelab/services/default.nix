@@ -4,7 +4,6 @@
     ./caddy
     ./configarr
     ./frp
-    ./gonic
     ./immich
     ./jellyfin
     ./jellything
