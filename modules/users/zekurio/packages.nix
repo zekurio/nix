@@ -9,6 +9,7 @@
     age
     bat
     btop
+    eza
     envsubst
     gh
     git
