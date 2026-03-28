@@ -10,13 +10,13 @@
     defaultEditor = true;
   };
 
-  environment.shells = [pkgs.nushell];
+  environment.shells = [pkgs.zsh];
 
   users = {
-    defaultUserShell = pkgs.nushell;
+    defaultUserShell = pkgs.zsh;
 
     users.zekurio = {
-      shell = pkgs.nushell;
+      shell = pkgs.zsh;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";

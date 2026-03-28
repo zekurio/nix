@@ -11,7 +11,7 @@
   environment = {
     shells = lib.mkAfter [
       pkgs.bashInteractive
-      pkgs.nushell
+      pkgs.zsh
     ];
 
     systemPackages = [
@@ -23,17 +23,8 @@
     };
   };
 
-  users.defaultUserShell = lib.mkForce pkgs.bashInteractive;
-  users.users.zekurio.shell = lib.mkForce pkgs.bashInteractive;
-
-  home-manager.users.zekurio.programs.bash = {
-    enable = true;
-    initExtra = ''
-      if [[ $- == *i* ]] && [[ ''${SHLVL:-0} -eq 1 ]] && command -v nu >/dev/null 2>&1; then
-        exec nu
-      fi
-    '';
-  };
+  users.defaultUserShell = lib.mkForce pkgs.zsh;
+  users.users.zekurio.shell = lib.mkForce pkgs.zsh;
 
   systemd.user.services.wsl2-ssh-agent = {
     description = "WSL2 SSH Agent Bridge";

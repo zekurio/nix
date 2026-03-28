@@ -63,7 +63,7 @@
   beetsConfigFile = settingsFormat.generate "beets.yaml" beetsConfig;
 
   beetWrapped = pkgs.writeShellScriptBin "beet-wrapped" ''
-    exec ${pkgs.sudo}/bin/sudo -u ${shareUser} \
+    exec /run/wrappers/bin/sudo -u ${shareUser} \
       BEETSDIR=${beetsDir} \
       ${lib.getExe pkgs.beets} -c ${beetsConfigFile} "$@"
   '';

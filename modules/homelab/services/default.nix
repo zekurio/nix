@@ -18,6 +18,6 @@
     ./seerr
     ./slskd
     ./sonarr
-    ./streamystats
+    ./tracearr
   ];
 }
