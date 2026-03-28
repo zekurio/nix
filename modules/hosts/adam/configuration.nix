@@ -302,7 +302,6 @@ in {
               "\"arr.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
               "\"ff.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
               "\"jt.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"music.zekurio.xyz. 3600 IN A ${networkIP}\""
               "\"stats.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
               "\"photos.zekurio.xyz. 3600 IN A ${networkIP}\""
               "\"auth.zekurio.xyz. 3600 IN A ${networkIP}\""
@@ -323,7 +322,6 @@ in {
               "\"arr.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
               "\"ff.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
               "\"jt.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"music.zekurio.xyz. 3600 IN A ${tailscaleIP}\""
               "\"stats.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
               "\"zekurio.xyz. 3600 IN A ${tailscaleIP}\""
               "\"photos.zekurio.xyz. 3600 IN A ${tailscaleIP}\""
@@ -340,7 +338,6 @@ in {
     beets.enable = true;
     configarr.enable = true;
     frp.enable = true;
-    gonic.enable = true;
     immich.enable = true;
     jellyfin.enable = true;
     jellything.enable = true;
