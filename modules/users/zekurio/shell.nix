@@ -2,31 +2,38 @@
   programs = {
     atuin = {
       enable = true;
-      enableNushellIntegration = true;
+      enableZshIntegration = true;
     };
 
     direnv = {
       enable = true;
-      enableNushellIntegration = true;
+      enableZshIntegration = true;
       nix-direnv.enable = true;
     };
 
-    nushell = {
+    zsh = {
       enable = true;
-      settings = {
-        show_banner = false;
-        history.file_format = "sqlite";
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      shellAliases = {
+        ls = "eza";
+        ll = "eza -lah";
+        la = "eza -la";
+        lt = "eza --tree";
       };
+      initContent = ''
+        eval "$(zoxide init zsh --cmd cd)"
+      '';
     };
 
     carapace = {
       enable = true;
-      enableNushellIntegration = true;
+      enableZshIntegration = true;
     };
 
     starship = {
       enable = true;
-      enableNushellIntegration = true;
+      enableZshIntegration = true;
       settings = {
         add_newline = false;
         format = "$python$directory$character";
@@ -85,7 +92,7 @@
 
     zoxide = {
       enable = true;
-      enableNushellIntegration = true;
+      enableZshIntegration = false;
     };
   };
 }

@@ -353,7 +353,7 @@ in {
     seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
-    streamystats.enable = true;
+    tracearr.enable = true;
   };
 
   system.autoUpgrade = {
