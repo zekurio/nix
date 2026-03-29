@@ -35,44 +35,44 @@
   '';
 
   queueBeetsImportScript = pkgs.writeShellScript "slskd-queue-beets-import" ''
-    set -eu
+        set -eu
 
-    payload=''${SLSKD_SCRIPT_DATA-}
-    if [ -z "$payload" ]; then
-      exit 0
-    fi
+        payload=''${SLSKD_SCRIPT_DATA-}
+        if [ -z "$payload" ]; then
+          exit 0
+        fi
 
-    download_file="$(${pkgs.jq}/bin/jq -r '
-      [
-        .. | objects | (
-          .filename?,
-          .Filename?,
-          .localFilename?,
-          .local_filename?,
-          .path?,
-          .Path?,
-          .targetFilename?,
-          .TargetFilename?
-        )
-      ]
-      | map(select(type == "string" and . != ""))
-      | first // empty
-    ' <<EOF
-$payload
-EOF
-)"
+        download_file="$(${pkgs.jq}/bin/jq -r '
+          [
+            .. | objects | (
+              .filename?,
+              .Filename?,
+              .localFilename?,
+              .local_filename?,
+              .path?,
+              .Path?,
+              .targetFilename?,
+              .TargetFilename?
+            )
+          ]
+          | map(select(type == "string" and . != ""))
+          | first // empty
+        ' <<EOF
+    $payload
+    EOF
+    )"
 
-    if [ -z "$download_file" ]; then
-      exit 0
-    fi
+        if [ -z "$download_file" ]; then
+          exit 0
+        fi
 
-    download_dir="$(${pkgs.coreutils}/bin/dirname "$download_file")"
-    marker_name="$(${pkgs.coreutils}/bin/printf '%s' "$download_dir" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.gawk}/bin/awk '{print $1}')"
-    tmp_marker="$(${pkgs.coreutils}/bin/mktemp "${queuePendingDir}/.$marker_name.XXXXXX")"
+        download_dir="$(${pkgs.coreutils}/bin/dirname "$download_file")"
+        marker_name="$(${pkgs.coreutils}/bin/printf '%s' "$download_dir" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.gawk}/bin/awk '{print $1}')"
+        tmp_marker="$(${pkgs.coreutils}/bin/mktemp "${queuePendingDir}/.$marker_name.XXXXXX")"
 
-    ${pkgs.coreutils}/bin/printf '%s\n' "$download_dir" > "$tmp_marker"
-    ${pkgs.coreutils}/bin/chmod 0664 "$tmp_marker"
-    ${pkgs.coreutils}/bin/mv "$tmp_marker" "${queuePendingDir}/$marker_name"
+        ${pkgs.coreutils}/bin/printf '%s\n' "$download_dir" > "$tmp_marker"
+        ${pkgs.coreutils}/bin/chmod 0664 "$tmp_marker"
+        ${pkgs.coreutils}/bin/mv "$tmp_marker" "${queuePendingDir}/$marker_name"
   '';
 
   importQueuedBeetsScript = pkgs.writeShellScript "slskd-import-queued-beets" ''
