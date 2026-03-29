@@ -36,7 +36,7 @@
       singleton = "$primary_artist/($year) $album/$track $title";
       comp = "Compilations/($year) $album/$track $artist - $title";
     };
-    inline.item_fields.primary_artist = ''
+    item_fields.primary_artist = ''
       import re
 
       name = (albumartist or artist or "").strip()
