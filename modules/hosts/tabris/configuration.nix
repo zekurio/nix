@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   networking.hostName = "tabris";
 
   modules.virtualization.enable = true;
