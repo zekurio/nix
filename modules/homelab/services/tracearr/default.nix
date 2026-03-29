@@ -6,6 +6,7 @@
   cfg = config.services.homelab.tracearr;
   domain = "trace.schnitzelflix.xyz";
   port = 3000;
+  stateDir = "/var/lib/tracearr";
 in {
   options.services.homelab.tracearr = {
     enable = lib.mkEnableOption "Tracearr stream analytics with Caddy integration";
@@ -21,9 +22,9 @@ in {
       };
       environmentFiles = [config.sops.secrets.tracearr_env.path];
       volumes = [
-        "tracearr_postgres:/data/postgres"
-        "tracearr_redis:/data/redis"
-        "tracearr_data:/data/tracearr"
+        "${stateDir}/postgres:/data/postgres"
+        "${stateDir}/redis:/data/redis"
+        "${stateDir}/tracearr:/data/tracearr"
       ];
       extraOptions = [
         "--pull=newer"
@@ -32,6 +33,13 @@ in {
         "--ulimit=nofile=65536:65536"
       ];
     };
+
+    systemd.tmpfiles.rules = [
+      "d ${stateDir} 0755 root root -"
+      "d ${stateDir}/postgres 0755 root root -"
+      "d ${stateDir}/redis 0755 root root -"
+      "d ${stateDir}/tracearr 0755 root root -"
+    ];
 
     sops.secrets.tracearr_env = {
       mode = "0400";
