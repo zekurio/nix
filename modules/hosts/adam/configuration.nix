@@ -92,6 +92,37 @@ in {
     networkmanager.enable = false;
     firewall.enable = true;
     hostId = "eab7e93e"; # nix run nixpkgs#openssl -- rand -hex 4
+    # Keep upstream resolvers DHCP-driven, but make Adam's own public service
+    # domains resolve locally so self-referential traffic does not depend on
+    # public DNS or router hairpin support.
+    hosts = {
+      "127.0.0.1" = [
+        "adam.lan"
+        "schnitzelflix.xyz"
+        "requests.schnitzelflix.xyz"
+        "sab.schnitzelflix.xyz"
+        "arr.schnitzelflix.xyz"
+        "trace.schnitzelflix.xyz"
+        "accounts.schnitzelflix.xyz"
+        "auth.zekurio.xyz"
+        "photos.zekurio.xyz"
+        "docs.zekurio.xyz"
+        "slskd.zekurio.xyz"
+      ];
+      "::1" = [
+        "adam.lan"
+        "schnitzelflix.xyz"
+        "requests.schnitzelflix.xyz"
+        "sab.schnitzelflix.xyz"
+        "arr.schnitzelflix.xyz"
+        "trace.schnitzelflix.xyz"
+        "accounts.schnitzelflix.xyz"
+        "auth.zekurio.xyz"
+        "photos.zekurio.xyz"
+        "docs.zekurio.xyz"
+        "slskd.zekurio.xyz"
+      ];
+    };
     firewall.allowedUDPPorts = [wgPort];
     firewall.allowedTCPPorts = [2049]; # NFS
   };
