@@ -52,24 +52,8 @@
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    danksearch = {
-      url = "github:AvengeMedia/danksearch";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    helium-browser = {
-      url = "github:schembriaiden/helium-browser-nix-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    t3code = {
-      url = "github:omarcresp/t3code-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     codex-cli-nix = {
@@ -79,7 +63,6 @@
   };
 
   outputs = {
-    self,
     flake-parts,
     ...
   } @ inputs: let
@@ -94,14 +77,11 @@
       systems = ["x86_64-linux"];
 
       _module.args = {
-        inherit inputs lib self;
+        inherit inputs lib;
       };
 
       perSystem = {system, ...}: let
         pkgs = import unstable {inherit system;};
-        desktopPackages = import ./modules/desktop/packages.nix {
-          inherit lib pkgs;
-        };
       in {
         formatter = pkgs.writeShellApplication {
           name = "nix-fmt";
@@ -110,8 +90,6 @@
             exec alejandra . "$@"
           '';
         };
-
-        packages = desktopPackages;
       };
 
       flake = {};
