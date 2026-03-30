@@ -5,7 +5,7 @@
     matchBlocks = {
       "*".compression = true;
       "adam" = {
-        hostname = "adam.local";
+        hostname = "adam.lan";
         user = "zekurio";
         forwardAgent = true;
       };
