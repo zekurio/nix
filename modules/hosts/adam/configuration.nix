@@ -9,10 +9,6 @@
   shareUser = "share";
   shareGroup = "share";
   wgPort = 51820;
-
-  # Network IP parameters - can be overridden when importing this module
-  networkIP = "192.168.0.2";
-  tailscaleIP = "100.100.67.10";
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -96,11 +92,7 @@ in {
     networkmanager.enable = false;
     firewall.enable = true;
     hostId = "eab7e93e"; # nix run nixpkgs#openssl -- rand -hex 4
-    nameservers = ["127.0.0.1"];
-    firewall.allowedUDPPorts = [
-      53
-      wgPort
-    ];
+    firewall.allowedUDPPorts = [wgPort];
     firewall.allowedTCPPorts = [2049]; # NFS
   };
 
@@ -158,13 +150,6 @@ in {
       };
     };
 
-    # Tailscale VPN
-    tailscale = {
-      enable = true;
-      useRoutingFeatures = "server";
-      openFirewall = true;
-    };
-
     # Samba network shares for ZFS tank pool
     samba = {
       enable = true;
@@ -175,7 +160,7 @@ in {
           "server string" = "adam";
           "netbios name" = "adam";
           security = "user";
-          "hosts allow" = "192.168.0.0/24 100.64.0.0/10 127.0.0.1 localhost";
+          "hosts allow" = "192.168.0.0/24 127.0.0.1 localhost";
           "hosts deny" = "0.0.0.0/0";
           "guest account" = "nobody";
           "map to guest" = "Bad User";
@@ -234,104 +219,12 @@ in {
     nfs.server = {
       enable = true;
       exports = ''
-        /tank/vault    192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash) 100.64.0.0/10(rw,sync,no_subtree_check,no_root_squash)
-        /tank/media    192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash) 100.64.0.0/10(rw,sync,no_subtree_check,no_root_squash)
-        /mnt/downloads 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash) 100.64.0.0/10(rw,sync,no_subtree_check,no_root_squash)
+        /tank/vault    192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)
+        /tank/media    192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)
+        /mnt/downloads 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)
       '';
     };
 
-    # Unbound DNS server
-    unbound = {
-      enable = true;
-      settings = {
-        server = {
-          interface = [
-            "127.0.0.1"
-            "::1"
-            "0.0.0.0"
-          ];
-          access-control = [
-            "127.0.0.0/8 allow"
-            "::1/128 allow"
-            "192.168.0.0/16 allow"
-            "100.64.0.0/10 allow"
-          ];
-          access-control-view = [
-            "192.168.0.0/16 lan"
-            "100.64.0.0/10 tailscale"
-          ];
-          do-ip4 = "yes";
-          do-ip6 = "yes";
-          do-udp = "yes";
-          do-tcp = "yes";
-          hide-identity = "yes";
-          hide-version = "yes";
-          harden-glue = "yes";
-          harden-dnssec-stripped = "yes";
-          use-caps-for-id = "yes";
-          prefetch = "yes";
-          prefetch-key = "yes";
-          qname-minimisation = "yes";
-          rrset-roundrobin = "yes";
-          minimal-responses = "yes";
-          cache-min-ttl = 300;
-          cache-max-ttl = 86400;
-        };
-
-        forward-zone = {
-          name = ".";
-          forward-ssl-upstream = "yes";
-          forward-addr = [
-            "9.9.9.9@853#dns.quad9.net"
-            "149.112.112.112@853#dns.quad9.net"
-          ];
-        };
-
-        view = [
-          {
-            name = "lan";
-            local-zone = [
-              "schnitzelflix.xyz. transparent"
-              "zekurio.xyz. transparent"
-            ];
-            local-data = [
-              "\"adam.local. 3600 IN A ${networkIP}\""
-              "\"schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"requests.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"sab.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"arr.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"ff.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"jt.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"stats.schnitzelflix.xyz. 3600 IN A ${networkIP}\""
-              "\"photos.zekurio.xyz. 3600 IN A ${networkIP}\""
-              "\"auth.zekurio.xyz. 3600 IN A ${networkIP}\""
-              "\"slskd.zekurio.xyz. 3600 IN A ${networkIP}\""
-            ];
-          }
-          {
-            name = "tailscale";
-            local-zone = [
-              "schnitzelflix.xyz. transparent"
-              "zekurio.xyz. transparent"
-            ];
-            local-data = [
-              "\"adam.local. 3600 IN A ${tailscaleIP}\""
-              "\"schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"requests.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"sab.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"arr.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"ff.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"jt.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"stats.schnitzelflix.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"zekurio.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"photos.zekurio.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"auth.zekurio.xyz. 3600 IN A ${tailscaleIP}\""
-              "\"slskd.zekurio.xyz. 3600 IN A ${tailscaleIP}\""
-            ];
-          }
-        ];
-      };
-    };
   };
 
   services.homelab = {
