@@ -7,7 +7,6 @@ NixOS configurations for my homelab, servers, and workstation
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server (ZFS, Intel QSV, Caddy, Samba/NFS) |
-| `sachiel` | Workstation desktop (`niri` + `dankmaterialshell`) |
 | `tabris` | WSL dev box |
 | `lilith` | VPS (FRP server, auto-upgrade) |
 
