@@ -16,13 +16,13 @@
     "/tank/media/anime"
     "/tank/media/movies"
     "/tank/media/music"
-    "/mnt/downloads"
-    "/mnt/downloads/complete"
-    "/mnt/downloads/complete/radarr"
-    "/mnt/downloads/complete/slskd"
-    "/mnt/downloads/complete/sonarr"
-    "/mnt/downloads/incomplete"
-    "/mnt/downloads/incomplete/slskd"
+    "/var/lib/downloads"
+    "/var/lib/downloads/complete"
+    "/var/lib/downloads/complete/radarr"
+    "/var/lib/downloads/complete/slskd"
+    "/var/lib/downloads/complete/sonarr"
+    "/var/lib/downloads/incomplete"
+    "/var/lib/downloads/incomplete/slskd"
   ];
 
   # Create root dirs as setgid + group-writable

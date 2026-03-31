@@ -117,15 +117,6 @@ in {
     }
   ];
 
-  fileSystems."/mnt/downloads" = {
-    device = "/dev/disk/by-uuid/b036ac8f-cb3c-468f-9a37-80351abe887c";
-    fsType = "ext4";
-    options = [
-      "noatime"
-      "nodiratime"
-    ];
-  };
-
   # SOPS secrets configuration
   sops = {
     defaultSopsFile = ../../../secrets/adam.yaml;

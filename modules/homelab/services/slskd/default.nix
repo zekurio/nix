@@ -9,8 +9,8 @@
   webPort = 5030;
   listenPort = 50300;
   musicDir = "/tank/media/music";
-  downloadDir = "/mnt/downloads/complete/slskd";
-  incompleteDir = "/mnt/downloads/incomplete/slskd";
+  downloadDir = "/var/lib/downloads/complete/slskd";
+  incompleteDir = "/var/lib/downloads/incomplete/slskd";
   profilePicture = "/var/lib/slskd/profile.jpg";
   beetsDir = "/var/lib/beets";
   shareUser = "share";
