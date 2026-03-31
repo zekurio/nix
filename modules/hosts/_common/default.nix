@@ -6,7 +6,6 @@
   inherit (lib) mkDefault;
 in {
   imports = [
-    ../../nixpkgs/overlays
     ../../users
     ../../virtualization
   ];
