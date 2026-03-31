@@ -2,6 +2,7 @@
   imports = [
     ./beets
     ./caddy
+    ./coolercontrol
     ./configarr
     ./immich
     ./jellyfin
