@@ -8,7 +8,6 @@ NixOS configurations for my homelab, servers, and workstation
 |------|-------------|
 | `adam` | Homelab server (ZFS, Intel QSV, Caddy, Samba/NFS) |
 | `tabris` | WSL dev box |
-| `lilith` | VPS (FRP server, auto-upgrade) |
 
 ## Installation runbook (NixOS)
 
@@ -22,7 +21,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 Partition and mount the drives using [disko](https://github.com/nix-community/disko)
 
 ```bash
-HOST=adam  # adam, lilith
+HOST=adam
 DISK='/dev/disk/by-id/<your-disk-id>'
 
 curl -o /tmp/disko.nix \
@@ -50,14 +49,6 @@ Unmount and reboot
 ```bash
 umount -Rl /mnt
 reboot
-```
-
-### Remote deployment with nixos-anywhere
-
-For remote hosts (e.g. `lilith`), use [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) instead:
-
-```bash
-nix run github:nix-community/nixos-anywhere -- --flake .#lilith root@<ip>
 ```
 
 ### WSL (tabris)
