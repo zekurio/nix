@@ -62,10 +62,7 @@
     };
   };
 
-  outputs = {
-    flake-parts,
-    ...
-  } @ inputs: let
+  outputs = {flake-parts, ...} @ inputs: let
     unstable = inputs."nixpkgs-unstable";
     lib = unstable.lib;
   in
