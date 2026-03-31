@@ -3,7 +3,6 @@
     ./beets
     ./caddy
     ./configarr
-    ./frp
     ./immich
     ./jellyfin
     ./jellything
