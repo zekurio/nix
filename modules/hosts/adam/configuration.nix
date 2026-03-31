@@ -23,13 +23,25 @@ in {
       "pcie_aspm.policy=powersave"
       "consoleblank=60"
       "i915.enable_guc=3"
+      "acpi_enforce_resources=lax"
     ];
     kernelModules = [
       "kvm-amd"
       "zenpower"
+      "nct6687"
     ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
-    blacklistedKernelModules = ["k10temp"];
+    extraModprobeConfig = ''
+      softdep nct6687 pre: i2c_i801
+      options nct6687
+    '';
+    extraModulePackages = [
+      config.boot.kernelPackages.zenpower
+      (config.boot.kernelPackages.callPackage ./nct6687d.nix {})
+    ];
+    blacklistedKernelModules = [
+      "k10temp"
+      "nct6683"
+    ];
     loader = {
       timeout = 0;
       efi.canTouchEfiVariables = true;
@@ -72,42 +84,42 @@ in {
   # Networking configuration
   networking = {
     hostName = "adam";
-    useDHCP = true;
+    useDHCP = false;
     networkmanager.enable = false;
     firewall.enable = true;
-    hostId = "eab7e93e"; # nix run nixpkgs#openssl -- rand -hex 4
-    # Keep upstream resolvers DHCP-driven, but make Adam's own public service
-    # domains resolve locally so self-referential traffic does not depend on
-    # public DNS or router hairpin support.
-    hosts = {
-      "127.0.0.1" = [
-        "adam.lan"
-        "schnitzelflix.xyz"
-        "requests.schnitzelflix.xyz"
-        "sab.schnitzelflix.xyz"
-        "arr.schnitzelflix.xyz"
-        "trace.schnitzelflix.xyz"
-        "accounts.schnitzelflix.xyz"
-        "auth.zekurio.xyz"
-        "photos.zekurio.xyz"
-        "docs.zekurio.xyz"
-        "slskd.zekurio.xyz"
-      ];
-      "::1" = [
-        "adam.lan"
-        "schnitzelflix.xyz"
-        "requests.schnitzelflix.xyz"
-        "sab.schnitzelflix.xyz"
-        "arr.schnitzelflix.xyz"
-        "trace.schnitzelflix.xyz"
-        "accounts.schnitzelflix.xyz"
-        "auth.zekurio.xyz"
-        "photos.zekurio.xyz"
-        "docs.zekurio.xyz"
-        "slskd.zekurio.xyz"
-      ];
+    hostId = "eab7e93e";
+    useNetworkd = true;
+  };
+
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNS = ["10.0.0.1"];
+      DNSSEC = false;
+      Domains = ["~."];
+      FallbackDNS = [];
+      DNSStubListener = true;
     };
-    firewall.allowedTCPPorts = [2049]; # NFS
+  };
+
+  systemd.network = {
+    enable = true;
+    networks."10-lan" = {
+      matchConfig.Name = "enp42s0";
+      networkConfig = {
+        DHCP = "yes";
+        DNS = "10.0.0.1";
+      };
+      dhcpV4Config = {
+        UseDNS = false;
+        UseNTP = true;
+      };
+    };
+    networks."99-podman" = {
+      matchConfig.Name = "podman0 veth*";
+      networkConfig.DHCP = "no";
+      linkConfig.Unmanaged = true;
+    };
   };
 
   swapDevices = [
@@ -152,6 +164,13 @@ in {
 
   services.homelab = {
     beets.enable = true;
+    coolercontrol = {
+      enable = true;
+      listenAddress = "0.0.0.0";
+      listenAddress6 = "::";
+      allowedInterfaces = ["enp42s0"];
+      caddy.forwardAuth = null;
+    };
     configarr.enable = true;
     immich.enable = true;
     jellyfin.enable = true;
