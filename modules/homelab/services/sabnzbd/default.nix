@@ -29,15 +29,15 @@ in {
           password = "";
           html_login = false;
           inet_exposure = "api+web (locally no auth)";
-          complete_dir = "/mnt/downloads/complete";
-          download_dir = "/mnt/downloads/incomplete";
+          complete_dir = "/var/lib/downloads/complete";
+          download_dir = "/var/lib/downloads/incomplete";
           dirscan_dir = "/var/lib/sabnzbd/nzb";
         };
 
         categories = {
           radarr = {
             name = "radarr";
-            dir = "/mnt/downloads/complete/radarr";
+            dir = "/var/lib/downloads/complete/radarr";
             pp = 3;
             priority = 0;
             newzbin = "";
@@ -45,7 +45,7 @@ in {
           };
           sonarr = {
             name = "sonarr";
-            dir = "/mnt/downloads/complete/sonarr";
+            dir = "/var/lib/downloads/complete/sonarr";
             pp = 3;
             priority = 0;
             newzbin = "";
@@ -53,7 +53,7 @@ in {
           };
           manual = {
             name = "manual";
-            dir = "/mnt/downloads/complete/manual";
+            dir = "/var/lib/downloads/complete/manual";
             pp = 3;
             priority = 0;
             newzbin = "";
