@@ -32,9 +32,9 @@
       log = "${beetsDir}/import.log";
     };
     paths = {
-      default = "$primary_artist/($year) $album/$track $title";
-      singleton = "$primary_artist/($year) $album/$track $title";
-      comp = "Compilations/($year) $album/$track $artist - $title";
+      default = "$primary_artist_dir/($year) $album/$track $title";
+      singleton = "$primary_artist_dir/($year) $album/$track $title";
+      comp = "Compilations/($year) $album/$track $artist_dir - $title";
     };
     item_fields.primary_artist = ''
       import re
@@ -45,11 +45,36 @@
 
       # Keep full credits in tags, but file albums under the first credited artist.
       primary_artist = re.split(
-          r"\s+(?:feat\.?|featuring|ft\.?|with|vs\.?|and|x)\s+|\s*&\s*|,\s*|;\s*|/\s*",
+          r"\s+(?:feat\.?|featuring|ft\.?|with|vs\.?|and|x)\s+|\s*&\s*|,\s*|;\s*",
           name,
           maxsplit=1,
       )[0].strip()
       return primary_artist or name
+    '';
+    item_fields.primary_artist_dir = ''
+      import re
+
+      name = (albumartist or artist or "").strip()
+      if not name:
+          return "Unknown Artist"
+
+      primary_artist = re.split(
+          r"\s+(?:feat\.?|featuring|ft\.?|with|vs\.?|and|x)\s+|\s*&\s*|,\s*|;\s*",
+          name,
+          maxsplit=1,
+      )[0].strip()
+
+      # Preserve artist names in tags while normalizing path separators for the filesystem.
+      return re.sub(r"[\\/]+", "-", primary_artist or name).strip() or "Unknown Artist"
+    '';
+    item_fields.artist_dir = ''
+      import re
+
+      name = (artist or "").strip()
+      if not name:
+          return "Unknown Artist"
+
+      return re.sub(r"[\\/]+", "-", name).strip() or "Unknown Artist"
     '';
     ftintitle = {
       auto = true;

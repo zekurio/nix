@@ -8,8 +8,6 @@
   domain = "slskd.zekurio.xyz";
   webPort = 5030;
   listenPort = 50300;
-  socksAddress = "10.100.0.1";
-  socksPort = 1080;
   musicDir = "/tank/media/music";
   downloadDir = "/mnt/downloads/complete/slskd";
   incompleteDir = "/mnt/downloads/incomplete/slskd";
@@ -161,12 +159,6 @@ in {
           description = "new to soulseek. sharing what I have. if something does not work/is locked let me know.";
           picture = profilePicture;
           listen_port = listenPort;
-          # Route all Soulseek connections through VPS so the server sees VPS IP
-          connection.proxy = {
-            enabled = true;
-            address = socksAddress;
-            port = socksPort;
-          };
         };
         directories = {
           downloads = downloadDir;
