@@ -88,6 +88,9 @@ in {
     networkmanager.enable = false;
     firewall.enable = true;
     hostId = "eab7e93e";
+    hosts = {
+      "127.0.0.1" = ["auth.zekurio.xyz"];
+    };
     useNetworkd = true;
   };
 
