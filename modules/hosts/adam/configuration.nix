@@ -166,6 +166,7 @@ in {
   };
 
   services.homelab = {
+    astroneer.enable = true;
     beets.enable = true;
     coolercontrol = {
       enable = true;

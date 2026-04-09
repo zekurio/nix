@@ -1,5 +1,6 @@
 {
   imports = [
+    ./astroneer
     ./beets
     ./caddy
     ./coolercontrol
