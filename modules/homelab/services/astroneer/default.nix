@@ -19,18 +19,6 @@ in {
       default = "/var/lib/astroneer";
       description = "Host directory used for persistent Astroneer server data.";
     };
-
-    debug = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable debug logging inside the Astroneer container.";
-    };
-
-    disableEncryption = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Disable network encryption for the Astroneer server.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -39,8 +27,8 @@ in {
       ports = ["${toString cfg.port}:${toString cfg.port}/udp"];
       environment = {
         CREATE_LAUNCHER_CONFIG = "true";
-        DEBUG = lib.boolToString cfg.debug;
-        DISABLE_ENCRYPTION = lib.boolToString cfg.disableEncryption;
+        DEBUG = "true";
+        DISABLE_ENCRYPTION = "false";
         TZ = "Europe/Vienna";
       };
       volumes = [
