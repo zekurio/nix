@@ -1,6 +1,7 @@
 {
   imports = [
     ./adam
+    ./lilith
     ./tabris
   ];
 }
