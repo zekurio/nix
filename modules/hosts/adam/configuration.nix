@@ -14,7 +14,7 @@ in {
     ./disko.nix
   ];
 
-  home-manager.users.${mainUser}.profiles.dev.enable = false;
+  home-manager.users.${mainUser}.profiles.dev.enable = true;
 
   # Boot configuration
   boot = {
