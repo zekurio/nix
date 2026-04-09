@@ -15,7 +15,7 @@
   environment = {
     shells = lib.mkAfter [
       pkgs.bashInteractive
-      pkgs.zsh
+      pkgs.nushell
     ];
 
     systemPackages = [
@@ -27,8 +27,8 @@
     };
   };
 
-  users.defaultUserShell = lib.mkForce pkgs.zsh;
-  users.users.zekurio.shell = lib.mkForce pkgs.zsh;
+  users.defaultUserShell = lib.mkForce pkgs.nushell;
+  users.users.zekurio.shell = lib.mkForce pkgs.nushell;
 
   systemd.user.services.wsl2-ssh-agent = {
     description = "WSL2 SSH Agent Bridge";

@@ -11,7 +11,6 @@
       inputs.sops-nix.nixosModules.sops
       inputs.autoaspm.nixosModules.default
       ../../homelab
-      ./nixpkgs.nix
       ./configuration.nix
     ];
   };
