@@ -61,7 +61,7 @@ in {
         enable = true;
         maxGenerations = 3;
         resolution = "2560x1440x32";
-        secureBoot.enable = true;
+        secureBoot.enable = false;
         style = {
           interface.resolution = "2560x1440";
           wallpapers = [../../../assets/limine.png];
@@ -69,12 +69,11 @@ in {
         extraConfig = ''
           remember_last_entry: yes
         '';
-        # Uncomment if dual-booting Windows
-        # extraEntries = ''
-        #   /Windows 11
-        #     protocol: efi
-        #     path: boot():/EFI/Microsoft/Boot/Bootmgfw.efi
-        # '';
+        extraEntries = ''
+          /Windows 11
+            protocol: efi
+            path: boot():/EFI/Microsoft/Boot/Bootmgfw.efi
+        '';
       };
     };
     initrd.verbose = false;
