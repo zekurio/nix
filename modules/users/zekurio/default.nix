@@ -10,13 +10,15 @@
     defaultEditor = true;
   };
 
-  environment.shells = [pkgs.nushell];
+  programs.fish.enable = true;
+
+  environment.shells = [pkgs.fish];
 
   users = {
-    defaultUserShell = pkgs.nushell;
+    defaultUserShell = pkgs.fish;
 
     users.zekurio = {
-      shell = pkgs.nushell;
+      shell = pkgs.fish;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";

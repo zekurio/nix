@@ -1,12 +1,12 @@
 # nix-config
 
-NixOS configurations for my homelab, servers, and workstation
+NixOS configurations for my current systems.
 
 ## Hosts
 
 | Host | Description |
 |------|-------------|
-| `adam` | Homelab server (ZFS, Intel QSV, Caddy, Samba/NFS) |
+| `adam` | Homelab server |
 | `tabris` | WSL dev box |
 
 ## Installation runbook (NixOS)
