@@ -7,8 +7,10 @@
 }: let
   cfg = config.profiles.dev;
   devPackages = with pkgs; [
-    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code-acp
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex-acp
     nil
     nixd
     uv

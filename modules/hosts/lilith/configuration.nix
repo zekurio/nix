@@ -65,6 +65,7 @@ in {
         style = {
           interface.resolution = "2560x1440";
           wallpapers = [../../../assets/limine.png];
+          graphicalTerminal.background = "FF000000";
         };
         extraConfig = ''
           remember_last_entry: yes
@@ -94,6 +95,12 @@ in {
 
   # Fan control
   programs.coolercontrol.enable = true;
+  systemd.services.coolercontrold.serviceConfig.ExecStartPre = pkgs.writeShellScript "coolercontrol-clear-password" ''
+    config=/etc/coolercontrol/config.toml
+    if [ -f "$config" ]; then
+      sed -i '/^password\s*=/d' "$config"
+    fi
+  '';
 
   # RGB control — enable driver/udev rules, then kill all LEDs on boot
   services.hardware.openrgb = {
