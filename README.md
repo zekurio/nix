@@ -7,6 +7,7 @@ NixOS configurations for my current systems.
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server |
+| `lilith` | Personal desktop |
 | `tabris` | WSL dev box |
 
 ## Installation runbook (NixOS)

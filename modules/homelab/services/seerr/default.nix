@@ -6,35 +6,26 @@
   cfg = config.services.homelab.seerr;
   domain = "requests.schnitzelflix.xyz";
   port = 5055;
+  stateDir = "/var/lib/seerr";
 in {
   options.services.homelab.seerr = {
     enable = lib.mkEnableOption "Seerr media request manager with Caddy integration";
   };
 
   config = lib.mkIf cfg.enable {
-    virtualisation.oci-containers.containers.seerr = {
-      image = "ghcr.io/seerr-team/seerr:latest";
-      ports = ["${toString port}:${toString port}"];
+    services.seerr = {
+      enable = true;
+      inherit port;
+      configDir = stateDir;
+    };
+
+    systemd.services.seerr = {
       environment = {
         LOG_LEVEL = "debug";
         TZ = "Europe/Vienna";
-        PORT = toString port;
       };
-      volumes = [
-        "/var/lib/seerr:/app/config"
-      ];
+      serviceConfig.StateDirectory = lib.mkForce "seerr";
     };
-
-    systemd.tmpfiles.rules = [
-      # The image runs as node:node (1000:1000) and needs write access to /app/config.
-      "d /var/lib/seerr 0755 1000 1000 -"
-    ];
-
-    # Allow the Podman bridge to reach local Sonarr/Radarr instances via host.containers.internal.
-    networking.firewall.interfaces.podman0.allowedTCPPorts = [
-      7878
-      8989
-    ];
 
     services.homelab.caddy.virtualHosts."seerr" = {
       inherit domain;
