@@ -2,20 +2,17 @@
   programs = {
     atuin = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
     };
 
     direnv = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
       nix-direnv.enable = true;
     };
 
-    nushell = {
+    fish = {
       enable = true;
-      settings = {
-        show_banner = false;
-      };
       shellAliases = {
         ls = "eza";
         ll = "eza -lah";
@@ -26,12 +23,12 @@
 
     carapace = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
     };
 
     starship = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
       settings = {
         add_newline = false;
         format = "$python$directory$character";
@@ -90,7 +87,7 @@
 
     zoxide = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
       options = ["--cmd" "cd"];
     };
   };
