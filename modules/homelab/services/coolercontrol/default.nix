@@ -67,6 +67,12 @@ in {
         default = "127.0.0.1:4181";
         description = "oauth2-proxy forward-auth endpoint for the CoolerControl vhost.";
       };
+
+      bearerTokenEnv = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Environment variable name holding the CoolerControl API bearer token. When set, Caddy injects Authorization: Bearer {env.VAR} on upstream requests. The variable must be present in Caddy's environment (e.g. via the caddy_env SOPS secret).";
+      };
     };
   };
 
@@ -102,7 +108,12 @@ in {
     services.homelab.caddy.virtualHosts."coolercontrol" = lib.mkIf cfg.caddy.enable {
       domain = cfg.caddy.domain;
       forwardAuth = cfg.caddy.forwardAuth;
-      reverseProxy = "127.0.0.1:${toString cfg.port}";
+      reverseProxy = lib.mkIf (cfg.caddy.bearerTokenEnv == null) "127.0.0.1:${toString cfg.port}";
+      extraConfig = lib.optionalString (cfg.caddy.bearerTokenEnv != null) ''
+        reverse_proxy 127.0.0.1:${toString cfg.port} {
+          header_up Authorization "Bearer {env.${cfg.caddy.bearerTokenEnv}}"
+        }
+      '';
     };
   };
 }

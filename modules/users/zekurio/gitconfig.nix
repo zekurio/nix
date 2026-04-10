@@ -1,5 +1,14 @@
-{config, ...}: let
+{
+  config,
+  osConfig,
+  pkgs,
+  ...
+}: let
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
+  sshSigningProgram =
+    if osConfig.networking.hostName == "lilith"
+    then "${pkgs._1password-gui}/share/1password/op-ssh-sign"
+    else "/run/current-system/sw/bin/ssh-keygen";
 in {
   programs.git = {
     enable = true;
@@ -17,7 +26,7 @@ in {
       rebase.autoStash = true;
       gpg.format = "ssh";
       gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.config/git/allowed_signers";
-      "gpg \"ssh\"".program = "/run/current-system/sw/bin/ssh-keygen";
+      "gpg \"ssh\"".program = sshSigningProgram;
     };
   };
 
@@ -32,7 +41,7 @@ in {
         behavior = "own";
         backend = "ssh";
         key = signingKey;
-        backends.ssh.program = "/run/current-system/sw/bin/ssh-keygen";
+        backends.ssh.program = sshSigningProgram;
       };
     };
   };
