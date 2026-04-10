@@ -146,6 +146,7 @@ in {
 
   # System packages
   environment.systemPackages = with pkgs; [
+    kitty.terminfo
     ryzen-monitor-ng
     zfs
     lm_sensors
