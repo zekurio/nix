@@ -64,7 +64,7 @@ in {
         secureBoot.enable = true;
         style = {
           interface.resolution = "2560x1440";
-          wallpapers = [../../../assets/limine.jpeg];
+          wallpapers = [../../../assets/limine.png];
         };
         extraConfig = ''
           remember_last_entry: yes
