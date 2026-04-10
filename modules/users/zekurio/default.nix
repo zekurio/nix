@@ -51,6 +51,7 @@
 
     users.zekurio = {
       imports = [
+        ./desktop.nix
         ./dev.nix
         ./dots.nix
         ./gitconfig.nix
