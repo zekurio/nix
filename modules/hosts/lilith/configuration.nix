@@ -3,7 +3,8 @@
   pkgs,
   modulesPath,
   ...
-}: let
+}:
+let
   rocmEnv = pkgs.symlinkJoin {
     name = "rocm-combined";
     paths = with pkgs.rocmPackages; [
@@ -12,7 +13,8 @@
       rocblas
     ];
   };
-in {
+in
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
@@ -43,8 +45,8 @@ in {
     extraModprobeConfig = ''
       options it87 force_id=0x8628
     '';
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
-    blacklistedKernelModules = ["k10temp"];
+    extraModulePackages = [ config.boot.kernelPackages.zenpower ];
+    blacklistedKernelModules = [ "k10temp" ];
     kernelParams = [
       "quiet"
       "splash"
@@ -61,10 +63,10 @@ in {
         enable = true;
         maxGenerations = 3;
         resolution = "2560x1440x32";
-        secureBoot.enable = false;
+        secureBoot.enable = true;
         style = {
           interface.resolution = "2560x1440";
-          wallpapers = [../../../assets/limine.png];
+          wallpapers = [ ../../../assets/limine.png ];
           graphicalTerminal.background = "FF000000";
         };
         extraConfig = ''
@@ -82,7 +84,7 @@ in {
 
   hardware = {
     enableRedistributableFirmware = true;
-    firmware = [pkgs.linux-firmware];
+    firmware = [ pkgs.linux-firmware ];
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -95,12 +97,13 @@ in {
 
   # Fan control
   programs.coolercontrol.enable = true;
-  systemd.services.coolercontrold.serviceConfig.ExecStartPre = pkgs.writeShellScript "coolercontrol-clear-password" ''
-    config=/etc/coolercontrol/config.toml
-    if [ -f "$config" ]; then
-      sed -i '/^password\s*=/d' "$config"
-    fi
-  '';
+  systemd.services.coolercontrold.serviceConfig.ExecStartPre =
+    pkgs.writeShellScript "coolercontrol-clear-password" ''
+      config=/etc/coolercontrol/config.toml
+      if [ -f "$config" ]; then
+        sed -i '/^password\s*=/d' "$config"
+      fi
+    '';
 
   # RGB control — enable driver/udev rules, then kill all LEDs on boot
   services.hardware.openrgb = {
@@ -110,8 +113,8 @@ in {
 
   systemd.services.openrgb-disable = {
     description = "Turn off all RGB LEDs via OpenRGB";
-    wantedBy = ["multi-user.target"];
-    after = ["systemd-udev-settle.service"];
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-udev-settle.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.openrgb}/bin/openrgb --noautoconnect -c 000000";
@@ -127,14 +130,14 @@ in {
   ];
 
   systemd = {
-    packages = [pkgs.lact];
-    services.lactd.wantedBy = ["multi-user.target"];
+    packages = [ pkgs.lact ];
+    services.lactd.wantedBy = [ "multi-user.target" ];
 
     # Workaround: disable GPP0 ACPI wakeup to prevent spurious wakeups
     services.disable-gpp0-acpi-wakeup = {
       description = "Disable ACPI wake device GPP0";
-      wantedBy = ["multi-user.target"];
-      after = ["sysinit.target"];
+      wantedBy = [ "multi-user.target" ];
+      after = [ "sysinit.target" ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
@@ -159,7 +162,7 @@ in {
     };
   };
 
-  users.users.zekurio.extraGroups = ["networkmanager"];
+  users.users.zekurio.extraGroups = [ "networkmanager" ];
 
   console.keyMap = "de";
   time.timeZone = "Europe/Vienna";
