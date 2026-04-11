@@ -97,29 +97,6 @@ in
 
   # Fan control
   programs.coolercontrol.enable = true;
-  systemd.services.coolercontrold.serviceConfig.ExecStartPre =
-    pkgs.writeShellScript "coolercontrol-clear-password" ''
-      config=/etc/coolercontrol/config.toml
-      if [ -f "$config" ]; then
-        sed -i '/^password\s*=/d' "$config"
-      fi
-    '';
-
-  # RGB control — enable driver/udev rules, then kill all LEDs on boot
-  services.hardware.openrgb = {
-    enable = true;
-    motherboard = "amd";
-  };
-
-  systemd.services.openrgb-disable = {
-    description = "Turn off all RGB LEDs via OpenRGB";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-udev-settle.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.openrgb}/bin/openrgb --noautoconnect -c 000000";
-    };
-  };
 
   # GPU management + ROCm for compute
   environment.systemPackages = with pkgs; [
@@ -131,18 +108,38 @@ in
 
   systemd = {
     packages = [ pkgs.lact ];
-    services.lactd.wantedBy = [ "multi-user.target" ];
-
-    # Workaround: disable GPP0 ACPI wakeup to prevent spurious wakeups
-    services.disable-gpp0-acpi-wakeup = {
-      description = "Disable ACPI wake device GPP0";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "sysinit.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
-          echo GPP0 > /proc/acpi/wakeup
+    services = {
+      coolercontrold.serviceConfig.ExecStartPre =
+        pkgs.writeShellScript "coolercontrol-clear-password" ''
+          config=/etc/coolercontrol/config.toml
+          if [ -f "$config" ]; then
+            sed -i '/^password\s*=/d' "$config"
+          fi
         '';
+
+      lactd.wantedBy = [ "multi-user.target" ];
+
+      openrgb-disable = {
+        description = "Turn off all RGB LEDs via OpenRGB";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "systemd-udev-settle.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.openrgb}/bin/openrgb --noautoconnect -c 000000";
+        };
+      };
+
+      # Workaround: disable GPP0 ACPI wakeup to prevent spurious wakeups
+      disable-gpp0-acpi-wakeup = {
+        description = "Disable ACPI wake device GPP0";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "sysinit.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = pkgs.writeShellScript "disable-gpp0-acpi-wakeup" ''
+            echo GPP0 > /proc/acpi/wakeup
+          '';
+        };
       };
     };
   };
@@ -153,6 +150,10 @@ in
 
   services = {
     fwupd.enable = true;
+    hardware.openrgb = {
+      enable = true;
+      motherboard = "amd";
+    };
     openssh = {
       enable = true;
       settings = {
