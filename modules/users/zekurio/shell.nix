@@ -35,8 +35,8 @@
       enableFishIntegration = true;
       settings = {
         add_newline = false;
-        format = "$username$hostname$directory$character";
-        right_format = "$status$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python";
+        format = "$directory$character";
+        right_format = "$status$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname";
 
         character = {
           success_symbol = "[❯](red)[❯](yellow)[❯](green)";
@@ -89,15 +89,15 @@
 
         username = {
           show_always = false;
-          format = "[$user]($style)@";
-          style_user = "yellow";
+          format = "[$user@]($style)";
+          style_user = "blue";
           style_root = "bold red";
         };
 
         hostname = {
           ssh_only = true;
           format = "[$hostname]($style) ";
-          style = "yellow";
+          style = "blue";
         };
 
         java = {
