@@ -416,7 +416,8 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "sops-nix": "sops-nix"
+        "sops-nix": "sops-nix",
+        "t3code": "t3code"
       }
     },
     "sops-nix": {
@@ -466,6 +467,26 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "t3code": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775856729,
+        "narHash": "sha256-GVuE7yUqf88QCc2nVMx4zkCXgfhwqJEYgpHD+BKUhgI=",
+        "owner": "omarcresp",
+        "repo": "t3code-flake",
+        "rev": "f386938dbc216b610304b9c1cc65b7ecb46c8141",
+        "type": "github"
+      },
+      "original": {
+        "owner": "omarcresp",
+        "repo": "t3code-flake",
         "type": "github"
       }
     },

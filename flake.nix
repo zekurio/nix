@@ -55,6 +55,10 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    t3code = {
+      url = "github:omarcresp/t3code-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
