@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   programs = {
     atuin = {
       enable = true;
@@ -34,8 +35,8 @@
       enableFishIntegration = true;
       settings = {
         add_newline = false;
-        format = "$python$directory$character";
-        right_format = "$status$git_branch$git_status";
+        format = "$username$hostname$directory$character";
+        right_format = "$status$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python";
 
         character = {
           success_symbol = "[❯](red)[❯](yellow)[❯](green)";
@@ -49,8 +50,8 @@
         };
 
         python = {
-          format = "[(\\($virtualenv\\) )]($style)";
-          style = "white";
+          format = "[py $version(\\($virtualenv\\))]($style) ";
+          style = "yellow";
         };
 
         git_status = {
@@ -85,13 +86,59 @@
           disabled = false;
           symbol = "✘ ";
         };
+
+        username = {
+          show_always = false;
+          format = "[$user]($style)@";
+          style_user = "yellow";
+          style_root = "bold red";
+        };
+
+        hostname = {
+          ssh_only = true;
+          format = "[$hostname]($style) ";
+          style = "yellow";
+        };
+
+        java = {
+          format = "[java $version]($style) ";
+          style = "red";
+        };
+
+        nodejs = {
+          format = "[node $version]($style) ";
+          style = "green";
+        };
+
+        bun = {
+          format = "[bun $version]($style) ";
+          style = "yellow";
+        };
+
+        deno = {
+          format = "[deno $version]($style) ";
+          style = "white";
+        };
+
+        golang = {
+          format = "[go $version]($style) ";
+          style = "cyan";
+        };
+
+        rust = {
+          format = "[rs $version]($style) ";
+          style = "red";
+        };
       };
     };
 
     zoxide = {
       enable = true;
       enableFishIntegration = true;
-      options = ["--cmd" "cd"];
+      options = [
+        "--cmd"
+        "cd"
+      ];
     };
   };
 }
