@@ -42,6 +42,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    helium-browser = {
+      url = "github:amaanq/helium-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -57,14 +61,6 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     t3code = {
       url = "github:omarcresp/t3code-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    danksearch = {
-      url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };

@@ -60,6 +60,8 @@
         ./ssh.nix
       ];
 
+      fonts.fontconfig.enable = false;
+
       home = {
         username = "zekurio";
         homeDirectory = "/home/zekurio";
