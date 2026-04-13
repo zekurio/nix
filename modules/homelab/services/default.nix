@@ -1,6 +1,5 @@
 {
   imports = [
-    ./astroneer
     ./beets
     ./caddy
     ./coolercontrol
@@ -18,6 +17,5 @@
     ./seerr
     ./slskd
     ./sonarr
-    ./tracearr
   ];
 }
