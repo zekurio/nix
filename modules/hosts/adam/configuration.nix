@@ -6,8 +6,6 @@
   ...
 }: let
   mainUser = "zekurio";
-  shareUser = "share";
-  shareGroup = "share";
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -53,8 +51,6 @@ in {
 
   # Hardware configuration
   hardware = {
-    enableRedistributableFirmware = true;
-    firmware = [pkgs.linux-firmware];
     cpu.amd = {
       updateMicrocode = true;
       ryzen-smu.enable = true;
@@ -154,17 +150,7 @@ in {
     lsof
   ];
 
-  services = {
-    autoaspm.enable = true;
-
-    openssh = {
-      enable = true;
-      settings = {
-        PasswordAuthentication = false;
-        PermitRootLogin = "no";
-      };
-    };
-  };
+  services.autoaspm.enable = true;
 
   services.homelab = {
     beets.enable = true;
@@ -197,8 +183,6 @@ in {
     randomizedDelaySec = "45min";
     allowReboot = true;
   };
-
-  time.timeZone = "Europe/Vienna";
 
   # DO NOT TOUCH THIS
   system.stateVersion = "25.05";
