@@ -33,9 +33,6 @@ in {
     profiles.dev.enable = true;
   };
 
-  # Keep the current disk layout as-is, but stop activating disk swap.
-  swapDevices = lib.mkForce [];
-  boot.resumeDevice = lib.mkForce "";
   zramSwap = {
     enable = true;
     memoryPercent = 50;
@@ -73,9 +70,22 @@ in {
         resolution = "2560x1440x32";
         secureBoot.enable = true;
         style = {
-          interface.resolution = "2560x1440";
-          wallpapers = [../../../assets/limine.png];
-          graphicalTerminal.background = "FF000000";
+          interface = {
+            resolution = "2560x1440";
+            brandingColor = 6; # OneDark cyan
+          };
+          wallpapers = [../../../assets/ublue.png];
+          backdrop = "282c34";
+          graphicalTerminal = {
+            background = "FF282c34";
+            foreground = "abb2bf";
+            brightForeground = "abb2bf";
+            brightBackground = "3e4452";
+            palette = "282c34;e06c75;98c379;d19a66;61afef;c678dd;56b6c2;5c6370";
+            brightPalette = "3e4452;e06c75;98c379;e5c07b;61afef;c678dd;56b6c2;abb2bf";
+            margin = 0;
+            marginGradient = 0;
+          };
         };
         extraConfig = ''
           remember_last_entry: yes
@@ -110,12 +120,13 @@ in {
     LIBVA_DRIVER_NAME = "radeonsi";
   };
 
-  # GPU management + ROCm for compute
   environment.systemPackages = with pkgs; [
+    easyeffects
+    deepfilternet
     lact
     lm_sensors
-    usbutils
     sbctl
+    usbutils
   ];
 
   systemd = {
