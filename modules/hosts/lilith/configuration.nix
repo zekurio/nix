@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   modulesPath,
   ...
@@ -30,6 +31,15 @@ in {
   home-manager.users.zekurio = {
     profiles.desktop.enable = true;
     profiles.dev.enable = true;
+  };
+
+  # Keep the current disk layout as-is, but stop activating disk swap.
+  swapDevices = lib.mkForce [];
+  boot.resumeDevice = lib.mkForce "";
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    algorithm = "zstd";
   };
 
   # Zen kernel for gaming/desktop performance
