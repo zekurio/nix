@@ -130,16 +130,6 @@ in {
 
       lactd.wantedBy = ["multi-user.target"];
 
-      openrgb-disable = {
-        description = "Turn off all RGB LEDs via OpenRGB";
-        wantedBy = ["multi-user.target"];
-        after = ["systemd-udev-settle.service"];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.openrgb}/bin/openrgb --noautoconnect -c 000000";
-        };
-      };
-
       # Workaround: disable GPP0 ACPI wakeup to prevent spurious wakeups
       disable-gpp0-acpi-wakeup = {
         description = "Disable ACPI wake device GPP0";
@@ -161,10 +151,6 @@ in {
 
   services = {
     fwupd.enable = true;
-    hardware.openrgb = {
-      enable = true;
-      motherboard = "amd";
-    };
     openssh = {
       enable = true;
       settings = {
