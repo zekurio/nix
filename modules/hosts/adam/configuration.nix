@@ -188,7 +188,6 @@ in {
     seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
-    tracearr.enable = true;
   };
 
   system.autoUpgrade = {

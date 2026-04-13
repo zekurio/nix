@@ -26,16 +26,6 @@ in {
     allowUnfree = true;
   };
 
-  environment.systemPackages = with pkgs; [
-    bubblewrap
-  ];
-
-  systemd.tmpfiles.rules = [
-    "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
-  ];
-
-  programs.zsh.enable = true;
-
   programs.nix-ld.enable = true;
 
   nix = {
