@@ -2,6 +2,6 @@
   imports = [
     ./adam
     ./lilith
-    ./tabris
+    ./sachiel
   ];
 }

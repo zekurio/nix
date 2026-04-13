@@ -1,10 +1,9 @@
 {osConfig, ...}: let
   hostName = osConfig.networking.hostName;
-  identityAgentByHost = {
-    adam = "SSH_AUTH_SOCK";
-    lilith = "~/.1password/agent.sock";
-    tabris = "SSH_AUTH_SOCK";
-  };
+  identityAgent =
+    if hostName == "lilith"
+    then "~/.1password/agent.sock"
+    else "SSH_AUTH_SOCK";
 in {
   programs.ssh = {
     enable = true;
@@ -12,7 +11,7 @@ in {
     matchBlocks = {
       "*" = {
         compression = true;
-        identityAgent = identityAgentByHost.${hostName} or "SSH_AUTH_SOCK";
+        inherit identityAgent;
       };
       "adam" = {
         hostname = "adam.lan";

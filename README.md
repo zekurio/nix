@@ -8,7 +8,6 @@ NixOS configurations for my current systems.
 |------|-------------|
 | `adam` | Homelab server |
 | `lilith` | Personal desktop |
-| `tabris` | WSL dev box |
 
 ## Installation runbook (NixOS)
 
@@ -51,13 +50,3 @@ Unmount and reboot
 umount -Rl /mnt
 reboot
 ```
-
-### WSL (tabris)
-
-Follow the [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) setup guide, then apply:
-
-```bash
-sudo nixos-rebuild switch --flake .#tabris
-```
-
-`tabris` uses Bash as the login shell for WSL compatibility, then `exec`s into Nushell for top-level interactive sessions.
