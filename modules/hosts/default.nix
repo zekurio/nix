@@ -14,22 +14,8 @@
     };
 in {
   flake.nixosConfigurations = {
-    adam = mkHost [
-      inputs.autoaspm.nixosModules.default
-      ../homelab
-      ./adam/configuration.nix
-    ];
-
-    lilith = mkHost [
-      ../desktop
-      ../gaming
-      ./lilith/configuration.nix
-    ];
-
-    sachiel = mkHost [
-      ../desktop
-      ../gaming
-      ./sachiel/configuration.nix
-    ];
+    adam = mkHost [./adam];
+    lilith = mkHost [./lilith];
+    sachiel = mkHost [./sachiel];
   };
 }
