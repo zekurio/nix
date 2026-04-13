@@ -1,14 +1,14 @@
 {
+  config,
   lib,
   pkgs,
   modulesPath,
   ...
 }: let
-  # Replace these with the real decimal bus IDs from `lspci` before deployment.
-  amdGpuBusId = "PCI:5@0:0:0";
+  amdGpuBusId = "PCI:4@0:0:0";
   nvidiaGpuBusId = "PCI:1@0:0:0";
-  # Fill this in after retrieving the swapfile offset from `/swapfile`.
-  resumeOffset = null;
+  resumeDevice = config.fileSystems."/".device;
+  resumeOffset = 81850368;
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -61,15 +61,14 @@ in {
         cryptroot.crypttabExtraOpts = ["tpm2-device=auto"];
       };
     };
-    resumeDevice = "/dev/mapper/cryptroot";
+    inherit resumeDevice;
     loader = {
       efi.canTouchEfiVariables = true;
       limine = {
         enable = true;
         maxGenerations = 3;
         resolution = "1920x1080x32";
-        # Enable this after key enrollment and a TPM re-enrollment pass.
-        secureBoot.enable = false;
+        secureBoot.enable = true;
         style = {
           interface.resolution = "1920x1080";
           wallpapers = [../../../assets/limine.png];

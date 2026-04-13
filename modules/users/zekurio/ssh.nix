@@ -1,9 +1,13 @@
-{osConfig, ...}: let
-  hostName = osConfig.networking.hostName;
+{
+  config,
+  osConfig,
+  ...
+}: let
+  desktopEnabled = osConfig.modules.desktop.enable or false;
   identityAgent =
-    if hostName == "lilith"
-    then "~/.1password/agent.sock"
-    else "SSH_AUTH_SOCK";
+    if desktopEnabled
+    then "${config.home.homeDirectory}/.1password/agent.sock"
+    else "$SSH_AUTH_SOCK";
 in {
   programs.ssh = {
     enable = true;
