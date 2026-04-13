@@ -1,5 +1,6 @@
 # Update device to match your hardware (e.g. ata-... ID from lsblk -o NAME,ID-LINK,SIZE)
-{...}: {
+{ ... }:
+{
   disko.devices = {
     disk = {
       main = {
@@ -15,16 +16,10 @@
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                mountOptions = ["fmask=0077" "dmask=0077"];
-              };
-            };
-            swap = {
-              size = "16G";
-              type = "8200";
-              content = {
-                type = "swap";
-                discardPolicy = "both";
-                resumeDevice = true;
+                mountOptions = [
+                  "fmask=0077"
+                  "dmask=0077"
+                ];
               };
             };
             root = {
@@ -32,9 +27,12 @@
               content = {
                 type = "filesystem";
                 format = "ext4";
-                extraArgs = ["-L" "nixos"];
+                extraArgs = [
+                  "-L"
+                  "nixos"
+                ];
                 mountpoint = "/";
-                mountOptions = ["noatime"];
+                mountOptions = [ "noatime" ];
               };
             };
           };
