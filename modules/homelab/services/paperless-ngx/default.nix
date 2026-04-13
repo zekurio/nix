@@ -21,6 +21,7 @@ in {
       environmentFile = config.sops.secrets.paperless_env.path;
       settings = {
         PAPERLESS_URL = "https://${domain}";
+        PAPERLESS_DISABLE_REGULAR_LOGIN = true;
         PAPERLESS_OCR_LANGUAGE = "deu+eng";
         PAPERLESS_TIME_ZONE = "Europe/Vienna";
         PAPERLESS_ENABLE_COMPRESSION = true;
