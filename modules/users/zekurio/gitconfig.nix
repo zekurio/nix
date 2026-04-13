@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  hostName = osConfig.networking.hostName;
+  desktopEnabled = osConfig.modules.desktop.enable or false;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
   sshSigningProgram =
-    if hostName == "lilith"
+    if desktopEnabled
     then "${pkgs._1password-gui}/share/1password/op-ssh-sign"
     else "/run/current-system/sw/bin/ssh-keygen";
 in {

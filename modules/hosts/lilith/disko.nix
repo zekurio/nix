@@ -1,6 +1,5 @@
 # Update device to match your hardware (e.g. ata-... ID from lsblk -o NAME,ID-LINK,SIZE)
-{ ... }:
-{
+{...}: {
   disko.devices = {
     disk = {
       main = {
@@ -32,7 +31,7 @@
                   "nixos"
                 ];
                 mountpoint = "/";
-                mountOptions = [ "noatime" ];
+                mountOptions = ["noatime"];
               };
             };
           };

@@ -4,8 +4,7 @@
   pkgs,
   inputs,
   ...
-}:
-let
+}: let
   cliPackages = with pkgs; [
     age
     bat
@@ -20,28 +19,27 @@ let
     zellij
   ];
 
-  desktopPackages =
-    let
-      t3codePackages = inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system};
-    in
-    [
-      pkgs.kdePackages.ark
-      pkgs.brave
-      pkgs.feishin
-      pkgs.haruna
-      pkgs.jellyfin-desktop
-      pkgs.kdePackages.dolphin
-      pkgs.kdePackages.gwenview
-      pkgs.kdePackages.konsole
-      pkgs.kdePackages.okular
-      pkgs.kdePackages.spectacle
-      pkgs.kitty
-      pkgs.klassy
-      pkgs.kdePackages.qtstyleplugin-kvantum
-      pkgs.vesktop
-      pkgs.zed-editor
-      t3codePackages.default
-    ];
+  desktopPackages = let
+    t3codePackages = inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system};
+  in [
+    pkgs.kdePackages.ark
+    pkgs.brave
+    pkgs.feishin
+    pkgs.haruna
+    pkgs.jellyfin-desktop
+    pkgs.kdePackages.dolphin
+    pkgs.kdePackages.gwenview
+    pkgs.kdePackages.konsole
+    pkgs.kdePackages.okular
+    pkgs.kdePackages.partitionmanager
+    pkgs.kdePackages.spectacle
+    pkgs.kitty
+    pkgs.klassy
+    pkgs.kdePackages.qtstyleplugin-kvantum
+    pkgs.vesktop
+    pkgs.zed-editor
+    t3codePackages.default
+  ];
 
   devPackages = [
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
@@ -50,9 +48,8 @@ let
     pkgs.nixd
     pkgs.uv
   ];
-in
-{
-  nix.settings.trusted-users = [ "zekurio" ];
+in {
+  nix.settings.trusted-users = ["zekurio"];
 
   programs.vim = {
     enable = true;
@@ -61,7 +58,7 @@ in
 
   programs.fish.enable = true;
 
-  environment.shells = [ pkgs.fish ];
+  environment.shells = [pkgs.fish];
   environment.systemPackages =
     lib.optionals config.home-manager.users.zekurio.profiles.packages.cli.enable cliPackages
     ++ lib.optionals config.home-manager.users.zekurio.profiles.desktop.enable desktopPackages
