@@ -1,5 +1,4 @@
 {
-  inputs,
   lib,
   pkgs,
   ...
@@ -26,7 +25,20 @@ in {
     allowUnfree = true;
   };
 
+  hardware = {
+    enableRedistributableFirmware = true;
+    firmware = [pkgs.linux-firmware];
+  };
+
   programs.nix-ld.enable = true;
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
 
   nix = {
     settings = {
@@ -47,4 +59,6 @@ in {
       options = mkDefault "--delete-older-than 7d";
     };
   };
+
+  time.timeZone = "Europe/Vienna";
 }
