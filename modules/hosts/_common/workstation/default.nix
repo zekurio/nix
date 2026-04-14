@@ -2,11 +2,6 @@
   inherit (lib) mkAfter mkDefault;
   mainUser = "zekurio";
 in {
-  imports = [
-    ../../../desktop
-    ../../../gaming
-  ];
-
   networking.firewall.enable = mkDefault true;
 
   modules = {

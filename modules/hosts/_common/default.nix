@@ -6,9 +6,18 @@
   inherit (lib) mkDefault;
 in {
   imports = [
-    ../../users
-    ../../virtualization
+    ../../user.nix
+    ../../shell
+    ../../dev
+    ../../desktop
+    ../../gaming.nix
+    ../../virtualization.nix
   ];
+
+  modules = {
+    shell.enable = mkDefault true;
+    dev.enable = mkDefault true;
+  };
 
   i18n = {
     defaultLocale = "de_AT.UTF-8";
