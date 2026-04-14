@@ -21,6 +21,8 @@
         ll = "eza -lah";
         la = "eza -la";
         lt = "eza --tree";
+        codex = "command codex --dangerously-bypass-approvals-and-sandbox";
+        claude = "command claude --dangerously-skip-permissions";
       };
     };
 
@@ -127,6 +129,11 @@
         rust = {
           format = "[rs $version]($style) ";
           style = "red";
+        };
+
+        nix_shell = {
+          format = "[nix $state]($style) ";
+          style = "blue";
         };
       };
     };
