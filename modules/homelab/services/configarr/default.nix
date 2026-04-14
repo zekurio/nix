@@ -8,6 +8,7 @@
   cfg = config.services.homelab.configarr;
   stateDir = "/var/lib/configarr";
   reposDir = "${stateDir}/repos";
+  runtimeEnvFile = "${stateDir}/configarr.env";
   configFilePath = toString cfg.configFile;
   secretsFilePath = toString cfg.secretsFile;
   configTextFile = pkgs.writeText "configarr-config.yaml" cfg.configText;
@@ -77,16 +78,19 @@ in {
         ExecStartPre =
           [
             "${pkgs.bash}/bin/bash -euc 'if [ -d \"${reposDir}\" ]; then for repo in \"${reposDir}\"/*; do [ -d \"$repo/.git\" ] || continue; ${pkgs.git}/bin/git -C \"$repo\" reset --hard HEAD; ${pkgs.git}/bin/git -C \"$repo\" clean -fd; done; fi'"
+            "${pkgs.bash}/bin/bash -euc 'src=${lib.escapeShellArg secretsFilePath}; dest=${lib.escapeShellArg runtimeEnvFile}; if ${pkgs.gnugrep}/bin/grep -Eq \"^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*:\" \"$src\"; then ${pkgs.gawk}/bin/awk '\\''/^[[:space:]]*#/ || /^[[:space:]]*$/ { next } match($0, /^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*:[[:space:]]*(.*)[[:space:]]*$/, m) { val = m[2]; gsub(/^\\\"|\\\"$/, \"\", val); print m[1] \"=\" val }'\\'' \"$src\" > \"$dest\"; ${pkgs.coreutils}/bin/chmod 0400 \"$dest\"; else ${pkgs.coreutils}/bin/install -D -m 0400 \"$src\" \"$dest\"; fi'"
           ]
           ++ lib.optionals (cfg.configText != "") [
             "${pkgs.coreutils}/bin/install -D -m 0640 ${configTextFile} ${configFilePath}"
           ];
         ExecStart = lib.getExe cfg.package;
+        EnvironmentFile = "-${runtimeEnvFile}";
       };
       environment = {
         ROOT_PATH = stateDir;
         CONFIG_LOCATION = configFilePath;
         SECRETS_LOCATION = secretsFilePath;
+        LOG_STACKTRACE = "true";
       };
     };
 

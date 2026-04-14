@@ -64,6 +64,7 @@ in {
     };
 
     systemd.services.sabnzbd.serviceConfig = {
+      SupplementaryGroups = ["share"];
       UMask = lib.mkForce shareUmask;
     };
 

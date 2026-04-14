@@ -195,6 +195,7 @@ in {
 
     # Upstream slskd makes shared paths read-only; clear that so beets import can move files into musicDir
     systemd.services.slskd.serviceConfig = {
+      SupplementaryGroups = ["share"];
       UMask = "0002";
       ReadOnlyPaths = lib.mkForce [];
       ReadWritePaths = [
@@ -244,6 +245,7 @@ in {
         Type = "oneshot";
         User = shareUser;
         Group = shareGroup;
+        SupplementaryGroups = [shareGroup];
         UMask = "0002";
         ExecStart = importQueuedBeetsScript;
         ReadWritePaths = [
