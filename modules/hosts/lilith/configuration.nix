@@ -21,6 +21,11 @@ in {
 
   networking = {
     hostName = "lilith";
+    networkmanager.dns = "systemd-resolved";
+  };
+
+  services.resolved = {
+    enable = true;
   };
 
   zramSwap = {
