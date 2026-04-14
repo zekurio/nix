@@ -1,6 +1,4 @@
 {
-  config,
-  lib,
   pkgs,
   inputs,
   ...
@@ -13,13 +11,5 @@
     pkgs.uv
   ];
 in {
-  options.profiles.dev.enable =
-    lib.mkEnableOption "development packages"
-    // {
-      default = true;
-    };
-
-  config = lib.mkIf config.profiles.dev.enable {
-    home.packages = devPackages;
-  };
+  home.packages = devPackages;
 }

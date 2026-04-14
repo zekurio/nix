@@ -15,11 +15,6 @@ in {
     virtualization.enable = mkDefault true;
   };
 
-  home-manager.users.${mainUser} = {
-    profiles.desktop.enable = mkDefault true;
-    profiles.dev.enable = mkDefault true;
-  };
-
   hardware = {
     graphics = {
       enable = mkDefault true;

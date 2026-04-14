@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   pkgs,
   modulesPath,
   ...
@@ -11,8 +10,6 @@ in {
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
   ];
-
-  home-manager.users.${mainUser}.profiles.dev.enable = true;
 
   # Boot configuration
   boot = {
