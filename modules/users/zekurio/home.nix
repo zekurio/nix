@@ -15,7 +15,6 @@
         ./gitconfig.nix
         ./packages.nix
         ./shell.nix
-        ./ssh.nix
       ];
 
       fonts.fontconfig.enable = false;
