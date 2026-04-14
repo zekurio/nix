@@ -23,6 +23,7 @@ in {
 
     # Set umask for shared library access
     systemd.services.radarr.serviceConfig = {
+      SupplementaryGroups = ["share"];
       UMask = lib.mkForce shareUmask;
     };
 

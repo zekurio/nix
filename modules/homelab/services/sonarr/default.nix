@@ -33,6 +33,7 @@ in {
     };
 
     systemd.services.sonarr.serviceConfig = {
+      SupplementaryGroups = ["share"];
       UMask = lib.mkForce shareUmask;
     };
 
