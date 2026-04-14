@@ -34,6 +34,7 @@ in {
       [
         "quiet"
         "splash"
+        "pcie_aspm.policy=powersave"
         "rd.systemd.show_status=false"
         "rd.udev.log_level=3"
         "udev.log_priority=3"
@@ -64,6 +65,8 @@ in {
 
   services.xserver.videoDrivers = ["nvidia"];
 
+  powerManagement.powertop.enable = true;
+
   hardware = {
     nvidia = {
       modesetting.enable = true;
@@ -82,6 +85,14 @@ in {
     };
   };
 
+  services = {
+    asusd.enable = true;
+    # PRIME offload is configured explicitly on this host, so leave GPU mode
+    # switching to the existing NVIDIA setup instead of supergfxd.
+    supergfxd.enable = lib.mkForce false;
+    power-profiles-daemon.enable = true;
+  };
+
   security.tpm2.enable = true;
 
   environment = {
@@ -89,6 +100,7 @@ in {
       cryptsetup
       e2fsprogs
       pciutils
+      powertop
       sbctl
       tpm2-tools
       usbutils
