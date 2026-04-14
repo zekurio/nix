@@ -94,10 +94,22 @@
   '';
 
   beetImportWrapped = pkgs.writeShellScriptBin "beet-import-wrapped" ''
-    exec ${pkgs.util-linux}/bin/runuser -u ${shareUser} -- \
-      ${pkgs.bash}/bin/bash -lc \
-      'export BEETSDIR='"${beetsDir}"'; exec '"${lib.getExe pkgs.beets}"' -c '"${beetsConfigFile}"' import -q "$@"' \
-      -- "$@"
+    set -eu
+
+    export BEETSDIR=${beetsDir}
+
+    if [ "$(${pkgs.coreutils}/bin/id -un)" = "${shareUser}" ]; then
+      exec ${lib.getExe pkgs.beets} -c ${beetsConfigFile} import -q "$@"
+    fi
+
+    if [ "$(${pkgs.coreutils}/bin/id -u)" -eq 0 ]; then
+      exec ${pkgs.util-linux}/bin/runuser -u ${shareUser} -- \
+        ${lib.getExe pkgs.beets} -c ${beetsConfigFile} import -q "$@"
+    fi
+
+    exec /run/wrappers/bin/sudo -u ${shareUser} \
+      ${pkgs.coreutils}/bin/env BEETSDIR=${beetsDir} \
+      ${lib.getExe pkgs.beets} -c ${beetsConfigFile} import -q "$@"
   '';
 in {
   options.services.homelab.beets = {
@@ -124,8 +136,10 @@ in {
 
     systemd.tmpfiles.rules = [
       "d ${beetsDir} 2775 share share -"
-      # Default ACL: new files inherit group rw so slskd (in share group) can write beets.db
-      "a+ ${beetsDir} - - - - default:group::rwx"
+      "a+ ${beetsDir} - - - - g:share:rwx"
+      "A+ ${beetsDir} - - - - g:share:rwx"
+      "a+ ${beetsDir} - - - - m::rwx"
+      "A+ ${beetsDir} - - - - m::rwx"
     ];
   };
 }

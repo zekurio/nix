@@ -12,12 +12,14 @@
   shareGid = 995;
 
   mediaDirs = [
+    "/var/lib/beets"
     "/tank/media/shows"
     "/tank/media/anime"
     "/tank/media/movies"
     "/tank/media/music"
     "/var/lib/downloads"
     "/var/lib/downloads/complete"
+    "/var/lib/downloads/complete/manual"
     "/var/lib/downloads/complete/radarr"
     "/var/lib/downloads/complete/slskd"
     "/var/lib/downloads/complete/sonarr"
@@ -47,6 +49,29 @@
   );
 
   fixExisting = cfg.fixExistingTrees;
+  normalizeTreeScript = pkgs.writeShellScript "media-share-normalize-tree" ''
+    set -euo pipefail
+
+    dirs=(${lib.concatStringsSep " " (map lib.escapeShellArg mediaDirs)})
+
+    for d in "''${dirs[@]}"; do
+      [ -d "$d" ] || continue
+
+      # Ensure group ownership and setgid on directories
+      chgrp -R ${lib.escapeShellArg shareGroup} "$d" || true
+      chmod 2775 "$d" || true
+
+      # Directories must be group-writable for arr import moves/renames
+      find "$d" -type d -exec chmod 2775 {} +
+
+      # Files commonly should be group-writable; adjust if you prefer 664/660
+      find "$d" -type f -exec chmod 664 {} +
+
+      # Ensure share group has rwx and inheritance works regardless of creator umask/mode
+      setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
+      setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m d:m::rwx "$d" || true
+    done
+  '';
 in {
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
@@ -101,35 +126,34 @@ in {
       after = ["local-fs.target"];
       serviceConfig = {
         Type = "oneshot";
+        ExecStart = normalizeTreeScript;
       };
       path = [
         pkgs.coreutils
         pkgs.findutils
         pkgs.acl
       ];
-      script = ''
-        set -euo pipefail
+    };
 
-        dirs=(${lib.concatStringsSep " " (map lib.escapeShellArg mediaDirs)})
+    systemd.paths.mediaShare-fixperms = lib.mkIf fixExisting {
+      wantedBy = ["multi-user.target"];
+      pathConfig.PathModified = [
+        "/var/lib/beets"
+        "/var/lib/downloads/complete"
+        "/var/lib/downloads/incomplete"
+        "/tank/media/music"
+        "/tank/media/movies"
+        "/tank/media/shows"
+      ];
+    };
 
-        for d in "''${dirs[@]}"; do
-          [ -d "$d" ] || continue
-
-          # Ensure group ownership and setgid on directories
-          chgrp -R ${lib.escapeShellArg shareGroup} "$d" || true
-          chmod 2775 "$d" || true
-
-          # Directories must be group-writable for arr import moves/renames
-          find "$d" -type d -exec chmod 2775 {} +
-
-          # Files commonly should be group-writable; adjust if you prefer 664/660
-          find "$d" -type f -exec chmod 664 {} +
-
-          # Ensure share group has rwx and inheritance works regardless of creator umask/mode
-          setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
-          setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m d:m::rwx "$d" || true
-        done
-      '';
+    systemd.timers.mediaShare-fixperms = lib.mkIf fixExisting {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "5m";
+        OnUnitActiveSec = "15m";
+        Persistent = true;
+      };
     };
   };
 }
