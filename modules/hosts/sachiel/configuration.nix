@@ -6,8 +6,6 @@
   ...
 }: let
   mkWorkstationLimine = import ../_common/workstation/limine.nix;
-  amdGpuBusId = "PCI:4@0:0:0";
-  nvidiaGpuBusId = "PCI:1@0:0:0";
   resumeDevice = config.fileSystems."/".device;
   resumeOffset = 81850368;
 in {
@@ -68,27 +66,19 @@ in {
   powerManagement.powertop.enable = true;
 
   hardware = {
+    asus.battery.chargeUpto = 80;
     nvidia = {
-      modesetting.enable = true;
       open = false;
       nvidiaSettings = true;
       powerManagement = {
         enable = true;
         finegrained = true;
       };
-      prime = {
-        offload.enable = true;
-        offload.enableOffloadCmd = true;
-        amdgpuBusId = amdGpuBusId;
-        nvidiaBusId = nvidiaGpuBusId;
-      };
     };
   };
 
   services = {
-    asusd.enable = true;
-    # PRIME offload is configured explicitly on this host, so leave GPU mode
-    # switching to the existing NVIDIA setup instead of supergfxd.
+    # Keep GPU mode switching disabled because this host uses PRIME offload.
     supergfxd.enable = lib.mkForce false;
     power-profiles-daemon.enable = true;
   };
