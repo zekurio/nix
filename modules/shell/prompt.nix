@@ -12,7 +12,7 @@ in {
       settings = {
         add_newline = false;
         format = "$directory$character";
-        right_format = "$status$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname";
+        right_format = "$status$jj$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname";
 
         character = {
           success_symbol = "[❯](red)[❯](yellow)[❯](green)";
@@ -20,30 +20,20 @@ in {
           vicmd_symbol = "[❮](green)[❮](yellow)[❮](red)";
         };
 
-        git_branch = {
-          format = "[$branch]($style) ";
+        jj = {
+          format = "[$symbol$change_id(:$bookmarks)]($style)[$conflict](bold red)[$divergent](bold yellow)[$immutable](bold cyan) ";
           style = "bold green";
+          symbol = " ";
         };
+
+        git_branch.disabled = true;
 
         python = {
           format = "[py $version(\\($virtualenv\\))]($style) ";
           style = "yellow";
         };
 
-        git_status = {
-          format = "$all_status$ahead_behind ";
-          ahead = "[⬆](bold purple) ";
-          behind = "[⬇](bold purple) ";
-          staged = "[✚](green) ";
-          deleted = "[✖](red) ";
-          renamed = "[➜](purple) ";
-          stashed = "[✭](cyan) ";
-          untracked = "[◼](white) ";
-          modified = "[✱](blue) ";
-          conflicted = "[═](yellow) ";
-          diverged = "⇕ ";
-          up_to_date = "";
-        };
+        git_status.disabled = true;
 
         directory = {
           style = "blue";
