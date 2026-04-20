@@ -22,6 +22,7 @@ in {
       eza
       gh
       git
+      jj-starship
       jq
       ripgrep
       sops

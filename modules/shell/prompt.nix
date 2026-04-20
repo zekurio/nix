@@ -12,7 +12,7 @@ in {
       settings = {
         add_newline = false;
         format = "$directory$character";
-        right_format = "$status$jj$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname";
+        right_format = ''$status''${custom.jj}$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname'';
 
         character = {
           success_symbol = "[❯](red)[❯](yellow)[❯](green)";
@@ -20,10 +20,10 @@ in {
           vicmd_symbol = "[❮](green)[❮](yellow)[❮](red)";
         };
 
-        jj = {
-          format = "[$symbol$change_id(:$bookmarks)]($style)[$conflict](bold red)[$divergent](bold yellow)[$immutable](bold cyan) ";
-          style = "bold green";
-          symbol = " ";
+        custom.jj = {
+          when = "jj-starship detect";
+          shell = ["jj-starship"];
+          format = "$output ";
         };
 
         git_branch.disabled = true;
