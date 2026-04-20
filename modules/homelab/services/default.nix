@@ -17,5 +17,6 @@
     ./seerr
     ./slskd
     ./sonarr
+    ./windrose
   ];
 }
