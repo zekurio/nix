@@ -171,6 +171,11 @@ in {
     seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
+    windrose = {
+      enable = true;
+      hostNetwork = true;
+      p2pProxyAddress = "10.0.0.2";
+    };
   };
 
   system.autoUpgrade = {
