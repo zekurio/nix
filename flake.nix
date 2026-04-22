@@ -56,6 +56,14 @@
       url = "github:omarcresp/t3code-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    helium = {
+      url = "github:tomsch/helium-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs = {flake-parts, ...} @ inputs: let

@@ -51,6 +51,8 @@ in {
     };
 
     users.${username} = {
+      imports = [./users/zekurio];
+
       fonts.fontconfig.enable = false;
 
       home = {
