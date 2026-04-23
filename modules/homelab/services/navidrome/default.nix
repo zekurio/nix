@@ -21,6 +21,7 @@ in {
         Port = port;
         MusicFolder = musicDir;
         DataFolder = dataDir;
+        EnableSharing = true;
         EnableInsightsCollector = false;
       };
     };
