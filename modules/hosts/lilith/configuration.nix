@@ -85,7 +85,6 @@ in {
   programs.coolercontrol.enable = true;
 
   environment.systemPackages = with pkgs; [
-    easyeffects
     deepfilternet
     lact
     lm_sensors
