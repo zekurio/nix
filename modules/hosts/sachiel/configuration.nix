@@ -78,6 +78,8 @@ in {
   };
 
   services = {
+    asusd.enable = true;
+
     # Keep GPU mode switching disabled because this host uses PRIME offload.
     supergfxd.enable = lib.mkForce false;
     power-profiles-daemon.enable = true;
@@ -87,6 +89,7 @@ in {
 
   environment = {
     systemPackages = with pkgs; [
+      asusctl
       cryptsetup
       e2fsprogs
       pciutils
