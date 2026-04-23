@@ -11,7 +11,7 @@
       resolution = interfaceResolution;
       brandingColor = 6; # OneDark cyan
     };
-    wallpapers = [../../../../assets/ublue.png];
+    wallpapers = [];
     backdrop = "282c34";
     graphicalTerminal = {
       background = "FF282c34";
