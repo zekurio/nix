@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.homelab.navidrome;
-  domain = "music.schnitzelflix.xyz";
+  domain = "music.zekurio.xyz";
   port = 4533;
   musicDir = "/tank/media/music";
   dataDir = "/var/lib/navidrome";
