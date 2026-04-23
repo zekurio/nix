@@ -162,6 +162,7 @@ in {
     immich.enable = true;
     jellyfin.enable = true;
     jellything.enable = true;
+    navidrome.enable = true;
     oauth2-proxy.enable = true;
     paperless-ngx.enable = true;
     pocket-id.enable = true;
