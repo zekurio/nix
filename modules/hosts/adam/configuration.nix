@@ -156,7 +156,7 @@ in {
       listenAddress = "0.0.0.0";
       listenAddress6 = "::";
       allowedInterfaces = ["enp42s0"];
-      caddy.bearerTokenEnv = "COOLERCONTROL_TOKEN";
+      caddy.enable = false;
     };
     configarr.enable = true;
     immich.enable = true;
