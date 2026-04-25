@@ -77,6 +77,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [pkgs.coolercontrol.coolercontrold];
+
     systemd.packages = [pkgs.coolercontrol.coolercontrold];
 
     systemd.services.coolercontrold = {
