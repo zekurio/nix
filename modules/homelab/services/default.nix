@@ -1,5 +1,6 @@
 {
   imports = [
+    ./alloy
     ./beets
     ./caddy
     ./coolercontrol

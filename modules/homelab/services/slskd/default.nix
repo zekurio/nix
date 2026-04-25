@@ -40,18 +40,19 @@
           exit 0
         fi
 
-        download_file="$(${pkgs.jq}/bin/jq -r '
+        event_type="$(${pkgs.jq}/bin/jq -r '.type // .Type // empty' <<EOF
+    $payload
+    EOF
+    )"
+
+        if [ "$event_type" != "DownloadDirectoryComplete" ]; then
+          exit 0
+        fi
+
+        download_dir="$(${pkgs.jq}/bin/jq -r '
           [
-            .. | objects | (
-              .filename?,
-              .Filename?,
-              .localFilename?,
-              .local_filename?,
-              .path?,
-              .Path?,
-              .targetFilename?,
-              .TargetFilename?
-            )
+            .localDirectoryName?,
+            .LocalDirectoryName?
           ]
           | map(select(type == "string" and . != ""))
           | first // empty
@@ -60,11 +61,18 @@
     EOF
     )"
 
-        if [ -z "$download_file" ]; then
+        if [ -z "$download_dir" ]; then
           exit 0
         fi
 
-        download_dir="$(${pkgs.coreutils}/bin/dirname "$download_file")"
+        download_dir="$(${pkgs.coreutils}/bin/realpath -m "$download_dir")"
+        case "$download_dir" in
+          ${downloadDir}/*) ;;
+          *) exit 0 ;;
+        esac
+
+        [ -d "$download_dir" ] || exit 0
+
         marker_name="$(${pkgs.coreutils}/bin/printf '%s' "$download_dir" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.gawk}/bin/awk '{print $1}')"
         tmp_marker="$(${pkgs.coreutils}/bin/mktemp "${queuePendingDir}/.$marker_name.XXXXXX")"
 
@@ -165,7 +173,7 @@ in {
           incomplete = incompleteDir;
         };
         integration.scripts.beets_import = {
-          on = ["DownloadFileComplete"];
+          on = ["DownloadDirectoryComplete"];
           run.executable = queueBeetsImportScript;
         };
         shares = {

@@ -34,6 +34,14 @@ in {
     allowUnfree = true;
   };
 
+  nixpkgs.overlays = [
+    (_final: prev: {
+      openldap = prev.openldap.overrideAttrs (_old: {
+        doCheck = false;
+      });
+    })
+  ];
+
   hardware = {
     enableRedistributableFirmware = true;
     firmware = [pkgs.linux-firmware];
