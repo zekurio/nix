@@ -62,6 +62,14 @@
       url = "github:tomsch/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    cpu-microcodes = {
+      url = "github:platomav/CPUMicrocodes/0be0bd7b6a3ec1f1b59562729f1ce14b9569b697";
+      flake = false;
+    };
+    ucodenix = {
+      url = "github:e-tho/ucodenix";
+      inputs.cpu-microcodes.follows = "cpu-microcodes";
+    };
   };
 
   outputs = {flake-parts, ...} @ inputs: let

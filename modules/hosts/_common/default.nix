@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkDefault;
+  inherit (lib) mkAfter mkDefault;
 in {
   imports = [
     ../../user.nix
@@ -38,6 +38,10 @@ in {
     enableRedistributableFirmware = true;
     firmware = [pkgs.linux-firmware];
   };
+
+  boot.kernelParams = mkAfter ["microcode.amd_sha_check=off"];
+
+  services.ucodenix.enable = mkDefault true;
 
   programs.nix-ld.enable = true;
 
