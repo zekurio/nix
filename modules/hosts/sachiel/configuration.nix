@@ -79,10 +79,15 @@ in {
 
   services = {
     asusd.enable = true;
+    tlp.enable = lib.mkForce false;
 
     # Keep GPU mode switching disabled because this host uses PRIME offload.
     supergfxd.enable = lib.mkForce false;
-    power-profiles-daemon.enable = true;
+    power-profiles-daemon.enable = false;
+    tuned = {
+      enable = true;
+      ppdSupport = true;
+    };
   };
 
   security.tpm2.enable = true;
