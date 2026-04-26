@@ -21,6 +21,7 @@
       "embedart"
       "inline"
       "lyrics"
+      "missing"
     ];
     import = {
       write = true;
