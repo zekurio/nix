@@ -102,6 +102,23 @@
         "type": "github"
       }
     },
+    "cpu-microcodes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1740351392,
+        "narHash": "sha256-1N8CQ15j5m345BlNVNTNjU1z1VkKUJm5HLw72EC1Y7A=",
+        "owner": "platomav",
+        "repo": "CPUMicrocodes",
+        "rev": "0be0bd7b6a3ec1f1b59562729f1ce14b9569b697",
+        "type": "github"
+      },
+      "original": {
+        "owner": "platomav",
+        "repo": "CPUMicrocodes",
+        "rev": "0be0bd7b6a3ec1f1b59562729f1ce14b9569b697",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -342,6 +359,7 @@
       "inputs": {
         "autoaspm": "autoaspm",
         "configarr": "configarr",
+        "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
@@ -351,7 +369,8 @@
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
-        "t3code": "t3code"
+        "t3code": "t3code",
+        "ucodenix": "ucodenix"
       }
     },
     "sops-nix": {
@@ -442,6 +461,26 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "ucodenix": {
+      "inputs": {
+        "cpu-microcodes": [
+          "cpu-microcodes"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774278023,
+        "narHash": "sha256-CdAsDvDYKanRvtvGOn/E2KjrrZk9Cu/eNdvCVynwzPQ=",
+        "owner": "e-tho",
+        "repo": "ucodenix",
+        "rev": "b04dc47972b80e538b81892b957ecce281430d33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "e-tho",
+        "repo": "ucodenix",
         "type": "github"
       }
     }

@@ -6,49 +6,7 @@
 }: let
   cfg = config.services.homelab.alloy;
   dataDir = "/var/lib/alloy";
-  runtimeDir = "/run/alloy";
-  serverRuntimeEnv = "${runtimeDir}/server.env";
-  webRuntimeEnv = "${runtimeDir}/web.env";
   databaseUrl = "postgresql://alloy@127.0.0.1:5432/alloy";
-  sanitizeEnvFile = pkgs.writeShellScript "alloy-sanitize-env-file" ''
-    set -eu
-
-    src="$1"
-    dest="$2"
-    shift 2
-
-    tmp="$(${pkgs.coreutils}/bin/mktemp)"
-    trap 'rm -f "$tmp"' EXIT
-
-    ${pkgs.gawk}/bin/awk '
-      /^[[:space:]]*($|#)/ { next }
-      {
-        line = $0
-        sub(/\r$/, "", line)
-        eq = index(line, "=")
-        if (!eq) next
-
-        key = substr(line, 1, eq - 1)
-        value = substr(line, eq + 1)
-        gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
-        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
-
-        if (value ~ /^".*"$/) {
-          value = substr(value, 2, length(value) - 2)
-        }
-
-        if (key ~ /^[A-Za-z_][A-Za-z0-9_]*$/) {
-          print key "=" value
-        }
-      }
-    ' "$src" > "$tmp"
-
-    for assignment in "$@"; do
-      printf '%s\n' "$assignment" >> "$tmp"
-    done
-
-    ${pkgs.coreutils}/bin/install -D -m 0600 "$tmp" "$dest"
-  '';
 in {
   options.services.homelab.alloy = {
     enable = lib.mkEnableOption "Alloy clip sharing service with Caddy integration";
@@ -82,21 +40,23 @@ in {
       default = 3020;
       description = "Host port used by the Alloy web container.";
     };
-
-    serverEnvironmentFile = lib.mkOption {
-      type = lib.types.str;
-      default = "/home/zekurio/Git/alloy/apps/server/.env.prod";
-      description = "Environment file for the Alloy API server container.";
-    };
-
-    webEnvironmentFile = lib.mkOption {
-      type = lib.types.str;
-      default = "/home/zekurio/Git/alloy/apps/web/.env.prod";
-      description = "Environment file for the Alloy web container.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
+    sops.secrets = {
+      alloy_server_env = {
+        owner = "root";
+        group = "root";
+        mode = "0400";
+      };
+
+      alloy_web_env = {
+        owner = "root";
+        group = "root";
+        mode = "0400";
+      };
+    };
+
     services.postgresql = {
       enable = true;
       enableTCPIP = true;
@@ -130,19 +90,17 @@ in {
         Type = "oneshot";
       };
       script = ''
-        ${sanitizeEnvFile} ${lib.escapeShellArg cfg.serverEnvironmentFile} ${serverRuntimeEnv} \
-          DATABASE_URL=${lib.escapeShellArg databaseUrl} \
-          BETTER_AUTH_URL=https://${lib.escapeShellArg cfg.domain} \
-          TRUSTED_ORIGINS=https://${lib.escapeShellArg cfg.domain} \
-          PORT=${toString cfg.serverPort} \
-          RUNTIME_CONFIG_PATH=/data/runtime-config.json \
-          STORAGE_FS_ROOT=/data/storage \
-          ENCODE_SCRATCH_DIR=/data/encode
-
         podman pull ${lib.escapeShellArg cfg.serverImage}
         podman run --rm \
           --network=host \
-          --env-file ${serverRuntimeEnv} \
+          --env-file ${lib.escapeShellArg config.sops.secrets.alloy_server_env.path} \
+          -e DATABASE_URL=${lib.escapeShellArg databaseUrl} \
+          -e BETTER_AUTH_URL=https://${lib.escapeShellArg cfg.domain} \
+          -e TRUSTED_ORIGINS=https://${lib.escapeShellArg cfg.domain} \
+          -e PORT=${toString cfg.serverPort} \
+          -e RUNTIME_CONFIG_PATH=/data/runtime-config.json \
+          -e STORAGE_FS_ROOT=/data/storage \
+          -e ENCODE_SCRATCH_DIR=/data/encode \
           -v ${lib.escapeShellArg "${dataDir}/data"}:/data \
           ${lib.escapeShellArg cfg.serverImage} \
           pnpm --dir /app/packages/db migrate:deploy
@@ -164,7 +122,7 @@ in {
           STORAGE_FS_ROOT = "/data/storage";
           ENCODE_SCRATCH_DIR = "/data/encode";
         };
-        environmentFiles = [serverRuntimeEnv];
+        environmentFiles = [config.sops.secrets.alloy_server_env.path];
         volumes = [
           "${dataDir}/data:/data"
         ];
@@ -181,36 +139,18 @@ in {
           PUBLIC_API_URL = "https://${cfg.domain}";
           VITE_API_URL = "https://${cfg.domain}/api";
         };
-        environmentFiles = [webRuntimeEnv];
+        environmentFiles = [config.sops.secrets.alloy_web_env.path];
       };
     };
 
     systemd.services.podman-alloy-server = {
       after = ["alloy-db-migrate.service"];
       requires = ["alloy-db-migrate.service"];
-      preStart = ''
-        ${sanitizeEnvFile} ${lib.escapeShellArg cfg.serverEnvironmentFile} ${serverRuntimeEnv} \
-          DATABASE_URL=${lib.escapeShellArg databaseUrl} \
-          BETTER_AUTH_URL=https://${lib.escapeShellArg cfg.domain} \
-          TRUSTED_ORIGINS=https://${lib.escapeShellArg cfg.domain} \
-          PORT=${toString cfg.serverPort} \
-          RUNTIME_CONFIG_PATH=/data/runtime-config.json \
-          STORAGE_FS_ROOT=/data/storage \
-          ENCODE_SCRATCH_DIR=/data/encode
-      '';
     };
 
     systemd.services.podman-alloy-web = {
       after = ["podman-alloy-server.service"];
       requires = ["podman-alloy-server.service"];
-      preStart = ''
-        ${sanitizeEnvFile} ${lib.escapeShellArg cfg.webEnvironmentFile} ${webRuntimeEnv} \
-          INTERNAL_API_URL=http://127.0.0.1:${toString cfg.serverPort} \
-          PORT=${toString cfg.webPort} \
-          PUBLIC_APP_URL=https://${lib.escapeShellArg cfg.domain} \
-          PUBLIC_API_URL=https://${lib.escapeShellArg cfg.domain} \
-          VITE_API_URL=https://${lib.escapeShellArg cfg.domain}/api
-      '';
     };
 
     services.homelab.caddy.virtualHosts."alloy" = {
