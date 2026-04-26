@@ -69,7 +69,7 @@
 
       # Ensure share group has rwx and inheritance works regardless of creator umask/mode
       setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
-      setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m d:m::rwx "$d" || true
+      setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
     done
   '';
 in {
@@ -132,18 +132,6 @@ in {
         pkgs.coreutils
         pkgs.findutils
         pkgs.acl
-      ];
-    };
-
-    systemd.paths.mediaShare-fixperms = lib.mkIf fixExisting {
-      wantedBy = ["multi-user.target"];
-      pathConfig.PathModified = [
-        "/var/lib/beets"
-        "/var/lib/downloads/complete"
-        "/var/lib/downloads/incomplete"
-        "/tank/media/music"
-        "/tank/media/movies"
-        "/tank/media/shows"
       ];
     };
 
