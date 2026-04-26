@@ -14,6 +14,7 @@ in {
   # Boot configuration
   boot = {
     kernelParams = [
+      "amd_pstate=guided"
       "pcie_aspm=force"
       "pcie_aspm.policy=powersave"
       "consoleblank=60"
@@ -66,6 +67,8 @@ in {
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
   };
+
+  powerManagement.cpuFreqGovernor = "schedutil";
 
   modules.virtualization.enable = true;
 
