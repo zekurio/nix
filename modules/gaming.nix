@@ -19,7 +19,6 @@ in {
 
     environment.systemPackages = [
       pkgs.heroic
-      pkgs.bottles
       pkgs.protonplus
     ];
 
