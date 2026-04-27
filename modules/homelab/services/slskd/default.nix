@@ -18,8 +18,16 @@
   queueDir = "/var/lib/slskd-beets-queue";
   queuePendingDir = "${queueDir}/pending";
   queueProcessingDir = "${queueDir}/processing";
+  queueDeferredDir = "${queueDir}/deferred";
   queueFailedDir = "${queueDir}/failed";
   importDebounceSeconds = 45;
+  failedTransferStates = [
+    80 # Completed | Cancelled
+    144 # Completed | TimedOut
+    272 # Completed | Errored
+    528 # Completed | Rejected
+    1040 # Completed | Aborted
+  ];
   beetsImportCommand =
     if config.services.homelab.beets.enable
     then config.services.homelab.beets.importCommand
@@ -33,52 +41,72 @@
   '';
 
   queueBeetsImportScript = pkgs.writeShellScript "slskd-queue-beets-import" ''
-        set -eu
+    set -eu
 
-        payload=''${SLSKD_SCRIPT_DATA-}
-        if [ -z "$payload" ]; then
-          exit 0
-        fi
+    payload=''${SLSKD_SCRIPT_DATA-}
+    if [ -z "$payload" ]; then
+      exit 0
+    fi
 
-        event_type="$(${pkgs.jq}/bin/jq -r '.type // .Type // empty' <<EOF
-    $payload
-    EOF
-    )"
+    event_type="$(${pkgs.coreutils}/bin/printf '%s' "$payload" | ${pkgs.jq}/bin/jq -r '.type // .Type // empty')"
 
-        if [ "$event_type" != "DownloadDirectoryComplete" ]; then
-          exit 0
-        fi
+    if [ "$event_type" != "DownloadDirectoryComplete" ]; then
+      exit 0
+    fi
 
-        download_dir="$(${pkgs.jq}/bin/jq -r '
-          [
-            .localDirectoryName?,
-            .LocalDirectoryName?
-          ]
-          | map(select(type == "string" and . != ""))
-          | first // empty
-        ' <<EOF
-    $payload
-    EOF
-    )"
+    download_dir="$(${pkgs.coreutils}/bin/printf '%s' "$payload" | ${pkgs.jq}/bin/jq -r '
+      [
+        .localDirectoryName?,
+        .LocalDirectoryName?
+      ]
+      | map(select(type == "string" and . != ""))
+      | first // empty
+    ')"
 
-        if [ -z "$download_dir" ]; then
-          exit 0
-        fi
+    remote_dir="$(${pkgs.coreutils}/bin/printf '%s' "$payload" | ${pkgs.jq}/bin/jq -r '
+      [
+        .remoteDirectoryName?,
+        .RemoteDirectoryName?
+      ]
+      | map(select(type == "string" and . != ""))
+      | first // empty
+    ')"
 
-        download_dir="$(${pkgs.coreutils}/bin/realpath -m "$download_dir")"
-        case "$download_dir" in
-          ${downloadDir}/*) ;;
-          *) exit 0 ;;
-        esac
+    username="$(${pkgs.coreutils}/bin/printf '%s' "$payload" | ${pkgs.jq}/bin/jq -r '
+      [
+        .username?,
+        .Username?
+      ]
+      | map(select(type == "string" and . != ""))
+      | first // empty
+    ')"
 
-        [ -d "$download_dir" ] || exit 0
+    if [ -z "$download_dir" ]; then
+      exit 0
+    fi
 
-        marker_name="$(${pkgs.coreutils}/bin/printf '%s' "$download_dir" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.gawk}/bin/awk '{print $1}')"
-        tmp_marker="$(${pkgs.coreutils}/bin/mktemp "${queuePendingDir}/.$marker_name.XXXXXX")"
+    download_dir="$(${pkgs.coreutils}/bin/realpath -m "$download_dir")"
+    case "$download_dir" in
+      ${downloadDir}/*) ;;
+      *) exit 0 ;;
+    esac
 
-        ${pkgs.coreutils}/bin/printf '%s\n' "$download_dir" > "$tmp_marker"
-        ${pkgs.coreutils}/bin/chmod 0664 "$tmp_marker"
-        ${pkgs.coreutils}/bin/mv "$tmp_marker" "${queuePendingDir}/$marker_name"
+    [ -d "$download_dir" ] || exit 0
+
+    marker_name="$(${pkgs.coreutils}/bin/printf '%s' "$download_dir" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.gawk}/bin/awk '{print $1}')"
+    tmp_marker="$(${pkgs.coreutils}/bin/mktemp "${queuePendingDir}/.$marker_name.XXXXXX")"
+
+    ${pkgs.jq}/bin/jq -n \
+      --arg downloadPath "$download_dir" \
+      --arg username "$username" \
+      --arg remoteDirectoryName "$remote_dir" \
+      '{
+        downloadPath: $downloadPath,
+        username: $username,
+        remoteDirectoryName: $remoteDirectoryName
+      }' > "$tmp_marker"
+    ${pkgs.coreutils}/bin/chmod 0664 "$tmp_marker"
+    ${pkgs.coreutils}/bin/mv "$tmp_marker" "${queuePendingDir}/$marker_name"
   '';
 
   importQueuedBeetsScript = pkgs.writeShellScript "slskd-import-queued-beets" ''
@@ -86,31 +114,86 @@
 
     ${pkgs.coreutils}/bin/sleep ${toString importDebounceSeconds}
 
-    shopt -s nullglob
-    for marker in ${queuePendingDir}/*; do
-      [ -f "$marker" ] || continue
+    failed_states='${lib.concatMapStringsSep " " toString failedTransferStates}'
 
-      marker_name="$(${pkgs.coreutils}/bin/basename "$marker")"
-      processing_marker="${queueProcessingDir}/$marker_name"
+    has_failed_downloads() {
+      username="$1"
+      remote_dir="$2"
 
-      if ! ${pkgs.coreutils}/bin/mv "$marker" "$processing_marker" 2>/dev/null; then
-        continue
-      fi
+      [ -n "$username" ] || return 1
+      [ -n "$remote_dir" ] || return 1
 
-      download_path="$(${pkgs.coreutils}/bin/cat "$processing_marker")"
+      response="$(${pkgs.curl}/bin/curl -fsS --max-time 10 "http://127.0.0.1:${toString webPort}/api/v0/transfers/downloads?includeRemoved=true")" || return 0
 
-      if [ -z "$download_path" ] || [ ! -d "$download_path" ]; then
+      failed_count="$(${pkgs.coreutils}/bin/printf '%s' "$response" | ${pkgs.jq}/bin/jq -r \
+        --arg username "$username" \
+        --arg remote_dir "$remote_dir" \
+        --argjson failed_states "[${lib.concatMapStringsSep ", " toString failedTransferStates}]" \
+        '
+          [
+            .[]
+            | select(.username == $username)
+            | .directories[]?
+            | select(.directory == $remote_dir)
+            | .files[]?
+            | select(
+                (.state | tonumber? as $state | $failed_states | index($state))
+                or
+                (.state | tostring | test("Cancelled|TimedOut|Errored|Rejected|Aborted"))
+              )
+          ]
+          | length
+        ')" || return 0
+
+      [ "$failed_count" -gt 0 ]
+    }
+
+    process_markers() {
+      source_dir="$1"
+
+      shopt -s nullglob
+      for marker in "$source_dir"/*; do
+        [ -f "$marker" ] || continue
+
+        marker_name="$(${pkgs.coreutils}/bin/basename "$marker")"
+        processing_marker="${queueProcessingDir}/$marker_name"
+
+        if ! ${pkgs.coreutils}/bin/mv "$marker" "$processing_marker" 2>/dev/null; then
+          continue
+        fi
+
+        marker_payload="$(${pkgs.coreutils}/bin/cat "$processing_marker")"
+        if ${pkgs.coreutils}/bin/printf '%s' "$marker_payload" | ${pkgs.jq}/bin/jq -e 'type == "object"' >/dev/null 2>&1; then
+          download_path="$(${pkgs.coreutils}/bin/printf '%s' "$marker_payload" | ${pkgs.jq}/bin/jq -r '.downloadPath // empty')"
+          username="$(${pkgs.coreutils}/bin/printf '%s' "$marker_payload" | ${pkgs.jq}/bin/jq -r '.username // empty')"
+          remote_dir="$(${pkgs.coreutils}/bin/printf '%s' "$marker_payload" | ${pkgs.jq}/bin/jq -r '.remoteDirectoryName // empty')"
+        else
+          download_path="$marker_payload"
+          username=
+          remote_dir=
+        fi
+
+        if [ -z "$download_path" ] || [ ! -d "$download_path" ]; then
+          ${pkgs.coreutils}/bin/mv "$processing_marker" "${queueFailedDir}/$marker_name"
+          continue
+        fi
+
+        if has_failed_downloads "$username" "$remote_dir"; then
+          ${pkgs.coreutils}/bin/mv "$processing_marker" "${queueDeferredDir}/$marker_name"
+          continue
+        fi
+
+        if ${beetsImportCommand} "$download_path"; then
+          ${pkgs.coreutils}/bin/rm -f "$processing_marker"
+          continue
+        fi
+
         ${pkgs.coreutils}/bin/mv "$processing_marker" "${queueFailedDir}/$marker_name"
-        continue
-      fi
+      done
+    }
 
-      if ${beetsImportCommand} "$download_path"; then
-        ${pkgs.coreutils}/bin/rm -f "$processing_marker"
-        continue
-      fi
-
-      ${pkgs.coreutils}/bin/mv "$processing_marker" "${queueFailedDir}/$marker_name"
-    done
+    process_markers ${queuePendingDir}
+    process_markers ${queueDeferredDir}
   '';
 in {
   options.services.homelab.slskd = {
@@ -198,6 +281,7 @@ in {
       "d ${queueDir} 2775 ${shareUser} ${shareGroup} -"
       "d ${queuePendingDir} 2775 ${config.services.slskd.user} ${shareGroup} -"
       "d ${queueProcessingDir} 2775 ${shareUser} ${shareGroup} -"
+      "d ${queueDeferredDir} 2775 ${shareUser} ${shareGroup} -"
       "d ${queueFailedDir} 2775 ${shareUser} ${shareGroup} -"
     ];
 
@@ -262,10 +346,24 @@ in {
           musicDir
           beetsDir
         ];
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+          "AF_UNIX"
+        ];
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectHome = true;
         ProtectSystem = "strict";
+      };
+    };
+
+    systemd.timers.slskd-beets-import = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "5m";
+        OnUnitActiveSec = "5m";
+        Persistent = true;
       };
     };
 
