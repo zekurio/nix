@@ -177,6 +177,7 @@ in {
     sonarr.enable = true;
     windrose = {
       enable = true;
+      maxPlayers = 4;
       hostNetwork = true;
       p2pProxyAddress = "10.0.0.2";
     };

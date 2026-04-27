@@ -106,6 +106,7 @@ in {
         MAX_PLAYERS = toString cfg.maxPlayers;
         P2P_PROXY_ADDRESS = cfg.p2pProxyAddress;
         GENERATE_SETTINGS = "true";
+        WINDROSE_PLUS_ENABLED = "true";
       };
 
       environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
