@@ -17,8 +17,7 @@
           "type": "registry"
         },
         "codex-acp": {
-          "type": "custom",
-          "command": "/run/current-system/sw/bin/codex-acp",
+          "type": "registry",
           "favorite_config_option_values": {
             "model": [
               "gpt-5.5"
