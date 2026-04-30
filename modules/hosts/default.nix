@@ -4,21 +4,23 @@
   commonModules = [
     ./_common
     inputs.home-manager.nixosModules.home-manager
+  ];
+
+  nixosModules = [
     inputs.disko.nixosModules.disko
     inputs.sops-nix.nixosModules.sops
     inputs.ucodenix.nixosModules.default
   ];
 
-  mkHost = hostModule:
+  mkHost = extraModules: hostModule:
     lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
-      modules = commonModules ++ [hostModule];
+      modules = commonModules ++ extraModules ++ [hostModule];
     };
 in {
   flake.nixosConfigurations = {
-    adam = mkHost ./adam;
-    lilith = mkHost ./lilith;
-    sachiel = mkHost ./sachiel;
+    adam = mkHost nixosModules ./adam;
+    tabris = mkHost [inputs.nixos-wsl.nixosModules.default] ./tabris;
   };
 }

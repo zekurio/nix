@@ -4,7 +4,6 @@
     ./beets
     ./caddy
     ./coolercontrol
-    ./configarr
     ./immich
     ./jellyfin
     ./jellything

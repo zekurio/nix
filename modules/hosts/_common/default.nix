@@ -9,8 +9,6 @@ in {
     ../../user.nix
     ../../shell
     ../../dev
-    ../../desktop
-    ../../gaming.nix
     ../../virtualization.nix
   ];
 
@@ -34,14 +32,10 @@ in {
     allowUnfree = true;
   };
 
-  hardware = {
-    enableRedistributableFirmware = true;
-    firmware = [pkgs.linux-firmware];
-  };
+  hardware.enableRedistributableFirmware = mkDefault true;
+  hardware.firmware = mkDefault [pkgs.linux-firmware];
 
   boot.kernelParams = mkAfter ["microcode.amd_sha_check=off"];
-
-  services.ucodenix.enable = mkDefault true;
 
   programs.nix-ld.enable = true;
 

@@ -70,6 +70,8 @@ in {
 
   powerManagement.cpuFreqGovernor = "schedutil";
 
+  services.ucodenix.enable = true;
+
   modules.virtualization.enable = true;
 
   modules.homelab.mediaShare = {
@@ -162,7 +164,6 @@ in {
       allowedInterfaces = ["enp42s0"];
       caddy.enable = false;
     };
-    configarr.enable = true;
     immich.enable = true;
     jellyfin.enable = true;
     jellything.enable = true;
