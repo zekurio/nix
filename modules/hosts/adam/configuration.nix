@@ -153,6 +153,7 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
+    alloy-clips.enable = true;
     beets.enable = true;
     coolercontrol = {
       enable = true;
