@@ -4,7 +4,6 @@
 # Build results
 result
 result-*
-*.wsl
 
 # Editor files
 .vscode/
