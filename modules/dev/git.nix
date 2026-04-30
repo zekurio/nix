@@ -1,16 +1,11 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }: let
   cfg = config.modules.dev;
-  desktopEnabled = config.modules.desktop.enable or false;
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
-  sshSigningProgram =
-    if desktopEnabled
-    then "${pkgs._1password-gui}/share/1password/op-ssh-sign"
-    else "/run/current-system/sw/bin/ssh-keygen";
+  sshSigningProgram = "/run/current-system/sw/bin/ssh-keygen";
 in {
   config = lib.mkIf cfg.enable {
     home-manager.users.zekurio = {config, ...}: {

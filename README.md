@@ -7,7 +7,7 @@ NixOS configurations for my current systems.
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server |
-| `lilith` | Personal desktop |
+| `tabris` | WSL environment |
 
 ## Installation runbook (NixOS)
 
@@ -50,3 +50,9 @@ Unmount and reboot
 umount -Rl /mnt
 reboot
 ```
+
+## WSL SSH agent bridge
+
+`tabris` bridges the Windows OpenSSH agent into WSL at `/mnt/wsl/ssh-agent.sock`.
+Keep the Windows OpenSSH Authentication Agent service running; the WSL side uses
+the packaged `wsl2-ssh-agent` bridge.

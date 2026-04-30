@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for homelab, servers, and workstations";
+  description = "NixOS configurations for homelab, servers, and WSL";
 
   nixConfig = {
     extra-substituters = [
@@ -24,10 +24,6 @@
     # Core dependencies
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11?shallow=true";
-    configarr = {
-      url = "github:raydak-labs/configarr";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
@@ -44,6 +40,10 @@
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixos-hardware = {
