@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for homelab, servers, and WSL";
+  description = "NixOS configurations for homelab and servers";
 
   nixConfig = {
     extra-substituters = [
@@ -40,10 +40,6 @@
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixos-hardware = {
