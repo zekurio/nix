@@ -21,6 +21,5 @@
 in {
   flake.nixosConfigurations = {
     adam = mkHost nixosModules ./adam;
-    tabris = mkHost [inputs.nixos-wsl.nixosModules.default] ./tabris;
   };
 }
