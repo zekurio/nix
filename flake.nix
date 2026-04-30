@@ -53,6 +53,10 @@
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    alloy = {
+      url = "github:zekurio/alloy";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     llm-agents.url = "github:numtide/llm-agents.nix";
     t3code = {
       url = "github:omarcresp/t3code-flake";
