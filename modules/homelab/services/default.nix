@@ -1,5 +1,6 @@
 {
   imports = [
+    ./alloy-clips
     ./beets
     ./caddy
     ./coolercontrol

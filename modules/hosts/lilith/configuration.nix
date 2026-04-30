@@ -9,8 +9,14 @@
     name = "rocm-combined";
     paths = with pkgs.rocmPackages; [
       clr
+      hipcc
       hipblas
       rocblas
+      rocm-core
+      rocm-device-libs
+      rocm-runtime
+      rocm-smi
+      rocminfo
     ];
   };
 in {
@@ -55,7 +61,6 @@ in {
       "udev.log_priority=3"
       "boot.shell_on_fail"
       "acpi_enforce_resources=lax"
-      "amdgpu.ppfeaturemask=0xffffffff"
     ];
     loader = {
       efi.canTouchEfiVariables = true;
@@ -76,6 +81,14 @@ in {
   };
 
   hardware = {
+    amdgpu = {
+      opencl.enable = true;
+      overdrive = {
+        enable = true;
+        ppfeaturemask = "0xffffffff";
+      };
+    };
+
     cpu.amd = {
       ryzen-smu.enable = true;
     };
@@ -85,11 +98,25 @@ in {
   programs.coolercontrol.enable = true;
 
   environment.systemPackages = with pkgs; [
+    clinfo
     deepfilternet
     lact
     lm_sensors
+    rocmPackages.hipcc
+    rocmPackages.rocm-smi
+    rocmPackages.rocminfo
     sbctl
     usbutils
+  ];
+
+  environment.sessionVariables = {
+    ROCM_PATH = "/opt/rocm";
+    HIP_PATH = "/opt/rocm";
+  };
+
+  users.users.zekurio.extraGroups = [
+    "render"
+    "video"
   ];
 
   systemd = {
