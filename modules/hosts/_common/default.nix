@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkAfter mkDefault;
+  inherit (lib) mkDefault;
 in {
   imports = [
     ../../user.nix
@@ -35,17 +35,7 @@ in {
   hardware.enableRedistributableFirmware = mkDefault true;
   hardware.firmware = mkDefault [pkgs.linux-firmware];
 
-  boot.kernelParams = mkAfter ["microcode.amd_sha_check=off"];
-
   programs.nix-ld.enable = true;
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
 
   nix = {
     settings = {
