@@ -17,6 +17,7 @@ in {
   boot = {
     kernelParams = [
       "amd_pstate=guided"
+      "microcode.amd_sha_check=off"
       "pcie_aspm=force"
       "pcie_aspm.policy=powersave"
       "consoleblank=60"
@@ -73,6 +74,14 @@ in {
   powerManagement.cpuFreqGovernor = "schedutil";
 
   services.ucodenix.enable = true;
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
 
   modules.virtualization.enable = true;
 
@@ -157,7 +166,7 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
-    alloy-clips.enable = true;
+    alloy.enable = true;
     beets.enable = true;
     coolercontrol = {
       enable = true;

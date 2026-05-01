@@ -3,20 +3,20 @@
   lib,
   ...
 }: let
-  cfg = config.services.homelab.alloy-clips;
+  cfg = config.services.homelab.alloy;
   domain = "clips.zekurio.xyz";
   port = 3000;
-  user = "alloy-clips";
-  group = "alloy-clips";
+  user = "alloy";
+  group = "alloy";
   uid = 972;
   gid = 969;
-  stateDir = "/var/lib/alloy-clips";
-  cacheDir = "/var/cache/alloy-clips";
-  storageDir = "/tank/alloy-clips/storage";
+  stateDir = "/var/lib/alloy";
+  cacheDir = "/var/cache/alloy";
+  storageDir = "/tank/alloy/storage";
   renderGid = config.users.groups.render.gid;
   videoGid = config.users.groups.video.gid;
 in {
-  options.services.homelab.alloy-clips = {
+  options.services.homelab.alloy = {
     enable = lib.mkEnableOption "Alloy clip sharing server with Caddy integration";
   };
 
@@ -33,7 +33,7 @@ in {
 
     services.postgresql = {
       enable = true;
-      ensureDatabases = ["alloy-clips"];
+      ensureDatabases = ["alloy"];
       ensureUsers = [
         {
           name = user;
@@ -43,14 +43,14 @@ in {
       ];
     };
 
-    virtualisation.oci-containers.containers.alloy-clips = {
-      image = "ghcr.io/zekurio/alloy-server:unstable";
+    virtualisation.oci-containers.containers.alloy = {
+      image = "ghcr.io/zekurio/alloy:nightly";
       pull = "newer";
       autoStart = true;
       user = "${toString uid}:${toString gid}";
 
       environment = {
-        DATABASE_URL = "postgresql:///alloy-clips";
+        DATABASE_URL = "postgresql:///alloy";
         PGHOST = "/run/postgresql";
         PGPORT = "5432";
         PGUSER = user;
@@ -69,7 +69,7 @@ in {
       volumes = [
         "${stateDir}:${stateDir}"
         "${cacheDir}:${cacheDir}"
-        "/tank/alloy-clips:/tank/alloy-clips"
+        "/tank/alloy:/tank/alloy"
         "/run/postgresql:/run/postgresql"
       ];
 
@@ -83,7 +83,7 @@ in {
       ];
     };
 
-    systemd.services.podman-alloy-clips = {
+    systemd.services.podman-alloy = {
       requires = [
         "postgresql.service"
         "tank-datasets.service"
@@ -101,11 +101,11 @@ in {
       "d ${stateDir}/data/storage 0700 ${user} ${group} -"
       "d ${cacheDir} 0700 ${user} ${group} -"
       "d ${cacheDir}/scratch 0700 ${user} ${group} -"
-      "d /tank/alloy-clips 0700 ${user} ${group} -"
+      "d /tank/alloy 0700 ${user} ${group} -"
       "d ${storageDir} 0700 ${user} ${group} -"
     ];
 
-    services.homelab.caddy.virtualHosts."alloy-clips" = {
+    services.homelab.caddy.virtualHosts."alloy" = {
       inherit domain;
       reverseProxy = "127.0.0.1:${toString port}";
     };
