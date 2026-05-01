@@ -42,22 +42,11 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/master";
-    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    t3code = {
-      url = "github:omarcresp/t3code-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    helium = {
-      url = "github:tomsch/helium-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     cpu-microcodes = {
       url = "github:platomav/CPUMicrocodes/0be0bd7b6a3ec1f1b59562729f1ce14b9569b697";
       flake = false;
