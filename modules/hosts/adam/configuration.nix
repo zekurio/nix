@@ -78,6 +78,7 @@ in {
   services.openssh = {
     enable = true;
     settings = {
+      AllowAgentForwarding = true;
       PasswordAuthentication = false;
       PermitRootLogin = "no";
     };
