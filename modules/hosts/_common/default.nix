@@ -6,16 +6,9 @@
   inherit (lib) mkDefault;
 in {
   imports = [
-    ../../user.nix
-    ../../shell
-    ../../dev
+    ../../nixos/users/zekurio.nix
     ../../virtualization.nix
   ];
-
-  modules = {
-    shell.enable = mkDefault true;
-    dev.enable = mkDefault true;
-  };
 
   i18n = {
     defaultLocale = "de_AT.UTF-8";
