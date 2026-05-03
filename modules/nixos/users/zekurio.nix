@@ -2,12 +2,10 @@
   inputs,
   pkgs,
   ...
-}:
-let
+}: let
   username = "zekurio";
-in
-{
-  nix.settings.trusted-users = [ username ];
+in {
+  nix.settings.trusted-users = [username];
 
   programs = {
     fish.enable = true;
@@ -17,7 +15,7 @@ in
     };
   };
 
-  environment.shells = [ pkgs.fish ];
+  environment.shells = [pkgs.fish];
 
   users = {
     defaultUserShell = pkgs.fish;
@@ -48,7 +46,7 @@ in
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = {inherit inputs;};
 
     users.${username}.imports = [
       ../../home/zekurio
