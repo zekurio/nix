@@ -4,6 +4,10 @@
   ...
 }: let
   username = "zekurio";
+  githubAuthorizedKeys = pkgs.fetchurl {
+    url = "https://github.com/zekurio.keys";
+    hash = "sha256:02c7j6s3s60fh81w2n3c85j898ksrd3f05s7j7qi4q711h2x1gx7";
+  };
 in {
   nix.settings.trusted-users = [username];
 
@@ -34,9 +38,7 @@ in {
         "i2c"
       ];
       group = username;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq zekurio@lilith"
-      ];
+      openssh.authorizedKeys.keyFiles = [githubAuthorizedKeys];
     };
 
     groups.${username}.gid = 1000;
