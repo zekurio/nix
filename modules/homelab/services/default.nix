@@ -6,7 +6,6 @@
     ./coolercontrol
     ./immich
     ./jellyfin
-    ./jellything
     ./media-share
     ./navidrome
     ./oauth2-proxy
