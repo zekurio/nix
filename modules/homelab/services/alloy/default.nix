@@ -33,6 +33,10 @@ in {
 
     services.postgresql = {
       enable = true;
+      authentication = lib.mkBefore ''
+        host alloy alloy 127.0.0.1/32 trust
+        host alloy alloy ::1/128 trust
+      '';
       ensureDatabases = ["alloy"];
       ensureUsers = [
         {
@@ -50,10 +54,7 @@ in {
       user = "${toString uid}:${toString gid}";
 
       environment = {
-        DATABASE_URL = "postgresql:///alloy";
-        PGHOST = "/run/postgresql";
-        PGPORT = "5432";
-        PGUSER = user;
+        DATABASE_URL = "postgresql://${user}@127.0.0.1:5432/alloy";
         ALLOY_STATE_DIR = stateDir;
         ALLOY_CONFIG_FILE = "${stateDir}/config.json";
         ENCODE_SCRATCH_DIR = "${cacheDir}/scratch";
@@ -62,15 +63,10 @@ in {
         TRUSTED_ORIGINS = "https://${domain}";
       };
 
-      ports = [
-        "127.0.0.1:${toString port}:${toString port}"
-      ];
-
       volumes = [
         "${stateDir}:${stateDir}"
         "${cacheDir}:${cacheDir}"
         "/tank/alloy:/tank/alloy"
-        "/run/postgresql:/run/postgresql"
       ];
 
       devices = [
@@ -78,6 +74,7 @@ in {
       ];
 
       extraOptions = [
+        "--network=host"
         "--group-add=${toString renderGid}"
         "--group-add=${toString videoGid}"
       ];
