@@ -20,7 +20,6 @@
       "fetchart"
       "embedart"
       "inline"
-      "lyrics"
       "missing"
     ];
     import = {
@@ -80,9 +79,6 @@
     ftintitle = {
       auto = true;
       drop = false;
-    };
-    lyrics = {
-      auto = true;
     };
   };
 
