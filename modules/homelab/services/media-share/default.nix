@@ -12,19 +12,15 @@
   shareGid = 995;
 
   mediaDirs = [
-    "/var/lib/beets"
     "/tank/media/shows"
     "/tank/media/anime"
     "/tank/media/movies"
-    "/tank/media/music"
     "/var/lib/downloads"
     "/var/lib/downloads/complete"
     "/var/lib/downloads/complete/manual"
     "/var/lib/downloads/complete/radarr"
-    "/var/lib/downloads/complete/slskd"
     "/var/lib/downloads/complete/sonarr"
     "/var/lib/downloads/incomplete"
-    "/var/lib/downloads/incomplete/slskd"
   ];
 
   # Create root dirs as setgid + group-writable
@@ -109,7 +105,7 @@ in {
           ];
         };
       }
-      (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
+      (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "sonarr"] (_: {
         extraGroups = lib.mkAfter [shareGroup];
       }))
       (lib.genAttrs cfg.collaborators (_: {
