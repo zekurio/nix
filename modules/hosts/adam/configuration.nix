@@ -9,7 +9,6 @@ in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
-    ./postgresql.nix
     ./zfs.nix
   ];
 
