@@ -46,7 +46,10 @@ in {
       systemd-boot.enable = true;
     };
     supportedFilesystems = ["zfs"];
-    zfs.extraPools = ["tank"];
+    zfs = {
+      extraPools = ["tank"];
+      forceImportRoot = false;
+    };
   };
 
   # Hardware configuration
