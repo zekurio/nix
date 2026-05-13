@@ -166,7 +166,6 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
-    alloy.enable = true;
     coolercontrol = {
       enable = true;
       listenAddress = "0.0.0.0";
