@@ -1,6 +1,5 @@
 {
   imports = [
-    ./alloy
     ./caddy
     ./coolercontrol
     ./immich
