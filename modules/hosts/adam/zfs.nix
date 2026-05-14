@@ -16,7 +16,7 @@ in {
       RemainAfterExit = true;
     };
     script = ''
-      ${ensureDataset "tank/media" "5700G"}
+      ${ensureDataset "tank/media" "5900G"}
       ${ensureDataset "tank/immich" "1000G"}
     '';
   };
