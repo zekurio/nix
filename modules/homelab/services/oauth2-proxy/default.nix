@@ -8,7 +8,7 @@
   serviceUser = "oauth2-proxy";
   serviceGroup = "oauth2-proxy";
 
-  oidcIssuerUrl = "https://auth.zekurio.xyz";
+  oidcIssuerUrl = "https://auth.zekurio.me";
 
   # Client IDs are public identifiers — fill these in after creating the OIDC
   # clients in Pocket ID. Secrets live in the SOPS env files below.
@@ -96,7 +96,7 @@ in {
       name = "zekurio";
       clientId = clientIdZekurio;
       port = portZekurio;
-      cookieDomain = ".zekurio.xyz";
+      cookieDomain = ".zekurio.me";
       secretName = "oauth2_proxy_zekurio_env";
     };
   };

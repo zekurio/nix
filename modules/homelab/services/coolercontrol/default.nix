@@ -5,13 +5,12 @@
   ...
 }: let
   cfg = config.services.homelab.coolercontrol;
-  domain = "cooling.zekurio.xyz";
   exposedTcpPorts =
     [cfg.port]
     ++ lib.optional cfg.exposeGrpc cfg.grpcPort;
 in {
   options.services.homelab.coolercontrol = {
-    enable = lib.mkEnableOption "CoolerControl daemon with LAN and Caddy integration";
+    enable = lib.mkEnableOption "CoolerControl daemon";
 
     port = lib.mkOption {
       type = lib.types.port;
@@ -48,32 +47,6 @@ in {
       default = [];
       description = "Network interfaces allowed to reach the exposed CoolerControl ports.";
     };
-
-    caddy = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Expose CoolerControl through the homelab Caddy reverse proxy.";
-      };
-
-      domain = lib.mkOption {
-        type = lib.types.str;
-        default = domain;
-        description = "Domain used for the reverse-proxied CoolerControl UI.";
-      };
-
-      forwardAuth = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = "127.0.0.1:4181";
-        description = "oauth2-proxy forward-auth endpoint for the CoolerControl vhost.";
-      };
-
-      bearerTokenEnv = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Environment variable name holding the CoolerControl API bearer token. When set, Caddy injects Authorization: Bearer {env.VAR} on upstream requests. The variable must be present in Caddy's environment (e.g. via the caddy_env SOPS secret).";
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -106,16 +79,5 @@ in {
         });
       })
     ];
-
-    services.homelab.caddy.virtualHosts."coolercontrol" = lib.mkIf cfg.caddy.enable {
-      domain = cfg.caddy.domain;
-      forwardAuth = cfg.caddy.forwardAuth;
-      reverseProxy = lib.mkIf (cfg.caddy.bearerTokenEnv == null) "127.0.0.1:${toString cfg.port}";
-      extraConfig = lib.optionalString (cfg.caddy.bearerTokenEnv != null) ''
-        reverse_proxy 127.0.0.1:${toString cfg.port} {
-          header_up Authorization "Bearer {env.${cfg.caddy.bearerTokenEnv}}"
-        }
-      '';
-    };
   };
 }
