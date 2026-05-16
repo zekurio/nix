@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  domain = "auth.zekurio.xyz";
+  domain = "auth.zekurio.me";
   port = 1411;
 in {
   options.services.homelab.pocket-id = {

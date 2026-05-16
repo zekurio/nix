@@ -6,7 +6,7 @@
 }: let
   cfg = config.services.homelab.caddy;
 
-  acmeEmail = "admin@zekurio.xyz";
+  acmeEmail = "admin@zekurio.me";
 
   # Helper to replace generic matchers with service-specific ones
   makeMatchersUnique = name: config: let

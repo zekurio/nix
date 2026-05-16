@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  domain = "photos.zekurio.xyz";
+  domain = "photos.zekurio.me";
   port = 2283;
 in {
   options.services.homelab.immich = {
