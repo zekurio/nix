@@ -101,7 +101,7 @@ in {
     firewall.enable = true;
     hostId = "eab7e93e";
     hosts = {
-      "127.0.0.1" = ["auth.zekurio.xyz"];
+      "127.0.0.1" = ["auth.zekurio.me"];
     };
     useNetworkd = true;
   };
@@ -174,7 +174,6 @@ in {
       listenAddress = "0.0.0.0";
       listenAddress6 = "::";
       allowedInterfaces = ["enp42s0"];
-      caddy.enable = false;
     };
     immich.enable = true;
     jellyfin.enable = true;

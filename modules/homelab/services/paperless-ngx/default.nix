@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  domain = "docs.zekurio.xyz";
+  domain = "docs.zekurio.me";
   port = 8010;
 in {
   options.services.homelab.paperless-ngx = {
