@@ -28,11 +28,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779053361,
-        "narHash": "sha256-NaIuzsHVDaM6VStFW5vY5TMJNY3+mly8PVOD+pQl+Sg=",
+        "lastModified": 1779056219,
+        "narHash": "sha256-ICwVC4lwIRhRkpD6bWdVVvhVUsZV34aBRtbTwVJdRcg=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "c5e86311ebbbb4e0b95266f61710cf762df7a645",
+        "rev": "20cee9eea397768daccc1bac99b657aa93da000d",
         "type": "github"
       },
       "original": {
