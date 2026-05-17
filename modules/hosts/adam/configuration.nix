@@ -187,7 +187,7 @@ in {
     seerr.enable = true;
     sonarr.enable = true;
     windrose = {
-      enable = true;
+      enable = false;
       maxPlayers = 4;
       hostNetwork = true;
       p2pProxyAddress = "10.0.0.2";
