@@ -2,9 +2,24 @@
   config,
   inputs,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.services.homelab.blitzcrank;
+  dataDir = "/var/lib/blitzcrank";
+  runtimeConfigFile = "${dataDir}/runtime-config.json";
+  upstreamPackage = inputs.blitzcrank.packages.${pkgs.system}.default;
+  servicePackage = pkgs.symlinkJoin {
+    name = "blitzcrank-service";
+    paths = [upstreamPackage];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram $out/bin/blitzcrank \
+        --set-default RUNTIME_CONFIG_PATH ${runtimeConfigFile} \
+        --set-default DATABASE_PATH ${dataDir}/blitzcrank.sqlite \
+        --set-default AGENT_THREADS_DIR ${dataDir}/threads
+    '';
+  };
 in {
   imports = [
     inputs.blitzcrank.nixosModules.default
@@ -17,7 +32,10 @@ in {
   config = lib.mkIf cfg.enable {
     services.blitzcrank = {
       enable = true;
+      package = servicePackage;
       environmentFile = config.sops.secrets.blitzcrank_env.path;
+      dataDir = dataDir;
+      runtimeConfigFile = runtimeConfigFile;
       publicName = "blitzcrank";
       timezone = config.time.timeZone;
       automations.enable = true;
@@ -50,6 +68,12 @@ in {
       };
       serviceConfig.SupplementaryGroups = ["share"];
     };
+
+    systemd.tmpfiles.rules = [
+      "d ${dataDir} 0750 blitzcrank blitzcrank -"
+      "d ${dataDir}/threads 0750 blitzcrank blitzcrank -"
+      "f ${runtimeConfigFile} 0640 blitzcrank blitzcrank -"
+    ];
 
     sops.secrets.blitzcrank_env = {
       owner = "blitzcrank";
