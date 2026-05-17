@@ -4,15 +4,16 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.homelab.blitzcrank;
   dataDir = "/var/lib/blitzcrank";
   runtimeConfigFile = "${dataDir}/runtime-config.json";
   upstreamPackage = inputs.blitzcrank.packages.${pkgs.system}.default;
   servicePackage = pkgs.symlinkJoin {
     name = "blitzcrank-service";
-    paths = [upstreamPackage];
-    nativeBuildInputs = [pkgs.makeWrapper];
+    paths = [ upstreamPackage ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/blitzcrank \
         --set-default RUNTIME_CONFIG_PATH ${runtimeConfigFile} \
@@ -20,7 +21,8 @@
         --set-default AGENT_THREADS_DIR ${dataDir}/threads
     '';
   };
-in {
+in
+{
   imports = [
     inputs.blitzcrank.nixosModules.default
   ];
@@ -43,9 +45,25 @@ in {
         default = {
           provider = "codex-oauth";
           model = "gpt-5.5";
+          reasoningEffort = "medium";
+        };
+        seerr = {
+          provider = "codex-oauth";
+          model = "gpt-5.5";
+          reasoningEffort = "medium";
+        };
+        discord = {
+          provider = "codex-oauth";
+          model = "gpt-5.5";
           reasoningEffort = "low";
         };
+        automation = {
+          provider = "codex-oauth";
+          model = "gpt-5.5";
+          reasoningEffort = "medium";
+        };
         discordTriage = {
+          provider = "codex-oauth";
           model = "gpt-5.4-mini";
           reasoningEffort = "none";
         };
@@ -66,13 +84,13 @@ in {
         AGENT_RUN_TIMEOUT = "5m";
         OPENROUTER_X_TITLE = "blitzcrank";
       };
-      serviceConfig.SupplementaryGroups = ["share"];
+      serviceConfig.SupplementaryGroups = [ "share" ];
     };
 
     systemd.tmpfiles.rules = [
       "d ${dataDir} 0750 blitzcrank blitzcrank -"
       "d ${dataDir}/threads 0750 blitzcrank blitzcrank -"
-      "f ${runtimeConfigFile} 0640 blitzcrank blitzcrank -"
+      "z ${runtimeConfigFile} 0640 blitzcrank blitzcrank -"
     ];
 
     sops.secrets.blitzcrank_env = {
