@@ -60,7 +60,7 @@ in
         automation = {
           provider = "codex-oauth";
           model = "gpt-5.5";
-          reasoningEffort = "medium";
+          reasoningEffort = "low";
         };
         discordTriage = {
           provider = "codex-oauth";
