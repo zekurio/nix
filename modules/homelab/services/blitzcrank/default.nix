@@ -2,25 +2,11 @@
   config,
   inputs,
   lib,
-  pkgs,
   ...
 }:
 let
   cfg = config.services.homelab.blitzcrank;
   dataDir = "/var/lib/blitzcrank";
-  runtimeConfigFile = "${dataDir}/runtime-config.json";
-  upstreamPackage = inputs.blitzcrank.packages.${pkgs.system}.default;
-  servicePackage = pkgs.symlinkJoin {
-    name = "blitzcrank-service";
-    paths = [ upstreamPackage ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/blitzcrank \
-        --set-default RUNTIME_CONFIG_PATH ${runtimeConfigFile} \
-        --set-default DATABASE_PATH ${dataDir}/blitzcrank.sqlite \
-        --set-default AGENT_THREADS_DIR ${dataDir}/threads
-    '';
-  };
 in
 {
   imports = [
@@ -34,13 +20,32 @@ in
   config = lib.mkIf cfg.enable {
     services.blitzcrank = {
       enable = true;
-      package = servicePackage;
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
-      runtimeConfigFile = runtimeConfigFile;
       publicName = "blitzcrank";
       timezone = config.time.timeZone;
       automations.enable = true;
+      settings = {
+        discord = {
+          triage_threshold = 0.75;
+          thread_archive_minutes = 1440;
+          context_recent_messages = 12;
+        };
+        seerr = {
+          webhook_listen_addr = "127.0.0.1:8080";
+          webhook_path = "/webhooks/seerr";
+        };
+        exa.base_url = "https://api.exa.ai";
+        llm = {
+          openai.base_url = "https://api.openai.com/v1";
+          openrouter.title = "blitzcrank";
+          codex.service_tier = "standard";
+        };
+        runtime = {
+          max_tool_iterations = 15;
+          run_timeout = "5m";
+        };
+      };
       runtime = {
         default = {
           provider = "codex-oauth";
@@ -71,26 +76,12 @@ in
     };
 
     systemd.services.blitzcrank = {
-      environment = {
-        DISCORD_TRIAGE_THRESHOLD = "0.75";
-        DISCORD_THREAD_ARCHIVE_MINUTES = "1440";
-        DISCORD_CONTEXT_RECENT_MESSAGES = "12";
-        SEERR_WEBHOOK_LISTEN_ADDR = "127.0.0.1:8080";
-        SEERR_WEBHOOK_PATH = "/webhooks/seerr";
-        EXA_BASE_URL = "https://api.exa.ai";
-        OPENAI_BASE_URL = "https://api.openai.com/v1";
-        CODEX_FAST_MODE = "false";
-        AGENT_MAX_TOOL_ITERATIONS = "15";
-        AGENT_RUN_TIMEOUT = "5m";
-        OPENROUTER_X_TITLE = "blitzcrank";
-      };
       serviceConfig.SupplementaryGroups = [ "share" ];
     };
 
     systemd.tmpfiles.rules = [
       "d ${dataDir} 0750 blitzcrank blitzcrank -"
       "d ${dataDir}/threads 0750 blitzcrank blitzcrank -"
-      "z ${runtimeConfigFile} 0640 blitzcrank blitzcrank -"
     ];
 
     sops.secrets.blitzcrank_env = {
