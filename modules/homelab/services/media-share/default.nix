@@ -10,17 +10,24 @@
   shareGroup = "share";
   shareUid = 995;
   shareGid = 995;
+  usenetDownloadsDir = "/var/lib/downloads";
+  torrentDownloadsDir = "/tank/media/torrents";
 
   mediaDirs = [
     "/tank/media/shows"
     "/tank/media/anime"
     "/tank/media/movies"
-    "/var/lib/downloads"
-    "/var/lib/downloads/complete"
-    "/var/lib/downloads/complete/manual"
-    "/var/lib/downloads/complete/radarr"
-    "/var/lib/downloads/complete/sonarr"
-    "/var/lib/downloads/incomplete"
+    usenetDownloadsDir
+    "${usenetDownloadsDir}/complete"
+    "${usenetDownloadsDir}/complete/manual"
+    "${usenetDownloadsDir}/complete/radarr"
+    "${usenetDownloadsDir}/complete/sonarr"
+    "${usenetDownloadsDir}/incomplete"
+    torrentDownloadsDir
+    "${torrentDownloadsDir}/manual"
+    "${torrentDownloadsDir}/radarr"
+    "${torrentDownloadsDir}/sonarr"
+    "${torrentDownloadsDir}/incomplete"
   ];
 
   # Create root dirs as setgid + group-writable
