@@ -16,9 +16,11 @@
   wgInterface = "wg0";
   runtimeDir = "/run/qbittorrent-mullvad";
   wgConfigPath = "${runtimeDir}/${wgInterface}.conf";
+  resolvConfPath = "${runtimeDir}/resolv.conf";
   hostAddress = "10.200.0.1";
   qbitAddress = "10.200.0.2";
   prefixLength = "30";
+  lanInterface = "enp42s0";
 
   setupNetns = pkgs.writeShellScript "qbittorrent-netns-up" ''
     set -euo pipefail
@@ -40,6 +42,8 @@
       ${pkgs.iproute2}/bin/ip link set qbit-veth up
     ${pkgs.iproute2}/bin/ip netns exec ${lib.escapeShellArg netns} \
       ${pkgs.iproute2}/bin/ip link set lo up
+    ${pkgs.iproute2}/bin/ip netns exec ${lib.escapeShellArg netns} \
+      ${pkgs.iproute2}/bin/ip route replace default via ${hostAddress} dev qbit-veth
   '';
 
   teardownNetns = pkgs.writeShellScript "qbittorrent-netns-down" ''
@@ -47,6 +51,37 @@
 
     ${pkgs.iproute2}/bin/ip link delete qbit-host >/dev/null 2>&1 || true
     ${pkgs.iproute2}/bin/ip netns delete ${lib.escapeShellArg netns} >/dev/null 2>&1 || true
+  '';
+
+  prepareWgConfig = pkgs.writeShellScript "qbittorrent-mullvad-prepare-config" ''
+    set -euo pipefail
+
+    install -m 0600 ${lib.escapeShellArg config.sops.secrets.qbittorrent_mullvad_wg_conf.path} ${lib.escapeShellArg wgConfigPath}
+    dns_servers="$(
+      ${pkgs.gawk}/bin/awk -F '=' '
+        /^[[:space:]]*DNS[[:space:]]*=/ {
+          gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2)
+          gsub(/,/, " ", $2)
+          print $2
+        }
+      ' ${lib.escapeShellArg wgConfigPath}
+    )"
+
+    ${pkgs.gawk}/bin/awk -F '=' '
+      /^[[:space:]]*DNS[[:space:]]*=/ { next }
+      { print }
+    ' ${lib.escapeShellArg wgConfigPath} > ${lib.escapeShellArg wgConfigPath}.tmp
+    mv ${lib.escapeShellArg wgConfigPath}.tmp ${lib.escapeShellArg wgConfigPath}
+    chmod 0600 ${lib.escapeShellArg wgConfigPath}
+
+    : > ${lib.escapeShellArg resolvConfPath}
+    for dns in $dns_servers; do
+      printf 'nameserver %s\n' "$dns" >> ${lib.escapeShellArg resolvConfPath}
+    done
+    if [ ! -s ${lib.escapeShellArg resolvConfPath} ]; then
+      printf 'nameserver 10.64.0.1\n' > ${lib.escapeShellArg resolvConfPath}
+    fi
+    chmod 0644 ${lib.escapeShellArg resolvConfPath}
   '';
 in {
   options.services.homelab.qbittorrent = {
@@ -87,16 +122,16 @@ in {
       before = ["qbittorrent.service"];
       path = with pkgs; [
         bash
+        gawk
         iproute2
         wireguard-tools
-        openresolv
       ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         RuntimeDirectory = "qbittorrent-mullvad";
         RuntimeDirectoryMode = "0700";
-        ExecStartPre = "${pkgs.coreutils}/bin/ln -sf ${config.sops.secrets.qbittorrent_mullvad_wg_conf.path} ${wgConfigPath}";
+        ExecStartPre = prepareWgConfig;
         ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.wireguard-tools}/bin/wg-quick up ${wgConfigPath}";
         ExecStop = "${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.wireguard-tools}/bin/wg-quick down ${wgConfigPath}";
       };
@@ -135,9 +170,16 @@ in {
       after = ["qbittorrent-mullvad.service"];
       serviceConfig = {
         NetworkNamespacePath = "/run/netns/${netns}";
+        BindReadOnlyPaths = ["${resolvConfPath}:/etc/resolv.conf"];
         SupplementaryGroups = ["share"];
         UMask = lib.mkForce shareUmask;
       };
+    };
+
+    networking.nat = {
+      enable = true;
+      externalInterface = lanInterface;
+      internalInterfaces = ["qbit-host"];
     };
 
     services.homelab.caddy.virtualHosts."qbittorrent" = {
