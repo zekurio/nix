@@ -4,10 +4,12 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.homelab.blitzcrank;
   dataDir = "/var/lib/blitzcrank";
-in {
+in
+{
   imports = [
     inputs.blitzcrank.nixosModules.default
   ];
@@ -65,7 +67,7 @@ in {
           codex = {
             auth_profile = "default";
             base_url = "https://chatgpt.com/backend-api/codex";
-            service_tier = "standard";
+            fast = "true";
           };
         };
 
@@ -133,7 +135,7 @@ in {
     };
 
     systemd.services.blitzcrank = {
-      serviceConfig.SupplementaryGroups = ["share"];
+      serviceConfig.SupplementaryGroups = [ "share" ];
     };
 
     sops.secrets.blitzcrank_env = {
