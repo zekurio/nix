@@ -4,12 +4,10 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.services.homelab.blitzcrank;
   dataDir = "/var/lib/blitzcrank";
-in
-{
+in {
   imports = [
     inputs.blitzcrank.nixosModules.default
   ];
@@ -25,6 +23,7 @@ in
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
       publicName = "blitzcrank";
+      openAIAuth = "codex-oauth";
       timezone = config.time.timeZone;
       automations.enable = true;
 
@@ -40,11 +39,12 @@ in
 
         seerr = {
           base_url = "http://127.0.0.1:5055";
-          webhook_listen_addr = "127.0.0.1:8080";
           webhook_path = "/webhooks/seerr";
           bot_user_id = "23";
           bot_display_name = "blitzcrank";
         };
+
+        web.listen_addr = "127.0.0.1:8080";
 
         jellyfin.base_url = "http://127.0.0.1:8096";
         sonarr.base_url = "http://127.0.0.1:8989/sonarr";
@@ -67,7 +67,6 @@ in
           codex = {
             auth_profile = "default";
             base_url = "https://chatgpt.com/backend-api/codex";
-            fast = "true";
           };
         };
 
@@ -82,52 +81,34 @@ in
           };
           profiles = {
             default = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.5";
               reasoning_effort = "low";
-              context_limit = 1050000;
-              input_limit = 922000;
-              output_limit = 128000;
             };
             seerr = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.5";
               reasoning_effort = "medium";
-              context_limit = 1050000;
-              input_limit = 922000;
-              output_limit = 128000;
             };
             discord = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.5";
               reasoning_effort = "low";
-              context_limit = 1050000;
-              input_limit = 922000;
-              output_limit = 128000;
             };
             automation = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.5";
               reasoning_effort = "medium";
-              context_limit = 1050000;
-              input_limit = 922000;
-              output_limit = 128000;
             };
             discord_triage = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.4-mini";
               reasoning_effort = "none";
-              context_limit = 400000;
-              input_limit = 272000;
-              output_limit = 128000;
             };
             sandbox_review = {
-              provider = "codex-oauth";
+              provider = "openai";
               model = "gpt-5.4-mini";
               reasoning_effort = "low";
-              context_limit = 400000;
-              input_limit = 272000;
-              output_limit = 128000;
             };
           };
         };
@@ -135,7 +116,7 @@ in
     };
 
     systemd.services.blitzcrank = {
-      serviceConfig.SupplementaryGroups = [ "share" ];
+      serviceConfig.SupplementaryGroups = ["share"];
     };
 
     sops.secrets.blitzcrank_env = {
