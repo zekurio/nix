@@ -9,6 +9,7 @@
     else "/home/zekurio";
 in {
   imports = [
+    ./dev.nix
     ./fish.nix
     ./git.nix
     ./packages.nix
