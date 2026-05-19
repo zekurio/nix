@@ -83,32 +83,32 @@ in
           profiles = {
             default = {
               provider = "codex-oauth";
-              model = "gpt-5.4";
-              reasoning_effort = "medium";
+              model = "gpt-5.5";
+              reasoning_effort = "low";
               context_limit = 1050000;
               input_limit = 922000;
               output_limit = 128000;
             };
             seerr = {
               provider = "codex-oauth";
-              model = "gpt-5.4";
-              reasoning_effort = "high";
+              model = "gpt-5.5";
+              reasoning_effort = "medium";
               context_limit = 1050000;
               input_limit = 922000;
               output_limit = 128000;
             };
             discord = {
               provider = "codex-oauth";
-              model = "gpt-5.4";
-              reasoning_effort = "medium";
+              model = "gpt-5.5";
+              reasoning_effort = "low";
               context_limit = 1050000;
               input_limit = 922000;
               output_limit = 128000;
             };
             automation = {
               provider = "codex-oauth";
-              model = "gpt-5.4";
-              reasoning_effort = "high";
+              model = "gpt-5.5";
+              reasoning_effort = "medium";
               context_limit = 1050000;
               input_limit = 922000;
               output_limit = 128000;
