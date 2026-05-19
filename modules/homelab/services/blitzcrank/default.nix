@@ -29,9 +29,9 @@ in {
 
       settings = {
         discord = {
-          guild_id = "1262432821121908899";
+          guild_id = "418795186475237376";
           owner_id = "144853050761150465";
-          channel_id = "1505596083575722044";
+          channel_id = "1473398718127407188";
           triage_threshold = 0.75;
           thread_archive_minutes = 1440;
           context_recent_messages = 12;
