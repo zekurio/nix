@@ -59,6 +59,7 @@
   networkOptions = alias: [
     "--network=${network}"
     "--network-alias=${alias}"
+    "--add-host=auth.zekurio.me:10.0.0.2"
   ];
 
   traefikLabels = {
