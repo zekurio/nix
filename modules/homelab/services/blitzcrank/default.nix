@@ -7,6 +7,9 @@
 }: let
   cfg = config.services.homelab.blitzcrank;
   dataDir = "/var/lib/blitzcrank";
+  package = inputs.blitzcrank.packages.${pkgs.system}.default.overrideAttrs (_: {
+    vendorHash = "sha256-sT3heEOjSXHgCKvAw+mXPkQDULJaDF4NCFQVGZFed00=";
+  });
 in {
   imports = [
     inputs.blitzcrank.nixosModules.default
@@ -19,7 +22,7 @@ in {
   config = lib.mkIf cfg.enable {
     services.blitzcrank = {
       enable = true;
-      package = inputs.blitzcrank.packages.${pkgs.system}.default;
+      package = package;
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
       publicName = "blitzcrank";
