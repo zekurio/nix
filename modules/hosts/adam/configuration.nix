@@ -181,6 +181,7 @@ in {
     oauth2-proxy.enable = true;
     paperless-ngx.enable = true;
     pocket-id.enable = true;
+    profilarr.enable = true;
     prowlarr.enable = true;
     qbittorrent.enable = true;
     radarr.enable = true;
