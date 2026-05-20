@@ -1,5 +1,6 @@
 {
   config,
+  osConfig,
   pkgs,
   ...
 }: let
@@ -25,7 +26,10 @@
       esac
     '';
   };
-  sshSigningProgram = "${pkgs.openssh}/bin/ssh-keygen";
+  sshSigningProgram =
+    if osConfig.wsl.enable or false
+    then "/mnt/c/Users/zekurio/AppData/Local/Microsoft/WindowsApps/op-ssh-sign-wsl.exe"
+    else "${pkgs.openssh}/bin/ssh-keygen";
 in {
   home.file.".config/git/allowed_signers".text = ''
     git@zekurio.me ${lilithSigningKey}

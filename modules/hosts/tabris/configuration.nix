@@ -12,17 +12,24 @@ in {
     defaultUser = mainUser;
     startMenuLaunchers = true;
     wslConf.network.hostname = "tabris";
+    docker-desktop.enable = true;
+    interop.includePath = true;
+    ssh-agent.enable = true;
   };
 
   programs.nix-ld.enable = lib.mkForce false;
 
-  environment.systemPackages = with pkgs; [
-    wsl2-ssh-agent
+  users.users = {
+    root.linger = true;
+    ${mainUser}.linger = true;
+  };
+
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/bash - - - - ${pkgs.bashInteractive}/bin/bash"
   ];
 
   home-manager.users.${mainUser}.imports = [
     ../../home/zekurio/opencode.nix
-    ./home.nix
   ];
 
   system.stateVersion = "25.05";
