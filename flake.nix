@@ -49,7 +49,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     blitzcrank = {
-      url = "github:zekurio/blitzcrank/ee52da4be03a5d9eaee0b3bfb86df2af2e469865";
+      url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
