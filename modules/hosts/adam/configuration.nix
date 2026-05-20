@@ -178,7 +178,6 @@ in {
     };
     immich.enable = true;
     jellyfin.enable = true;
-    kyoo.enable = true;
     oauth2-proxy.enable = true;
     paperless-ngx.enable = true;
     pocket-id.enable = true;
