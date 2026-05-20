@@ -5,7 +5,6 @@
     ./coolercontrol
     ./immich
     ./jellyfin
-    ./kyoo
     ./media-share
     ./oauth2-proxy
     ./paperless-ngx
