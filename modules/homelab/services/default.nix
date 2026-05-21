@@ -9,7 +9,6 @@
     ./oauth2-proxy
     ./paperless-ngx
     ./pocket-id
-    ./profilarr
     ./prowlarr
     ./qbittorrent
     ./radarr
