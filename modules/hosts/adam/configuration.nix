@@ -170,7 +170,6 @@ in {
 
   services.homelab = {
     alloy.enable = true;
-    blitzcrank.enable = false;
     coolercontrol = {
       enable = true;
       listenAddress = "0.0.0.0";
