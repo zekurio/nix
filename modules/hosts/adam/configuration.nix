@@ -169,6 +169,7 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
+    alloy.enable = true;
     blitzcrank.enable = true;
     coolercontrol = {
       enable = true;
