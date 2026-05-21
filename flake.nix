@@ -52,6 +52,10 @@
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    alloy = {
+      url = "github:zekurio/alloy";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
