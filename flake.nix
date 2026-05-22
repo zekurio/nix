@@ -62,6 +62,7 @@
       url = "github:amaanq/helium-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     blitzcrank = {
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

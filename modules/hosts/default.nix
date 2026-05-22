@@ -16,6 +16,7 @@ in {
   flake.nixosConfigurations = {
     adam = mkHost ./adam;
     lilith = mkHost ./lilith;
+    sachiel = mkHost ./sachiel;
     tabris = mkHost ./tabris;
   };
 }
