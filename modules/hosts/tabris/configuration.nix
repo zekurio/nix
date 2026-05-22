@@ -28,9 +28,5 @@ in {
     "L+ /usr/bin/bash - - - - ${pkgs.bashInteractive}/bin/bash"
   ];
 
-  home-manager.users.${mainUser}.imports = [
-    ../../home/zekurio/opencode.nix
-  ];
-
   system.stateVersion = "25.05";
 }

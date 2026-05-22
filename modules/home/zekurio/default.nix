@@ -13,10 +13,20 @@ in {
     ./fish.nix
     ./git.nix
     ./packages.nix
+    ./pi.nix
     ./prompt.nix
   ];
 
   config = {
+    home.pi = {
+      enable = true;
+      settings = {
+        theme = "dark";
+        quietStartup = true;
+        enableInstallTelemetry = false;
+      };
+    };
+
     home = {
       username = lib.mkDefault "zekurio";
       homeDirectory = lib.mkDefault homeDirectory;

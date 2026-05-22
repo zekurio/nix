@@ -48,6 +48,20 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # Desktop / lilith host
+    chaotic-nyx.url = "github:chaotic-cx/nyx";
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    dms-plugin-registry = {
+      url = "github:AvengeMedia/dms-plugin-registry";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    helium = {
+      url = "github:amaanq/helium-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     blitzcrank = {
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
