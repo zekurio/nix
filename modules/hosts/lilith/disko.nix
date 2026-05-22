@@ -3,8 +3,8 @@
     disk = {
       nixos = {
         type = "disk";
-        # nvme0n1 — Linux/NixOS disk (Windows lives on nvme1n1, untouched)
-        device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_1TB_S7M9NL0X315196K";
+        # Replace with Lilith's stable NVMe disk id before running disko.
+        device = "/dev/disk/by-id/nvme-TODO-lilith-root-disk";
         content = {
           type = "gpt";
           partitions = {

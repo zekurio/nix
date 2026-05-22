@@ -74,6 +74,13 @@ in {
 
   powerManagement.cpuFreqGovernor = "schedutil";
 
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+    priority = 100;
+  };
+
   services.openssh.enable = true;
 
   # 1Password — allow helium browser

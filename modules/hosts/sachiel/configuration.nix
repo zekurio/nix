@@ -13,17 +13,6 @@ in {
 
   networking.hostName = "sachiel";
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/NIXOS";
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/BOOT";
-    fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
-  };
-
   hardware.enableRedistributableFirmware = true;
   hardware.firmware = [pkgs.linux-firmware];
 
@@ -31,6 +20,13 @@ in {
     efi.canTouchEfiVariables = true;
     systemd-boot.enable = true;
   };
+
+  # Hibernation resumes from the encrypted swap LV defined in ./disko.nix.
+  powerManagement.enable = true;
+  systemd.sleep.extraConfig = ''
+    HibernateMode=platform shutdown
+    HibernateState=disk
+  '';
 
   # nixos-hardware handles PRIME offload, modesetting, dynamic boost
   hardware.graphics = {
