@@ -15,6 +15,7 @@
         ll = "eza -lah";
         la = "eza -la";
         lt = "eza --tree";
+        codex = "command codex --dangerously-bypass-approvals-and-sandbox";
       };
     };
 
