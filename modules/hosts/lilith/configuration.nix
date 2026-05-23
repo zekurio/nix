@@ -54,6 +54,7 @@ in {
     limine = {
       enable = true;
       efiSupport = true;
+      maxGenerations = 3;
     };
   };
 
