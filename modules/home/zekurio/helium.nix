@@ -9,47 +9,6 @@
   cfg = config.home.helium;
   heliumPkg = inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-  # ── Extension IDs ────────────────────────────────────────────────
-  ublockId = "blockjmkbacgjkknlgpkjjiijinjdanf";
-  sponsorblockId = "mnjggcdmjocbbbhaepdhchncahnbgone";
-  violentmonkeyId = "jinjaccalgkegednnccohejagnlnfdag";
-  onepasswordId = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
-
-  # ── Extensions to force-install (IDs from Chrome Web Store) ──────
-  forceInstallIds = [
-    ublockId
-    sponsorblockId
-    violentmonkeyId
-    onepasswordId
-  ];
-
-  # ── Managed bookmarks skeleton ───────────────────────────────────
-  bookmarks = [
-    {
-      toplevel_name = "Tools";
-    }
-  ];
-
-  # ── Chromium policy (applied via /etc/chromium/policies/managed) ─
-  policy = {
-    ExtensionInstallBlocklist = ["*"];
-    ExtensionInstallAllowlist = forceInstallIds;
-    ExtensionInstallForcelist = forceInstallIds;
-    ExtensionInstallSources = ["https://services.helium.imput.net/*"];
-
-    DefaultBrowserSettingEnabled = false;
-    DeveloperToolsAvailability = 1;
-
-    DefaultSearchProviderEnabled = true;
-    DefaultSearchProviderName = "Kagi";
-    DefaultSearchProviderSearchURL = "https://kagi.com/search?q={searchTerms}";
-    DefaultSearchProviderSuggestURL = "https://kagi.com/api/autosuggest?q={searchTerms}";
-    SearchSuggestEnabled = true;
-
-    ManagedBookmarks = bookmarks;
-    RestoreOnStartup = 1;
-  };
-
   # ── Helium preferences ───────────────────────────────────────────
   preferences = {
     helium.completed_onboarding = true;
