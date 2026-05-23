@@ -6,6 +6,7 @@
   inherit (lib) mkDefault;
 in {
   imports = [
+    ../../nixpkgs
     ../../nixos/users/zekurio.nix
     ../../virtualization.nix
   ];
@@ -19,10 +20,6 @@ in {
     extraLocaleSettings = {
       LC_TIME = "de_AT.UTF-8";
     };
-  };
-
-  nixpkgs.config = {
-    allowUnfree = true;
   };
 
   hardware.enableRedistributableFirmware = mkDefault true;

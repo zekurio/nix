@@ -1,9 +1,9 @@
 {inputs, ...}: {
   imports = [
     inputs.disko.nixosModules.disko
-    inputs.dms.nixosModules.default
+    inputs.dms.nixosModules.dank-material-shell
     inputs.dms.nixosModules.greeter
-    inputs.home-manager.nixosModules.home-manager
+    ../_common/desktop
     ./configuration.nix
   ];
 }
