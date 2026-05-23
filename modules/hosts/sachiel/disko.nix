@@ -3,8 +3,7 @@
     disk = {
       nixos = {
         type = "disk";
-        # Replace with Sachiel's stable NVMe disk id before running disko.
-        device = "/dev/disk/by-id/nvme-TODO-sachiel-root-disk";
+        device = "/dev/disk/by-id/nvme-eui.0000000001000000e4d25c17f4e85101";
         content = {
           type = "gpt";
           partitions = {
@@ -26,6 +25,9 @@
                 name = "crypted";
                 settings = {
                   allowDiscards = true;
+                  crypttabExtraOpts = [
+                    "tpm2-device=auto"
+                  ];
                 };
                 content = {
                   type = "lvm_pv";

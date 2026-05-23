@@ -48,6 +48,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # Desktop / lilith host
     chaotic-nyx.url = "github:chaotic-cx/nyx";
     dms = {
