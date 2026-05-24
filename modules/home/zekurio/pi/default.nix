@@ -28,6 +28,15 @@ in {
       };
     };
 
+    keybindings = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = {};
+      description = "pi keybindings.json configuration (see pi docs/keybindings.md)";
+      example = {
+        "app.thinking.cycle" = ["ctrl+r"];
+      };
+    };
+
     contextFiles = lib.mkOption {
       type = lib.types.attrsOf lib.types.lines;
       default = {};
@@ -46,6 +55,9 @@ in {
     home.file =
       {
         ".pi/agent/settings.json".text = builtins.toJSON cfg.settings;
+      }
+      // lib.optionalAttrs (cfg.keybindings != {}) {
+        ".pi/agent/keybindings.json".text = builtins.toJSON cfg.keybindings;
       }
       // lib.mapAttrs' (name: text:
         lib.nameValuePair ".pi/agent/${name}" {inherit text;})

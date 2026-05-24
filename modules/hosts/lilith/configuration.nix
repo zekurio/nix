@@ -89,7 +89,7 @@ in {
   };
 
   home-manager.users.${mainUser}.imports = [
-    ../../home/zekurio/lilith-desktop.nix
+    ../../home/zekurio/hosts/lilith-desktop.nix
   ];
 
   system.stateVersion = "26.05";
