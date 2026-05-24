@@ -9,6 +9,10 @@
       enable = true;
       interactiveShellInit = ''
         set fish_greeting
+
+        if set -q GHOSTTY_RESOURCES_DIR; and not set -q ZELLIJ
+          exec zellij attach --create
+        end
       '';
       shellAliases = {
         ls = "eza";

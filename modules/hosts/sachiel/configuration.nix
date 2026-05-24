@@ -134,7 +134,7 @@ in {
   };
 
   home-manager.users.${mainUser}.imports = [
-    ../../home/zekurio/sachiel-desktop.nix
+    ../../home/zekurio/hosts/sachiel-desktop.nix
   ];
 
   system.stateVersion = "26.05";

@@ -9,12 +9,10 @@
     else "/home/zekurio";
 in {
   imports = [
-    ./dev.nix
-    ./fish.nix
-    ./git.nix
-    ./packages.nix
-    ./pi.nix
-    ./prompt.nix
+    ./cli
+    ./desktop/helium
+    ./git
+    ./pi
   ];
 
   config = {
@@ -24,7 +22,12 @@ in {
         theme = "dark";
         quietStartup = true;
         enableInstallTelemetry = false;
+        extensions = ["./extensions/fast.ts"];
       };
+      keybindings = {
+        "app.thinking.cycle" = ["ctrl+r"];
+      };
+      contextFiles."extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
     };
 
     home = {

@@ -1,6 +1,7 @@
 {
   imports = [
     ./alloy
+    ./blitzcrank
     ./caddy
     ./coolercontrol
     ./immich
