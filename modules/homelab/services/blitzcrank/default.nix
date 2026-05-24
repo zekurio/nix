@@ -14,7 +14,7 @@ in {
   ];
 
   options.services.homelab.blitzcrank = {
-    enable = lib.mkEnableOption "Blitzcrank Jellyseerr/Jellyfin Discord support agent";
+    enable = lib.mkEnableOption "Blitzcrank Seerr media automation agent";
   };
 
   config = lib.mkIf cfg.enable {
@@ -23,19 +23,14 @@ in {
       package = package;
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
-      publicName = "blitzcrank";
-      timezone = config.time.timeZone;
-      automations.enable = true;
-      discordAutomationChannelId = "1473398718127407188";
-      piModels = {
-        default = "openai-codex/gpt-5.5:low";
-        seerr = "openai-codex/gpt-5.5:medium";
-        automation = "openai-codex/gpt-5.5:medium";
-      };
-
       settings = {
+        bot = {
+          public_name = "blitzcrank";
+        };
+
         discord = {
           guild_id = "418795186475237376";
+          automation_channel_id = "1473398718127407188";
           automation_thread_lock = true;
         };
 
@@ -45,14 +40,36 @@ in {
           bot_display_name = "blitzcrank";
         };
 
-        web.listen_addr = "127.0.0.1:8080";
+        web = {
+          listen_addr = "127.0.0.1:8080";
+        };
 
-        jellyfin.base_url = "http://127.0.0.1:8096";
-        sonarr.base_url = "http://127.0.0.1:8989/sonarr";
-        radarr.base_url = "http://127.0.0.1:7878/radarr";
-        sabnzbd.base_url = "http://127.0.0.1:6789";
+        jellyfin = {
+          base_url = "http://127.0.0.1:8096";
+        };
+        sonarr = {
+          base_url = "http://127.0.0.1:8989/sonarr";
+        };
+        radarr = {
+          base_url = "http://127.0.0.1:7878/radarr";
+        };
+        sabnzbd = {
+          base_url = "http://127.0.0.1:6789";
+        };
 
-        runtime.run_timeout = "5m";
+        pi = {
+          models = {
+            default = "openai-codex/gpt-5.5:low";
+            seerr = "openai-codex/gpt-5.5:medium";
+            automation = "openai-codex/gpt-5.5:medium";
+          };
+        };
+
+        runtime = {
+          automations_enabled = true;
+          run_timeout = "5m";
+          timezone = config.time.timeZone;
+        };
       };
     };
 
