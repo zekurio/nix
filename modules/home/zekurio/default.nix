@@ -22,12 +22,20 @@ in {
         theme = "dark";
         quietStartup = true;
         enableInstallTelemetry = false;
-        extensions = ["./extensions/fast.ts"];
+        extensions = [
+          "./extensions/fast.ts"
+          "./extensions/goal"
+        ];
       };
       keybindings = {
         "app.thinking.cycle" = ["ctrl+r"];
       };
       contextFiles."extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
+    };
+
+    home.file.".pi/agent/extensions/goal" = {
+      source = ./pi/extensions/goal;
+      recursive = true;
     };
 
     home = {
