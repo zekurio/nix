@@ -53,7 +53,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     # Desktop / lilith host
-    chaotic-nyx.url = "github:chaotic-cx/nyx";
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
