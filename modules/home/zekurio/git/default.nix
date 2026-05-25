@@ -79,6 +79,11 @@ in {
       settings."*" = {
         IdentityAgent = "~/.1password/agent.sock";
       };
+      matchBlocks.adam = {
+        hostname = "adam.lan";
+        user = "zekurio";
+        forwardAgent = true;
+      };
     };
 
     programs.git = {

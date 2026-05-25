@@ -44,8 +44,12 @@ in {
   # LACT daemon for overclocking/fan control
   services.lact.enable = true;
   environment.systemPackages = with pkgs; [
+    kdePackages.kwallet
+    kdePackages.kwalletmanager
     rocmPackages.rocm-smi
   ];
+
+  services.dbus.packages = [pkgs.kdePackages.kwallet];
 
   boot.loader = {
     efi.canTouchEfiVariables = true;
@@ -79,8 +83,12 @@ in {
 
   programs.niri.enable = true;
 
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
+  security.pam.services.greetd.kwallet = {
+    enable = true;
+    forceRun = true;
+  };
+
+  xdg.portal.extraPortals = [pkgs.kdePackages.kwallet];
 
   nix.settings.trusted-users = [mainUser];
 
