@@ -78,6 +78,14 @@
       url = "github:e-tho/ucodenix";
       inputs.cpu-microcodes.follows = "cpu-microcodes";
     };
+    catppuccin-zellij = {
+      url = "github:catppuccin/zellij";
+      flake = false;
+    };
+    pi-catppuccin = {
+      url = "github:otahontas/pi-coding-agent-catppuccin";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs = {flake-parts, ...} @ inputs: let

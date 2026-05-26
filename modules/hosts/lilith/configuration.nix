@@ -56,23 +56,15 @@ in {
       efiSupport = true;
       maxGenerations = 3;
 
-      # TODO(zekurio): enable Limine Secure Boot after preparing sbctl:
-      # 1. Rebuild once with this disabled and sbctl installed.
-      # 2. In firmware, reset Secure Boot keys / enter Setup Mode.
-      # 3. Run: sudo sbctl create-keys
-      # 4. Run: sudo sbctl enroll-keys -m -f
-      # 5. Set this to true, rebuild, then enable Secure Boot in firmware.
-      secureBoot.enable = false;
+      secureBoot.enable = true;
 
-      # TODO(zekurio): add Windows once Lilith is booting reliably.
-      # Windows is on a separate disk, so get its EFI System Partition UUID with:
-      #   lsblk -f
-      # Then add something like:
-      #   extraEntries = ''
-      #     /Windows
-      #       protocol: efi_chainload
-      #       path: uuid(<WINDOWS-ESP-UUID>):/EFI/Microsoft/Boot/bootmgfw.efi
-      #   '';
+      # Show the Windows Boot Manager from the Windows ESP in Limine's menu.
+      extraEntries = ''
+        /Windows
+          protocol: efi_chainload
+          path: uuid(CABE-2052):/EFI/Microsoft/Boot/bootmgfw.efi
+      '';
+
       extraConfig = ''
         # Catppuccin Frappé for Limine: https://github.com/catppuccin/limine
         term_palette: 303446;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5

@@ -1,4 +1,5 @@
 {
+  inputs,
   lib,
   pkgs,
   ...
@@ -19,7 +20,7 @@ in {
     home.pi = {
       enable = true;
       settings = {
-        theme = "dark";
+        theme = "catppuccin-frappe";
         quietStartup = true;
         enableInstallTelemetry = false;
         extensions = [
@@ -37,6 +38,8 @@ in {
       source = ./pi/extensions/goal;
       recursive = true;
     };
+
+    home.file.".pi/agent/themes/catppuccin-frappe.json".source = "${inputs.pi-catppuccin.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/pi/themes/catppuccin-frappe.json";
 
     home = {
       username = lib.mkDefault "zekurio";

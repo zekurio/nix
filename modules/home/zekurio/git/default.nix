@@ -6,7 +6,7 @@
   ...
 }: let
   cfg = config.home.onepasswordSsh;
-  lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCcQoZiY9wkJ+U93isE8B3CKLmzL7TPzVh3ugE1WPJq";
+  lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
   sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
   gitSshSigningKeyCommand = pkgs.writeShellApplication {
     name = "git-ssh-signing-key";
@@ -76,13 +76,15 @@ in {
     programs.ssh = lib.mkIf cfg.enable {
       enable = true;
       enableDefaultConfig = false;
-      settings."*" = {
-        IdentityAgent = "~/.1password/agent.sock";
-      };
-      matchBlocks.adam = {
-        hostname = "adam.lan";
-        user = "zekurio";
-        forwardAgent = true;
+      settings = {
+        "*" = {
+          IdentityAgent = "~/.1password/agent.sock";
+        };
+        adam = {
+          HostName = "adam.lan";
+          User = "zekurio";
+          ForwardAgent = true;
+        };
       };
     };
 

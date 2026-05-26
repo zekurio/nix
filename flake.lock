@@ -120,6 +120,22 @@
         "type": "github"
       }
     },
+    "catppuccin-zellij": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775401951,
+        "narHash": "sha256-w5vU7Ecx01pXcrzqhHx48wrT+j6glxVAZqsddT/QAGM=",
+        "owner": "catppuccin",
+        "repo": "zellij",
+        "rev": "be841efbfb0b914daecdc4d1cde242fee53781b2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "zellij",
+        "type": "github"
+      }
+    },
     "cpu-microcodes": {
       "flake": false,
       "locked": {
@@ -474,6 +490,26 @@
         "type": "github"
       }
     },
+    "pi-catppuccin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774252203,
+        "narHash": "sha256-LRiBOEl6WHKnG5DcufEfJ4G2/u4Boa7Hpy5VHjy79Qo=",
+        "owner": "otahontas",
+        "repo": "pi-coding-agent-catppuccin",
+        "rev": "0a415dacee3e1ba2971d8576a9d49201ca401a30",
+        "type": "github"
+      },
+      "original": {
+        "owner": "otahontas",
+        "repo": "pi-coding-agent-catppuccin",
+        "type": "github"
+      }
+    },
     "pre-commit": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -502,6 +538,7 @@
         "alloy": "alloy",
         "autoaspm": "autoaspm",
         "blitzcrank": "blitzcrank",
+        "catppuccin-zellij": "catppuccin-zellij",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts",
@@ -513,6 +550,7 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "pi-catppuccin": "pi-catppuccin",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix"
       }
