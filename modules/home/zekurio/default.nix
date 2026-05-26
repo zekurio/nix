@@ -10,7 +10,7 @@
 in {
   imports = [
     ./cli
-    ./desktop/helium
+    ./desktop
     ./git
     ./pi
   ];
