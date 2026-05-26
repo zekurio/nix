@@ -22,12 +22,19 @@ in {
         theme = "catppuccin-frappe";
         quietStartup = true;
         enableInstallTelemetry = false;
+        packages = [
+          "git:github.com/mjakl/pi-kagi-api"
+        ];
         extensions = [
           "./extensions/fast.ts"
           "./extensions/goal"
         ];
       };
       keybindings = {
+        "app.clipboard.pasteImage" = [
+          "ctrl+v"
+          "alt+v"
+        ];
         "app.thinking.cycle" = ["ctrl+r"];
       };
       contextFiles."extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;

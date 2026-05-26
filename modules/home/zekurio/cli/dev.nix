@@ -15,6 +15,9 @@
     settings = {
       theme = "catppuccin-frappe";
       show_startup_tips = false;
+      support_kitty_keyboard_protocol = true;
+      copy_command = "wl-copy";
+      copy_clipboard = "system";
     };
   };
 
