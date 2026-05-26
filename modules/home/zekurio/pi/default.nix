@@ -50,7 +50,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [cfg.package];
+    home.packages = [
+      cfg.package
+      pkgs.nodejs
+    ];
 
     home.file =
       {

@@ -58,23 +58,34 @@ in {
 
       secureBoot.enable = true;
 
-      # Show the Windows Boot Manager from the Windows ESP in Limine's menu.
+      # Reboot into the firmware's Windows Boot Manager entry instead of
+      # chainloading a filesystem path. This avoids depending on a changing EFI
+      # boot number or on the Windows ESP's filesystem UUID.
       extraEntries = ''
         /Windows
-          protocol: efi_chainload
-          path: uuid(CABE-2052):/EFI/Microsoft/Boot/bootmgfw.efi
+          protocol: efi_boot_entry
+          entry: Windows Boot Manager
       '';
 
-      extraConfig = ''
-        # Catppuccin Frappé for Limine: https://github.com/catppuccin/limine
-        term_palette: 303446;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5
-        term_palette_bright: 626880;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5
-        term_background: 303446
-        term_foreground: c6d0f5
-        term_background_bright: 626880
-        term_foreground_bright: c6d0f5
-        interface_branding:
-      '';
+      style = {
+        # Override NixOS' default Limine wallpaper; the terminal background below
+        # is made full-screen instead of an inset box.
+        wallpapers = [];
+
+        interface.branding = "";
+
+        graphicalTerminal = {
+          # Catppuccin Frappé for Limine: https://github.com/catppuccin/limine
+          palette = "303446;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5";
+          brightPalette = "626880;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5";
+          foreground = "c6d0f5";
+          brightForeground = "c6d0f5";
+          background = "303446";
+          brightBackground = "626880";
+          margin = 0;
+          marginGradient = 0;
+        };
+      };
     };
   };
 
