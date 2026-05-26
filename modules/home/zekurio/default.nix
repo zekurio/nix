@@ -11,7 +11,6 @@
 in {
   imports = [
     ./cli
-    ./desktop
     ./git
     ./pi
   ];
