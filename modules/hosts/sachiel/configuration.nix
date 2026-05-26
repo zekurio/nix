@@ -112,26 +112,6 @@ in {
   };
 
   # nixos-hardware handles PRIME offload, modesetting, dynamic boost
-  services.displayManager.plasma-login-manager.enable = true;
-  services.desktopManager.plasma6.enable = true;
-
-  fonts = {
-    packages = with pkgs; [
-      ibm-plex
-      nerd-fonts.symbols-only
-    ];
-
-    fontconfig.defaultFonts = {
-      sansSerif = [
-        "IBM Plex Sans"
-        "Symbols Nerd Font"
-      ];
-      monospace = [
-        "IBM Plex Mono"
-        "Symbols Nerd Font Mono"
-      ];
-    };
-  };
 
   home-manager.users.${mainUser}.imports = [
     ../../home/zekurio/hosts/sachiel-desktop.nix
