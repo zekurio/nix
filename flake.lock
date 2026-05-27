@@ -120,19 +120,23 @@
         "type": "github"
       }
     },
-    "catppuccin-zellij": {
-      "flake": false,
+    "catppuccin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
       "locked": {
-        "lastModified": 1775401951,
-        "narHash": "sha256-w5vU7Ecx01pXcrzqhHx48wrT+j6glxVAZqsddT/QAGM=",
+        "lastModified": 1779876564,
+        "narHash": "sha256-0cPac2/hEW5hnfNaKd+fHVjWb3dScO2VyExme1vIZDQ=",
         "owner": "catppuccin",
-        "repo": "zellij",
-        "rev": "be841efbfb0b914daecdc4d1cde242fee53781b2",
+        "repo": "nix",
+        "rev": "7d283dea9a4e25cfa9a544eb40933d256cb57957",
         "type": "github"
       },
       "original": {
         "owner": "catppuccin",
-        "repo": "zellij",
+        "repo": "nix",
         "type": "github"
       }
     },
@@ -538,7 +542,7 @@
         "alloy": "alloy",
         "autoaspm": "autoaspm",
         "blitzcrank": "blitzcrank",
-        "catppuccin-zellij": "catppuccin-zellij",
+        "catppuccin": "catppuccin",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts",
