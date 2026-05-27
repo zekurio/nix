@@ -47,6 +47,12 @@ in {
     sbctl
   ];
 
+  catppuccin = {
+    flavor = "frappe";
+    accent = "mauve";
+    limine.enable = true;
+  };
+
   boot.loader = {
     efi.canTouchEfiVariables = true;
     grub.enable = false;
@@ -68,20 +74,9 @@ in {
       '';
 
       style = {
-        # Override NixOS' default Limine wallpaper; the terminal background below
-        # is made full-screen instead of an inset box.
-        wallpapers = [];
-
         interface.branding = "";
 
         graphicalTerminal = {
-          # Catppuccin Frappé for Limine: https://github.com/catppuccin/limine
-          palette = "303446;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5";
-          brightPalette = "626880;e78284;a6d189;e5c890;8caaee;f4b8e4;81c8be;c6d0f5";
-          foreground = "c6d0f5";
-          brightForeground = "c6d0f5";
-          background = "303446";
-          brightBackground = "626880";
           margin = 0;
           marginGradient = 0;
         };

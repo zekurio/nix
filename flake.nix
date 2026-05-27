@@ -1,6 +1,8 @@
 {
   description = "NixOS configurations for homelab and servers";
 
+  inputs.self.lfs = true;
+
   nixConfig = {
     extra-substituters = [
       "https://cache.numtide.com"
@@ -37,6 +39,10 @@
     # System configuration management
     home-manager = {
       url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    catppuccin = {
+      url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixos-wsl = {
@@ -77,10 +83,6 @@
     ucodenix = {
       url = "github:e-tho/ucodenix";
       inputs.cpu-microcodes.follows = "cpu-microcodes";
-    };
-    catppuccin-zellij = {
-      url = "github:catppuccin/zellij";
-      flake = false;
     };
     pi-catppuccin = {
       url = "github:otahontas/pi-coding-agent-catppuccin";
