@@ -30,6 +30,11 @@ in {
 
   hardware.cpu.amd.updateMicrocode = true;
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
   hardware.amdgpu = {
     opencl.enable = true;
     initrd.enable = true;
