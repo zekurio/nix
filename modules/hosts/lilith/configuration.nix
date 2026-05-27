@@ -15,15 +15,10 @@ in {
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "amd_pstate=guided"
-    "acpi_enforce_resources=lax"
   ];
   boot.kernelModules = [
     "kvm-amd"
-    "it87"
   ];
-  boot.extraModprobeConfig = ''
-    options it87 force_id=0x8628
-  '';
   boot.initrd.availableKernelModules = [
     "nvme"
     "xhci_pci"
