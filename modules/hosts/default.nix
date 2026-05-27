@@ -10,7 +10,7 @@
     lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
-      modules = commonModules ++ [hostModule];
+      modules = commonModules ++ [inputs.catppuccin.nixosModules.catppuccin hostModule];
     };
 in {
   flake.nixosConfigurations = {

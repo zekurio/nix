@@ -12,6 +12,7 @@
     eza
     gh
     git
+    git-lfs
     jq
     ripgrep
     sops
