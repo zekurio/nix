@@ -88,6 +88,15 @@
       url = "github:otahontas/pi-coding-agent-catppuccin";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager/trunk";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs = {flake-parts, ...} @ inputs: let

@@ -18,7 +18,7 @@ in {
   config = {
     catppuccin = {
       flavor = "frappe";
-      accent = "mauve";
+      accent = "blue";
       fish.enable = true;
       ghostty.enable = true;
       zellij.enable = true;

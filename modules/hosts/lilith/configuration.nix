@@ -1,10 +1,19 @@
 {
   inputs,
+  lib,
   pkgs,
   modulesPath,
   ...
 }: let
   mainUser = "zekurio";
+  rocmEnv = pkgs.symlinkJoin {
+    name = "rocm-combined";
+    paths = with pkgs.rocmPackages; [
+      clr
+      hipblas
+      rocblas
+    ];
+  };
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -15,6 +24,9 @@ in {
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "amd_pstate=guided"
+    # Required by LACT for AMD Overdrive controls (clocks/voltage,
+    # extended power limits, and RDNA3+ fan control).
+    "amdgpu.ppfeaturemask=0xffffffff"
   ];
   boot.kernelModules = [
     "kvm-amd"
@@ -40,16 +52,25 @@ in {
     initrd.enable = true;
   };
 
+  # Many HIP/ROCm applications look for libraries under /opt/rocm instead of
+  # the Nix store. Provide the expected compatibility path while keeping the
+  # actual ROCm components managed by Nix.
+  systemd.tmpfiles.rules = [
+    "L+ /opt/rocm - - - - ${rocmEnv}"
+  ];
+
   # LACT daemon for overclocking/fan control
   services.lact.enable = true;
   environment.systemPackages = with pkgs; [
+    clinfo
+    rocmPackages.rocminfo
     rocmPackages.rocm-smi
     sbctl
   ];
 
   catppuccin = {
     flavor = "frappe";
-    accent = "mauve";
+    accent = "blue";
     limine.enable = true;
   };
 
@@ -85,6 +106,11 @@ in {
   };
 
   powerManagement.cpuFreqGovernor = "schedutil";
+
+  # Lilith does not support the power-profiles-daemon/TuneD profile APIs;
+  # keep policy to the kernel governor instead.
+  services.power-profiles-daemon.enable = lib.mkForce false;
+  services.tuned.enable = lib.mkForce false;
 
   zramSwap = {
     enable = true;
