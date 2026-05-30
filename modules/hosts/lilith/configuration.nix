@@ -125,6 +125,23 @@ in {
     jack.enable = true;
   };
 
+  programs.steam = {
+    package = lib.mkForce (pkgs.steam.override {
+      extraEnv = {
+        # Let OBS' Vulkan/OpenGL game-capture layer hook Steam-launched games
+        # without setting per-game launch options.
+        OBS_VKCAPTURE = "1";
+
+        # Keep the MangoHud Vulkan layer available for Steam-launched games.
+        MANGOHUD = "1";
+      };
+    });
+
+    extraPackages = with pkgs; [
+      obs-studio-plugins.obs-vkcapture
+    ];
+  };
+
   home-manager.users.${mainUser}.imports = [
     ../../home/zekurio/hosts/lilith-desktop.nix
   ];
