@@ -85,6 +85,10 @@ in {
           User = "zekurio";
           ForwardAgent = true;
         };
+        "adam.lan" = {
+          User = "zekurio";
+          ForwardAgent = true;
+        };
       };
     };
 

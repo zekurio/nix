@@ -84,10 +84,6 @@
       url = "github:e-tho/ucodenix";
       inputs.cpu-microcodes.follows = "cpu-microcodes";
     };
-    pi-catppuccin = {
-      url = "github:otahontas/pi-coding-agent-catppuccin";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     plasma-manager = {
       url = "github:nix-community/plasma-manager/trunk";
       inputs.home-manager.follows = "home-manager";
@@ -95,6 +91,10 @@
     };
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    t3code-nix = {
+      url = "github:Sawrz/t3code-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
