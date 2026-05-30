@@ -86,6 +86,15 @@ in {
     };
   };
 
+  home-manager.users.${mainUser}.programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    settings."github.com" = {
+      # adam is headless; use the agent socket forwarded by the inbound SSH session.
+      IdentityAgent = "$SSH_AUTH_SOCK";
+    };
+  };
+
   modules.virtualization.enable = true;
 
   modules.homelab.mediaShare = {
