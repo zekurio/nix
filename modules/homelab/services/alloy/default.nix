@@ -4,7 +4,7 @@
   ...
 }: let
   domain = "clips.zekurio.me";
-  port = 3000;
+  port = 2552;
 in {
   options.services.homelab.alloy = {
     enable = lib.mkEnableOption "Alloy clip sharing with Caddy integration";
@@ -16,7 +16,6 @@ in {
       port = port;
       publicServerUrl = "https://${domain}";
       storageDir = "/tank/alloy/storage";
-      database.createLocally = true;
     };
 
     systemd.services.alloy-clips = {
