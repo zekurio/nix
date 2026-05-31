@@ -19,12 +19,6 @@ in {
       database.createLocally = true;
     };
 
-    systemd.services.tank-datasets.script = lib.mkAfter ''
-      mkdir -p /tank/alloy/storage
-      chown alloy:alloy /tank/alloy/storage
-      chmod 0750 /tank/alloy/storage
-    '';
-
     systemd.services.alloy-clips = {
       requires = ["tank-datasets.service"];
       after = ["tank-datasets.service"];

@@ -15,6 +15,8 @@ in {
 
   config = {
     catppuccin = {
+      enable = true;
+      autoEnable = false;
       flavor = "frappe";
       accent = "blue";
       fish.enable = true;
