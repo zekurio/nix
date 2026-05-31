@@ -25,6 +25,11 @@ in {
   hardware.enableRedistributableFirmware = mkDefault true;
   hardware.firmware = mkDefault [pkgs.linux-firmware];
 
+  catppuccin = {
+    enable = true;
+    autoEnable = false;
+  };
+
   programs.nix-ld.enable = true;
 
   nix = {
