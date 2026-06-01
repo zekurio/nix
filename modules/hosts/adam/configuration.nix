@@ -186,7 +186,7 @@ in {
       listenAddress6 = "::";
       allowedInterfaces = ["enp42s0"];
     };
-    hermes-agent.enable = true;
+    hermes-agent.enable = false;
     immich.enable = true;
     jellyfin.enable = true;
     oauth2-proxy.enable = true;
