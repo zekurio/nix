@@ -1,11 +1,16 @@
 {
   config,
+  inputs,
   lib,
   ...
 }: let
   domain = "clips.zekurio.me";
   port = 2552;
 in {
+  imports = [
+    inputs.alloy.nixosModules.default
+  ];
+
   options.services.homelab.alloy = {
     enable = lib.mkEnableOption "Alloy clip sharing with Caddy integration";
   };
