@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.services.homelab.hermes-agent;
@@ -37,6 +38,17 @@ in {
 
     sops.secrets.hermes_env = {
       mode = "0400";
+    };
+
+    # Discord voice playback needs libopus. discord.py loads it via
+    # ctypes.util.find_library("opus"), which in the locked-down service only
+    # resolves when libopus is on LD_LIBRARY_PATH (so dlopen finds it) *and*
+    # `ld` (binutils) is on PATH (so find_library returns the soname).
+    # Verified on adam: find_library -> "libopus.so.0", load_opus -> loaded.
+    # Scoped to the service so the interactive hermes user stays clean.
+    systemd.services.hermes-agent = {
+      path = [pkgs.binutils];
+      environment.LD_LIBRARY_PATH = lib.makeLibraryPath [pkgs.libopus];
     };
   };
 }
