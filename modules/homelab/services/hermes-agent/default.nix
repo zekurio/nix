@@ -19,6 +19,12 @@ in {
     services.hermes-agent = {
       enable = true;
       environmentFiles = [config.sops.secrets.hermes_env.path];
+      # Non-secret env (written to $HERMES_HOME/.env). Discord allowlist:
+      # only these user IDs may interact with the bot. Numeric IDs avoid
+      # needing the privileged "members" intent.
+      environment = {
+        DISCORD_ALLOWED_USERS = "144853050761150465"; # zekurio
+      };
       # Enables the Discord gateway support
       extraDependencyGroups = ["messaging"];
       # Exposes the hermes CLI + shared HERMES_HOME system-wide so we can run
