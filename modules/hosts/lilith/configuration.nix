@@ -23,7 +23,11 @@ in {
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
-    "amd_pstate=guided"
+    # active mode exposes the amd-pstate EPP interface that
+    # power-profiles-daemon drives (and which backs KDE's power-profile
+    # selector). guided/passive mode has no EPP, so PPD has nothing to switch
+    # and interactive bursts ramp clocks too conservatively.
+    "amd_pstate=active"
     # Required by LACT for AMD Overdrive controls (clocks/voltage,
     # extended power limits, and RDNA3+ fan control).
     "amdgpu.ppfeaturemask=0xffffffff"
@@ -105,11 +109,12 @@ in {
     };
   };
 
-  powerManagement.cpuFreqGovernor = "schedutil";
+  # Let power-profiles-daemon own CPU power policy via amd-pstate EPP. In active
+  # mode only performance/powersave governors exist, so do not pin a governor;
+  # PPD switches the governor and EPP per selected profile.
+  services.power-profiles-daemon.enable = lib.mkForce true;
 
-  # Lilith does not support the power-profiles-daemon/TuneD profile APIs;
-  # keep policy to the kernel governor instead.
-  services.power-profiles-daemon.enable = lib.mkForce false;
+  # tuned conflicts with power-profiles-daemon; keep it off so PPD owns policy.
   services.tuned.enable = lib.mkForce false;
 
   zramSwap = {

@@ -6,7 +6,7 @@
   username = "zekurio";
   githubAuthorizedKeys = pkgs.fetchurl {
     url = "https://github.com/zekurio.keys";
-    hash = "sha256-5C9I7gQrhgJP6Ky4BZSg92HKR9n0vQ7w1JlEGHh2wu4=";
+    hash = "sha256-ch40GqgtlYUajia+2aQFxdvAndOgAH37KufcohWBAqU=";
   };
 in {
   nix.settings.trusted-users = [username];
