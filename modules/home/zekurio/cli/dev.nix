@@ -16,7 +16,10 @@
     };
   };
 
-  home.packages = [
-    pkgs.jujutsu
+  home.packages = with pkgs; [
+    jujutsu
+    devenv
+    nil
+    nixd
   ];
 }
