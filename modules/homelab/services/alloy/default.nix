@@ -21,6 +21,8 @@ in {
       port = port;
       publicServerUrl = "https://${domain}";
       storageDir = "/tank/alloy/storage";
+      accelerationDevices = ["/dev/dri/renderD128"];
+      extraGroups = ["render" "video"];
     };
 
     systemd.services.alloy-clips = {
