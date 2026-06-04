@@ -48,7 +48,7 @@ in {
         "https://cachix.cachix.org"
         "https://nixpkgs.cachix.org"
         "https://nix-community.cachix.org"
-        "https://alloy.cachix.org"
+        "https://zekurio.cachix.org"
         "https://cache.garnix.io"
       ];
       trusted-public-keys = [
@@ -57,7 +57,7 @@ in {
         "cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
         "nixpkgs.cachix.org-1:q91R6hxbwFvDqTSDKwDAV4T5PxqXGxswD8vhONFMeOE="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "alloy.cachix.org-1:wXlNsjaHLyuPuGbiUb+O5C7sIzUSXqR8rMvI1DOpYVw="
+        "zekurio.cachix.org-1:9ibXBAZj69Pg57FpygJiguefU5v93B7beAoQEQrtxw0="
         "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       ];
       auto-optimise-store = true;
