@@ -48,6 +48,10 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    herdr = {
+      url = "github:ogulcancelik/herdr/v0.6.8";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
