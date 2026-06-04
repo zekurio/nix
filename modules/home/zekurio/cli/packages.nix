@@ -6,6 +6,7 @@
   home.packages = with pkgs; [
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.herdr
     age
     envsubst
     eza
