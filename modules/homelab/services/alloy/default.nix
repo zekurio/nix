@@ -3,12 +3,10 @@
   inputs,
   lib,
   ...
-}:
-let
+}: let
   domain = "clips.zekurio.me";
   port = 2552;
-in
-{
+in {
   imports = [
     inputs.alloy.nixosModules.default
   ];
@@ -23,7 +21,7 @@ in
       port = port;
       publicServerUrl = "https://${domain}";
       storageDir = "/tank/alloy";
-      accelerationDevices = [ "/dev/dri/renderD128" ];
+      accelerationDevices = ["/dev/dri/renderD128"];
       extraGroups = [
         "render"
         "video"
@@ -31,8 +29,8 @@ in
     };
 
     systemd.services.alloy-clips = {
-      requires = [ "tank-datasets.service" ];
-      after = [ "tank-datasets.service" ];
+      requires = ["tank-datasets.service"];
+      after = ["tank-datasets.service"];
     };
 
     services.homelab.caddy.virtualHosts."alloy" = {
