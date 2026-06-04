@@ -67,7 +67,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     alloy = {
-      url = "github:zekurio/alloy";
+      url = "github:zekurio/alloy/staging";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
@@ -91,48 +91,39 @@
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    t3code-nix = {
-      url = "github:Sawrz/t3code-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     hermes-agent = {
       url = "github:NousResearch/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 
-  outputs =
-    { flake-parts, ... }@inputs:
-    let
-      unstable = inputs."nixpkgs-unstable";
-      lib = unstable.lib;
-    in
-    flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = {flake-parts, ...} @ inputs: let
+    unstable = inputs."nixpkgs-unstable";
+    lib = unstable.lib;
+  in
+    flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         ./modules/hosts
       ];
 
-      systems = [ "x86_64-linux" ];
+      systems = ["x86_64-linux"];
 
       _module.args = {
         inherit inputs lib;
       };
 
-      perSystem =
-        { system, ... }:
-        let
-          pkgs = import unstable { inherit system; };
-        in
-        {
-          formatter = pkgs.writeShellApplication {
-            name = "nix-fmt";
-            runtimeInputs = [ pkgs.alejandra ];
-            text = ''
-              exec alejandra . "$@"
-            '';
-          };
+      perSystem = {system, ...}: let
+        pkgs = import unstable {inherit system;};
+      in {
+        formatter = pkgs.writeShellApplication {
+          name = "nix-fmt";
+          runtimeInputs = [pkgs.alejandra];
+          text = ''
+            exec alejandra . "$@"
+          '';
         };
+      };
 
-      flake = { };
+      flake = {};
     };
 }
