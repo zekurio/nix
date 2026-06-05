@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1780690303,
-        "narHash": "sha256-d+mvwsF0c6QXX9NqTLMc/0AUJ0xEbKrIzHJupX4M+i4=",
+        "lastModified": 1780693296,
+        "narHash": "sha256-z1PdrJJAVgXhPrvFVpT/3mKRrjyOrfz91jJfCBLntgo=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "a30c2dda125084ae6f9f636b4888a09c335fc7cb",
+        "rev": "d624391cbc406a6bf3e0737b9b04c29b159a061e",
         "type": "github"
       },
       "original": {
