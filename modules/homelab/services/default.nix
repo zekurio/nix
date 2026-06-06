@@ -4,7 +4,6 @@
     ./blitzcrank
     ./caddy
     ./coolercontrol
-    ./hermes-agent
     ./immich
     ./jellyfin
     ./media-share
