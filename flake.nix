@@ -28,7 +28,6 @@
   inputs = {
     # Core dependencies
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
@@ -56,16 +55,11 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.0.0";
+    # WSL host
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Desktop hosts
-    helium = {
-      url = "github:amaanq/helium-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
     blitzcrank = {
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -84,19 +78,6 @@
     ucodenix = {
       url = "github:e-tho/ucodenix";
       inputs.cpu-microcodes.follows = "cpu-microcodes";
-    };
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager/trunk";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    spicetify-nix = {
-      url = "github:Gerg-L/spicetify-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 

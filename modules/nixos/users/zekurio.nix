@@ -52,7 +52,6 @@ in {
 
     users.${username}.imports = [
       inputs.catppuccin.homeModules.catppuccin
-      inputs.spicetify-nix.homeManagerModules.default
       ../../home/zekurio
     ];
   };
