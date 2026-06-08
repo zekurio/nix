@@ -60,9 +60,9 @@ in {
 
         pi = {
           models = {
-            default = "openai-codex/gpt-5.5:low";
-            seerr = "openai-codex/gpt-5.5:medium";
-            automation = "openai-codex/gpt-5.5:medium";
+            default = "openai-codex/gpt-5.4-mini:medium";
+            seerr = "openai-codex/gpt-5.5:high";
+            automation = "openai-codex/gpt-5.5:high";
           };
         };
 
