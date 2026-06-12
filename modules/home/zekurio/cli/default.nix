@@ -1,7 +1,7 @@
 {
   imports = [
     ./dev.nix
-    ./fish.nix
+    ./nushell.nix
     ./packages.nix
     ./prompt.nix
   ];
@@ -21,6 +21,5 @@
   programs = {
     bat.enable = true;
     btop.enable = true;
-    fish.shellAliases.cat = "bat";
   };
 }
