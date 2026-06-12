@@ -178,7 +178,7 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
-    alloy.enable = true;
+    beets.enable = true;
     blitzcrank.enable = true;
     coolercontrol = {
       enable = true;
@@ -188,6 +188,7 @@ in {
     };
     immich.enable = true;
     jellyfin.enable = true;
+    navidrome.enable = true;
     oauth2-proxy.enable = true;
     paperless-ngx.enable = true;
     pocket-id.enable = true;
@@ -196,6 +197,7 @@ in {
     radarr.enable = true;
     sabnzbd.enable = true;
     seerr.enable = true;
+    slskd.enable = true;
     sonarr.enable = true;
     windrose = {
       enable = false;
