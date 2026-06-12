@@ -14,6 +14,7 @@
   torrentDownloadsDir = "/tank/media/torrents";
 
   mediaDirs = [
+    "/tank/media/music"
     "/tank/media/shows"
     "/tank/media/anime"
     "/tank/media/movies"
@@ -22,7 +23,9 @@
     "${usenetDownloadsDir}/complete/manual"
     "${usenetDownloadsDir}/complete/radarr"
     "${usenetDownloadsDir}/complete/sonarr"
+    "${usenetDownloadsDir}/complete/slskd"
     "${usenetDownloadsDir}/incomplete"
+    "${usenetDownloadsDir}/incomplete/slskd"
     torrentDownloadsDir
     "${torrentDownloadsDir}/manual"
     "${torrentDownloadsDir}/radarr"
@@ -112,7 +115,7 @@ in {
           ];
         };
       }
-      (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "sonarr"] (_: {
+      (lib.genAttrs ["jellyfin" "navidrome" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
         extraGroups = lib.mkAfter [shareGroup];
       }))
       (lib.genAttrs cfg.collaborators (_: {

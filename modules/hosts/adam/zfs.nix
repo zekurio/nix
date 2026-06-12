@@ -18,7 +18,6 @@ in {
     script = ''
       ${ensureDataset "tank/media" "5700G"}
       ${ensureDataset "tank/immich" "1000G"}
-      ${ensureDataset "tank/alloy" "200G"}
     '';
   };
 }

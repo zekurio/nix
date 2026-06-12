@@ -1,12 +1,13 @@
 {
   imports = [
-    ./alloy
+    ./beets
     ./blitzcrank
     ./caddy
     ./coolercontrol
     ./immich
     ./jellyfin
     ./media-share
+    ./navidrome
     ./oauth2-proxy
     ./paperless-ngx
     ./pocket-id
@@ -15,6 +16,7 @@
     ./radarr
     ./sabnzbd
     ./seerr
+    ./slskd
     ./sonarr
     ./windrose
   ];
