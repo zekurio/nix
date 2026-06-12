@@ -19,8 +19,8 @@ in {
       autoEnable = false;
       flavor = "frappe";
       accent = "blue";
-      fish.enable = true;
       ghostty.enable = true;
+      nushell.enable = true;
       zellij.enable = true;
     };
 
