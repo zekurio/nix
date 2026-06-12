@@ -24,20 +24,17 @@
     download-buffer-size = 1073741824;
   };
 
-  # Flake inputs: external dependencies and frameworks
   inputs = {
-    # Core dependencies
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
     };
-    # NixOS infrastructure
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # System configuration management
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -55,17 +52,9 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # WSL host
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+
     blitzcrank = {
       url = "github:zekurio/blitzcrank";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    alloy = {
-      url = "github:zekurio/alloy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
@@ -82,7 +71,7 @@
     };
   };
 
-  outputs = {flake-parts, ...} @ inputs: let
+  outputs = inputs @ {flake-parts, ...}: let
     unstable = inputs."nixpkgs-unstable";
     lib = unstable.lib;
   in
@@ -108,7 +97,5 @@
           '';
         };
       };
-
-      flake = {};
     };
 }
