@@ -2,32 +2,33 @@
   programs = {
     atuin = {
       enable = true;
-      enableFishIntegration = true;
+      enableNushellIntegration = true;
     };
 
-    fish = {
+    nushell = {
       enable = true;
-      interactiveShellInit = ''
-        set fish_greeting
-      '';
+      settings = {
+        show_banner = false;
+      };
       shellAliases = {
         ls = "eza";
         ll = "eza -lah";
         la = "eza -la";
         lt = "eza --tree";
-        codex = "command codex --dangerously-bypass-approvals-and-sandbox";
-        claude = "command claude --dangerously-skip-permissions";
+        cat = "bat";
+        codex = "^codex --dangerously-bypass-approvals-and-sandbox";
+        claude = "^claude --dangerously-skip-permissions";
       };
     };
 
     carapace = {
       enable = true;
-      enableFishIntegration = true;
+      enableNushellIntegration = true;
     };
 
     zoxide = {
       enable = true;
-      enableFishIntegration = true;
+      enableNushellIntegration = true;
       options = [
         "--cmd"
         "cd"
