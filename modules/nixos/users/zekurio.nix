@@ -16,15 +16,20 @@ in {
       enable = true;
       defaultEditor = true;
     };
+
+    zsh.enable = true;
   };
 
-  environment.shells = [pkgs.nushell];
+  environment.shells = [
+    pkgs.zsh
+    pkgs.nushell
+  ];
 
   users = {
-    defaultUserShell = pkgs.nushell;
+    defaultUserShell = pkgs.zsh;
 
     users.${username} = {
-      shell = pkgs.nushell;
+      shell = pkgs.zsh;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";

@@ -4,6 +4,7 @@
     ./nushell.nix
     ./packages.nix
     ./prompt.nix
+    ./zsh.nix
   ];
 
   catppuccin = {

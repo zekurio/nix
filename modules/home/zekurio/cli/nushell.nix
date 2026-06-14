@@ -3,6 +3,7 @@
     atuin = {
       enable = true;
       enableNushellIntegration = true;
+      enableZshIntegration = true;
     };
 
     nushell = {
@@ -24,11 +25,13 @@
     carapace = {
       enable = true;
       enableNushellIntegration = true;
+      enableZshIntegration = true;
     };
 
     zoxide = {
       enable = true;
       enableNushellIntegration = true;
+      enableZshIntegration = true;
       options = [
         "--cmd"
         "cd"
