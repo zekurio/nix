@@ -51,6 +51,11 @@ in {
             newzbin = "";
             script = "None";
           };
+            pp = 3;
+            priority = 0;
+            newzbin = "";
+            script = "None";
+          };
           manual = {
             name = "manual";
             dir = "/var/lib/downloads/complete/manual";

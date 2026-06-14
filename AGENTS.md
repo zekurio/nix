@@ -18,6 +18,8 @@ Prefer adding new functionality as a focused module with a `default.nix`. Follow
 - `nix build .#nixosConfigurations.adam.config.system.build.toplevel`: build the `adam` system without switching
 - `nix flake update`: refresh inputs; CI’s scheduled workflow commits `flake.lock` updates automatically
 
+Before running any Nix evaluation command such as `nix flake check` or `nix build`, run `git add` for the files changed in the task. Nix flakes only see files tracked by Git, so newly created modules must be added to the index before checks or builds.
+
 ## Coding Style & Naming Conventions
 Use `nix fmt`; do not hand-format around it. Keep modules small and composable. Name directories and files after the host, service, or concern they define, for example `modules/homelab/services/seerr/default.nix`. Use lowercase attribute names and keep options close to the service or host they configure.
 
@@ -25,6 +27,7 @@ Use `nix fmt`; do not hand-format around it. Keep modules small and composable. 
 There is no standalone unit test suite in this repo. Minimum validation for changes is:
 
 - `nix fmt`
+- `git add` for all files changed by the task
 - `nix flake check`
 - a targeted `nix build` for each affected host
 
