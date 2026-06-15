@@ -1,10 +1,9 @@
 {
   imports = [
     ./dev.nix
-    ./nushell.nix
+    ./fish.nix
     ./packages.nix
     ./prompt.nix
-    ./zsh.nix
   ];
 
   catppuccin = {
