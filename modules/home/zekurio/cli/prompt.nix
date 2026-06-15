@@ -1,8 +1,7 @@
 {
   programs.starship = {
     enable = true;
-    enableNushellIntegration = true;
-    enableZshIntegration = true;
+    enableFishIntegration = true;
     settings = {
       add_newline = false;
       format = "$directory$character";
