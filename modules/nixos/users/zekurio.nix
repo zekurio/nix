@@ -12,24 +12,20 @@ in {
   nix.settings.trusted-users = [username];
 
   programs = {
+    fish.enable = true;
     vim = {
       enable = true;
       defaultEditor = true;
     };
-
-    zsh.enable = true;
   };
 
-  environment.shells = [
-    pkgs.zsh
-    pkgs.nushell
-  ];
+  environment.shells = [pkgs.fish];
 
   users = {
-    defaultUserShell = pkgs.zsh;
+    defaultUserShell = pkgs.fish;
 
     users.${username} = {
-      shell = pkgs.zsh;
+      shell = pkgs.fish;
       uid = 1000;
       isNormalUser = true;
       hashedPassword = "$y$j9T$F7RSP23wOrzzmEJcTxY98.$i58fRl1nIbPjOZ4jBxLu/FWJb/i/DEytiWVtMxcd5G8";
