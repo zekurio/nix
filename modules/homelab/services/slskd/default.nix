@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.homelab.slskd;
-  domain = "arr.schnitzelflix.xyz";
+  domain = "nv.zekurio.me";
   webPort = 5030;
   listenPort = 50300;
   shareUmask = "0002";
@@ -98,8 +98,22 @@ in {
 
     services.homelab.caddy.virtualHosts."slskd" = {
       inherit domain;
-      forwardAuth = "127.0.0.1:4180";
       extraConfig = ''
+        handle /oauth2/* {
+          reverse_proxy 127.0.0.1:4180
+        }
+        @slskd_not_bypass {
+          path /slskd*
+          not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
+        }
+        forward_auth @slskd_not_bypass 127.0.0.1:4180 {
+          uri /oauth2/auth
+          copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
+          @slskd_unauthorized status 401
+          handle_response @slskd_unauthorized {
+            redir * /oauth2/start?rd={http.request.uri} 302
+          }
+        }
         redir /slskd /slskd/
         @slskd path /slskd*
         reverse_proxy @slskd 127.0.0.1:${toString webPort} {

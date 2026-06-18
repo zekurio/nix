@@ -6,6 +6,7 @@
   ...
 }: let
   cfg = config.home.onepasswordSsh;
+  adamSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGoFjRGxdJUuPwS0wXCOmcvf8rOgeSGWtWQaCnLcRS4N";
   lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
   sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
   gitSshSigningKeyCommand = pkgs.writeShellApplication {
@@ -57,6 +58,7 @@ in {
 
   config = {
     home.file.".config/git/allowed_signers".text = ''
+      git@zekurio.me ${adamSigningKey}
       git@zekurio.me ${lilithSigningKey}
       git@zekurio.me ${sachielSigningKey}
     '';

@@ -7,6 +7,7 @@ NixOS configurations for my current systems.
 | Host | Description |
 |------|-------------|
 | `adam` | Homelab server |
+| `sachiel` | ASUS Zephyrus G14 laptop |
 
 ## Installation runbook (NixOS)
 
