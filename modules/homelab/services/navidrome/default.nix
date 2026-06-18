@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  domain = "music.schnitzelflix.xyz";
+  domain = "nv.zekurio.me";
   port = 4533;
   musicDir = "/tank/media/music";
 in {

@@ -5,6 +5,8 @@
   ...
 }: let
   mainUser = "zekurio";
+  mainUserHome = "/home/${mainUser}";
+  mainUserSshKey = "${mainUserHome}/.ssh/id_ed25519";
 in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -86,12 +88,19 @@ in {
     };
   };
 
-  home-manager.users.${mainUser}.programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    settings."github.com" = {
-      # adam is headless; use the agent socket forwarded by the inbound SSH session.
-      IdentityAgent = "$SSH_AUTH_SOCK";
+  home-manager.users.${mainUser} = {
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      settings."github.com" = {
+        IdentityAgent = "none";
+        IdentityFile = mainUserSshKey;
+        IdentitiesOnly = true;
+      };
+    };
+
+    programs.git.settings.user = {
+      signingkey = mainUserSshKey;
     };
   };
 
