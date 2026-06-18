@@ -89,13 +89,19 @@ in {
   };
 
   home-manager.users.${mainUser} = {
+    programs.keychain = {
+      enable = true;
+      enableFishIntegration = true;
+      keys = [mainUserSshKey];
+    };
+
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
       settings."github.com" = {
-        IdentityAgent = "none";
         IdentityFile = mainUserSshKey;
         IdentitiesOnly = true;
+        AddKeysToAgent = "yes";
       };
     };
 
