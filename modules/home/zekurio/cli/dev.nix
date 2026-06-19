@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{
   programs.direnv = {
     enable = true;
     enableFishIntegration = true;
@@ -15,11 +15,4 @@
       copy_clipboard = "system";
     };
   };
-
-  home.packages = with pkgs; [
-    jujutsu
-    devenv
-    nil
-    nixd
-  ];
 }
