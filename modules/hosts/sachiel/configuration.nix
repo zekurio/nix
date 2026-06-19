@@ -1,206 +1,115 @@
 {
-  config,
+  inputs,
   lib,
   pkgs,
-  modulesPath,
   ...
-}: let
-  mainUser = "zekurio";
-in {
+}: {
   imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-    ./disko.nix
+    inputs.nixos-hardware.nixosModules.asus-zephyrus-ga401iv
   ];
 
-  boot = {
-    initrd = {
-      availableKernelModules = [
-        "nvme"
-        "xhci_pci"
-        "usb_storage"
-        "sd_mod"
-        "rtsx_pci_sdmmc"
-      ];
-      systemd = {
-        enable = true;
-        tpm2.enable = true;
-      };
-    };
-    kernelModules = ["kvm-amd"];
-    kernelParams = [
-      "amd_pstate=active"
-      "mem_sleep_default=deep"
-    ];
-    loader = {
-      timeout = 5;
-      efi.canTouchEfiVariables = true;
-      systemd-boot.enable = lib.mkForce false;
-      limine = {
-        enable = true;
-        efiSupport = true;
-        secureBoot.enable = true;
-      };
-    };
-    plymouth.enable = true;
+  networking.hostName = "sachiel";
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  boot.kernelParams = [
+    "mem_sleep_default=deep"
+    "pcie_aspm.policy=powersupersave"
+  ];
+
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+    systemd-boot.enable = lib.mkForce false;
   };
 
-  hardware = {
-    cpu.amd.updateMicrocode = true;
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-    };
-    bluetooth = {
-      enable = true;
-      powerOnBoot = true;
-    };
-    nvidia = {
-      open = true;
-      nvidiaSettings = true;
-      powerManagement = {
-        enable = true;
-        finegrained = true;
-      };
-      prime.offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
-    };
+  boot.lanzaboote = {
+    enable = true;
+    configurationLimit = 3;
+    pkiBundle = "/var/lib/sbctl";
   };
 
+  environment.systemPackages = [
+    pkgs.powertop
+    pkgs.sbctl
+  ];
+
+  boot.initrd.systemd = {
+    enable = true;
+    tpm2.enable = true;
+  };
+
+  # Hibernation resumes from the encrypted swap LV defined in ./disko.nix.
   powerManagement = {
     enable = true;
     cpuFreqGovernor = "schedutil";
-  };
-
-  services = {
-    xserver = {
+    powertop = {
       enable = true;
-      videoDrivers = [
-        "amdgpu"
-        "nvidia"
-      ];
+      postStart = ''
+        # Keep the internal ASUS keyboard responsive after powertop enables
+        # autosuspend globally.
+        for device in /sys/bus/usb/devices/*; do
+          if [ -f "$device/idVendor" ] \
+            && [ -f "$device/idProduct" ] \
+            && [ "$(cat "$device/idVendor")" = "0b05" ] \
+            && [ "$(cat "$device/idProduct")" = "1866" ] \
+            && [ -w "$device/power/control" ]; then
+            echo on > "$device/power/control"
+          fi
+        done
+      '';
     };
-    desktopManager.plasma6.enable = true;
-    displayManager.plasma-login-manager.enable = true;
-    pipewire = {
+  };
+
+  # Keep PRIME render offload available, but allow the NVIDIA GPU to enter
+  # runtime D3 when the hardware/driver combination supports it.
+  hardware.nvidia = {
+    powerManagement = {
       enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      jack.enable = true;
-      pulse.enable = true;
-    };
-    power-profiles-daemon.enable = true;
-    fstrim.enable = true;
-    fwupd.enable = true;
-    printing.enable = true;
-    openssh = {
-      enable = true;
-      settings = {
-        AllowAgentForwarding = true;
-        PasswordAuthentication = false;
-        PermitRootLogin = "no";
-      };
-    };
-    logind.settings.Login = {
-      HandleLidSwitch = "suspend-then-hibernate";
-      HandleLidSwitchExternalPower = "suspend";
-      HandleLidSwitchDocked = "ignore";
-      HandlePowerKey = "suspend";
+      finegrained = true;
     };
   };
 
-  systemd.sleep.settings.Sleep = {
-    AllowSuspend = "yes";
-    AllowHibernation = "yes";
-    AllowSuspendThenHibernate = "yes";
-    AllowHybridSleep = "yes";
-    HibernateDelaySec = "2h";
-  };
-
-  security = {
-    polkit.enable = true;
-    rtkit.enable = true;
-    tpm2 = {
-      enable = true;
-      tctiEnvironment.enable = true;
-    };
-  };
-
-  networking = {
-    hostName = "sachiel";
-    networkmanager.enable = true;
-    firewall.enable = true;
-  };
-
-  programs = {
-    dconf.enable = true;
-    _1password.enable = true;
-    _1password-gui = {
-      enable = true;
-      polkitPolicyOwners = [mainUser];
-    };
-  };
-
-  environment = {
-    etc."1password/custom_allowed_browsers".text = ''
-      helium
-    '';
-    sessionVariables = {
-      NIXOS_OZONE_WL = "1";
-    };
-    systemPackages = with pkgs; [
-      klassy
-      sbctl
-      tpm2-tools
-      pciutils
-      usbutils
-      lm_sensors
-      nvtopPackages.nvidia
-      powertop
-      wl-clipboard
+  specialisation."igpu-only".configuration = {
+    system.nixos.tags = ["igpu-only"];
+    imports = [
+      "${inputs.nixos-hardware}/common/gpu/nvidia/disable.nix"
     ];
-  };
-
-  fonts = {
-    packages = with pkgs; [
-      fira-sans
-      nerd-fonts.fira-code
-      noto-fonts-color-emoji
-      roboto-slab
-    ];
-    fontconfig.defaultFonts = {
-      sansSerif = ["Fira Sans"];
-      monospace = ["FiraCode Nerd Font"];
-      serif = ["Roboto Slab"];
-      emoji = ["Noto Color Emoji"];
+    hardware.nvidia = {
+      prime.offload.enable = lib.mkForce false;
+      powerManagement = {
+        enable = lib.mkForce false;
+        finegrained = lib.mkForce false;
+      };
     };
   };
 
-  users.users.${mainUser}.extraGroups = [
-    "audio"
-    "networkmanager"
-    "tss"
-  ];
-
-  home-manager.users.${mainUser}.imports = [
-    ./home.nix
-  ];
-
-  catppuccin = {
-    flavor = "frappe";
-    accent = "blue";
-    limine.enable = true;
-    plymouth.enable = true;
-    tty.enable = true;
-    cursors = {
-      enable = true;
-      flavor = "frappe";
-      accent = "blue";
+  services.tuned = {
+    enable = true;
+    ppdSupport = true;
+    ppdSettings = {
+      main.default = "power-saver";
+      profiles = {
+        power-saver = "powersave";
+        balanced = "balanced-battery";
+        performance = "balanced";
+      };
+      battery = {
+        balanced = "balanced-battery";
+      };
     };
   };
 
-  system.stateVersion = "25.05";
+  # nixos-hardware's generic laptop module defaults TLP on when the original
+  # power-profiles-daemon is off. Force it off so TuneD owns power policy.
+  services.tlp.enable = lib.mkForce false;
+  services.autoaspm.enable = true;
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = false;
+  };
+
+  # nixos-hardware handles PRIME offload, modesetting, dynamic boost
+
+  system.stateVersion = "26.05";
 }

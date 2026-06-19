@@ -1,7 +1,9 @@
 {inputs, ...}: {
   imports = [
     inputs.disko.nixosModules.disko
-    (inputs.nixos-hardware + "/asus/zephyrus/ga401")
+    inputs.lanzaboote.nixosModules.lanzaboote
+    inputs.autoaspm.nixosModules.default
+    ./disko.nix
     ./configuration.nix
   ];
 }

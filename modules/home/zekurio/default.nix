@@ -20,7 +20,6 @@ in {
       flavor = "frappe";
       accent = "blue";
       fish.enable = true;
-      ghostty.enable = true;
       zellij.enable = true;
     };
 

@@ -214,6 +214,7 @@ in {
     seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
+    vaultwarden.enable = true;
     windrose = {
       enable = false;
       maxPlayers = 4;

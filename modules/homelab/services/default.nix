@@ -18,6 +18,7 @@
     ./seerr
     ./slskd
     ./sonarr
+    ./vaultwarden
     ./windrose
   ];
 }
