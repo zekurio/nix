@@ -6,6 +6,7 @@
   cfg = config.services.homelab.slskd;
   domain = "nv.zekurio.me";
   webPort = 5030;
+  oauth2ProxyPort = 4181;
   listenPort = 50300;
   shareUmask = "0002";
   musicDir = "/tank/media/music";
@@ -100,13 +101,13 @@ in {
       inherit domain;
       extraConfig = ''
         handle /oauth2/* {
-          reverse_proxy 127.0.0.1:4180
+          reverse_proxy 127.0.0.1:${toString oauth2ProxyPort}
         }
         @slskd_not_bypass {
           path /slskd*
           not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
         }
-        forward_auth @slskd_not_bypass 127.0.0.1:4180 {
+        forward_auth @slskd_not_bypass 127.0.0.1:${toString oauth2ProxyPort} {
           uri /oauth2/auth
           copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
           @slskd_unauthorized status 401
