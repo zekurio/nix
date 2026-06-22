@@ -193,6 +193,7 @@ in {
   services.autoaspm.enable = true;
 
   services.homelab = {
+    alloy.enable = true;
     beets.enable = true;
     blitzcrank.enable = true;
     coolercontrol = {
