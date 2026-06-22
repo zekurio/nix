@@ -2,7 +2,7 @@
   zfs = "${pkgs.zfs}/bin/zfs";
   ensureDataset = name: quota: ''
     if ! ${zfs} list -H -o name ${name} >/dev/null 2>&1; then
-      ${zfs} create ${name}
+      ${zfs} create -p ${name}
     fi
     ${zfs} set quota=${quota} ${name}
   '';
@@ -18,6 +18,7 @@ in {
     script = ''
       ${ensureDataset "tank/media" "5700G"}
       ${ensureDataset "tank/immich" "1000G"}
+      ${ensureDataset "tank/alloy" "none"}
     '';
   };
 }
