@@ -17,6 +17,7 @@ in {
     };
     script = ''
       ${ensureDataset "tank/media" "5700G"}
+      ${ensureDataset "tank/share" "500G"}
       ${ensureDataset "tank/immich" "1000G"}
       ${ensureDataset "tank/alloy" "none"}
     '';
