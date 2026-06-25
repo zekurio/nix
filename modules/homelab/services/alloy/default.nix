@@ -39,6 +39,8 @@ in {
         openRegistrations = true;
         requireAuthToBrowse = false;
       };
+
+      limits.defaultStorageQuotaBytes = 16106127360;
     };
 
     systemd.tmpfiles.rules = let

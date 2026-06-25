@@ -11,6 +11,7 @@ in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
+    ./tailscale.nix
     ./zfs.nix
   ];
 
@@ -115,6 +116,8 @@ in {
   modules.homelab.mediaShare = {
     enable = true;
     collaborators = [mainUser];
+    nfs.enable = true;
+    samba.enable = true;
   };
 
   # Networking configuration
@@ -177,7 +180,7 @@ in {
       sshKeyPaths = [];
     };
     gnupg.sshKeyPaths = [];
-    secrets = {};
+    secrets.tailscale_auth_key = {};
   };
 
   # System packages
