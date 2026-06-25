@@ -10,8 +10,12 @@
   shareGroup = "share";
   shareUid = 995;
   shareGid = 995;
+  fileShareDir = "/tank/share";
   usenetDownloadsDir = "/var/lib/downloads";
   torrentDownloadsDir = "/tank/media/torrents";
+  tailnetCidr = "100.64.0.0/10";
+  nfsRootOptions = "ro,fsid=0,no_subtree_check,crossmnt";
+  nfsShareOptions = "rw,sync,no_subtree_check,all_squash,anonuid=${toString shareUid},anongid=${toString shareGid},insecure";
 
   mediaDirs = [
     "/tank/media/music"
@@ -32,9 +36,10 @@
     "${torrentDownloadsDir}/sonarr"
     "${torrentDownloadsDir}/incomplete"
   ];
+  sharedDirs = mediaDirs ++ lib.optional cfg.samba.enable fileShareDir;
 
   # Create root dirs as setgid + group-writable
-  directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") mediaDirs;
+  directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") sharedDirs;
 
   # systemd-tmpfiles supports ACL lines. These make sure the share group gets rwx,
   # and that new files/dirs inherit it (default ACL).
@@ -51,14 +56,14 @@
       "a+ ${dir} - - - - m::rwx"
       "A+ ${dir} - - - - m::rwx"
     ])
-    mediaDirs
+    sharedDirs
   );
 
   fixExisting = cfg.fixExistingTrees;
   normalizeTreeScript = pkgs.writeShellScript "media-share-normalize-tree" ''
     set -euo pipefail
 
-    dirs=(${lib.concatStringsSep " " (map lib.escapeShellArg mediaDirs)})
+    dirs=(${lib.concatStringsSep " " (map lib.escapeShellArg sharedDirs)})
 
     for d in "''${dirs[@]}"; do
       [ -d "$d" ] || continue
@@ -93,6 +98,10 @@ in {
       default = true;
       description = "Normalize existing permissions/ACLs under mediaDirs at boot (useful for tools that create 755/644).";
     };
+
+    samba.enable = lib.mkEnableOption "SMB shares for homelab files and media";
+
+    nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
   };
 
   config = lib.mkIf cfg.enable {
@@ -148,6 +157,54 @@ in {
         OnUnitActiveSec = "15m";
         Persistent = true;
       };
+    };
+
+    services.samba = lib.mkIf cfg.samba.enable {
+      enable = true;
+      openFirewall = false;
+      settings = {
+        global = {
+          "server string" = config.networking.hostName;
+          "workgroup" = "WORKGROUP";
+          "map to guest" = "Never";
+          "server min protocol" = "SMB3_00";
+          "vfs objects" = "catia fruit streams_xattr";
+          "fruit:metadata" = "stream";
+          "fruit:model" = "MacSamba";
+          "fruit:veto_appledouble" = "no";
+          "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+          "fruit:delete_empty_adfiles" = "yes";
+        };
+        files = {
+          path = fileShareDir;
+          "valid users" = lib.concatStringsSep " " cfg.collaborators;
+          "force group" = shareGroup;
+          "create mask" = "0664";
+          "directory mask" = "2775";
+          "read only" = "no";
+          "browseable" = "yes";
+          "guest ok" = "no";
+        };
+        media = {
+          path = "/tank/media";
+          "valid users" = lib.concatStringsSep " " cfg.collaborators;
+          "force group" = shareGroup;
+          "create mask" = "0664";
+          "directory mask" = "2775";
+          "read only" = "no";
+          "browseable" = "yes";
+          "guest ok" = "no";
+        };
+      };
+    };
+
+    services.nfs.server = lib.mkIf cfg.nfs.enable {
+      enable = true;
+      exports = ''
+        /tank ${tailnetCidr}(${nfsRootOptions})
+        ${fileShareDir} ${tailnetCidr}(${nfsShareOptions})
+        /tank/media ${tailnetCidr}(${nfsShareOptions})
+      '';
     };
   };
 }
