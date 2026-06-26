@@ -224,6 +224,21 @@
         "type": "github"
       }
     },
+    "flake-compat_2": {
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -428,6 +443,28 @@
         "type": "github"
       }
     },
+    "nix-t3code": {
+      "inputs": {
+        "flake-compat": "flake-compat_2",
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ],
+        "utils": "utils_2"
+      },
+      "locked": {
+        "lastModified": 1782449607,
+        "narHash": "sha256-ICNc/AYIDi1GQci1+/r0PIiUzfbl2Z/MQfrfXYQ/8Eo=",
+        "owner": "limwa",
+        "repo": "nix-t3code",
+        "rev": "a87cad1d8e9dc22c43c3d2cee1dbb8b742d05789",
+        "type": "github"
+      },
+      "original": {
+        "owner": "limwa",
+        "repo": "nix-t3code",
+        "type": "github"
+      }
+    },
     "nixos-hardware": {
       "inputs": {
         "nixpkgs": [
@@ -547,10 +584,12 @@
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
         "llm-agents": "llm-agents",
+        "nix-t3code": "nix-t3code",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix",
+        "wavexlr-on-linux-cfg": "wavexlr-on-linux-cfg",
         "zed": "zed"
       }
     },
@@ -676,6 +715,21 @@
         "type": "github"
       }
     },
+    "systems_5": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -732,6 +786,40 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "utils_2": {
+      "inputs": {
+        "systems": "systems_5"
+      },
+      "locked": {
+        "lastModified": 1750097467,
+        "narHash": "sha256-/znllFZ9KtlGSUUALds+ziBuRZa553PFyG0PH1wxkSM=",
+        "owner": "limwa",
+        "repo": "nix-flake-utils",
+        "rev": "be2d710203df176f33482c8b335d93b421e05d3b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "limwa",
+        "repo": "nix-flake-utils",
+        "type": "github"
+      }
+    },
+    "wavexlr-on-linux-cfg": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776282660,
+        "narHash": "sha256-+mVZm7JENSvhQPincMHqc5XDdF1Txv3hUUj4PVBzdso=",
+        "owner": "jmansar",
+        "repo": "wavexlr-on-linux-cfg",
+        "rev": "37eb2d774e750a8446c251e33fc2171eb9277248",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jmansar",
+        "repo": "wavexlr-on-linux-cfg",
         "type": "github"
       }
     },
