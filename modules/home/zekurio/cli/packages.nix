@@ -11,9 +11,6 @@
     envsubst
     eza
     gh
-    git
-    git-lfs
-    jujutsu
     jq
     nil
     nixd
