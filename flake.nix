@@ -46,23 +46,8 @@
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    catppuccin = {
-      url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    helium = {
-      url = "github:schembriaiden/helium-browser-nix-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    nix-t3code = {
-      url = "github:limwa/nix-t3code";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     zed.url = "github:zed-industries/zed";
-    wavexlr-on-linux-cfg = {
-      url = "github:jmansar/wavexlr-on-linux-cfg";
-      flake = false;
-    };
     llm-agents.url = "github:numtide/llm-agents.nix";
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
@@ -105,8 +90,8 @@
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        ./modules/darwin
         ./modules/hosts
+        ./modules/darwin
       ];
 
       systems = [

@@ -14,15 +14,6 @@ in {
   ];
 
   config = {
-    catppuccin = {
-      enable = true;
-      autoEnable = false;
-      flavor = "frappe";
-      accent = "blue";
-      fish.enable = true;
-      zellij.enable = true;
-    };
-
     home = {
       username = lib.mkDefault "zekurio";
       homeDirectory = lib.mkDefault homeDirectory;
@@ -31,6 +22,9 @@ in {
       sessionPath = [
         "$HOME/.local/bin"
       ];
+      sessionVariables = {
+        SOPS_AGE_KEY_FILE = "${homeDirectory}/.config/sops/age/keys.txt";
+      };
     };
 
     fonts.fontconfig.enable = false;

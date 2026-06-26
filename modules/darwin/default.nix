@@ -1,9 +1,8 @@
 {inputs, ...}: let
-  inherit (inputs.nixpkgs-unstable) lib;
-
   commonModules = [
     ./_common
     inputs.home-manager.darwinModules.home-manager
+    inputs.nix-homebrew.darwinModules.nix-homebrew
   ];
 
   mkDarwin = hostModule:
@@ -13,7 +12,11 @@
       modules = commonModules ++ [hostModule];
     };
 in {
-  flake.darwinConfigurations = {
-    darwin = mkDarwin ./darwin;
+  flake.darwinConfigurations = let
+    sachiel = mkDarwin ./darwin;
+  in {
+    inherit sachiel;
+    darwin = sachiel;
+    macbook-air = sachiel;
   };
 }
