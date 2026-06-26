@@ -4,10 +4,22 @@ NixOS configurations for my current systems.
 
 ## Hosts
 
-| Host | Description |
-|------|-------------|
-| `adam` | Homelab server |
-| `sachiel` | ASUS Zephyrus G14 laptop |
+| Host | Type | Description |
+|------|------|-------------|
+| `adam` | NixOS | Homelab server |
+| `sachiel` | NixOS | ASUS Zephyrus G14 laptop |
+| `sachiel` | nix-darwin | MacBook Air |
+
+## Rebuild runbook (nix-darwin)
+
+On macOS, use `path:` so the root activation step reads the checkout as a
+plain path instead of trying to treat Michael's Git working tree as root-owned:
+
+```bash
+sudo darwin-rebuild switch --flake path:/Users/zekurio/Projects/nix#sachiel
+```
+
+The `macbook-air` Darwin configuration name remains available as an alias.
 
 ## Installation runbook (NixOS)
 

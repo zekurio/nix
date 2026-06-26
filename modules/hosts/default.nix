@@ -10,12 +10,11 @@
     lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
-      modules = commonModules ++ [inputs.catppuccin.nixosModules.catppuccin hostModule];
+      modules = commonModules ++ [hostModule];
     };
 in {
   flake.nixosConfigurations = {
     adam = mkHost ./adam;
-    lilith = mkHost ./lilith;
     sachiel = mkHost ./sachiel;
   };
 }
