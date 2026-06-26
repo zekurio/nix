@@ -5,6 +5,7 @@
     ./configuration.nix
     ./fonts.nix
     ./hardware-support.nix
+    ./helium.nix
     ./plasma.nix
     ./desktop-apps.nix
   ];
