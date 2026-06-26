@@ -51,7 +51,6 @@ in {
     extraSpecialArgs = {inherit inputs;};
 
     users.${username}.imports = [
-      inputs.catppuccin.homeModules.catppuccin
       ../../home/zekurio
     ];
   };
