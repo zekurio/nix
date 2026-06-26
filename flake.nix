@@ -42,6 +42,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -101,10 +105,14 @@
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
+        ./modules/darwin
         ./modules/hosts
       ];
 
-      systems = ["x86_64-linux"];
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
 
       _module.args = {
         inherit inputs lib;
