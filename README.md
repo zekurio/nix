@@ -7,7 +7,6 @@ NixOS configurations for my current systems.
 | Host | Type | Description |
 |------|------|-------------|
 | `adam` | NixOS | Homelab server |
-| `sachiel` | NixOS | ASUS Zephyrus G14 laptop |
 | `sachiel` | nix-darwin | MacBook Air |
 
 ## Rebuild runbook (nix-darwin)
