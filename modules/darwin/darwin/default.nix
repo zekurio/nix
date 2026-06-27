@@ -39,7 +39,6 @@
       "iina"
       "mullvad-vpn"
       "notion"
-      "raycast"
       "t3-code@nightly"
       "tailscale-app"
       "vesktop"
