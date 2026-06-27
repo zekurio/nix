@@ -24,24 +24,33 @@
     enable = true;
     user = "zekurio";
     taps = [
-      "homebrew/cask"
+      {
+        name = "kgarner7/feishin";
+        trusted = true;
+      }
+      "steipete/tap"
     ];
     casks = [
       "bitwarden"
+      "codexbar"
+      "feishin"
       "ghostty"
       "helium-browser"
+      "mullvad-vpn"
+      "notion"
       "t3-code@nightly"
+      "tailscale-app"
       "vesktop"
       "zed"
     ];
     caskArgs.appdir = "/Applications";
     onActivation = {
-      autoUpdate = false;
+      autoUpdate = true;
       cleanup = "none";
       extraEnv.HOMEBREW_NO_ANALYTICS = "1";
-      upgrade = false;
+      upgrade = true;
     };
-    global.autoUpdate = false;
+    global.autoUpdate = true;
   };
 
   home-manager.users.zekurio.programs.ssh.settings = {
