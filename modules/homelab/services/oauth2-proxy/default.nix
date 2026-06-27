@@ -18,6 +18,27 @@
   portSchnitzelflix = 4180;
   portZekurio = 4181;
 
+  caddyUnits = lib.optionals config.services.homelab.caddy.enable ["caddy.service"];
+  waitForOidcDiscovery = pkgs.writeShellScript "oauth2-proxy-wait-for-oidc-discovery" ''
+    set -eu
+
+    url="${oidcIssuerUrl}/.well-known/openid-configuration"
+    attempts=60
+    attempt=1
+
+    while [ "$attempt" -le "$attempts" ]; do
+      if ${lib.getExe pkgs.curl} --fail --silent --output /dev/null --connect-timeout 1 --max-time 2 "$url"; then
+        exit 0
+      fi
+
+      ${pkgs.coreutils}/bin/sleep 1
+      attempt=$((attempt + 1))
+    done
+
+    echo "OIDC discovery endpoint did not become ready: $url" >&2
+    exit 1
+  '';
+
   mkArgs = {
     clientId,
     port,
@@ -33,6 +54,8 @@
     "--email-domain=*"
     "--skip-provider-button=true"
     "--reverse-proxy=true"
+    "--trusted-proxy-ip=127.0.0.1/32"
+    "--trusted-proxy-ip=::1/128"
     "--set-xauthrequest=true"
     "--proxy-prefix=/oauth2"
     # Skip auth check on oauth2-proxy's own routes
@@ -48,11 +71,13 @@
   }: {
     description = "oauth2-proxy forward auth for ${cookieDomain}";
     wantedBy = ["multi-user.target"];
-    after = ["network.target" "pocket-id.service"];
+    wants = ["network-online.target" "pocket-id.service"] ++ caddyUnits;
+    after = ["network-online.target" "pocket-id.service"] ++ caddyUnits;
     serviceConfig = {
       User = serviceUser;
       Group = serviceGroup;
       EnvironmentFile = config.sops.secrets.${secretName}.path;
+      ExecStartPre = waitForOidcDiscovery;
       ExecStart = lib.escapeShellArgs (
         ["${pkgs.oauth2-proxy}/bin/oauth2-proxy"]
         ++ mkArgs {inherit clientId port cookieDomain;}
