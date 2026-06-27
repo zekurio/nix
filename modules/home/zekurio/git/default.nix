@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  osConfig,
   pkgs,
   ...
 }: let
@@ -31,10 +30,7 @@
       esac
     '';
   };
-  sshSigningProgram =
-    if osConfig.wsl.enable or false
-    then "/mnt/c/Users/zekurio/AppData/Local/Microsoft/WindowsApps/op-ssh-sign-wsl.exe"
-    else "${pkgs.openssh}/bin/ssh-keygen";
+  sshSigningProgram = "${pkgs.openssh}/bin/ssh-keygen";
 in {
   config = {
     home.file.".config/git/allowed_signers".text =
