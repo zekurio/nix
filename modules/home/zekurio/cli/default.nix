@@ -2,6 +2,7 @@
   imports = [
     ./dev.nix
     ./fish.nix
+    ./ghostty.nix
     ./packages.nix
     ./prompt.nix
   ];
