@@ -4,8 +4,19 @@
     enableFishIntegration = true;
     settings = {
       add_newline = false;
+      palette = "sachiel";
       format = "$directory$character";
-      right_format = "$status$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python$nix_shell$username$hostname";
+      right_format = "$status$cmd_duration$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python$nix_shell$time$username$hostname";
+
+      palettes.sachiel = {
+        blue = "#7aa2f7";
+        cyan = "#7dcfff";
+        green = "#9ece6a";
+        purple = "#bb9af7";
+        red = "#f7768e";
+        white = "#c0caf5";
+        yellow = "#e0af68";
+      };
 
       bun = {
         format = "[bun $version]($style) ";
@@ -51,6 +62,8 @@
 
       cmd_duration = {
         format = "[$duration]($style) ";
+        min_time = 1000;
+        style = "yellow";
       };
 
       line_break.disabled = true;
@@ -77,7 +90,16 @@
 
       status = {
         disabled = false;
+        format = "[$symbol$status]($style) ";
         symbol = "✘ ";
+        style = "red";
+      };
+
+      time = {
+        disabled = false;
+        format = "[$time]($style) ";
+        style = "cyan";
+        time_format = "%H:%M";
       };
 
       username = {
