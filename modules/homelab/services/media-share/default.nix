@@ -14,6 +14,15 @@
   usenetDownloadsDir = "/var/lib/downloads";
   torrentDownloadsDir = "/tank/media/torrents";
   tailnetCidr = "100.64.0.0/10";
+  smbTcpPorts = [
+    139
+    445
+  ];
+  smbUdpPorts = [
+    137
+    138
+  ];
+  mdnsUdpPort = 5353;
   nfsRootOptions = "ro,fsid=0,no_subtree_check,crossmnt";
   nfsShareOptions = "rw,sync,no_subtree_check,all_squash,anonuid=${toString shareUid},anongid=${toString shareGid},insecure";
 
@@ -104,6 +113,20 @@ in {
 
     samba.enable = lib.mkEnableOption "SMB shares for homelab files and media";
 
+    samba.interfaces = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Network interfaces whose firewalls should allow SMB traffic.";
+    };
+
+    samba.discovery.enable = lib.mkEnableOption "Avahi/mDNS discovery for SMB shares";
+
+    samba.discovery.interfaces = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Network interfaces Avahi should use for SMB service discovery. Empty means all eligible local interfaces.";
+    };
+
     nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
   };
 
@@ -136,6 +159,20 @@ in {
     ];
 
     systemd.tmpfiles.rules = directoryRules ++ aclRules;
+
+    networking.firewall.interfaces = lib.mkMerge [
+      (lib.mkIf (cfg.samba.enable && cfg.samba.interfaces != []) (
+        lib.genAttrs cfg.samba.interfaces (_: {
+          allowedTCPPorts = smbTcpPorts;
+          allowedUDPPorts = smbUdpPorts;
+        })
+      ))
+      (lib.mkIf (cfg.samba.enable && cfg.samba.discovery.enable && cfg.samba.discovery.interfaces != []) (
+        lib.genAttrs cfg.samba.discovery.interfaces (_: {
+          allowedUDPPorts = [mdnsUdpPort];
+        })
+      ))
+    ];
 
     # Fix already-existing content (created by downloaders, etc.)
     systemd.services.mediaShare-fixperms = lib.mkIf fixExisting {
@@ -199,6 +236,29 @@ in {
           "guest ok" = "no";
         };
       };
+    };
+
+    services.avahi = lib.mkIf (cfg.samba.enable && cfg.samba.discovery.enable) {
+      enable = true;
+      nssmdns4 = true;
+      openFirewall = cfg.samba.discovery.interfaces == [];
+      allowInterfaces = lib.mkIf (cfg.samba.discovery.interfaces != []) cfg.samba.discovery.interfaces;
+      publish = {
+        enable = true;
+        addresses = true;
+        workstation = true;
+      };
+      extraServiceFiles.smb = ''
+        <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+        <service-group>
+          <name replace-wildcards="yes">%h</name>
+          <service>
+            <type>_smb._tcp</type>
+            <port>445</port>
+          </service>
+        </service-group>
+      '';
     };
 
     services.nfs.server = lib.mkIf cfg.nfs.enable {
