@@ -5,6 +5,7 @@
     ./blitzcrank
     ./caddy
     ./coolercontrol
+    ./fileflows
     ./immich
     ./jellyfin
     ./media-share
