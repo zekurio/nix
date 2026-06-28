@@ -1,6 +1,7 @@
 {
   imports = [
     ./alloy
+    ./anvil
     ./beets
     ./blitzcrank
     ./caddy
