@@ -205,6 +205,7 @@ in {
       listenAddress6 = "::";
       allowedInterfaces = ["enp42s0"];
     };
+    fileflows.enable = true;
     immich.enable = true;
     jellyfin.enable = true;
     navidrome.enable = true;

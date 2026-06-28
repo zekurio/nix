@@ -39,7 +39,7 @@
       "iina"
       "mullvad-vpn"
       "notion"
-      "t3-code@nightly"
+      "steam"
       "tailscale-app"
       "vesktop"
       "zed"
