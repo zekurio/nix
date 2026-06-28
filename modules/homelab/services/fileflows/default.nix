@@ -7,7 +7,7 @@
 
   domain = "ff.schnitzelflix.xyz";
   port = 19200;
-  shareUid = config.users.users.share.uid;
+  runtimeUid = config.users.users.zekurio.uid;
   shareGid = config.users.groups.share.gid;
   videoGid = config.users.groups.video.gid;
   renderGid = config.users.groups.render.gid;
@@ -42,7 +42,9 @@ in {
       environment = {
         TZ = "Europe/Vienna";
         LIBVA_DRIVER_NAME = "iHD";
-        PUID = toString shareUid;
+        # Avoid using the low shared-system UID as PUID: recent Ubuntu-based
+        # FileFlows images already use 995 for an expired systemd-resolve user.
+        PUID = toString runtimeUid;
         PGID = toString shareGid;
         TempPathHost = tempDir;
       };
