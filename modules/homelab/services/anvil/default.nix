@@ -11,6 +11,7 @@
   shareGroup = "share";
   shareUmask = "0002";
   profileName = "qsv-av1";
+  animeProfileName = "qsv-av1-anime";
   flowName = "download-av1-handoff";
   qsvFfmpegArgs = [
     "-extbrc"
@@ -92,11 +93,6 @@ in {
       user = shareUser;
       group = shareGroup;
 
-      daemon = {
-        tempDir = "/var/tmp/anvil";
-        storePath = "/var/lib/anvil/anvil.db";
-      };
-
       flows.${flowName}.steps = [
         "probe"
         "crop-detect"
@@ -110,42 +106,83 @@ in {
         "cleanup"
       ];
 
-      profiles.${profileName} = {
-        video = {
-          codec = "av1_qsv";
-          preset = "medium";
-          pixelFormat = "p010le";
-          targetVmaf = 95;
-          minSavingsPercent = 20;
-          ffmpegArgs = qsvFfmpegArgs;
-          abAv1Args = qsvAbAv1Args;
-
-          dolbyVision = {
-            mode = "auto";
-            codec = "hevc_qsv";
-            preset = "medium";
+      profiles = {
+        ${profileName} = {
+          video = {
+            codec = "av1_qsv";
+            preset = "slow";
             pixelFormat = "p010le";
-            removeHDR10Plus = false;
+            targetVmaf = 96;
+            minSavingsPercent = 20;
+            ffmpegArgs = qsvFfmpegArgs;
+            abAv1Args = qsvAbAv1Args;
+
+            dolbyVision = {
+              mode = "auto";
+              codec = "hevc_qsv";
+              preset = "slow";
+              pixelFormat = "p010le";
+              removeHDR10Plus = false;
+            };
           };
+
+          audio = {
+            languagesToKeep = [
+              "orig"
+              "deu"
+            ];
+            fallback = "keep_first";
+            unknownAsOriginal = true;
+          };
+
+          subtitles = {
+            mode = "preserve";
+            fallback = "keep_all";
+            keepForced = true;
+            keepExternal = true;
+          };
+
+          validation.durationToleranceSeconds = 2;
         };
 
-        audio = {
-          languagesToKeep = [
-            "orig"
-            "deu"
-          ];
-          fallback = "keep_first";
-          unknownAsOriginal = true;
-        };
+        ${animeProfileName} = {
+          video = {
+            codec = "av1_qsv";
+            preset = "slow";
+            pixelFormat = "p010le";
+            targetVmaf = 97;
+            minSavingsPercent = 10;
+            ffmpegArgs = qsvFfmpegArgs;
+            abAv1Args = qsvAbAv1Args;
 
-        subtitles = {
-          mode = "preserve";
-          fallback = "keep_all";
-          keepForced = true;
-          keepExternal = true;
-        };
+            dolbyVision = {
+              mode = "auto";
+              codec = "hevc_qsv";
+              preset = "slow";
+              pixelFormat = "p010le";
+              removeHDR10Plus = false;
+            };
+          };
 
-        validation.durationToleranceSeconds = 2;
+          audio = {
+            languagesToKeep = [
+              "orig"
+              "jpn"
+              "deu"
+            ];
+            fallback = "keep_first";
+            unknownAsOriginal = true;
+          };
+
+          subtitles = {
+            mode = "preserve";
+            fallback = "keep_all";
+            keepForced = true;
+            keepExternal = true;
+          };
+
+          validation.durationToleranceSeconds = 2;
+        };
       };
 
       arrs = {
@@ -185,10 +222,6 @@ in {
         UMask = shareUmask;
       };
     };
-
-    systemd.tmpfiles.rules = [
-      "d /var/tmp/anvil 2775 ${shareUser} ${shareGroup} -"
-    ];
 
     systemd.services.anvil.environment = {
       LIBVA_DRIVER_NAME = "iHD";
