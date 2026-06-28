@@ -117,7 +117,17 @@ in {
     enable = true;
     collaborators = [mainUser];
     nfs.enable = true;
-    samba.enable = true;
+    samba = {
+      enable = true;
+      interfaces = [
+        "enp42s0"
+        "tailscale0"
+      ];
+      discovery = {
+        enable = true;
+        interfaces = ["enp42s0"];
+      };
+    };
   };
 
   # Networking configuration
