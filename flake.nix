@@ -59,6 +59,10 @@
       url = "github:zekurio/alloy/develop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    anvil = {
+      url = "github:zekurio/anvil";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
