@@ -39,6 +39,7 @@
       "iina"
       "mullvad-vpn"
       "notion"
+      "raycast"
       "steam"
       "tailscale-app"
       "vesktop"
