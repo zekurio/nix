@@ -111,7 +111,7 @@ in {
           video = {
             codec = "av1_qsv";
             preset = "slow";
-            pixelFormat = "p010le";
+            pixelFormat = "yuv420p10le";
             targetVmaf = 96;
             minSavingsPercent = 20;
             ffmpegArgs = qsvFfmpegArgs;
@@ -121,7 +121,7 @@ in {
               mode = "auto";
               codec = "hevc_qsv";
               preset = "slow";
-              pixelFormat = "p010le";
+              pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
             };
           };
@@ -149,7 +149,7 @@ in {
           video = {
             codec = "av1_qsv";
             preset = "slow";
-            pixelFormat = "p010le";
+            pixelFormat = "yuv420p10le";
             targetVmaf = 97;
             minSavingsPercent = 10;
             ffmpegArgs = qsvFfmpegArgs;
@@ -159,7 +159,7 @@ in {
               mode = "auto";
               codec = "hevc_qsv";
               preset = "slow";
-              pixelFormat = "p010le";
+              pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
             };
           };
