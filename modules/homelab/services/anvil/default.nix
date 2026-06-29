@@ -61,6 +61,9 @@
       "**/sample*/**"
       "**/*sample*"
     ];
+    ignoreRegex = [
+      "(^|/)_UNPACK[^/]*(/|$)"
+    ];
     download = {
       inherit handoffPath;
       stableFor = "5m";
