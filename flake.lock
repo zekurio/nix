@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782717016,
-        "narHash": "sha256-65nBqKdHit8NqjGXr35BznuS56ycBcbOOOaim5zyykc=",
+        "lastModified": 1782720537,
+        "narHash": "sha256-b6773dvb/q4fa+nv3ZYh+uNjGf21WZSlQrfUEnq4/b8=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "9067ee66076432d4a87900d8dcaaf9bbb7683151",
+        "rev": "fe50f573b31f76206d6c9f7c79bbb0a76b27a9e4",
         "type": "github"
       },
       "original": {
