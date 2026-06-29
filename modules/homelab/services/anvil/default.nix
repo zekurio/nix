@@ -10,7 +10,7 @@
   shareUser = "share";
   shareGroup = "share";
   shareUmask = "0002";
-  profileName = "qsv-av1";
+  profileName = "qsv-hevc";
   animeProfileName = "qsv-av1-anime";
   flowName = "download-av1-handoff";
   qsvFfmpegArgs = [
@@ -46,12 +46,13 @@
     path,
     handoffPath,
     arr,
+    profile ? profileName,
     priority,
   }: {
     kind = "download";
     inherit path arr priority;
     flow = flowName;
-    profile = profileName;
+    inherit profile;
     include = [
       "*.mkv"
       "*.mp4"
@@ -112,7 +113,7 @@ in {
           trackTitleMode = "standardize";
 
           video = {
-            codec = "av1_qsv";
+            codec = "hevc_qsv";
             preset = "veryslow";
             pixelFormat = "yuv420p10le";
             targetVmaf = 95;
@@ -160,14 +161,6 @@ in {
             minSavingsPercent = 0;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
-
-            dolbyVision = {
-              mode = "auto";
-              codec = "hevc_qsv";
-              preset = "veryslow";
-              pixelFormat = "yuv420p10le";
-              removeHDR10Plus = false;
-            };
           };
 
           audio = {
@@ -212,11 +205,27 @@ in {
           priority = 10;
         };
 
+        radarr-anime-downloads = mkDownloadLibrary {
+          path = "/var/lib/downloads/complete/radarr-anime";
+          handoffPath = "/var/lib/downloads/converted/radarr-anime";
+          arr = "radarr";
+          profile = animeProfileName;
+          priority = 20;
+        };
+
         sonarr-downloads = mkDownloadLibrary {
           path = "/var/lib/downloads/complete/sonarr";
           handoffPath = "/var/lib/downloads/converted/sonarr";
           arr = "sonarr";
           priority = 10;
+        };
+
+        sonarr-anime-downloads = mkDownloadLibrary {
+          path = "/var/lib/downloads/complete/sonarr-anime";
+          handoffPath = "/var/lib/downloads/converted/sonarr-anime";
+          arr = "sonarr";
+          profile = animeProfileName;
+          priority = 20;
         };
       };
 
