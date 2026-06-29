@@ -108,19 +108,22 @@ in {
 
       profiles = {
         ${profileName} = {
+          metadataMode = "preserve";
+          trackTitleMode = "standardize";
+
           video = {
             codec = "av1_qsv";
-            preset = "slow";
+            preset = "veryslow";
             pixelFormat = "yuv420p10le";
-            targetVmaf = 96;
-            minSavingsPercent = 20;
+            targetVmaf = 95;
+            minSavingsPercent = 5;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
 
             dolbyVision = {
               mode = "auto";
               codec = "hevc_qsv";
-              preset = "slow";
+              preset = "veryslow";
               pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
             };
@@ -146,19 +149,22 @@ in {
         };
 
         ${animeProfileName} = {
+          metadataMode = "preserve";
+          trackTitleMode = "standardize";
+
           video = {
             codec = "av1_qsv";
-            preset = "slow";
+            preset = "veryslow";
             pixelFormat = "yuv420p10le";
             targetVmaf = 97;
-            minSavingsPercent = 10;
+            minSavingsPercent = 0;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
 
             dolbyVision = {
               mode = "auto";
               codec = "hevc_qsv";
-              preset = "slow";
+              preset = "veryslow";
               pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
             };
@@ -220,11 +226,15 @@ in {
           "video"
         ];
         UMask = shareUmask;
+        WorkingDirectory = "/var/lib/anvil/tmp";
       };
     };
 
     systemd.services.anvil.environment = {
       LIBVA_DRIVER_NAME = "iHD";
+      TEMP = "/var/lib/anvil/tmp";
+      TMP = "/var/lib/anvil/tmp";
+      TMPDIR = "/var/lib/anvil/tmp";
     };
 
     sops.secrets = {
