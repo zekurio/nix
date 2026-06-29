@@ -11,6 +11,7 @@ in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disko.nix
+    ./downloads-disk.nix
     ./tailscale.nix
     ./zfs.nix
   ];

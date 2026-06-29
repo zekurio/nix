@@ -10,8 +10,10 @@
   shareUser = "share";
   shareGroup = "share";
   shareUmask = "0002";
-  profileName = "qsv-hevc";
-  animeProfileName = "qsv-av1-anime";
+  profileName = "qsv-hevc-sonarr-veryslow";
+  animeProfileName = "qsv-av1-sonarr-anime-veryslow";
+  radarrProfileName = "qsv-hevc-radarr-slow";
+  radarrAnimeProfileName = "qsv-av1-radarr-anime-slow";
   flowName = "download-av1-handoff";
   qsvFfmpegArgs = [
     "-extbrc"
@@ -98,7 +100,8 @@ in {
       group = shareGroup;
 
       daemon.scanInterval = "5m";
-      daemon.workerCount = 3;
+      daemon.workerCount = 2;
+      daemon.totalThreads = 8;
 
       flows.${flowName}.steps = [
         "probe"
@@ -122,8 +125,11 @@ in {
             codec = "hevc_qsv";
             preset = "veryslow";
             pixelFormat = "yuv420p10le";
+            crfMin = 14;
+            crfMax = 38;
             targetVmaf = 95;
             minSavingsPercent = 5;
+            forceEncodeOnNoFit = true;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
 
@@ -163,8 +169,11 @@ in {
             codec = "av1_qsv";
             preset = "veryslow";
             pixelFormat = "yuv420p10le";
+            crfMin = 14;
+            crfMax = 38;
             targetVmaf = 97;
             minSavingsPercent = 0;
+            forceEncodeOnNoFit = true;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
           };
@@ -172,7 +181,86 @@ in {
           audio = {
             languagesToKeep = [
               "orig"
-              "jpn"
+              "deu"
+            ];
+            fallback = "keep_first";
+            unknownAsOriginal = true;
+          };
+
+          subtitles = {
+            mode = "preserve";
+            fallback = "keep_all";
+            keepForced = true;
+            keepExternal = true;
+          };
+
+          validation.durationToleranceSeconds = 2;
+        };
+
+        ${radarrProfileName} = {
+          metadataMode = "preserve";
+          trackTitleMode = "standardize";
+
+          video = {
+            codec = "hevc_qsv";
+            preset = "slow";
+            pixelFormat = "yuv420p10le";
+            crfMin = 14;
+            crfMax = 38;
+            targetVmaf = 95;
+            minSavingsPercent = 5;
+            forceEncodeOnNoFit = true;
+            ffmpegArgs = qsvFfmpegArgs;
+            abAv1Args = qsvAbAv1Args;
+
+            dolbyVision = {
+              mode = "auto";
+              codec = "hevc_qsv";
+              preset = "slow";
+              pixelFormat = "yuv420p10le";
+              removeHDR10Plus = false;
+            };
+          };
+
+          audio = {
+            languagesToKeep = [
+              "orig"
+              "deu"
+            ];
+            fallback = "keep_first";
+            unknownAsOriginal = true;
+          };
+
+          subtitles = {
+            mode = "preserve";
+            fallback = "keep_all";
+            keepForced = true;
+            keepExternal = true;
+          };
+
+          validation.durationToleranceSeconds = 2;
+        };
+
+        ${radarrAnimeProfileName} = {
+          metadataMode = "preserve";
+          trackTitleMode = "standardize";
+
+          video = {
+            codec = "av1_qsv";
+            preset = "slow";
+            pixelFormat = "yuv420p10le";
+            crfMin = 14;
+            crfMax = 38;
+            targetVmaf = 97;
+            minSavingsPercent = 0;
+            forceEncodeOnNoFit = true;
+            ffmpegArgs = qsvFfmpegArgs;
+            abAv1Args = qsvAbAv1Args;
+          };
+
+          audio = {
+            languagesToKeep = [
+              "orig"
               "deu"
             ];
             fallback = "keep_first";
@@ -208,6 +296,7 @@ in {
           path = "/var/lib/downloads/complete/radarr";
           handoffPath = "/var/lib/downloads/converted/radarr";
           arr = "radarr";
+          profile = radarrProfileName;
           priority = 10;
         };
 
@@ -215,7 +304,7 @@ in {
           path = "/var/lib/downloads/complete/radarr-anime";
           handoffPath = "/var/lib/downloads/converted/radarr-anime";
           arr = "radarr";
-          profile = animeProfileName;
+          profile = radarrAnimeProfileName;
           priority = 20;
         };
 
