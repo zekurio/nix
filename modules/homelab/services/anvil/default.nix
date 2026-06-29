@@ -122,7 +122,8 @@ in {
           trackTitleMode = "standardize";
 
           video = {
-            codec = "hevc_qsv";
+            codec = "hevc";
+            accelerator = "qsv";
             preset = "veryslow";
             pixelFormat = "yuv420p10le";
             crfMin = 14;
@@ -135,7 +136,8 @@ in {
 
             dolbyVision = {
               mode = "auto";
-              codec = "hevc_qsv";
+              codec = "hevc";
+              accelerator = "qsv";
               preset = "veryslow";
               pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
@@ -166,7 +168,8 @@ in {
           trackTitleMode = "standardize";
 
           video = {
-            codec = "av1_qsv";
+            codec = "av1";
+            accelerator = "qsv";
             preset = "veryslow";
             pixelFormat = "yuv420p10le";
             crfMin = 14;
@@ -202,7 +205,8 @@ in {
           trackTitleMode = "standardize";
 
           video = {
-            codec = "hevc_qsv";
+            codec = "hevc";
+            accelerator = "qsv";
             preset = "slow";
             pixelFormat = "yuv420p10le";
             crfMin = 14;
@@ -215,7 +219,8 @@ in {
 
             dolbyVision = {
               mode = "auto";
-              codec = "hevc_qsv";
+              codec = "hevc";
+              accelerator = "qsv";
               preset = "slow";
               pixelFormat = "yuv420p10le";
               removeHDR10Plus = false;
@@ -246,7 +251,8 @@ in {
           trackTitleMode = "standardize";
 
           video = {
-            codec = "av1_qsv";
+            codec = "av1";
+            accelerator = "qsv";
             preset = "slow";
             pixelFormat = "yuv420p10le";
             crfMin = 14;
