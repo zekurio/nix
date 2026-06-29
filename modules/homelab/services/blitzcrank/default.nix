@@ -37,7 +37,7 @@ in {
         seerr = {
           base_url = "http://127.0.0.1:5055";
           webhook_path = "/webhooks/seerr";
-          bot_user_id = "23";
+          bot_user_id = "2";
           bot_display_name = "blitzcrank";
         };
 

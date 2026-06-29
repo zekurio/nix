@@ -94,6 +94,9 @@ in {
       user = shareUser;
       group = shareGroup;
 
+      daemon.scanInterval = "5m";
+      daemon.workerCount = 3;
+
       flows.${flowName}.steps = [
         "probe"
         "crop-detect"
