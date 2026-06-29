@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782737136,
-        "narHash": "sha256-HKNdDTJQraWMrho8VDIbEyDPJb2VCyOaleetkVIdlr8=",
+        "lastModified": 1782763209,
+        "narHash": "sha256-n7ux9dlJPmCTT4zBhxlKC3ZoWKgMCAdqCKNuLDyNrt0=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "e9ea34bd06269fe921cc9de700f7699f6c37ad3c",
+        "rev": "801e856e460444ae4169578bcf523dba0b461ae8",
         "type": "github"
       },
       "original": {
@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782761739,
-        "narHash": "sha256-ahpmBBh/o1XA3dEdLyw5fGXy8ShlfBZALlY1ogxdieA=",
+        "lastModified": 1782768607,
+        "narHash": "sha256-+kkmPRsWWamiMSpmHWmoNapJxlsK/5VgqrLfDPxkrjU=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "b6a0622b3cfce34daab2fec49068af0e7f7a5c75",
+        "rev": "60495fb34f99332d0f7a02f0c51b3ccdebb0280d",
         "type": "github"
       },
       "original": {
