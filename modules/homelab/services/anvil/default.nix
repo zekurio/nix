@@ -65,6 +65,7 @@
     ];
     ignoreRegex = [
       "(^|/)_UNPACK[^/]*(/|$)"
+      "(?i)(^|/)[^/]*samples?[^/]*(/|$)"
     ];
     download = {
       inherit handoffPath;
@@ -364,6 +365,9 @@ in {
       TMP = "/var/lib/anvil/tmp";
       TMPDIR = "/var/lib/anvil/tmp";
     };
+    systemd.services.anvil.restartTriggers = [
+      config.environment.etc."anvil/anvil.toml".source
+    ];
 
     sops.secrets = {
       anvil_radarr_api_key = {
