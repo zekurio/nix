@@ -182,7 +182,7 @@ in {
 
             dolbyVision = {
               mode = "auto";
-              codec = "av1";
+              codec = "hevc";
               accelerator = "qsv";
               preset = "veryslow";
               bitDepth = 10;
@@ -274,7 +274,7 @@ in {
 
             dolbyVision = {
               mode = "auto";
-              codec = "av1";
+              codec = "hevc";
               accelerator = "qsv";
               preset = "slow";
               bitDepth = 10;
