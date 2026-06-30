@@ -125,7 +125,7 @@ in {
             codec = "hevc";
             accelerator = "qsv";
             preset = "veryslow";
-            pixelFormat = "yuv420p10le";
+            bitDepth = 10;
             crfMin = 14;
             crfMax = 38;
             targetVmaf = 95;
@@ -139,7 +139,7 @@ in {
               codec = "hevc";
               accelerator = "qsv";
               preset = "veryslow";
-              pixelFormat = "yuv420p10le";
+              bitDepth = 10;
               removeHDR10Plus = false;
             };
           };
@@ -171,7 +171,7 @@ in {
             codec = "av1";
             accelerator = "qsv";
             preset = "veryslow";
-            pixelFormat = "yuv420p10le";
+            bitDepth = 10;
             crfMin = 14;
             crfMax = 38;
             targetVmaf = 97;
@@ -179,6 +179,15 @@ in {
             forceEncodeOnNoFit = true;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
+
+            dolbyVision = {
+              mode = "auto";
+              codec = "av1";
+              accelerator = "qsv";
+              preset = "veryslow";
+              bitDepth = 10;
+              removeHDR10Plus = false;
+            };
           };
 
           audio = {
@@ -208,7 +217,7 @@ in {
             codec = "hevc";
             accelerator = "qsv";
             preset = "slow";
-            pixelFormat = "yuv420p10le";
+            bitDepth = 10;
             crfMin = 14;
             crfMax = 38;
             targetVmaf = 95;
@@ -222,7 +231,7 @@ in {
               codec = "hevc";
               accelerator = "qsv";
               preset = "slow";
-              pixelFormat = "yuv420p10le";
+              bitDepth = 10;
               removeHDR10Plus = false;
             };
           };
@@ -254,7 +263,7 @@ in {
             codec = "av1";
             accelerator = "qsv";
             preset = "slow";
-            pixelFormat = "yuv420p10le";
+            bitDepth = 10;
             crfMin = 14;
             crfMax = 38;
             targetVmaf = 97;
@@ -262,6 +271,15 @@ in {
             forceEncodeOnNoFit = true;
             ffmpegArgs = qsvFfmpegArgs;
             abAv1Args = qsvAbAv1Args;
+
+            dolbyVision = {
+              mode = "auto";
+              codec = "av1";
+              accelerator = "qsv";
+              preset = "slow";
+              bitDepth = 10;
+              removeHDR10Plus = false;
+            };
           };
 
           audio = {
