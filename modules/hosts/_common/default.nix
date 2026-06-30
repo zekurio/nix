@@ -27,6 +27,18 @@ in {
 
   programs.nix-ld.enable = true;
 
+  security.sudo.extraRules = [
+    {
+      users = ["zekurio"];
+      commands = [
+        {
+          command = "ALL";
+          options = ["NOPASSWD"];
+        }
+      ];
+    }
+  ];
+
   nix = {
     settings = {
       experimental-features = [
