@@ -1,10 +1,25 @@
-{pkgs, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  mediaShare = config.modules.homelab.mediaShare;
   zfs = "${pkgs.zfs}/bin/zfs";
   ensureDataset = name: quota: ''
     if ! ${zfs} list -H -o name ${name} >/dev/null 2>&1; then
       ${zfs} create -p ${name}
     fi
     ${zfs} set quota=${quota} ${name}
+  '';
+  ensurePersonalShareDatasets = lib.optionalString (mediaShare.personalShares.users != {}) ''
+    ${ensureDataset mediaShare.personalShares.dataset mediaShare.personalShares.rootQuota}
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (
+        name: share: ensureDataset "${mediaShare.personalShares.dataset}/${name}" share.quota
+      )
+      mediaShare.personalShares.users
+    )}
   '';
 in {
   systemd.services.tank-datasets = {
@@ -20,6 +35,7 @@ in {
       ${ensureDataset "tank/share" "500G"}
       ${ensureDataset "tank/immich" "1000G"}
       ${ensureDataset "tank/alloy" "100G"}
+      ${ensurePersonalShareDatasets}
     '';
   };
 }

@@ -76,6 +76,10 @@
       url = "github:zekurio/anvil";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    jellything = {
+      url = "github:zekurio/jellything";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
