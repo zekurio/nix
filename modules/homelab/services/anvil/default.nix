@@ -43,6 +43,17 @@
     "--enc"
     "bf=7"
   ];
+  subtitleCleanup = {
+    languagesToKeep = [
+      "orig"
+      "deu"
+    ];
+    fallback = "keep_all";
+    keepForced = true;
+    keepSdh = true;
+    keepCommentary = true;
+    unknownAsOriginal = true;
+  };
 
   mkDownloadLibrary = {
     path,
@@ -108,6 +119,7 @@ in {
         "probe"
         "crop-detect"
         "audio-cleanup"
+        "subtitle-cleanup"
         "stage"
         "crf-search"
         "encode"
@@ -154,12 +166,7 @@ in {
             unknownAsOriginal = true;
           };
 
-          subtitles = {
-            mode = "preserve";
-            fallback = "keep_all";
-            keepForced = true;
-            keepExternal = true;
-          };
+          subtitles = subtitleCleanup;
 
           validation.durationToleranceSeconds = 2;
         };
@@ -200,12 +207,7 @@ in {
             unknownAsOriginal = true;
           };
 
-          subtitles = {
-            mode = "preserve";
-            fallback = "keep_all";
-            keepForced = true;
-            keepExternal = true;
-          };
+          subtitles = subtitleCleanup;
 
           validation.durationToleranceSeconds = 2;
         };
@@ -246,12 +248,7 @@ in {
             unknownAsOriginal = true;
           };
 
-          subtitles = {
-            mode = "preserve";
-            fallback = "keep_all";
-            keepForced = true;
-            keepExternal = true;
-          };
+          subtitles = subtitleCleanup;
 
           validation.durationToleranceSeconds = 2;
         };
@@ -292,12 +289,7 @@ in {
             unknownAsOriginal = true;
           };
 
-          subtitles = {
-            mode = "preserve";
-            fallback = "keep_all";
-            keepForced = true;
-            keepExternal = true;
-          };
+          subtitles = subtitleCleanup;
 
           validation.durationToleranceSeconds = 2;
         };
@@ -351,6 +343,7 @@ in {
 
       service.extraServiceConfig = {
         SupplementaryGroups = [
+          "share"
           "render"
           "video"
         ];

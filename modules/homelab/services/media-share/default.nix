@@ -10,9 +10,12 @@
   shareGroup = "share";
   shareUid = 995;
   shareGid = 995;
+  shareDirMode = "2775";
+  shareFileMode = "0664";
   fileShareDir = "/tank/share";
   usenetDownloadsDir = "/var/lib/downloads";
-  torrentDownloadsDir = "/tank/media/torrents";
+  personalSharesRoot = cfg.personalShares.root;
+  personalShareUsers = lib.attrNames cfg.personalShares.users;
   tailnetCidr = "100.64.0.0/10";
   smbTcpPorts = [
     139
@@ -46,16 +49,26 @@
     "${usenetDownloadsDir}/converted/radarr-anime"
     "${usenetDownloadsDir}/converted/sonarr"
     "${usenetDownloadsDir}/converted/sonarr-anime"
-    torrentDownloadsDir
-    "${torrentDownloadsDir}/manual"
-    "${torrentDownloadsDir}/radarr"
-    "${torrentDownloadsDir}/sonarr"
-    "${torrentDownloadsDir}/incomplete"
   ];
-  sharedDirs = mediaDirs ++ lib.optional cfg.samba.enable fileShareDir;
+  sharedDirs = mediaDirs;
 
   # Create root dirs as setgid + group-writable
-  directoryRules = map (dir: "d ${dir} 2775 ${shareUser} ${shareGroup} -") sharedDirs;
+  directoryRules = map (dir: "d ${dir} ${shareDirMode} ${shareUser} ${shareGroup} -") sharedDirs;
+  personalShareDirectoryRules =
+    lib.optional (personalShareUsers != []) "d ${personalSharesRoot} 0755 root root -"
+    ++ map (name: "d ${personalSharesRoot}/${name} 0700 ${name} ${shareGroup} -") personalShareUsers;
+  personalShareSambaSettings =
+    lib.mapAttrs (name: _: {
+      path = "${personalSharesRoot}/${name}";
+      "valid users" = name;
+      "force user" = name;
+      "create mask" = "0600";
+      "directory mask" = "0700";
+      "read only" = "no";
+      "browseable" = "no";
+      "guest ok" = "no";
+    })
+    cfg.personalShares.users;
 
   # systemd-tmpfiles supports ACL lines. These make sure the share group gets rwx,
   # and that new files/dirs inherit it (default ACL).
@@ -84,18 +97,18 @@
     for d in "''${dirs[@]}"; do
       [ -d "$d" ] || continue
 
-      # Ensure group ownership and setgid on directories
-      chgrp -R ${lib.escapeShellArg shareGroup} "$d" || true
-      chmod 2775 "$d" || true
+      # Keep media automation trees owned by the shared service account.
+      chown -R ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
+      chmod ${shareDirMode} "$d" || true
 
       # Directories must be group-writable for arr import moves/renames
-      find "$d" -type d -exec chmod 2775 {} +
+      find "$d" -type d -exec chmod ${shareDirMode} {} +
 
-      # Files commonly should be group-writable; adjust if you prefer 664/660
-      find "$d" -type f -exec chmod 664 {} +
+      # Files should be readable and writable by the shared group, but not executable.
+      find "$d" -type f -exec chmod ${shareFileMode} {} +
 
       # Ensure share group has rwx and inheritance works regardless of creator umask/mode
-      setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
+      setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwX -m m::rwX "$d" || true
       setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
     done
   '';
@@ -132,9 +145,47 @@ in {
     };
 
     nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
+
+    personalShares = {
+      dataset = lib.mkOption {
+        type = lib.types.str;
+        default = "tank/shares";
+        description = "Parent ZFS dataset for private per-user SMB shares.";
+      };
+
+      root = lib.mkOption {
+        type = lib.types.str;
+        default = "/tank/shares";
+        description = "Root directory for private per-user SMB shares.";
+      };
+
+      rootQuota = lib.mkOption {
+        type = lib.types.str;
+        default = "100G";
+        description = "ZFS quota for the parent dataset containing private per-user SMB shares.";
+      };
+
+      users = lib.mkOption {
+        type = lib.types.attrsOf (lib.types.submodule {
+          options.quota = lib.mkOption {
+            type = lib.types.str;
+            description = "ZFS quota for this user's private SMB share dataset.";
+          };
+        });
+        default = {};
+        description = "Private per-user SMB shares backed by child ZFS datasets.";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    assertions =
+      map (name: {
+        assertion = lib.hasAttr name config.users.users;
+        message = "modules.homelab.mediaShare.personalShares.users.${name} requires a matching NixOS user.";
+      })
+      personalShareUsers;
+
     users.groups.${shareGroup} = {
       gid = shareGid;
     };
@@ -162,7 +213,7 @@ in {
       }))
     ];
 
-    systemd.tmpfiles.rules = directoryRules ++ aclRules;
+    systemd.tmpfiles.rules = directoryRules ++ aclRules ++ personalShareDirectoryRules;
 
     networking.firewall.interfaces = lib.mkMerge [
       (lib.mkIf (cfg.samba.enable && cfg.samba.interfaces != []) (
@@ -206,40 +257,32 @@ in {
     services.samba = lib.mkIf cfg.samba.enable {
       enable = true;
       openFirewall = false;
-      settings = {
-        global = {
-          "server string" = config.networking.hostName;
-          "workgroup" = "WORKGROUP";
-          "map to guest" = "Never";
-          "server min protocol" = "SMB3_00";
-          "vfs objects" = "catia fruit streams_xattr";
-          "fruit:metadata" = "stream";
-          "fruit:model" = "MacSamba";
-          "fruit:veto_appledouble" = "no";
-          "fruit:wipe_intentionally_left_blank_rfork" = "yes";
-          "fruit:delete_empty_adfiles" = "yes";
-        };
-        files = {
-          path = fileShareDir;
-          "valid users" = lib.concatStringsSep " " cfg.collaborators;
-          "force group" = shareGroup;
-          "create mask" = "0664";
-          "directory mask" = "2775";
-          "read only" = "no";
-          "browseable" = "yes";
-          "guest ok" = "no";
-        };
-        media = {
-          path = "/tank/media";
-          "valid users" = lib.concatStringsSep " " cfg.collaborators;
-          "force group" = shareGroup;
-          "create mask" = "0664";
-          "directory mask" = "2775";
-          "read only" = "no";
-          "browseable" = "yes";
-          "guest ok" = "no";
-        };
-      };
+      settings =
+        {
+          global = {
+            "server string" = config.networking.hostName;
+            "workgroup" = "WORKGROUP";
+            "map to guest" = "Never";
+            "server min protocol" = "SMB3_00";
+            "vfs objects" = "catia fruit streams_xattr";
+            "fruit:metadata" = "stream";
+            "fruit:model" = "MacSamba";
+            "fruit:veto_appledouble" = "no";
+            "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+            "fruit:delete_empty_adfiles" = "yes";
+          };
+          media = {
+            path = "/tank/media";
+            "valid users" = lib.concatStringsSep " " cfg.collaborators;
+            "force group" = shareGroup;
+            "create mask" = shareFileMode;
+            "directory mask" = shareDirMode;
+            "read only" = "no";
+            "browseable" = "yes";
+            "guest ok" = "no";
+          };
+        }
+        // personalShareSambaSettings;
     };
 
     services.avahi = lib.mkIf (cfg.samba.enable && cfg.samba.discovery.enable) {

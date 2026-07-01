@@ -129,6 +129,12 @@ in {
         interfaces = ["enp42s0"];
       };
     };
+    personalShares = {
+      dataset = "tank/shares";
+      root = "/tank/shares";
+      rootQuota = "100G";
+      users.zekurio.quota = "100G";
+    };
   };
 
   # Networking configuration
@@ -219,12 +225,12 @@ in {
     };
     immich.enable = true;
     jellyfin.enable = true;
+    jellything.enable = true;
     navidrome.enable = true;
     oauth2-proxy.enable = true;
     paperless-ngx.enable = true;
     pocket-id.enable = true;
     prowlarr.enable = true;
-    qbittorrent.enable = true;
     radarr.enable = true;
     sabnzbd.enable = true;
     seerr.enable = true;
