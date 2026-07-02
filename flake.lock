@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783008119,
-        "narHash": "sha256-AB205VfQKXzRFtRx6js3MYPQBLDryK/d3BMxA+0Laz0=",
+        "lastModified": 1783008651,
+        "narHash": "sha256-3T6XMIVQCAn18oGj3wp+ZRStavGqyM1LQbyV2ECwdCw=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "eadabe1f38461e340097869aafb1541158c49ade",
+        "rev": "d37bba59e629022594c3e1a36ce72d227e130570",
         "type": "github"
       },
       "original": {
@@ -541,11 +541,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783001306,
-        "narHash": "sha256-iP+kID+kQ2YTEm/sB/xG6P3ofJcK1Ct9wRuUhDV6Iz4=",
+        "lastModified": 1783009253,
+        "narHash": "sha256-zq+Su+tASmQpgcU4UnmbNvS/sc5+5SvATzssYkESnkU=",
         "owner": "zekurio",
         "repo": "jellything",
-        "rev": "eaf948a6d5df0efe55d008cc67d4b3b3f06816cd",
+        "rev": "b5e8b59d0ecd1c747227bc6a3821f33b98d4717c",
         "type": "github"
       },
       "original": {
