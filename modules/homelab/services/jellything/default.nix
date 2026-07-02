@@ -9,13 +9,7 @@
   domain = "account.schnitzelflix.xyz";
   port = 4173;
   jellyfinDataDir = config.services.jellyfin.dataDir;
-  package = inputs.jellything.packages.${pkgs.system}.default.overrideAttrs (finalAttrs: _: {
-    pnpmDeps = pkgs.fetchPnpmDeps {
-      inherit (finalAttrs) pname version src;
-      fetcherVersion = 3;
-      hash = "sha256-yxLZI1+gZpl6le1MNjPZgGzmz/VKIy7N+BrvS6MhfBI=";
-    };
-  });
+  package = inputs.jellything.packages.${pkgs.system}.default;
 in {
   imports = [
     inputs.jellything.nixosModules.default
