@@ -35,10 +35,10 @@ in {
           "git:github.com/Michaelliv/pi-dynamic-workflows"
           "git:github.com/tintinweb/pi-subagents"
           "https://github.com/gotgenes/pi-anthropic-auth"
+          "https://github.com/tmonk/pi-goal-x"
         ];
         extensions = [
           "./extensions/fast.ts"
-          "./extensions/goal"
         ];
       };
       keybindings = {
@@ -50,11 +50,6 @@ in {
         "tui.editor.cursorRight" = ["right"];
       };
       contextFiles."extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
-    };
-
-    home.file.".pi/agent/extensions/goal" = {
-      source = ./pi/extensions/goal;
-      recursive = true;
     };
 
     home = {
