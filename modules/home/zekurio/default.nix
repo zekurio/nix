@@ -24,10 +24,12 @@ in {
         defaultProvider = "openai-codex";
         defaultModel = "gpt-5.5";
         defaultThinkingLevel = "high";
+        warnings.anthropicExtraUsage = false;
         enabledModels = [
           "anthropic/claude-fable-5"
           "anthropic/claude-opus-4-8"
           "anthropic/claude-sonnet-5"
+          "openai-codex/gpt-5.4-mini"
           "openai-codex/gpt-5.5"
         ];
         packages = [
@@ -49,7 +51,10 @@ in {
         "app.thinking.cycle" = ["ctrl+r"];
         "tui.editor.cursorRight" = ["right"];
       };
-      contextFiles."extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
+      contextFiles = {
+        "agents/Explore.md" = builtins.readFile ./pi/agents/Explore.md;
+        "extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
+      };
     };
 
     home = {
