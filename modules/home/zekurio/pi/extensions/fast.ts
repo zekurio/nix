@@ -14,11 +14,6 @@ type FastVariant = {
 
 const FAST_VARIANTS: FastVariant[] = [
   {
-    provider: "openai",
-    label: "OpenAI/Codex OAuth priority service tier",
-    payload: {service_tier: "priority"},
-  },
-  {
     provider: "openai-codex",
     label: "Codex OAuth priority service tier",
     payload: {service_tier: "priority"},
@@ -51,7 +46,11 @@ function sanitizeStatusText(text: string): string {
 }
 
 export default function fastExtension(pi: ExtensionAPI): void {
-  let enabled = true;
+  let enabled = false;
+
+  function flagEnabledForCurrentModel(ctx: ExtensionContext): boolean {
+    return pi.getFlag("fast") === true && variantFor(ctx) !== undefined;
+  }
 
   function installFooter(ctx: ExtensionContext): void {
     if (!ctx.hasUI) return;
@@ -109,7 +108,7 @@ export default function fastExtension(pi: ExtensionAPI): void {
           statsLeftWidth = visibleWidth(statsLeft);
         }
 
-        const modelSlug = `${ctx.model?.id || "no-model"}${enabled ? " fast" : ""}`;
+        const modelSlug = `${ctx.model?.id || "no-model"}${enabled && variantFor(ctx) ? " fast" : ""}`;
         let rightSideWithoutProvider = modelSlug;
         if (ctx.model?.reasoning) {
           const thinkingLevel = pi.getThinkingLevel();
@@ -164,20 +163,20 @@ export default function fastExtension(pi: ExtensionAPI): void {
   }
 
   function setEnabled(next: boolean, ctx: ExtensionContext, notify = true): void {
-    enabled = next;
+    const variant = variantFor(ctx);
+    enabled = next && variant !== undefined;
     updateStatus(ctx);
 
     if (!notify || !ctx.hasUI) return;
-    if (!enabled) {
+    if (!next) {
       ctx.ui.notify("Fast mode disabled.", "info");
       return;
     }
 
-    const variant = variantFor(ctx);
     if (variant) {
       ctx.ui.notify(`Fast mode enabled for ${variant.label}.`, "info");
     } else {
-      ctx.ui.notify(`Fast mode enabled, but no fast variant is mapped for ${modelName(ctx)}.`, "info");
+      ctx.ui.notify(`Fast mode is only available for Codex models; current model is ${modelName(ctx)}.`, "info");
     }
   }
 
@@ -219,16 +218,17 @@ export default function fastExtension(pi: ExtensionAPI): void {
   });
 
   pi.on("session_start", (_event, ctx) => {
-    if (pi.getFlag("fast") === true) enabled = true;
+    enabled = flagEnabledForCurrentModel(ctx);
     installFooter(ctx);
   });
 
   pi.on("session_switch", (_event, ctx) => {
-    if (pi.getFlag("fast") === true) enabled = true;
+    enabled = flagEnabledForCurrentModel(ctx);
     installFooter(ctx);
   });
 
   pi.on("model_select", (_event, ctx) => {
+    enabled = flagEnabledForCurrentModel(ctx);
     updateStatus(ctx);
   });
 
