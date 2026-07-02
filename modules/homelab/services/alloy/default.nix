@@ -27,6 +27,10 @@ in {
       enable = true;
       inherit port;
       publicServerUrl = "https://${domain}";
+      ffmpegPackage = pkgs.jellyfin-ffmpeg;
+      environment = {
+        ALLOY_FFMPEG_PATH = "${pkgs.jellyfin-ffmpeg}/bin/ffmpeg";
+      };
       environmentFile = config.sops.secrets.alloy_env.path;
 
       storage.fs = {
