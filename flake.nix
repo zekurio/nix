@@ -1,8 +1,6 @@
 {
   description = "NixOS configurations for homelab and servers";
 
-  inputs.self.lfs = true;
-
   nixConfig = {
     extra-substituters = [
       "https://cache.numtide.com"
@@ -91,11 +89,13 @@
     };
   };
 
-  outputs = inputs @ {flake-parts, ...}: let
-    unstable = inputs."nixpkgs-unstable";
-    lib = unstable.lib;
-  in
-    flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs@{ flake-parts, ... }:
+    let
+      unstable = inputs."nixpkgs-unstable";
+      lib = unstable.lib;
+    in
+    flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ./modules/hosts
         ./modules/darwin
@@ -110,16 +110,19 @@
         inherit inputs lib;
       };
 
-      perSystem = {system, ...}: let
-        pkgs = import unstable {inherit system;};
-      in {
-        formatter = pkgs.writeShellApplication {
-          name = "nix-fmt";
-          runtimeInputs = [pkgs.alejandra];
-          text = ''
-            exec alejandra . "$@"
-          '';
+      perSystem =
+        { system, ... }:
+        let
+          pkgs = import unstable { inherit system; };
+        in
+        {
+          formatter = pkgs.writeShellApplication {
+            name = "nix-fmt";
+            runtimeInputs = [ pkgs.alejandra ];
+            text = ''
+              exec alejandra . "$@"
+            '';
+          };
         };
-      };
     };
 }
