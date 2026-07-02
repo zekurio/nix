@@ -35,7 +35,7 @@ in {
           "git:github.com/Michaelliv/pi-dynamic-workflows"
           "git:github.com/tintinweb/pi-subagents"
           "https://github.com/gotgenes/pi-anthropic-auth"
-          "https://github.com/tmonk/pi-goal-x"
+          "git:github.com/tmonk/pi-goal-x@v0.18.10"
         ];
         extensions = [
           "./extensions/fast.ts"
