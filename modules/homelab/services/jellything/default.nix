@@ -6,8 +6,9 @@
   ...
 }: let
   cfg = config.services.homelab.jellything;
-  domain = "invite.schnitzelflix.xyz";
+  domain = "account.schnitzelflix.xyz";
   port = 4173;
+  jellyfinDataDir = config.services.jellyfin.dataDir;
   package = inputs.jellything.packages.${pkgs.system}.default.overrideAttrs (finalAttrs: _: {
     pnpmDeps = pkgs.fetchPnpmDeps {
       inherit (finalAttrs) pname version src;
@@ -25,6 +26,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = config.services.homelab.jellyfin.enable;
+        message = "services.homelab.jellything requires services.homelab.jellyfin so password reset PIN files can be read from Jellyfin's data directory.";
+      }
+    ];
+
     services.jellything = {
       enable = true;
       inherit package;
@@ -32,6 +40,15 @@ in {
       inherit port;
       dataDir = "/var/lib/jellything";
       logLevel = "info";
+    };
+
+    systemd.services.jellything = {
+      after = ["jellyfin.service"];
+      unitConfig.RequiresMountsFor = [jellyfinDataDir];
+      serviceConfig = {
+        ReadOnlyPaths = [jellyfinDataDir];
+        SupplementaryGroups = ["jellyfin"];
+      };
     };
 
     services.homelab.caddy.virtualHosts."jellything" = {

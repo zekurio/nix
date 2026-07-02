@@ -212,6 +212,31 @@ in {
 
   services.autoaspm.enable = true;
 
+  systemd = {
+    services.claude-hourly-hi = {
+      description = "Send hourly hi prompt to Claude";
+      serviceConfig = {
+        Type = "oneshot";
+        User = mainUser;
+        WorkingDirectory = mainUserHome;
+        Environment = [
+          "HOME=${mainUserHome}"
+          "PATH=${mainUserHome}/.local/bin:/run/current-system/sw/bin"
+        ];
+        ExecStart = "${mainUserHome}/.local/bin/claude -p --model sonnet --no-session-persistence --max-budget-usd 0.02 hi";
+      };
+    };
+
+    timers.claude-hourly-hi = {
+      description = "Run Claude hi prompt hourly";
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+      };
+    };
+  };
+
   services.homelab = {
     alloy.enable = true;
     anvil.enable = true;
