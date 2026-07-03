@@ -28,8 +28,13 @@ in {
       inherit port;
       publicServerUrl = "https://${domain}";
       ffmpegPackage = pkgs.jellyfin-ffmpeg;
+      extraGroups = [
+        "render"
+        "video"
+      ];
       environment = {
         ALLOY_FFMPEG_PATH = "${pkgs.jellyfin-ffmpeg}/bin/ffmpeg";
+        LIBVA_DRIVER_NAME = "iHD";
       };
       environmentFile = config.sops.secrets.alloy_env.path;
 
@@ -83,6 +88,10 @@ in {
     systemd.services.alloy-server = {
       requires = ["alloy-storage-dirs.service"];
       after = ["alloy-storage-dirs.service"];
+      serviceConfig = {
+        PrivateDevices = lib.mkForce false;
+        DeviceAllow = ["/dev/dri/renderD128"];
+      };
     };
 
     sops.secrets.alloy_env = {
