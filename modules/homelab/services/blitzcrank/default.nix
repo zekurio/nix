@@ -58,14 +58,6 @@ in {
           base_url = "http://127.0.0.1:6789";
         };
 
-        pi = {
-          models = {
-            default = "openai-codex/gpt-5.4-mini:medium";
-            seerr = "openai-codex/gpt-5.5:high";
-            automation = "openai-codex/gpt-5.5:high";
-          };
-        };
-
         runtime = {
           automations_enabled = true;
           run_timeout = "5m";
