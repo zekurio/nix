@@ -11,52 +11,9 @@ in {
   imports = [
     ./cli
     ./git
-    ./pi
   ];
 
   config = {
-    home.pi = {
-      enable = true;
-      settings = {
-        theme = "dark";
-        quietStartup = true;
-        enableInstallTelemetry = false;
-        defaultProvider = "openai-codex";
-        defaultModel = "gpt-5.5";
-        defaultThinkingLevel = "high";
-        warnings.anthropicExtraUsage = false;
-        enabledModels = [
-          "anthropic/claude-fable-5"
-          "anthropic/claude-opus-4-8"
-          "anthropic/claude-sonnet-5"
-          "openai-codex/gpt-5.4-mini"
-          "openai-codex/gpt-5.5"
-        ];
-        packages = [
-          "git:github.com/mjakl/pi-kagi-api"
-          "git:github.com/Michaelliv/pi-dynamic-workflows"
-          "git:github.com/tintinweb/pi-subagents"
-          "https://github.com/gotgenes/pi-anthropic-auth"
-          "git:github.com/tmonk/pi-goal-x@v0.18.10"
-        ];
-        extensions = [
-          "./extensions/fast.ts"
-        ];
-      };
-      keybindings = {
-        "app.clipboard.pasteImage" = [
-          "ctrl+v"
-          "alt+v"
-        ];
-        "app.thinking.cycle" = ["ctrl+r"];
-        "tui.editor.cursorRight" = ["right"];
-      };
-      contextFiles = {
-        "agents/Explore.md" = builtins.readFile ./pi/agents/Explore.md;
-        "extensions/fast.ts" = builtins.readFile ./pi/extensions/fast.ts;
-      };
-    };
-
     home = {
       username = lib.mkDefault "zekurio";
       homeDirectory = lib.mkDefault homeDirectory;
