@@ -12,11 +12,5 @@
       modules = commonModules ++ [hostModule];
     };
 in {
-  flake.darwinConfigurations = let
-    sachiel = mkDarwin ./darwin;
-  in {
-    inherit sachiel;
-    darwin = sachiel;
-    macbook-air = sachiel;
-  };
+  flake.darwinConfigurations.sachiel = mkDarwin ./sachiel;
 }
