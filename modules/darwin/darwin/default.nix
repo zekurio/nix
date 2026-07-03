@@ -32,6 +32,8 @@
     ];
     casks = [
       "bitwarden"
+      "claude-code"
+      "codex"
       "codexbar"
       "feishin"
       "ghostty"
@@ -41,6 +43,7 @@
       "notion"
       "raycast"
       "steam"
+      "t3-code"
       "tailscale-app"
       "vesktop"
       "zed"

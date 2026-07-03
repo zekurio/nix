@@ -93,23 +93,29 @@
     set -euo pipefail
 
     dirs=(${lib.concatStringsSep " " (map lib.escapeShellArg sharedDirs)})
+    activeDownloadPrune=(
+      -path ${lib.escapeShellArg "${usenetDownloadsDir}/incomplete/*"}
+      -o
+      -name '_UNPACK_*'
+    )
 
     for d in "''${dirs[@]}"; do
       [ -d "$d" ] || continue
 
-      # Keep media automation trees owned by the shared service account.
-      chown -R ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
+      # Keep managed roots owned by the shared service account without stealing
+      # ownership from active downloader/importer work files.
+      chown ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
       chmod ${shareDirMode} "$d" || true
 
       # Directories must be group-writable for arr import moves/renames
-      find "$d" -type d -exec chmod ${shareDirMode} {} +
+      find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec chmod ${shareDirMode} {} + || true
 
       # Files should be readable and writable by the shared group, but not executable.
-      find "$d" -type f -exec chmod ${shareFileMode} {} +
+      find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type f -exec chmod ${shareFileMode} {} + || true
 
       # Ensure share group has rwx and inheritance works regardless of creator umask/mode
-      setfacl -R -m g:${lib.escapeShellArg shareGroup}:rwX -m m::rwX "$d" || true
-      setfacl -R -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx "$d" || true
+      find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -exec setfacl -m g:${lib.escapeShellArg shareGroup}:rwX -m m::rwX {} + || true
+      find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec setfacl -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx {} + || true
     done
   '';
 in {
