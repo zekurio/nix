@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783033213,
-        "narHash": "sha256-fCswxoMgpVh8hL+TthgiEp/4lXKOPnJl3wUN2k1JPK8=",
+        "lastModified": 1783073477,
+        "narHash": "sha256-8f8qRkyLMEfmcEdcOF6LBeshXxuUft3JzLAx0bbrhyg=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "98000501f0aaf0fca745244862f50f904e2a5577",
+        "rev": "c63f17b93b7c28ba419ea9f6fec0b085024e5dda",
         "type": "github"
       },
       "original": {
@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783032904,
-        "narHash": "sha256-qVo/nlWUNZHdKXRpV/B+c6A0Zfr74Xm1HYEN7hGbei8=",
+        "lastModified": 1783074093,
+        "narHash": "sha256-5HQvJ+XB/qif+d/AaRdKwZcIEnUvfrHIn17aIu2NyZ0=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "ad945a75cf1a8b1a21ae97a0aec2cacef93c12fd",
+        "rev": "127a7e3bf5a352a50a78788ddedabd9ec00ab233",
         "type": "github"
       },
       "original": {
@@ -71,11 +71,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782932264,
-        "narHash": "sha256-9prwXj4HAd88jZJIDsM/sD9XkMDCBVuWIRyDgXITYJw=",
+        "lastModified": 1783074594,
+        "narHash": "sha256-qemP/fw42SqcGT8OW6K+dR958wrZ8tDA/FQDj0ux+qc=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "d9255625e8a26da44fa6844c8b8f3a599fb50f46",
+        "rev": "0fdb3b5e038bf6bbbb39995b4f4a439246da9ed7",
         "type": "github"
       },
       "original": {
@@ -500,11 +500,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1782532589,
-        "narHash": "sha256-SbRcgRa3CYE0UWW+Zbbgih4amUqYKCaFQe/v3H4380U=",
+        "lastModified": 1783050329,
+        "narHash": "sha256-v0GGTttQboqPkX8L5TAm0GQpG/jwhmzFJyMgphD1BHA=",
         "owner": "schembriaiden",
         "repo": "helium-browser-nix-flake",
-        "rev": "66082f4d174c15ff00b25a20bbd593255fce6d35",
+        "rev": "b9209362800a8ffb10ed76d38352ec873cfdc228",
         "type": "github"
       },
       "original": {
@@ -541,11 +541,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783017742,
-        "narHash": "sha256-MDaBXjS0u6V8SrstrMcIde7LWH+zKwa28YbIv4z5yT4=",
+        "lastModified": 1783075301,
+        "narHash": "sha256-xfjWx3kHpPXJZWeV5pfPyfxIutsxoWx2GmnoDM3mP7A=",
         "owner": "zekurio",
         "repo": "jellything",
-        "rev": "8e3c7a45220dde93366fe1d09d1ce91b0040645a",
+        "rev": "9f38b89f5688bff0c88ccc7f69b732ae7d50834c",
         "type": "github"
       },
       "original": {
@@ -564,11 +564,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1783031507,
-        "narHash": "sha256-GpKuB8U8j0ca6q51i/enmSzKcjmn3cnrOJjPdU5+kqQ=",
+        "lastModified": 1783064987,
+        "narHash": "sha256-uW5Yqg7ygU6NKD8uDuFaK2SdXVEN4bje3/DHFOxASVU=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "60b0143d99e01857309b938e6e9b119d67174451",
+        "rev": "a2430dc43803db87dd99ae8a71fc8df41c5ac03a",
         "type": "github"
       },
       "original": {
@@ -671,11 +671,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1782881987,
-        "narHash": "sha256-GE7cbgEzZ3a+g/jB8FvFd/jXNtf1CRKw9eM2ZJMyIsY=",
+        "lastModified": 1783071714,
+        "narHash": "sha256-hmEIgzc+4gMW7+gMSxC9ljhJ9CLf0WOZedQiPXyU62Q=",
         "owner": "limwa",
         "repo": "nix-t3code",
-        "rev": "1ab5d827daa7a429c8e59a7ee4ccd94d193da1fe",
+        "rev": "fcd22f9632d52fa5ae45bec9fa71e131c4c72133",
         "type": "github"
       },
       "original": {

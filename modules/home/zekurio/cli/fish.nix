@@ -11,7 +11,7 @@
   codex = inputs.llm-agents.packages.${system}.codex;
   claude = inputs.llm-agents.packages.${system}.claude-code;
 in {
-  home.file = {
+  home.file = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
     ".local/bin/codex" = {
       executable = true;
       text = ''
@@ -44,13 +44,18 @@ in {
         cnix = "cd ${nixRepository}";
         nixcfg = "cd ${nixRepository}";
       };
-      shellAliases = {
-        ls = "eza";
-        ll = "eza -lah";
-        la = "eza -la";
-        lt = "eza --tree";
-        cat = "bat";
-      };
+      shellAliases =
+        {
+          ls = "eza";
+          ll = "eza -lah";
+          la = "eza -la";
+          lt = "eza --tree";
+          cat = "bat";
+        }
+        // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+          codex = "codex --dangerously-bypass-approvals-and-sandbox";
+          claude = "claude --dangerously-skip-permissions";
+        };
     };
 
     carapace = {
