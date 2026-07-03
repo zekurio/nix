@@ -32,7 +32,7 @@
     ];
     casks = [
       "bitwarden"
-      "claude-code"
+      "claude-code@latest"
       "codex"
       "codexbar"
       "feishin"
@@ -51,7 +51,7 @@
     caskArgs.appdir = "/Applications";
     onActivation = {
       autoUpdate = true;
-      cleanup = "none";
+      cleanup = "uninstall";
       extraEnv.HOMEBREW_NO_ANALYTICS = "1";
       upgrade = true;
     };
