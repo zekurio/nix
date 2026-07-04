@@ -262,8 +262,7 @@ in {
     slskd.enable = true;
     sonarr.enable = true;
     statusthing-agent = {
-      # Flip on once the hub is deployed at hubUrl.
-      enable = false;
+      enable = true;
       hubUrl = "https://status.zekurio.me";
       systemdUnits = [
         "caddy.service"
