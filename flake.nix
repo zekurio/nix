@@ -75,6 +75,10 @@
       url = "github:zekurio/jellything";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    statusthing = {
+      url = "github:zekurio/statusthing";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
