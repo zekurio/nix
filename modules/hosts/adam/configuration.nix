@@ -261,6 +261,24 @@ in {
     seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
+    statusthing-agent = {
+      # Flip on once the hub is deployed at hubUrl.
+      enable = false;
+      hubUrl = "https://status.zekurio.me";
+      systemdUnits = [
+        "caddy.service"
+        "immich-server.service"
+        "jellyfin.service"
+        "navidrome.service"
+        "prowlarr.service"
+        "radarr.service"
+        "sabnzbd.service"
+        "seerr.service"
+        "sonarr.service"
+        "vaultwarden.service"
+      ];
+      watchContainers = true;
+    };
     vaultwarden.enable = true;
     windrose = {
       enable = false;
