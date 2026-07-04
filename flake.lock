@@ -871,11 +871,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783208029,
-        "narHash": "sha256-4RDA0Vdm7S9jKSsa/cNQ4Xz49ZdW/ig88s4QXh4SD8s=",
+        "lastModified": 1783208906,
+        "narHash": "sha256-N+KjbfBnuda/wmKFQGyA3XJ3/9Wdp7pVxd/6mtqwp1Q=",
         "owner": "zekurio",
         "repo": "statusthing",
-        "rev": "93c742bdefafa5865a2171242c311d659e1246ac",
+        "rev": "547004b8ea694c9a0316667fd05f14f83732a7c8",
         "type": "github"
       },
       "original": {
