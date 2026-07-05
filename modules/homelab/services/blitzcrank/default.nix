@@ -24,7 +24,7 @@ in {
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
       piModels = {
-        default = "gpt-5.5:medium";
+        default = "openai-codex/gpt-5.5:medium";
       };
       settings = {
         bot = {
