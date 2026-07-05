@@ -21,7 +21,6 @@
     ./seerr
     ./slskd
     ./sonarr
-    ./statusthing-agent
     ./vaultwarden
     ./windrose
   ];

@@ -46,10 +46,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    nix-t3code = {
-      url = "github:limwa/nix-t3code";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     llm-agents.url = "github:numtide/llm-agents.nix";
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -73,10 +69,6 @@
     };
     jellything = {
       url = "github:zekurio/jellything";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    statusthing = {
-      url = "github:zekurio/statusthing";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
