@@ -1,5 +1,6 @@
 {
   imports = [
+    ./claude.nix
     ./dev.nix
     ./fish.nix
     ./ghostty.nix
