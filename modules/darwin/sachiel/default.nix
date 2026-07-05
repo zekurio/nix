@@ -28,13 +28,13 @@
         name = "kgarner7/feishin";
         trusted = true;
       }
-      "steipete/tap"
+      "can1357/tap"
+    ];
+    brews = [
+      "omp"
     ];
     casks = [
       "bitwarden"
-      "claude-code@latest"
-      "codex"
-      "codexbar"
       "feishin"
       "ghostty"
       "helium-browser"
@@ -43,7 +43,6 @@
       "notion"
       "raycast"
       "steam"
-      "t3-code"
       "tailscale-app"
       "vesktop"
       "zed"
