@@ -18,6 +18,11 @@ in {
       interactiveShellInit = ''
         set fish_greeting
       '';
+      functions.omp = {
+        body = ''
+          command omp --allow-home $argv
+        '';
+      };
       shellAbbrs = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         cgit = "cd ${gitDirectory}";
         cnix = "cd ${nixRepository}";
