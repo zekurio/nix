@@ -23,6 +23,9 @@ in {
       package = package;
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
+      piModels = {
+        default = "gpt-5.5:medium";
+      };
       settings = {
         bot = {
           public_name = "blitzcrank";
@@ -39,6 +42,7 @@ in {
           webhook_path = "/webhooks/seerr";
           bot_user_id = "2";
           bot_display_name = "blitzcrank";
+          revisits_enabled = true;
         };
 
         web = {
