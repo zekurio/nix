@@ -1,12 +1,5 @@
-{
-  inputs,
-  pkgs,
-  ...
-}: let
-  system = pkgs.stdenv.hostPlatform.system;
-in {
+{pkgs, ...}: {
   environment.systemPackages = [
-    inputs.nix-t3code.packages.${system}.t3code-nightly
     pkgs.feishin
     pkgs.ghostty
     pkgs.zed-editor
