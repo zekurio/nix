@@ -118,6 +118,21 @@
       find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec setfacl -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx {} + || true
     done
   '';
+
+  sambaPasswdScript = pkgs.writeShellScript "media-share-samba-passwd" ''
+    set -euo pipefail
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (user: file: ''
+        pw="$(cat ${lib.escapeShellArg file})"
+        if pdbedit --user=${lib.escapeShellArg user} >/dev/null 2>&1; then
+          printf '%s\n%s\n' "$pw" "$pw" | smbpasswd -s ${lib.escapeShellArg user}
+        else
+          printf '%s\n%s\n' "$pw" "$pw" | smbpasswd -s -a ${lib.escapeShellArg user}
+        fi
+      '')
+      cfg.samba.passwordFiles
+    )}
+  '';
 in {
   options.modules.homelab.mediaShare = {
     enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
@@ -148,6 +163,18 @@ in {
       type = lib.types.listOf lib.types.str;
       default = [];
       description = "Network interfaces Avahi should use for SMB service discovery. Empty means all eligible local interfaces.";
+    };
+
+    samba.passwordFiles = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      example = lib.literalExpression "{ zekurio = config.sops.secrets.smb_password_zekurio.path; }";
+      description = ''
+        Samba account passwords keyed by username. Each value is the path to a
+        file containing the plaintext SMB password (typically a SOPS secret). A
+        oneshot service creates or updates the matching tdbsam account before
+        smbd starts; each referenced UNIX user must already exist.
+      '';
     };
 
     nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
@@ -190,7 +217,12 @@ in {
         assertion = lib.hasAttr name config.users.users;
         message = "modules.homelab.mediaShare.personalShares.users.${name} requires a matching NixOS user.";
       })
-      personalShareUsers;
+      personalShareUsers
+      ++ map (name: {
+        assertion = lib.hasAttr name config.users.users;
+        message = "modules.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
+      })
+      (lib.attrNames cfg.samba.passwordFiles);
 
     users.groups.${shareGroup} = {
       gid = shareGid;
@@ -289,6 +321,23 @@ in {
           };
         }
         // personalShareSambaSettings;
+    };
+
+    systemd.services.samba-passwd = lib.mkIf (cfg.samba.enable && cfg.samba.passwordFiles != {}) {
+      description = "Provision Samba account passwords";
+      before = ["samba-smbd.service"];
+      requiredBy = ["samba-smbd.service"];
+      after = ["systemd-tmpfiles-setup.service"];
+      unitConfig.RequiresMountsFor = "/var/lib/samba";
+      path = [
+        config.services.samba.package
+        pkgs.coreutils
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = sambaPasswdScript;
+      };
     };
 
     services.avahi = lib.mkIf (cfg.samba.enable && cfg.samba.discovery.enable) {
