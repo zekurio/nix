@@ -4,6 +4,7 @@
   ...
 }: let
   cfg = config.services.homelab.sabnzbd;
+  downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   domain = "sab.schnitzelflix.xyz";
   port = 6789;
   serviceUser = "sabnzbd";
@@ -29,15 +30,15 @@ in {
           password = "";
           html_login = false;
           inet_exposure = "api+web (locally no auth)";
-          complete_dir = "/var/lib/downloads/complete";
-          download_dir = "/var/lib/downloads/incomplete";
+          complete_dir = "${downloadsRoot}/complete";
+          download_dir = "${downloadsRoot}/incomplete";
           dirscan_dir = "/var/lib/sabnzbd/nzb";
         };
 
         categories = {
           radarr = {
             name = "radarr";
-            dir = "/var/lib/downloads/complete/radarr";
+            dir = "${downloadsRoot}/complete/radarr";
             pp = 3;
             priority = 0;
             newzbin = "";
@@ -45,7 +46,7 @@ in {
           };
           sonarr = {
             name = "sonarr";
-            dir = "/var/lib/downloads/complete/sonarr";
+            dir = "${downloadsRoot}/complete/sonarr";
             pp = 3;
             priority = 0;
             newzbin = "";
@@ -53,7 +54,7 @@ in {
           };
           manual = {
             name = "manual";
-            dir = "/var/lib/downloads/complete/manual";
+            dir = "${downloadsRoot}/complete/manual";
             pp = 3;
             priority = 0;
             newzbin = "";
