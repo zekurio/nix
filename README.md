@@ -15,10 +15,8 @@ On macOS, use `path:` so the root activation step reads the checkout as a
 plain path instead of trying to treat Michael's Git working tree as root-owned:
 
 ```bash
-sudo darwin-rebuild switch --flake path:/Users/zekurio/Projects/nix#sachiel
+sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
-
-The `macbook-air` Darwin configuration name remains available as an alias.
 
 ## Installation runbook (NixOS)
 

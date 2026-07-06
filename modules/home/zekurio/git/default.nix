@@ -109,6 +109,12 @@ in {
           IdentityFile = lib.mkDefault "~/.ssh/id_ed25519";
           User = lib.mkDefault "git";
         };
+
+        adam = {
+          HostName = "10.0.0.2";
+          User = "zekurio";
+          IdentityFile = "~/.ssh/id_ed25519";
+        };
       };
     };
   };

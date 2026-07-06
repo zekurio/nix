@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for homelab and servers";
+  description = "Nix configurations for my NixOS hosts and macOS";
 
   nixConfig = {
     extra-substituters = [
