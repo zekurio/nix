@@ -5,8 +5,9 @@
   ...
 }: let
   cfg = config.services.homelab.beets;
+  downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   musicDir = "/tank/media/music";
-  importDir = "/var/lib/downloads/complete/slskd";
+  importDir = "${downloadsRoot}/complete/slskd";
   stateDir = "/var/lib/beets";
   slskdDownloadsApi = "http://127.0.0.1:5030/slskd/api/v0/transfers/downloads";
   beetsConfig = (pkgs.formats.yaml {}).generate "beets-config.yaml" {

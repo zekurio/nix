@@ -4,14 +4,15 @@
   ...
 }: let
   cfg = config.services.homelab.slskd;
+  downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   domain = "nv.zekurio.me";
   webPort = 5030;
   oauth2ProxyPort = 4181;
   listenPort = 50300;
   shareUmask = "0002";
   musicDir = "/tank/media/music";
-  downloadsDir = "/var/lib/downloads/complete/slskd";
-  incompleteDir = "/var/lib/downloads/incomplete/slskd";
+  downloadsDir = "${downloadsRoot}/complete/slskd";
+  incompleteDir = "${downloadsRoot}/incomplete/slskd";
   profilePicture = "/var/lib/slskd/profile.jpg";
 in {
   options.services.homelab.slskd = {

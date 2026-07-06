@@ -1,5 +1,5 @@
-{...}: {
-  fileSystems."/var/lib/downloads" = {
+{config, ...}: {
+  fileSystems.${config.modules.homelab.mediaShare.downloadsRoot} = {
     device = "/dev/disk/by-label/downloads";
     fsType = "ext4";
     options = ["noatime"];
