@@ -17,6 +17,12 @@ in {
     primaryUser = username;
     stateVersion = 6;
   };
+  # nix-darwin master still passes the removed --toc-depth flag to
+  # nixos-render-docs from current nixpkgs, breaking darwin-manual-html.
+  # Skip the HTML manual and the uninstaller (whose embedded default system
+  # also builds the manual) until upstream switches to --sidebar-depth.
+  documentation.doc.enable = false;
+  system.tools.darwin-uninstaller.enable = false;
 
   programs.fish.enable = true;
   environment.shells = [pkgs.fish];
