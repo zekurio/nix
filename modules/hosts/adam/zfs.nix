@@ -12,9 +12,13 @@
     fi
     ${zfs} set quota=${quota} ${name}
   '';
-  ensureVaultDataset = lib.optionalString mediaShare.vault.enable (
-    ensureDataset mediaShare.vault.dataset mediaShare.vault.quota
-  );
+  ensureVaultDataset = lib.optionalString mediaShare.vault.enable ''
+    ${ensureDataset mediaShare.vault.dataset mediaShare.vault.quota}
+    # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule
+    # (which races the mount). Own it here, after the mount already exists.
+    ${pkgs.coreutils}/bin/chown ${mediaShare.vault.owner}:share ${mediaShare.vault.path}
+    ${pkgs.coreutils}/bin/chmod 0700 ${mediaShare.vault.path}
+  '';
 in {
   systemd.services.tank-datasets = {
     description = "Ensure tank ZFS datasets and quotas";
