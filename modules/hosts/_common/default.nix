@@ -7,9 +7,12 @@
 in {
   imports = [
     ../../nixpkgs
+    ../../nixos/ssh
     ../../nixos/users/zekurio.nix
     ../../virtualization.nix
   ];
+
+  modules.ssh.users = ["zekurio"];
 
   i18n = {
     defaultLocale = "de_AT.UTF-8";
