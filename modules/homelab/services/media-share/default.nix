@@ -14,8 +14,6 @@
   shareFileMode = "0664";
   fileShareDir = "/tank/share";
   usenetDownloadsDir = "/var/lib/downloads";
-  personalSharesRoot = cfg.personalShares.root;
-  personalShareUsers = lib.attrNames cfg.personalShares.users;
   tailnetCidr = "100.64.0.0/10";
   smbTcpPorts = [
     139
@@ -54,21 +52,19 @@
 
   # Create root dirs as setgid + group-writable
   directoryRules = map (dir: "d ${dir} ${shareDirMode} ${shareUser} ${shareGroup} -") sharedDirs;
-  personalShareDirectoryRules =
-    lib.optional (personalShareUsers != []) "d ${personalSharesRoot} 0755 root root -"
-    ++ map (name: "d ${personalSharesRoot}/${name} 0700 ${name} ${shareGroup} -") personalShareUsers;
-  personalShareSambaSettings =
-    lib.mapAttrs (name: _: {
-      path = "${personalSharesRoot}/${name}";
-      "valid users" = name;
-      "force user" = name;
+  vaultDirectoryRule = lib.optional cfg.vault.enable "d ${cfg.vault.path} 0700 ${cfg.vault.owner} ${shareGroup} -";
+  vaultSambaSettings = lib.optionalAttrs cfg.vault.enable {
+    ${cfg.vault.name} = {
+      path = cfg.vault.path;
+      "valid users" = cfg.vault.owner;
+      "force user" = cfg.vault.owner;
       "create mask" = "0600";
       "directory mask" = "0700";
       "read only" = "no";
-      "browseable" = "no";
+      "browseable" = "yes";
       "guest ok" = "no";
-    })
-    cfg.personalShares.users;
+    };
+  };
 
   # systemd-tmpfiles supports ACL lines. These make sure the share group gets rwx,
   # and that new files/dirs inherit it (default ACL).
@@ -179,45 +175,46 @@ in {
 
     nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
 
-    personalShares = {
+    vault = {
+      enable = lib.mkEnableOption "a private, network-discoverable SMB share for a single user";
+
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = "vault";
+        description = "SMB share name exposed to clients.";
+      };
+
+      owner = lib.mkOption {
+        type = lib.types.str;
+        description = "Existing NixOS user that owns the vault and is its sole permitted SMB user.";
+      };
+
       dataset = lib.mkOption {
         type = lib.types.str;
-        default = "tank/shares";
-        description = "Parent ZFS dataset for private per-user SMB shares.";
+        default = "tank/shares/vault";
+        description = "ZFS dataset backing the vault share.";
       };
 
-      root = lib.mkOption {
+      path = lib.mkOption {
         type = lib.types.str;
-        default = "/tank/shares";
-        description = "Root directory for private per-user SMB shares.";
+        default = "/tank/shares/vault";
+        description = "Filesystem path of the vault dataset mountpoint.";
       };
 
-      rootQuota = lib.mkOption {
+      quota = lib.mkOption {
         type = lib.types.str;
         default = "100G";
-        description = "ZFS quota for the parent dataset containing private per-user SMB shares.";
-      };
-
-      users = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submodule {
-          options.quota = lib.mkOption {
-            type = lib.types.str;
-            description = "ZFS quota for this user's private SMB share dataset.";
-          };
-        });
-        default = {};
-        description = "Private per-user SMB shares backed by child ZFS datasets.";
+        description = "ZFS quota for the vault dataset.";
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
     assertions =
-      map (name: {
-        assertion = lib.hasAttr name config.users.users;
-        message = "modules.homelab.mediaShare.personalShares.users.${name} requires a matching NixOS user.";
-      })
-      personalShareUsers
+      lib.optional cfg.vault.enable {
+        assertion = lib.hasAttr cfg.vault.owner config.users.users;
+        message = "modules.homelab.mediaShare.vault.owner (${cfg.vault.owner}) must be an existing NixOS user.";
+      }
       ++ map (name: {
         assertion = lib.hasAttr name config.users.users;
         message = "modules.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
@@ -251,7 +248,7 @@ in {
       }))
     ];
 
-    systemd.tmpfiles.rules = directoryRules ++ aclRules ++ personalShareDirectoryRules;
+    systemd.tmpfiles.rules = directoryRules ++ aclRules ++ vaultDirectoryRule;
 
     networking.firewall.interfaces = lib.mkMerge [
       (lib.mkIf (cfg.samba.enable && cfg.samba.interfaces != []) (
@@ -320,7 +317,7 @@ in {
             "guest ok" = "no";
           };
         }
-        // personalShareSambaSettings;
+        // vaultSambaSettings;
     };
 
     systemd.services.samba-passwd = lib.mkIf (cfg.samba.enable && cfg.samba.passwordFiles != {}) {

@@ -12,15 +12,9 @@
     fi
     ${zfs} set quota=${quota} ${name}
   '';
-  ensurePersonalShareDatasets = lib.optionalString (mediaShare.personalShares.users != {}) ''
-    ${ensureDataset mediaShare.personalShares.dataset mediaShare.personalShares.rootQuota}
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (
-        name: share: ensureDataset "${mediaShare.personalShares.dataset}/${name}" share.quota
-      )
-      mediaShare.personalShares.users
-    )}
-  '';
+  ensureVaultDataset = lib.optionalString mediaShare.vault.enable (
+    ensureDataset mediaShare.vault.dataset mediaShare.vault.quota
+  );
 in {
   systemd.services.tank-datasets = {
     description = "Ensure tank ZFS datasets and quotas";
@@ -35,7 +29,7 @@ in {
       ${ensureDataset "tank/share" "500G"}
       ${ensureDataset "tank/immich" "1000G"}
       ${ensureDataset "tank/alloy" "100G"}
-      ${ensurePersonalShareDatasets}
+      ${ensureVaultDataset}
     '';
   };
 }
