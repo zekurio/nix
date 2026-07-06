@@ -81,14 +81,8 @@ in {
 
   services.ucodenix.enable = true;
 
-  services.openssh = {
-    enable = true;
-    settings = {
-      AllowAgentForwarding = true;
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
+  # sshd itself (hardened defaults + URL-sourced keys) comes from modules.ssh.
+  services.openssh.settings.AllowAgentForwarding = true;
 
   home-manager.users.${mainUser} = {
     programs.keychain = {
@@ -128,6 +122,7 @@ in {
         enable = true;
         interfaces = ["enp42s0"];
       };
+      passwordFiles.zekurio = config.sops.secrets.smb_password_zekurio.path;
     };
     personalShares = {
       dataset = "tank/shares";
@@ -198,6 +193,7 @@ in {
     };
     gnupg.sshKeyPaths = [];
     secrets.tailscale_auth_key = {};
+    secrets.smb_password_zekurio = {};
   };
 
   # System packages
