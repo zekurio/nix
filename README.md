@@ -1,6 +1,6 @@
 # nix-config
 
-NixOS configurations for my current systems.
+Nix configurations for my NixOS hosts and macOS.
 
 ## Hosts
 
@@ -8,6 +8,26 @@ NixOS configurations for my current systems.
 |------|------|-------------|
 | `adam` | NixOS | Homelab server |
 | `sachiel` | nix-darwin | MacBook Air |
+
+## Bootstrap runbook (macOS / nix-darwin)
+
+On a fresh macOS install, install upstream (vanilla) multi-user Nix — **not** the
+Determinate installer — then let nix-darwin take over:
+
+```bash
+sh <(curl -L https://nixos.org/nix/install)
+```
+
+Open a new shell, clone this repo to `~/Git/nix`, then bootstrap the first
+generation (`darwin-rebuild` isn't on `PATH` yet, and flakes aren't enabled on a
+fresh upstream install):
+
+```bash
+sudo nix --extra-experimental-features "nix-command flakes" \
+    run nix-darwin/master#darwin-rebuild -- switch --flake path:/Users/zekurio/Git/nix#sachiel
+```
+
+Subsequent rebuilds use `darwin-rebuild` directly (see below).
 
 ## Rebuild runbook (nix-darwin)
 
