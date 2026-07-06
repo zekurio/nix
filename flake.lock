@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783285075,
-        "narHash": "sha256-ENLSqzcL5N3OOMOWVzNUT3nXg3ZRKfVzosrqV2JgLsU=",
+        "lastModified": 1783348018,
+        "narHash": "sha256-g9cQbAsIZrCOXNXQ77cnT944ejpAMay1cfOzZCRNSI8=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "a8810ca2ce8c13acda5efffc5a6b17db4c16e594",
+        "rev": "ee199f820c5a35e0622902134102259cb6c6aba7",
         "type": "github"
       },
       "original": {
@@ -526,11 +526,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783252315,
-        "narHash": "sha256-JepRmK3QUY9nEw73bNgqkoRzZjy+T4vZZ71Pr83/sB0=",
+        "lastModified": 1783332195,
+        "narHash": "sha256-fXjLKrqlgSt6syg5QvKbDVMvsTC9bltG/I/3bHD4ibE=",
         "owner": "zekurio",
         "repo": "jellything",
-        "rev": "fa2c246fca562e87e03b98cd25448fa5c5e93a5b",
+        "rev": "84586feec39c2133bb677e7ae70176406754f30b",
         "type": "github"
       },
       "original": {
@@ -549,11 +549,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1783243767,
-        "narHash": "sha256-iiQL/IHgQlmnZgKgs4wBOiDA9+S3tRFsQPRxtYIhUYo=",
+        "lastModified": 1783335367,
+        "narHash": "sha256-TJ4+wYOJYYX+z//9C4psF0e1K8TgXrWRITnERhL/oP8=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "22f1080fb54a217bdda6cfd6eca5dbf9e7afddac",
+        "rev": "5dd40d7cef40fce5ac4f922b92d92373ef71daf2",
         "type": "github"
       },
       "original": {
