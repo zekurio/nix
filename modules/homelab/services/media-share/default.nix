@@ -13,7 +13,7 @@
   shareDirMode = "2775";
   shareFileMode = "0664";
   fileShareDir = "/tank/share";
-  usenetDownloadsDir = "/var/lib/downloads";
+  usenetDownloadsDir = cfg.downloadsRoot;
   tailnetCidr = "100.64.0.0/10";
   smbTcpPorts = [
     139
@@ -143,6 +143,12 @@ in {
       type = lib.types.bool;
       default = true;
       description = "Normalize existing permissions/ACLs under mediaDirs at boot (useful for tools that create 755/644).";
+    };
+
+    downloadsRoot = lib.mkOption {
+      type = lib.types.str;
+      default = "/mnt/downloads";
+      description = "Root directory (dedicated disk) for the shared download and import tree used by the usenet, torrent, and soulseek automation.";
     };
 
     samba.enable = lib.mkEnableOption "SMB shares for homelab files and media";

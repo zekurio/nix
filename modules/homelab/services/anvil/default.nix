@@ -6,6 +6,7 @@
   ...
 }: let
   cfg = config.services.homelab.anvil;
+  downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   package = inputs.anvil.packages.${pkgs.system}.default;
   shareUser = "share";
   shareGroup = "share";
@@ -310,31 +311,31 @@ in {
 
       libraries = {
         radarr-downloads = mkDownloadLibrary {
-          path = "/var/lib/downloads/complete/radarr";
-          handoffPath = "/var/lib/downloads/converted/radarr";
+          path = "${downloadsRoot}/complete/radarr";
+          handoffPath = "${downloadsRoot}/converted/radarr";
           arr = "radarr";
           profile = radarrProfileName;
           priority = 10;
         };
 
         radarr-anime-downloads = mkDownloadLibrary {
-          path = "/var/lib/downloads/complete/radarr-anime";
-          handoffPath = "/var/lib/downloads/converted/radarr-anime";
+          path = "${downloadsRoot}/complete/radarr-anime";
+          handoffPath = "${downloadsRoot}/converted/radarr-anime";
           arr = "radarr";
           profile = radarrAnimeProfileName;
           priority = 20;
         };
 
         sonarr-downloads = mkDownloadLibrary {
-          path = "/var/lib/downloads/complete/sonarr";
-          handoffPath = "/var/lib/downloads/converted/sonarr";
+          path = "${downloadsRoot}/complete/sonarr";
+          handoffPath = "${downloadsRoot}/converted/sonarr";
           arr = "sonarr";
           priority = 10;
         };
 
         sonarr-anime-downloads = mkDownloadLibrary {
-          path = "/var/lib/downloads/complete/sonarr-anime";
-          handoffPath = "/var/lib/downloads/converted/sonarr-anime";
+          path = "${downloadsRoot}/complete/sonarr-anime";
+          handoffPath = "${downloadsRoot}/converted/sonarr-anime";
           arr = "sonarr";
           profile = animeProfileName;
           priority = 20;
