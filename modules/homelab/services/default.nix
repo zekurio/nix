@@ -15,7 +15,6 @@
     ./paperless-ngx
     ./pocket-id
     ./prowlarr
-    ./qbittorrent
     ./radarr
     ./sabnzbd
     ./seerr
