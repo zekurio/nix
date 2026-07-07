@@ -11,7 +11,7 @@
   storageDirs = {
     clips = "/tank/alloy/clips";
     thumbnails = "/var/lib/alloy/assets/thumbnails";
-    users = "/var/lib/alloy/assets/users";
+    assets = "/var/lib/alloy/assets/users";
   };
 in {
   imports = [
@@ -41,7 +41,7 @@ in {
       storage.fs = {
         clipsPath = storageDirs.clips;
         thumbnailsPath = storageDirs.thumbnails;
-        usersPath = storageDirs.users;
+        assetsPath = storageDirs.assets;
       };
 
       auth = {
@@ -60,7 +60,7 @@ in {
       "d ${storageDirs.clips} 0750 ${user} ${group} - -"
       "d /var/lib/alloy/assets 0750 ${user} ${group} - -"
       "d ${storageDirs.thumbnails} 0750 ${user} ${group} - -"
-      "d ${storageDirs.users} 0750 ${user} ${group} - -"
+      "d ${storageDirs.assets} 0750 ${user} ${group} - -"
     ];
 
     systemd.services.alloy-storage-dirs = let
@@ -71,7 +71,7 @@ in {
         storageDirs.clips
         "/var/lib/alloy/assets"
         storageDirs.thumbnails
-        storageDirs.users
+        storageDirs.assets
       ];
     in {
       description = "Create Alloy storage directories";
