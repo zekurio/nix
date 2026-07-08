@@ -1,22 +1,15 @@
 {
+  # Starship palette (Frappé) provided by catppuccin/nix; the module sets
+  # `palette` and injects the color definitions used by the styles below.
+  catppuccin.starship.enable = true;
+
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
     settings = {
       add_newline = false;
-      palette = "sachiel";
       format = "$directory$character";
       right_format = "$status$cmd_duration$git_branch$git_status$java$nodejs$bun$deno$golang$rust$python$nix_shell$time$username$hostname";
-
-      palettes.sachiel = {
-        blue = "#7aa2f7";
-        cyan = "#7dcfff";
-        green = "#9ece6a";
-        purple = "#bb9af7";
-        red = "#f7768e";
-        white = "#c0caf5";
-        yellow = "#e0af68";
-      };
 
       bun = {
         format = "[bun $version]($style) ";
@@ -31,12 +24,12 @@
 
       deno = {
         format = "[deno $version]($style) ";
-        style = "white";
+        style = "";
       };
 
       git_branch = {
         format = "[$branch]($style) ";
-        style = "purple";
+        style = "mauve";
       };
       git_status = {
         format = "[$all_status$ahead_behind]($style) ";
@@ -45,7 +38,7 @@
 
       golang = {
         format = "[go $version]($style) ";
-        style = "cyan";
+        style = "teal";
       };
 
       directory = {
@@ -98,7 +91,7 @@
       time = {
         disabled = false;
         format = "[$time]($style) ";
-        style = "cyan";
+        style = "teal";
         time_format = "%H:%M";
       };
 
