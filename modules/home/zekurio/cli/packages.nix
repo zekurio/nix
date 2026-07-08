@@ -8,7 +8,6 @@
     bitwarden-cli
     devenv
     envsubst
-    eza
     gh
     git
     git-lfs
