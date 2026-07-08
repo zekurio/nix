@@ -196,6 +196,26 @@
         "type": "github"
       }
     },
+    "catppuccin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783500374,
+        "narHash": "sha256-a1BtX5sbb7ZwDRgD5/WtPQpU0f9cw3F5KLmSmkcZFzI=",
+        "owner": "catppuccin",
+        "repo": "nix",
+        "rev": "d88e830b7bff7a591a49d031f6895312c15c27b1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "nix",
+        "type": "github"
+      }
+    },
     "cpu-microcodes": {
       "flake": false,
       "locked": {
@@ -749,6 +769,7 @@
         "anvil": "anvil",
         "autoaspm": "autoaspm",
         "blitzcrank": "blitzcrank",
+        "catppuccin": "catppuccin",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts_2",

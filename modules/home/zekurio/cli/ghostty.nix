@@ -9,7 +9,6 @@
       package = null;
       enableFishIntegration = true;
       settings = {
-        theme = "light:catppuccin-latte,dark:catppuccin-mocha";
         window-width = 150;
         window-height = 38;
         window-save-state = "never";
@@ -20,5 +19,7 @@
         macos-titlebar-style = "transparent";
       };
     };
+
+    catppuccin.ghostty.enable = true;
   };
 }
