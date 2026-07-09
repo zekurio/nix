@@ -20,6 +20,10 @@
   papirusFolders = pkgs.catppuccin-papirus-folders.override {
     inherit flavor accent;
   };
+  gtkTheme = pkgs.catppuccin-gtk.override {
+    variant = flavor;
+    accents = [accent];
+  };
 
   kdeSettings = {
     kdeglobals = {
@@ -41,9 +45,15 @@
 
   ini = pkgs.formats.ini {};
 in {
-  catppuccin.cursors = {
-    enable = true;
-    inherit accent flavor;
+  catppuccin = {
+    cursors = {
+      enable = true;
+      inherit accent flavor;
+    };
+    gtk.icon = {
+      enable = true;
+      inherit accent flavor;
+    };
   };
 
   environment = {
@@ -51,6 +61,7 @@ in {
       kdeTheme
       papirusFolders
       pkgs.catppuccin-kvantum
+      gtkTheme
     ];
 
     # Plasma Login Manager runs as the plasmalogin user and reads KConfig from
@@ -88,6 +99,14 @@ in {
     gtk = {
       enable = true;
       colorScheme = "dark";
+      theme = {
+        name = "catppuccin-${flavor}-${accent}-standard";
+        package = gtkTheme;
+      };
+      gtk4.theme = {
+        name = "catppuccin-${flavor}-${accent}-standard";
+        package = gtkTheme;
+      };
     };
 
     qt = {

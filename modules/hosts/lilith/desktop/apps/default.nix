@@ -5,5 +5,6 @@
     ./feishin.nix
     ./ghostty.nix
     ./zed.nix
+    ./vesktop.nix
   ];
 }
