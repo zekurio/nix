@@ -4,11 +4,7 @@
     inputs.disko.nixosModules.disko
     ./disko.nix
     ./configuration.nix
-    ./fonts.nix
-    ./gaming.nix
+    ./desktop
     ./hardware-support.nix
-    ./helium.nix
-    ./plasma.nix
-    ./desktop-apps.nix
   ];
 }
