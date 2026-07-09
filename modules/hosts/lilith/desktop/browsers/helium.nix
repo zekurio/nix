@@ -9,7 +9,6 @@
     "cdglnehniifkbagbbombnjghhcihifij" # Kagi Search
     "nngceckbapebfimnlniiiahkandclblb" # Bitwarden Password Manager
     "lppmekppnliemjclknbagdhoocikieoi" # 7TV
-    "olhelnoplefjdmncknfphenjclimckaf" # Catppuccin Chrome Theme - Frappe
   ];
 in {
   environment.systemPackages = [
@@ -19,6 +18,7 @@ in {
   programs.chromium = {
     enable = true;
     extraOpts = {
+      BrowserThemeColor = "#ca9ee6";
       ExtensionInstallAllowlist = extensionIds;
       ExtensionInstallBlocklist = ["*"];
       ExtensionInstallForcelist = extensionIds;
