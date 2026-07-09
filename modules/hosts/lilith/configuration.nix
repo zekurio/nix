@@ -20,7 +20,7 @@
     enable = true;
     autoEnable = false;
     flavor = "frappe";
-    accent = "mauve";
+    accent = "blue";
     limine.enable = true;
   };
 
