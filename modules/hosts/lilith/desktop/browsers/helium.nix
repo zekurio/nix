@@ -4,7 +4,6 @@
   ...
 }: let
   system = pkgs.stdenv.hostPlatform.system;
-  chromeWebStoreUpdateUrl = "https://clients2.google.com/service/update2/crx";
   extensionIds = [
     "alblebhaoakdgapamjdifdfnaicpnklm" # Kagi Translate
     "cdglnehniifkbagbbombnjghhcihifij" # Kagi Search
@@ -18,6 +17,11 @@ in {
 
   programs.chromium = {
     enable = true;
-    extensions = map (id: "${id};${chromeWebStoreUpdateUrl}") extensionIds;
+    extraOpts = {
+      ExtensionInstallAllowlist = extensionIds;
+      ExtensionInstallBlocklist = ["*"];
+      ExtensionInstallForcelist = extensionIds;
+      ExtensionInstallSources = ["https://services.helium.imput.net/*"];
+    };
   };
 }
