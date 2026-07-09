@@ -16,6 +16,8 @@
         la = "eza -la";
         lt = "eza --tree";
         cat = "bat";
+        claude = "claude --dangerously-skip-permissions";
+        codex = "codex --dangerously-bypass-approvals-and-sandbox";
       };
     };
 
