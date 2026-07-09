@@ -1,5 +1,5 @@
 {pkgs, ...}: {
   environment.systemPackages = [
-    pkgs.klassy
+    pkgs.bitwarden-desktop
   ];
 }

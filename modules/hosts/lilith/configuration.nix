@@ -72,30 +72,6 @@
   };
 
   services = {
-    desktopManager.plasma6 = {
-      enable = true;
-      enableQt5Integration = false;
-    };
-
-    displayManager = {
-      defaultSession = "plasma";
-      plasma-login-manager.enable = true;
-      sddm.enable = lib.mkForce false;
-    };
-
-    xserver.xkb.layout = "at";
-
-    pipewire = {
-      enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      pulse.enable = true;
-      jack.enable = true;
-    };
-
-    pulseaudio.enable = false;
     printing.enable = true;
     fwupd.enable = true;
     mullvad-vpn.enable = true;
@@ -104,13 +80,6 @@
       enable = true;
       openFirewall = true;
     };
-  };
-
-  security.rtkit.enable = true;
-
-  programs = {
-    kde-pim.enable = false;
-    firefox.enable = true;
   };
 
   environment = {
