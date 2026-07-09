@@ -44,11 +44,6 @@ in {
         assetsPath = storageDirs.assets;
       };
 
-      auth = {
-        openRegistrations = true;
-        requireAuthToBrowse = false;
-      };
-
       limits.defaultStorageQuotaBytes = 16106127360;
     };
 
