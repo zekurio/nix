@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -11,6 +12,9 @@
   cursorTheme = "catppuccin-${flavor}-${accent}-cursors";
   lookAndFeelPackage = "Catppuccin-${flavorTitle}-${accentTitle}";
   splashTheme = "${lookAndFeelPackage}-splash";
+
+  wallpaperImage = ../../../../assets/wallpaper.jpg;
+  faceImage = ../../../../assets/face.png;
 
   # Latte is installed alongside the active flavor so Catppuccin-Latte-Blue is
   # selectable from System Settings without changing the default look.
@@ -44,6 +48,25 @@
   };
 
   ini = pkgs.formats.ini {};
+
+  # Plasma Login Manager's greeter reads kscreenlockerrc's nested
+  # [Greeter][Wallpaper][org.kde.image][General] group, which pkgs.formats.ini
+  # can only express as one section whose name embeds the KDE group nesting;
+  # the default ini generator escapes brackets, so section names pass through
+  # literally here instead.
+  loginIni = pkgs.formats.ini {mkSectionName = name: name;};
+  loginKscreenlockerrc =
+    kdeSettings.kscreenlockerrc
+    // {
+      "Greeter][Wallpaper][org.kde.image][General".Image = "file://${wallpaperImage}";
+    };
+
+  accountsServiceUser = ini.generate "zekurio-accountsservice" {
+    User = {
+      Icon = "/var/lib/AccountsService/icons/zekurio";
+      SystemAccount = false;
+    };
+  };
 in {
   catppuccin = {
     cursors = {
@@ -69,15 +92,25 @@ in {
     etc = {
       "xdg/kdeglobals".source = ini.generate "catppuccin-kdeglobals" kdeSettings.kdeglobals;
       "xdg/kcminputrc".source = ini.generate "catppuccin-kcminputrc" kdeSettings.kcminputrc;
-      "xdg/kscreenlockerrc".source = ini.generate "catppuccin-kscreenlockerrc" kdeSettings.kscreenlockerrc;
+      "xdg/kscreenlockerrc".source = loginIni.generate "catppuccin-kscreenlockerrc" loginKscreenlockerrc;
       "xdg/ksplashrc".source = ini.generate "catppuccin-ksplashrc" kdeSettings.ksplashrc;
       "xdg/kwinrc".source = ini.generate "catppuccin-kwinrc" kdeSettings.kwinrc;
       "xdg/plasmarc".source = ini.generate "catppuccin-plasmarc" kdeSettings.plasmarc;
     };
   };
 
+  # User avatar shown on the login/lock screen, read by AccountsService.
+  systemd.tmpfiles.rules = [
+    "L+ /var/lib/AccountsService/icons/zekurio - - - - ${faceImage}"
+    "L+ /var/lib/AccountsService/users/zekurio - - - - ${accountsServiceUser}"
+  ];
+
   home-manager.users.zekurio = {
+    imports = [inputs.plasma-manager.homeModules.plasma-manager];
+
     home.pointerCursor.enable = true;
+
+    programs.plasma.workspace.wallpaper = wallpaperImage;
 
     catppuccin = {
       inherit accent flavor;
@@ -113,7 +146,9 @@ in {
       enable = true;
       platformTheme.name = "kde";
       style.name = "kvantum";
-      kde.settings = kdeSettings;
+      kde.settings = lib.recursiveUpdate kdeSettings {
+        kscreenlockerrc.Greeter.Wallpaper."org.kde.image".General.Image = "file://${wallpaperImage}";
+      };
     };
   };
 }
