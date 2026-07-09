@@ -27,7 +27,7 @@
     iconTheme,
   }: let
     flavorTitle = lib.toSentenceCase flavor;
-    id = "me.zekurio.catppuccin-${flavor}.desktop";
+    id = "local.custom.catppuccin-${flavor}.desktop";
   in {
     inherit id;
     defaults = pkgs.writeText "${id}-defaults" ''
@@ -44,7 +44,7 @@
       name=default
 
       [Wallpaper]
-      Image=Zekurio
+      Image=CustomWallpaper
 
       [kcminputrc][Mouse]
       cursorTheme=breeze_cursors
@@ -62,13 +62,13 @@
     metadata = pkgs.writeText "${id}-metadata.json" (builtins.toJSON {
       KPackageStructure = "Plasma/LookAndFeel";
       KPlugin = {
-        Authors = [{Name = "Zekurio";}];
+        Authors = [{Name = "Custom";}];
         Category = "Global Themes (Plasma 6)";
         Description = "Catppuccin ${flavorTitle} colors with Breeze and Klassy";
         EnabledByDefault = true;
         Id = id;
         License = "LicenseRef-Proprietary";
-        Name = "Zekurio Catppuccin ${flavorTitle}";
+        Name = "Custom ${flavorTitle}";
       };
       "X-Plasma-APIVersion" = "2";
     });
@@ -85,23 +85,23 @@
     })
   ];
 
-  wallpaperMetadata = pkgs.writeText "zekurio-wallpaper-metadata.json" (builtins.toJSON {
+  wallpaperMetadata = pkgs.writeText "custom-wallpaper-metadata.json" (builtins.toJSON {
     KPlugin = {
-      Authors = [{Name = "Zekurio";}];
-      Id = "Zekurio";
+      Authors = [{Name = "Custom";}];
+      Id = "CustomWallpaper";
       License = "LicenseRef-Proprietary";
-      Name = "Zekurio";
+      Name = "Custom Wallpaper";
     };
   });
 
   plasmaDesigns =
-    pkgs.runCommand "zekurio-plasma-designs" {
+    pkgs.runCommand "custom-plasma-designs" {
       nativeBuildInputs = [pkgs.imagemagick];
     } ''
       mkdir -p "$out/share"
       cp -r ${catppuccinKde}/share/color-schemes "$out/share/"
 
-      wallpaper="$out/share/wallpapers/Zekurio"
+      wallpaper="$out/share/wallpapers/CustomWallpaper"
       install -Dm644 ${wallpaperImage} "$wallpaper/contents/images/1920x1080.jpg"
       install -Dm644 ${wallpaperMetadata} "$wallpaper/metadata.json"
       install -Dm644 ${wallpaperImage} "$wallpaper/contents/screenshot.jpg"
