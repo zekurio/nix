@@ -3,7 +3,7 @@
     disk = {
       system = {
         type = "disk";
-        device = "/dev/disk/by-id/replace-me-lilith-system-disk";
+        device = "/dev/disk/by-id/nvme-CT1000P3PSSD8_2322E6DD1319_1";
         content = {
           type = "gpt";
           partitions = {
