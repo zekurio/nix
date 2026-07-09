@@ -14,6 +14,16 @@
     firewall.enable = true;
   };
 
+  console.useXkbConfig = true;
+
+  catppuccin = {
+    enable = true;
+    autoEnable = false;
+    flavor = "frappe";
+    accent = "mauve";
+    limine.enable = true;
+  };
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = ["kvm-amd"];
@@ -27,10 +37,15 @@
         enable = true;
         efiSupport = true;
         maxGenerations = 10;
-        # TODO: add a Windows boot entry once the Windows EFI partition is known.
+        extraEntries = ''
+          /Windows Boot Manager
+            protocol: efi_boot_entry
+            entry: Windows Boot Manager
+        '';
         secureBoot = {
           enable = true;
           autoGenerateKeys = true;
+          autoEnrollKeys.enable = true;
         };
       };
     };
@@ -67,6 +82,8 @@
       plasma-login-manager.enable = true;
       sddm.enable = lib.mkForce false;
     };
+
+    xserver.xkb.layout = "at";
 
     pipewire = {
       enable = true;
