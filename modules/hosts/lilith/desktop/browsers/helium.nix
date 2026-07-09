@@ -9,6 +9,7 @@
     "cdglnehniifkbagbbombnjghhcihifij" # Kagi Search
     "nngceckbapebfimnlniiiahkandclblb" # Bitwarden Password Manager
     "lppmekppnliemjclknbagdhoocikieoi" # 7TV
+    "olhelnoplefjdmncknfphenjclimckaf" # Catppuccin Chrome Theme - Frappe
   ];
 in {
   environment.systemPackages = [

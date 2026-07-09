@@ -22,8 +22,5 @@
 
   environment.systemPackages = [
     pkgs.klassy
-    pkgs.papirus-icon-theme
   ];
-
-  home-manager.users.zekurio.qt.kde.settings.kdeglobals.Icons.Theme = "Papirus-Dark";
 }
