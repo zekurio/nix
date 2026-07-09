@@ -11,10 +11,11 @@
   cursorTheme = "catppuccin-${flavor}-${accent}-cursors";
   lookAndFeelPackage = "Catppuccin-${flavorTitle}-${accentTitle}";
   splashTheme = "${lookAndFeelPackage}-splash";
-  windowDecorationTheme = "__aurorae__svg__Catppuccin${flavorTitle}-Modern";
 
+  # Latte is installed alongside the active flavor so Catppuccin-Latte-Blue is
+  # selectable from System Settings without changing the default look.
   kdeTheme = pkgs.catppuccin-kde.override {
-    flavour = [flavor];
+    flavour = [flavor "latte"];
     accents = [accent];
   };
   papirusFolders = pkgs.catppuccin-papirus-folders.override {
@@ -37,8 +38,7 @@
     kwinrc."org.kde.kdecoration2" = {
       ButtonsOnLeft = "";
       ButtonsOnRight = "IAX";
-      library = "org.kde.kwin.aurorae";
-      theme = windowDecorationTheme;
+      library = "org.kde.klassy";
     };
     plasmarc.Theme.name = "default";
   };

@@ -7,6 +7,6 @@
   catppuccin.vesktop = {
     enable = true;
     flavor = "frappe";
-    accent = "mauve";
+    accent = "blue";
   };
 }
