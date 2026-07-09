@@ -9,6 +9,7 @@
     else "/home/zekurio";
 in {
   imports = [
+    ./apps
     ./cli
     ./git
   ];
