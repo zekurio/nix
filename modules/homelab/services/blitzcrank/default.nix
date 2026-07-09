@@ -24,8 +24,12 @@ in {
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
       piModels = {
-        default = "openai-codex/gpt-5.5:medium";
-        review = "openai-codex/gpt-5.5:medium";
+        default = "openai-codex/gpt-5.6-terra:medium";
+        seerr = "openai-codex/gpt-5.6-terra:medium";
+        automation = "openai-codex/gpt-5.6-terra:medium";
+        discord = "openai-codex/gpt-5.6-terra:medium";
+        discord_triage = "openai-codex/gpt-5.6-luna:medium";
+        review = "openai-codex/gpt-5.6-luna:medium";
       };
       settings = {
         bot = {
@@ -36,6 +40,7 @@ in {
           guild_id = "418795186475237376";
           automation_channel_id = "1473398718127407188";
           automation_thread_lock = true;
+          watched_channel_ids = ["1473398718127407188"];
         };
 
         seerr = {
