@@ -6,5 +6,6 @@
     ./fonts.nix
     ./gaming
     ./plasma.nix
+    ./theme.nix
   ];
 }

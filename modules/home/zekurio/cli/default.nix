@@ -15,11 +15,13 @@
     btop.enable = true;
   };
 
-  # Catppuccin Frappé across the CLI. autoEnable is off so only the ports
-  # enabled next to each program are themed; flavor cascades to every port.
+  # Catppuccin Frappé/Mauve across the CLI. autoEnable is off so only the
+  # ports enabled next to each program are themed; flavor and accent cascade to
+  # every port.
   catppuccin = {
     enable = true;
     autoEnable = false;
     flavor = "frappe";
+    accent = "mauve";
   };
 }
