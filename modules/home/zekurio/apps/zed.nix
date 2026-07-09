@@ -6,7 +6,7 @@
 
   catppuccin.zed = {
     enable = true;
-    accent = "mauve";
+    accent = "blue";
     icons = {
       enable = true;
       flavor = "frappe";

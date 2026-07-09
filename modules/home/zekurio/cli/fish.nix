@@ -1,12 +1,9 @@
 {
-  config,
   inputs,
   lib,
   pkgs,
   ...
 }: let
-  gitDirectory = "${config.home.homeDirectory}/Git";
-  nixRepository = "${gitDirectory}/nix";
   system = pkgs.stdenv.hostPlatform.system;
   claude = inputs.llm-agents.packages.${system}.claude-code;
   codex = inputs.llm-agents.packages.${system}.codex;
@@ -39,16 +36,6 @@ in {
       interactiveShellInit = ''
         set fish_greeting
       '';
-      functions.omp = {
-        body = ''
-          command omp --allow-home $argv
-        '';
-      };
-      shellAbbrs = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-        cgit = "cd ${gitDirectory}";
-        cnix = "cd ${nixRepository}";
-        nixcfg = "cd ${nixRepository}";
-      };
       shellAliases =
         {
           ls = "eza";

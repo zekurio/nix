@@ -29,7 +29,7 @@
 
       git_branch = {
         format = "[$branch]($style) ";
-        style = "mauve";
+        style = "blue";
       };
       git_status = {
         format = "[$all_status$ahead_behind]($style) ";
