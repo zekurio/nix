@@ -14,7 +14,7 @@ in {
   ];
 
   options.services.homelab.blitzcrank = {
-    enable = lib.mkEnableOption "Blitzcrank Seerr media automation agent";
+    enable = lib.mkEnableOption "Blitzcrank media support and automation agent";
   };
 
   config = lib.mkIf cfg.enable {
@@ -25,6 +25,7 @@ in {
       dataDir = dataDir;
       piModels = {
         default = "openai-codex/gpt-5.5:medium";
+        review = "openai-codex/gpt-5.5:medium";
       };
       settings = {
         bot = {
