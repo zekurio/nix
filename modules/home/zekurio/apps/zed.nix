@@ -1,4 +1,7 @@
 {
+  # Config/theme only; the binary comes from the host (system package on
+  # NixOS, Homebrew cask on macOS). Flavor and accent cascade from the
+  # global catppuccin settings.
   programs.zed-editor = {
     enable = true;
     package = null;
@@ -6,10 +9,6 @@
 
   catppuccin.zed = {
     enable = true;
-    accent = "blue";
-    icons = {
-      enable = true;
-      flavor = "frappe";
-    };
+    icons.enable = true;
   };
 }

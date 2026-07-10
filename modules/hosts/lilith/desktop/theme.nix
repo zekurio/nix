@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (config.catppuccin) accent;
+  inherit (config.catppuccin) accent flavor;
 
   accentTitle = lib.toSentenceCase accent;
   wallpaperImage = ../../../../assets/wallpaper.jpg;
@@ -14,12 +14,11 @@
   # install its global themes: they select Catppuccin cursors and Aurorae
   # decorations instead of the Breeze/Klassy combination used here.
   catppuccinKde = pkgs.catppuccin-kde.override {
-    flavour = ["frappe" "latte"];
+    flavour = [flavor "latte"];
     accents = [accent];
   };
   papirusFolders = pkgs.catppuccin-papirus-folders.override {
-    flavor = "frappe";
-    inherit accent;
+    inherit accent flavor;
   };
 
   mkDesign = {
@@ -76,7 +75,7 @@
 
   designs = [
     (mkDesign {
-      flavor = "frappe";
+      inherit flavor;
       iconTheme = "Papirus-Dark";
     })
     (mkDesign {
@@ -142,6 +141,12 @@ in {
   ];
 
   home-manager.users.zekurio = {
+    # Re-assert the dark design on every login so a fresh install (or a
+    # detour through System Settings) always lands back on the intended
+    # look. Switching to Custom Latte by hand still works within a session
+    # but won't survive a re-login; drop this line if that ever bothers you.
+    programs.plasma.workspace.lookAndFeel = (builtins.head designs).id;
+
     # Breeze GTK follows Plasma's selected color scheme, allowing the Latte and
     # Frappé global themes to switch light/dark application colors together.
     gtk = {
