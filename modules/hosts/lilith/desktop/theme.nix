@@ -13,10 +13,18 @@
     lib.removeSuffix ".jpeg" (lib.removeSuffix ".jpg" (lib.removeSuffix ".png" filename));
   wallpaperId = filename: "zekurio.${wallpaperBasename filename}";
   wallpaperTitle = filename: lib.toSentenceCase (lib.replaceStrings ["-"] [" "] (wallpaperBasename filename));
+  wallpaperAuthors = {
+    "gits.jpeg" = "Yoji Shinkawa";
+    "night-city-at-night.png" = "CD PROJEKT RED";
+    "night-city.png" = "CD PROJEKT RED";
+    "rei-thrice-upon-a-time.png" = "Studio Khara";
+    "the-monster-you-created.png" = "Riot Games / Fortiche Production";
+  };
+  wallpaperAuthor = filename: wallpaperAuthors.${filename} or "Unknown";
   mkWallpaperMetadata = filename:
     pkgs.writeText "${wallpaperBasename filename}-wallpaper-metadata.json" (builtins.toJSON {
       KPlugin = {
-        Authors = [{Name = "Zekurio";}];
+        Authors = [{Name = wallpaperAuthor filename;}];
         Id = wallpaperId filename;
         License = "LicenseRef-Proprietary";
         Name = wallpaperTitle filename;
