@@ -16,6 +16,8 @@
 
   console.useXkbConfig = true;
 
+  programs.ssh.startAgent = true;
+
   catppuccin =
     {
       enable = true;
