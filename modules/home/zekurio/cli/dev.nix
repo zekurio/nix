@@ -21,4 +21,6 @@ in {
       copy_clipboard = "system";
     };
   };
+
+  catppuccin.zellij.enable = true;
 }
