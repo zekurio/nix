@@ -1,0 +1,74 @@
+/* Feishin has no Frappé theme, so use its Mocha theme ID as the dark anchor. */
+:root[data-theme="catppuccinMocha"] {
+  --theme-colors-background: #292c3c !important;
+  --theme-colors-background-alternate: #232634 !important;
+  --theme-colors-background-transparent: 41, 44, 60 !important;
+  --theme-colors-surface: #303446 !important;
+  --theme-colors-surface-foreground: #c6d0f5 !important;
+  --theme-colors-foreground: #c6d0f5 !important;
+  --theme-colors-foreground-muted: #a5adce !important;
+  --theme-colors-border: #414559 !important;
+  --theme-colors-state-error: #e78284 !important;
+  --theme-colors-state-info: #8caaee !important;
+  --theme-colors-state-success: #a6d189 !important;
+  --theme-colors-state-warning: #ef9f76 !important;
+  --theme-overlay-header:
+    linear-gradient(transparent 0%, rgb(41 44 60 / 85%) 100%),
+    var(--theme-background-noise) !important;
+  --theme-overlay-subheader:
+    linear-gradient(180deg, rgb(41 44 60 / 5%) 0%, #292c3c 100%),
+    var(--theme-background-noise) !important;
+  --mantine-color-body: #292c3c !important;
+  --mantine-color-text: #c6d0f5 !important;
+  --mantine-color-dimmed: #a5adce !important;
+  --mantine-color-placeholder: #737994 !important;
+  --mantine-color-anchor: #8caaee !important;
+  --mantine-color-error: #e78284 !important;
+  --mantine-color-default: #303446 !important;
+  --mantine-color-default-hover: #414559 !important;
+  --mantine-color-default-color: #c6d0f5 !important;
+  --mantine-color-default-border: #414559 !important;
+  --theme-colors-primary: #8caaee !important;
+  --theme-colors-primary-filled: #8caaee !important;
+  --theme-colors-primary-contrast: #303446 !important;
+  --mantine-primary-color-filled: #8caaee !important;
+  --mantine-primary-color-filled-hover: #a8bff4 !important;
+  --mantine-primary-color-light: rgb(140 170 238 / 15%) !important;
+  --mantine-primary-color-light-hover: rgb(140 170 238 / 25%) !important;
+  --mantine-primary-color-light-color: #8caaee !important;
+  --mantine-primary-color-contrast: #303446 !important;
+}
+
+:root[data-theme="catppuccinLatte"] {
+  --theme-colors-background: #eff1f5 !important;
+  --theme-colors-background-alternate: #e6e9ef !important;
+  --theme-colors-background-transparent: 239, 241, 245 !important;
+  --theme-colors-surface: #dce0e8 !important;
+  --theme-colors-surface-foreground: #4c4f69 !important;
+  --theme-colors-foreground: #4c4f69 !important;
+  --theme-colors-foreground-muted: #6c6f85 !important;
+  --theme-colors-border: #ccd0da !important;
+  --theme-colors-state-error: #d20f39 !important;
+  --theme-colors-state-info: #1e66f5 !important;
+  --theme-colors-state-success: #40a02b !important;
+  --theme-colors-state-warning: #df8e1d !important;
+  --mantine-color-body: #eff1f5 !important;
+  --mantine-color-text: #4c4f69 !important;
+  --mantine-color-dimmed: #6c6f85 !important;
+  --mantine-color-placeholder: #9ca0b0 !important;
+  --mantine-color-anchor: #1e66f5 !important;
+  --mantine-color-error: #d20f39 !important;
+  --mantine-color-default: #dce0e8 !important;
+  --mantine-color-default-hover: #ccd0da !important;
+  --mantine-color-default-color: #4c4f69 !important;
+  --mantine-color-default-border: #ccd0da !important;
+  --theme-colors-primary: #1e66f5 !important;
+  --theme-colors-primary-filled: #1e66f5 !important;
+  --theme-colors-primary-contrast: #eff1f5 !important;
+  --mantine-primary-color-filled: #1e66f5 !important;
+  --mantine-primary-color-filled-hover: #0d5ff6 !important;
+  --mantine-primary-color-light: rgb(30 102 245 / 12%) !important;
+  --mantine-primary-color-light-hover: rgb(30 102 245 / 20%) !important;
+  --mantine-primary-color-light-color: #1e66f5 !important;
+  --mantine-primary-color-contrast: #eff1f5 !important;
+}
