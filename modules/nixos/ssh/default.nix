@@ -17,6 +17,7 @@ in {
       default = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGoFjRGxdJUuPwS0wXCOmcvf8rOgeSGWtWQaCnLcRS4N"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ"
       ];
       description = ''
         SSH public keys accepted for every user in modules.ssh.users. Pinned
