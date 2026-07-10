@@ -5,6 +5,21 @@
   programs.zed-editor = {
     enable = true;
     package = null;
+    extensions = [
+      "astro"
+      "dockerfile"
+      "git-firefly"
+      "html"
+      "java"
+      "kotlin"
+      "log"
+      "make"
+      "nix"
+      "qml"
+      "sql"
+      "toml"
+      "xml"
+    ];
   };
 
   catppuccin.zed = {
