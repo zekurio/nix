@@ -24,6 +24,9 @@ in {
       shell = pkgs.fish;
       uid = 1000;
       isNormalUser = true;
+      # A yescrypt hash of a strong password; committing it is an accepted
+      # trade-off (offline cracking is infeasible, and SSH password auth is
+      # disabled everywhere anyway).
       hashedPassword = "$y$j9T$WeZ0opXmn8yWxOwDH6/bL0$wtARyV6xTpo4OYgGpy9W0EAhJtJPYWXlwqaaVsfZQN/";
       extraGroups = [
         "wheel"
