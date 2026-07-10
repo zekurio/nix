@@ -2,13 +2,15 @@ name: Update flake.lock
 
 on:
   schedule:
-    # Runs before the Sunday 03:00 Europe/Vienna auto-upgrade window on adam/lilith.
-    # 23:15 UTC lands on Sunday 00:15 CET / 01:15 CEST.
+    # Weekly, Saturday night: leaves the PR waiting for review well before
+    # adam's Sunday 03:00 Europe/Vienna auto-upgrade window. Updates only
+    # reach adam once the PR is merged to main.
     - cron: "15 23 * * 6"
   workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update-flake-lock:
@@ -17,27 +19,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v22
 
-      - name: Enable Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - name: Update flake lock
-        run: nix flake update
-
-      - name: Commit updated lock file
-        run: |
-          if git diff --quiet -- flake.lock; then
-            echo "No flake.lock changes detected"
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add flake.lock
-          git commit -m "chore: update flake.lock"
-          git push
+      - name: Update flake.lock and open PR
+        uses: DeterminateSystems/update-flake-lock@v28
+        with:
+          pr-title: "chore(flake): update flake.lock"
+          commit-msg: "chore(flake): update flake.lock"
+          pr-labels: dependencies

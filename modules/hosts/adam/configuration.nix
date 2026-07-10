@@ -182,7 +182,8 @@ in {
     }
   ];
 
-  # SOPS secrets configuration
+  # SOPS secrets configuration. The age key is hand-placed during bootstrap
+  # (see README) and deliberately not generated on the host.
   sops = {
     defaultSopsFile = ../../../secrets/adam.yaml;
     age = {
