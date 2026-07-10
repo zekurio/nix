@@ -2,7 +2,7 @@
   copyCommand =
     if pkgs.stdenv.hostPlatform.isDarwin
     then "pbcopy"
-    else "wl-copy";
+    else "${pkgs.wl-clipboard}/bin/wl-copy";
 in {
   programs.direnv = {
     enable = true;
