@@ -7,7 +7,21 @@
   inherit (config.catppuccin) accent flavor;
 
   accentTitle = lib.toSentenceCase accent;
-  wallpaperImage = ../../../../assets/wallpaper.jpg;
+  wallpaperDirectory = ../../../../assets/wallpapers;
+  wallpaperFiles = builtins.attrNames (builtins.readDir wallpaperDirectory);
+  wallpaperBasename = filename:
+    lib.removeSuffix ".jpeg" (lib.removeSuffix ".jpg" (lib.removeSuffix ".png" filename));
+  wallpaperId = filename: "zekurio.${wallpaperBasename filename}";
+  wallpaperTitle = filename: lib.toSentenceCase (lib.replaceStrings ["-"] [" "] (wallpaperBasename filename));
+  mkWallpaperMetadata = filename:
+    pkgs.writeText "${wallpaperBasename filename}-wallpaper-metadata.json" (builtins.toJSON {
+      KPlugin = {
+        Authors = [{Name = "Zekurio";}];
+        Id = wallpaperId filename;
+        License = "LicenseRef-Proprietary";
+        Name = wallpaperTitle filename;
+      };
+    });
   faceImage = ../../../../assets/face.png;
 
   # Keep the Catppuccin package as a source for its color schemes, but do not
@@ -43,7 +57,7 @@
       name=default
 
       [Wallpaper]
-      Image=CustomWallpaper
+      Image=${wallpaperId "gits.jpeg"}
 
       [kcminputrc][Mouse]
       cursorTheme=breeze_cursors
@@ -84,15 +98,6 @@
     })
   ];
 
-  wallpaperMetadata = pkgs.writeText "custom-wallpaper-metadata.json" (builtins.toJSON {
-    KPlugin = {
-      Authors = [{Name = "Custom";}];
-      Id = "CustomWallpaper";
-      License = "LicenseRef-Proprietary";
-      Name = "Custom Wallpaper";
-    };
-  });
-
   plasmaDesigns =
     pkgs.runCommand "custom-plasma-designs" {
       nativeBuildInputs = [pkgs.imagemagick];
@@ -100,17 +105,21 @@
       mkdir -p "$out/share"
       cp -r ${catppuccinKde}/share/color-schemes "$out/share/"
 
-      wallpaper="$out/share/wallpapers/CustomWallpaper"
-      install -Dm644 ${wallpaperImage} "$wallpaper/contents/images/1920x1080.jpg"
-      install -Dm644 ${wallpaperMetadata} "$wallpaper/metadata.json"
-      install -Dm644 ${wallpaperImage} "$wallpaper/contents/screenshot.jpg"
+      ${lib.concatMapStringsSep "\n" (filename: let
+          extension = lib.last (lib.splitString "." filename);
+          wallpaper = "$out/share/wallpapers/${wallpaperId filename}";
+        in ''
+          install -Dm644 ${wallpaperDirectory + "/${filename}"} "${wallpaper}/contents/images/1920x1080.${extension}"
+          install -Dm644 ${mkWallpaperMetadata filename} "${wallpaper}/metadata.json"
+        '')
+        wallpaperFiles}
 
       ${lib.concatMapStringsSep "\n" (design: ''
           theme="$out/share/plasma/look-and-feel/${design.id}"
           install -Dm644 ${design.defaults} "$theme/contents/defaults"
           install -Dm644 ${design.metadata} "$theme/metadata.json"
-          install -Dm644 ${wallpaperImage} "$theme/contents/previews/fullscreenpreview.jpg"
-          magick ${wallpaperImage} -thumbnail 400x225^ -gravity center -extent 400x225 "$theme/contents/previews/preview.png"
+          install -Dm644 ${wallpaperDirectory + "/gits.jpeg"} "$theme/contents/previews/fullscreenpreview.jpg"
+          magick ${wallpaperDirectory + "/gits.jpeg"} -thumbnail 400x225^ -gravity center -extent 400x225 "$theme/contents/previews/preview.png"
           install -Dm644 ${pkgs.writeText "${design.id}-layout.js" ''
             var desktopsArray = desktopsForActivity(currentActivity());
             for (var i = 0; i < desktopsArray.length; i++) {
