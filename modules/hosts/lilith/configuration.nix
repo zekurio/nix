@@ -16,13 +16,13 @@
 
   console.useXkbConfig = true;
 
-  catppuccin = {
-    enable = true;
-    autoEnable = false;
-    flavor = "frappe";
-    accent = "blue";
-    limine.enable = true;
-  };
+  catppuccin =
+    {
+      enable = true;
+      autoEnable = false;
+      limine.enable = true;
+    }
+    // import ../../palette.nix;
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;

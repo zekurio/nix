@@ -7,6 +7,7 @@ Nix configurations for my NixOS hosts and macOS.
 | Host | Type | Description |
 |------|------|-------------|
 | `adam` | NixOS | Homelab server |
+| `lilith` | NixOS | Desktop (KDE Plasma 6) |
 | `sachiel` | nix-darwin | MacBook Air |
 
 ## Bootstrap runbook (macOS / nix-darwin)
@@ -79,3 +80,34 @@ Unmount and reboot
 umount -Rl /mnt
 reboot
 ```
+
+## Plasma settings (lilith)
+
+KDE settings are managed with
+[plasma-manager](https://github.com/nix-community/plasma-manager)
+(`programs.plasma` in `modules/hosts/lilith/desktop/plasma.nix`); the custom
+look-and-feel packages are built in `theme.nix` and re-applied on every
+login. Only keys set in Nix are managed — to promote a GUI tweak into the
+config, capture the live state on lilith and diff:
+
+```bash
+nix run github:nix-community/plasma-manager -- rc2nix > /tmp/plasma-capture.nix
+```
+
+Once everything worth keeping is in Nix, set
+`programs.plasma.overrideConfig = true` to make the desktop fully
+reproducible (any setting not in Nix then resets to default on login).
+
+## Secrets bootstrap (sops-nix, adam only)
+
+`adam` decrypts its sops secrets with an age key at
+`/var/lib/sops-nix/key.txt`. The key is deliberately **not** generated on the
+host (`generateKey = false`), so a fresh install has one manual step: copy the
+host's private key into place before (or right after) the first rebuild:
+
+```bash
+sudo install -Dm600 -o root -g root key.txt /var/lib/sops-nix/key.txt
+```
+
+Without it, every secret-dependent service fails to activate. The host's
+public key (recipient) lives in `.sops.yaml`.
