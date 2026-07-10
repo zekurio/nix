@@ -20,6 +20,7 @@ in {
           background-opacity = 0.96;
           font-family = "FiraCode Nerd Font Mono";
           font-size = 14;
+          window-inherit-font-size = false;
         }
         // lib.optionalAttrs isDarwin {
           macos-titlebar-style = "transparent";
