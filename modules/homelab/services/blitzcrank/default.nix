@@ -69,10 +69,6 @@ in {
           base_url = "http://127.0.0.1:6789";
         };
 
-        digests = {
-          enabled = true;
-        };
-
         runtime = {
           automations_enabled = true;
           run_timeout = "5m";
