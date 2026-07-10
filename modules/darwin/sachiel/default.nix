@@ -13,7 +13,6 @@
       }
     ];
     casks = [
-      "bitwarden"
       "feishin"
       "ghostty"
       "helium-browser"
