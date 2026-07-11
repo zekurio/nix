@@ -38,7 +38,7 @@
       limine = {
         enable = true;
         efiSupport = true;
-        maxGenerations = 10;
+        maxGenerations = 5;
         extraEntries = ''
           /Windows Boot Manager
             protocol: efi_boot_entry
