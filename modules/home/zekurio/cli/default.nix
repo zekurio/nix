@@ -1,6 +1,7 @@
 {inputs, ...}: {
   imports = [
     inputs.catppuccin.homeModules.catppuccin
+    ./agents
     ./dev.nix
     ./eza.nix
     ./fish.nix
