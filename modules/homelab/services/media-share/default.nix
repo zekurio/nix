@@ -52,17 +52,99 @@
 
   # Create root dirs as setgid + group-writable
   directoryRules = map (dir: "d ${dir} ${shareDirMode} ${shareUser} ${shareGroup} -") sharedDirs;
-  vaultDirectoryRule = lib.optional cfg.vault.enable "d ${cfg.vault.path} 0700 ${cfg.vault.owner} ${shareGroup} -";
-  vaultSambaSettings = lib.optionalAttrs cfg.vault.enable {
-    ${cfg.vault.name} = {
-      path = cfg.vault.path;
-      "valid users" = cfg.vault.owner;
-      "force user" = cfg.vault.owner;
-      "create mask" = "0600";
-      "directory mask" = "0700";
-      "read only" = "no";
-      "browseable" = "yes";
-      "guest ok" = "no";
+  userShareDirectoryRules = lib.mapAttrsToList (_: share: "d ${share.path} 0700 ${share.owner} ${share.group} -") cfg.userShares;
+  userLibraryDirectoryRules =
+    lib.mapAttrsToList (
+      _: share: "d ${share.libraryPath} 0700 ${share.owner} ${share.group} -"
+    )
+    cfg.userShares;
+  userShareSambaSettings = lib.listToAttrs (
+    lib.mapAttrsToList (_: share: {
+      name = share.name;
+      value = {
+        path = share.path;
+        "valid users" = share.owner;
+        "force user" = share.owner;
+        "create mask" = "0600";
+        "directory mask" = "0700";
+        "read only" = "no";
+        "browseable" = "yes";
+        "guest ok" = "no";
+      };
+    })
+    cfg.userShares
+  );
+  userSharePaths = lib.mapAttrsToList (_: share: share.path) cfg.userShares;
+  immichLibraryPaths = lib.mapAttrsToList (_: share: share.libraryPath) cfg.userShares;
+
+  userShareAclScript = pkgs.writeShellScript "media-share-user-library-acl" ''
+    set -euo pipefail
+
+    sharePaths=(${lib.concatStringsSep " " (map lib.escapeShellArg userSharePaths)})
+    libraryPaths=(${lib.concatStringsSep " " (map lib.escapeShellArg immichLibraryPaths)})
+
+    for share in "''${sharePaths[@]}"; do
+      [ -d "$share" ] || continue
+      # Each share is private to its owner over SMB; Immich may only traverse it.
+      setfacl -m u:immich:--x "$share"
+    done
+
+    for library in "''${libraryPaths[@]}"; do
+      [ -d "$library" ] || continue
+
+      # Keep each per-user share private while allowing Immich to read only the
+      # explicitly named external-library subtree.
+      find "$library" -type d -exec setfacl \
+        -m u::rwx,g::---,o::---,m::r-x,u:immich:r-x \
+        -m d:u::rwx,d:g::---,d:o::---,d:m::r-x,d:u:immich:r-x {} +
+      find "$library" -type f -exec setfacl \
+        -m u::rw-,g::---,o::---,m::r--,u:immich:r-- {} +
+    done
+  '';
+
+  userShareOptions = {name, ...}: {
+    options = {
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = name;
+        description = "SMB share name for this user's private share.";
+      };
+
+      owner = lib.mkOption {
+        type = lib.types.str;
+        default = name;
+        description = "Unix user that owns and authenticates to this private share.";
+      };
+
+      group = lib.mkOption {
+        type = lib.types.str;
+        default = shareGroup;
+        description = "Group assigned to the private share root.";
+      };
+
+      dataset = lib.mkOption {
+        type = lib.types.str;
+        default = "tank/shares/users/${name}";
+        description = "ZFS dataset backing this user's private share.";
+      };
+
+      path = lib.mkOption {
+        type = lib.types.str;
+        default = "/tank/shares/users/${name}";
+        description = "Filesystem path of this user's private share.";
+      };
+
+      quota = lib.mkOption {
+        type = lib.types.str;
+        default = "100G";
+        description = "ZFS quota for this user's private share.";
+      };
+
+      libraryPath = lib.mkOption {
+        type = lib.types.str;
+        default = "/tank/shares/users/${name}/Immich External Library";
+        description = "Immich external-library subtree inside this user's private share.";
+      };
     };
   };
 
@@ -181,46 +263,25 @@ in {
 
     nfs.enable = lib.mkEnableOption "NFSv4 exports for homelab files and media";
 
-    vault = {
-      enable = lib.mkEnableOption "a private, network-discoverable SMB share for a single user";
-
-      name = lib.mkOption {
-        type = lib.types.str;
-        default = "vault";
-        description = "SMB share name exposed to clients.";
-      };
-
-      owner = lib.mkOption {
-        type = lib.types.str;
-        description = "Existing NixOS user that owns the vault and is its sole permitted SMB user.";
-      };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "tank/shares/vault";
-        description = "ZFS dataset backing the vault share.";
-      };
-
-      path = lib.mkOption {
-        type = lib.types.str;
-        default = "/tank/shares/vault";
-        description = "Filesystem path of the vault dataset mountpoint.";
-      };
-
-      quota = lib.mkOption {
-        type = lib.types.str;
-        default = "100G";
-        description = "ZFS quota for the vault dataset.";
-      };
+    userShares = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule userShareOptions);
+      default = {};
+      description = "Private per-user SMB shares and their Immich library subtrees.";
     };
   };
 
   config = lib.mkIf cfg.enable {
     assertions =
-      lib.optional cfg.vault.enable {
-        assertion = lib.hasAttr cfg.vault.owner config.users.users;
-        message = "modules.homelab.mediaShare.vault.owner (${cfg.vault.owner}) must be an existing NixOS user.";
-      }
+      (lib.mapAttrsToList (name: share: {
+          assertion = lib.hasAttr share.owner config.users.users;
+          message = "modules.homelab.mediaShare.userShares.${name}.owner (${share.owner}) must be an existing NixOS user.";
+        })
+        cfg.userShares)
+      ++ (lib.mapAttrsToList (name: share: {
+          assertion = lib.hasAttr share.owner cfg.samba.passwordFiles;
+          message = "modules.homelab.mediaShare.userShares.${name} requires a Samba password file for ${share.owner}.";
+        })
+        cfg.userShares)
       ++ map (name: {
         assertion = lib.hasAttr name config.users.users;
         message = "modules.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
@@ -254,7 +315,26 @@ in {
       }))
     ];
 
-    systemd.tmpfiles.rules = directoryRules ++ aclRules ++ vaultDirectoryRule;
+    systemd.tmpfiles.rules = directoryRules ++ aclRules ++ userShareDirectoryRules ++ userLibraryDirectoryRules;
+
+    systemd.services.mediaShare-user-library-acl = lib.mkIf (cfg.userShares != {}) {
+      description = "Grant Immich read access to per-user external-library trees";
+      wantedBy = ["multi-user.target"];
+      after = [
+        "local-fs.target"
+        "systemd-tmpfiles-setup.service"
+      ];
+      unitConfig.RequiresMountsFor = lib.concatStringsSep " " userSharePaths;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = userShareAclScript;
+      };
+      path = [
+        pkgs.acl
+        pkgs.findutils
+      ];
+    };
 
     networking.firewall.interfaces = lib.mkMerge [
       (lib.mkIf (cfg.samba.enable && cfg.samba.interfaces != []) (
@@ -323,7 +403,7 @@ in {
             "guest ok" = "no";
           };
         }
-        // vaultSambaSettings;
+        // userShareSambaSettings;
     };
 
     systemd.services.samba-passwd = lib.mkIf (cfg.samba.enable && cfg.samba.passwordFiles != {}) {
