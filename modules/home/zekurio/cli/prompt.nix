@@ -1,4 +1,8 @@
 {
+  lib,
+  pkgs,
+  ...
+}: {
   # Starship palette (Frappé) provided by catppuccin/nix; the module sets
   # `palette` and injects the color definitions used by the styles below.
   catppuccin.starship.enable = true;
@@ -6,6 +10,7 @@
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
+    package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (pkgs.callPackage ./starship-darwin.nix {});
     settings = {
       add_newline = false;
       format = "$directory$character";
