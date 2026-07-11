@@ -18,6 +18,9 @@ in {
     kernelModules = [
       "it87"
     ];
+    extraModprobeConfig = ''
+      options it87 force_id=0x8628
+    '';
     kernelParams = [
       "acpi_enforce_resources=lax"
     ];

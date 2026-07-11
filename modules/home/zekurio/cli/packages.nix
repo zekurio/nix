@@ -13,5 +13,6 @@
     nixd
     ripgrep
     sops
+    tmux
   ];
 }
