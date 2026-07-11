@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -17,6 +18,20 @@
     };
 
     xserver.xkb.layout = "at";
+  };
+
+  # The plasma-login-manager NixOS module sets XDG_DATA_DIRS on the greeter's
+  # system and user services to just the session-data share dir whenever any
+  # display-manager session packages are registered (which plasma6 always
+  # does). That assignment replaces XDG_DATA_DIRS outright instead of
+  # extending it, so it drops /run/current-system/sw/share, where icon
+  # themes installed via environment.systemPackages (e.g. Papirus) actually
+  # live. Re-add it so the greeter can resolve icons again.
+  systemd = let
+    xdgDataDirs = lib.mkForce "${config.services.displayManager.sessionData.desktops}/share:/run/current-system/sw/share";
+  in {
+    services.plasmalogin.environment.XDG_DATA_DIRS = xdgDataDirs;
+    user.services.plasma-login.environment.XDG_DATA_DIRS = xdgDataDirs;
   };
 
   programs.kde-pim.enable = false;
