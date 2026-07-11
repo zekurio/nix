@@ -24,12 +24,12 @@ in {
       environmentFile = config.sops.secrets.blitzcrank_env.path;
       dataDir = dataDir;
       piModels = {
-        default = "openai-codex/gpt-5.6-terra:medium";
-        seerr = "openai-codex/gpt-5.6-terra:medium";
-        automation = "openai-codex/gpt-5.6-terra:medium";
-        discord = "openai-codex/gpt-5.6-terra:medium";
-        discord_triage = "openai-codex/gpt-5.6-luna:medium";
-        review = "openai-codex/gpt-5.6-luna:medium";
+        default = "openai-codex/gpt-5.6-luna:high";
+        seerr = "openai-codex/gpt-5.6-luna:high";
+        automation = "openai-codex/gpt-5.6-luna:high";
+        discord = "openai-codex/gpt-5.6-luna:high";
+        discord_triage = "openai-codex/gpt-5.6-luna:low";
+        review = "openai-codex/gpt-5.6-luna:high";
       };
       settings = {
         bot = {
@@ -57,6 +57,7 @@ in {
 
         jellyfin = {
           base_url = "http://127.0.0.1:8096";
+          public_url = "https://schnitzelflix.xyz";
         };
         sonarr = {
           base_url = "http://127.0.0.1:8989/sonarr";
