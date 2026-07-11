@@ -42,6 +42,19 @@
   papirusFolders = pkgs.catppuccin-papirus-folders.override {
     inherit accent flavor;
   };
+  gtkThemePython = pkgs.python313.override {
+    packageOverrides = _: prev: {
+      # catppuccin's Matplotlib import check is incompatible with the current
+      # Matplotlib package; it is not needed to build GTK themes.
+      catppuccin = prev.catppuccin.overridePythonAttrs (_: {doCheck = false;});
+    };
+  };
+  gtkThemes = lib.genAttrs ["frappe" "latte"] (variant:
+    pkgs.catppuccin-gtk.override {
+      inherit variant;
+      accents = [accent];
+      python3 = gtkThemePython;
+    });
 
   mkDesign = {
     flavor,
@@ -60,6 +73,15 @@
 
       [kdeglobals][Icons]
       Theme=${iconTheme}
+
+      [gtkrc-2.0][Settings]
+      gtk-theme-name=catppuccin-${flavor}-${accent}-standard
+
+      [gtk-3.0/settings.ini][Settings]
+      gtk-theme-name=catppuccin-${flavor}-${accent}-standard
+
+      [gtk-4.0/settings.ini][Settings]
+      gtk-theme-name=catppuccin-${flavor}-${accent}-standard
 
       [plasmarc][Theme]
       name=default
@@ -149,6 +171,8 @@ in {
   environment.systemPackages = [
     papirusFolders
     plasmaDesigns
+    gtkThemes.frappe
+    gtkThemes.latte
   ];
 
   # User avatar shown on the login/lock screen, read by AccountsService.
@@ -163,20 +187,6 @@ in {
     # look. Switching to Custom Latte by hand still works within a session
     # but won't survive a re-login; drop this line if that ever bothers you.
     programs.plasma.workspace.lookAndFeel = (builtins.head designs).id;
-
-    # Breeze GTK follows Plasma's selected color scheme, allowing the Latte and
-    # Frappé global themes to switch light/dark application colors together.
-    gtk = {
-      enable = true;
-      theme = {
-        name = "Breeze";
-        package = pkgs.kdePackages.breeze-gtk;
-      };
-      gtk4.theme = {
-        name = "Breeze";
-        package = pkgs.kdePackages.breeze-gtk;
-      };
-    };
 
     qt = {
       enable = true;
