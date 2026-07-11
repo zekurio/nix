@@ -124,10 +124,10 @@ in {
       };
       passwordFiles.zekurio = config.sops.secrets.smb_password_zekurio.path;
     };
-    vault = {
-      enable = true;
-      owner = mainUser;
-      quota = "100G";
+    userShares = {
+      ${mainUser} = {
+        quota = "100G";
+      };
     };
   };
 
