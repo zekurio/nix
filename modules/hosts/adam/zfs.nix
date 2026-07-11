@@ -12,13 +12,17 @@
     fi
     ${zfs} set quota=${quota} ${name}
   '';
-  ensureVaultDataset = lib.optionalString mediaShare.vault.enable ''
-    ${ensureDataset mediaShare.vault.dataset mediaShare.vault.quota}
-    # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule
-    # (which races the mount). Own it here, after the mount already exists.
-    ${pkgs.coreutils}/bin/chown ${mediaShare.vault.owner}:share ${mediaShare.vault.path}
-    ${pkgs.coreutils}/bin/chmod 0700 ${mediaShare.vault.path}
-  '';
+  ensureUserShareDatasets = lib.concatStringsSep "\n" (lib.mapAttrsToList (_: share: ''
+      ${ensureDataset share.dataset share.quota}
+      # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule
+      # (which races the mount). Own it here, after the mount already exists.
+      ${pkgs.coreutils}/bin/mkdir -p ${share.path} ${share.libraryPath}
+      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${share.path}
+      ${pkgs.coreutils}/bin/chmod 0700 ${share.path}
+      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${share.libraryPath}
+      ${pkgs.coreutils}/bin/chmod 0700 ${share.libraryPath}
+    '')
+    mediaShare.userShares);
 in {
   systemd.services.tank-datasets = {
     description = "Ensure tank ZFS datasets and quotas";
@@ -33,7 +37,7 @@ in {
       ${ensureDataset "tank/share" "500G"}
       ${ensureDataset "tank/immich" "1000G"}
       ${ensureDataset "tank/alloy" "100G"}
-      ${ensureVaultDataset}
+      ${ensureUserShareDatasets}
     '';
   };
 }
