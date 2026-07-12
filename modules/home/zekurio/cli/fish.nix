@@ -10,15 +10,6 @@
       interactiveShellInit = ''
         set fish_greeting
 
-        # SSH into a host and land in the shared, always-alive zellij
-        # session instead of a bare shell. Detaching (Ctrl+o d) or quitting
-        # closes the connection; the session and its tabs keep running on the
-        # host for the next login. Skip when already nested inside zellij.
-        # No `exec`: if the attach fails (e.g. corrupt session) we fall back
-        # to a usable shell instead of dropping the connection outright.
-        if status is-interactive; and set -q SSH_CONNECTION; and not set -q ZELLIJ; and command -q zellij
-            zellij attach -c main; and exit
-        end
       '';
       shellAliases = {
         ls = "eza";
