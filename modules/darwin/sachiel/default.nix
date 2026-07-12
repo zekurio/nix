@@ -13,7 +13,6 @@
       }
     ];
     casks = [
-      "cmux"
       "feishin"
       "ghostty"
       "helium-browser"
