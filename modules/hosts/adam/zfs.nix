@@ -16,11 +16,11 @@
       ${ensureDataset share.dataset share.quota}
       # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule
       # (which races the mount). Own it here, after the mount already exists.
-      ${pkgs.coreutils}/bin/mkdir -p ${share.path} ${share.libraryPath}
-      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${share.path}
-      ${pkgs.coreutils}/bin/chmod 0700 ${share.path}
-      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${share.libraryPath}
-      ${pkgs.coreutils}/bin/chmod 0700 ${share.libraryPath}
+      ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg share.path} ${lib.escapeShellArg share.libraryPath}
+      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${lib.escapeShellArg share.path}
+      ${pkgs.coreutils}/bin/chmod 0700 ${lib.escapeShellArg share.path}
+      ${pkgs.coreutils}/bin/chown ${share.owner}:${share.group} ${lib.escapeShellArg share.libraryPath}
+      ${pkgs.coreutils}/bin/chmod 0700 ${lib.escapeShellArg share.libraryPath}
     '')
     mediaShare.userShares);
 in {

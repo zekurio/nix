@@ -52,10 +52,10 @@
 
   # Create root dirs as setgid + group-writable
   directoryRules = map (dir: "d ${dir} ${shareDirMode} ${shareUser} ${shareGroup} -") sharedDirs;
-  userShareDirectoryRules = lib.mapAttrsToList (_: share: "d ${share.path} 0700 ${share.owner} ${share.group} -") cfg.userShares;
+  userShareDirectoryRules = lib.mapAttrsToList (_: share: "d ${builtins.toJSON share.path} 0700 ${share.owner} ${share.group} -") cfg.userShares;
   userLibraryDirectoryRules =
     lib.mapAttrsToList (
-      _: share: "d ${share.libraryPath} 0700 ${share.owner} ${share.group} -"
+      _: share: "d ${builtins.toJSON share.libraryPath} 0700 ${share.owner} ${share.group} -"
     )
     cfg.userShares;
   userShareSambaSettings = lib.listToAttrs (
