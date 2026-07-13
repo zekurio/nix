@@ -8,6 +8,5 @@ in {
   home.packages = with agents; [
     claude-code
     codex
-    pi
   ];
 }
