@@ -27,6 +27,7 @@ in {
   systemd.services.tank-datasets = {
     description = "Ensure tank ZFS datasets and quotas";
     wantedBy = ["multi-user.target"];
+    before = ["mediaShare-user-library-acl.service"];
     after = ["zfs-import.target"];
     serviceConfig = {
       Type = "oneshot";
@@ -37,6 +38,7 @@ in {
       ${ensureDataset "tank/share" "500G"}
       ${ensureDataset "tank/immich" "1000G"}
       ${ensureDataset "tank/alloy" "100G"}
+      ${ensureDataset "tank/shares" "none"}
       ${ensureUserShareDatasets}
     '';
   };
