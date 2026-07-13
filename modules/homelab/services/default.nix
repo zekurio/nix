@@ -2,6 +2,7 @@
   imports = [
     ./alloy
     ./anvil
+    ./arr-cal-proxy
     ./beets
     ./blitzcrank
     ./caddy
