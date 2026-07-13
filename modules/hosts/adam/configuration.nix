@@ -211,6 +211,7 @@ in {
   services.homelab = {
     alloy.enable = true;
     anvil.enable = true;
+    arr-cal-proxy.enable = true;
     beets.enable = true;
     blitzcrank.enable = true;
     coolercontrol = {
