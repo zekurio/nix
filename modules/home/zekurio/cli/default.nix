@@ -21,6 +21,7 @@
     {
       enable = true;
       autoEnable = false;
+      bat.enable = true;
     }
     // import ../../../palette.nix;
 }

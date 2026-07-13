@@ -2,6 +2,7 @@
   home.packages = with pkgs; [
     age
     bitwarden-cli
+    bun
     devenv
     envsubst
     gh
