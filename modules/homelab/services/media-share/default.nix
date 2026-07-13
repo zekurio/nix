@@ -86,7 +86,7 @@
     for share in "''${sharePaths[@]}"; do
       [ -d "$share" ] || continue
       # Each share is private to its owner over SMB; Immich may only traverse it.
-      setfacl -m u:immich:--x "$share"
+      setfacl -m u:immich:--x,m::--x "$share"
     done
 
     for library in "''${libraryPaths[@]}"; do
@@ -124,13 +124,13 @@
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        default = "tank/shares/users/${name}";
+        default = "tank/shares/${name}";
         description = "ZFS dataset backing this user's private share.";
       };
 
       path = lib.mkOption {
         type = lib.types.str;
-        default = "/tank/shares/users/${name}";
+        default = "/tank/shares/${name}";
         description = "Filesystem path of this user's private share.";
       };
 
@@ -142,7 +142,7 @@
 
       libraryPath = lib.mkOption {
         type = lib.types.str;
-        default = "/tank/shares/users/${name}/Immich External Library";
+        default = "/tank/shares/${name}/Immich External Library";
         description = "Immich external-library subtree inside this user's private share.";
       };
     };
@@ -320,6 +320,7 @@ in {
     systemd.services.mediaShare-user-library-acl = lib.mkIf (cfg.userShares != {}) {
       description = "Grant Immich read access to per-user external-library trees";
       wantedBy = ["multi-user.target"];
+      before = ["immich-server.service"];
       after = [
         "local-fs.target"
         "systemd-tmpfiles-setup.service"
