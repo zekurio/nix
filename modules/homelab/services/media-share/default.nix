@@ -12,7 +12,6 @@
   shareGid = 995;
   shareDirMode = "2775";
   shareFileMode = "0664";
-  fileShareDir = "/tank/share";
   usenetDownloadsDir = cfg.downloadsRoot;
   tailnetCidr = "100.64.0.0/10";
   smbTcpPorts = [
@@ -451,7 +450,6 @@ in {
       enable = true;
       exports = ''
         /tank ${tailnetCidr}(${nfsRootOptions})
-        ${fileShareDir} ${tailnetCidr}(${nfsShareOptions})
         /tank/media ${tailnetCidr}(${nfsShareOptions})
       '';
     };
