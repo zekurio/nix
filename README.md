@@ -7,7 +7,6 @@ Nix configurations for my NixOS hosts and macOS.
 | Host | Type | Description |
 |------|------|-------------|
 | `adam` | NixOS | Homelab server |
-| `lilith` | NixOS | Desktop (KDE Plasma 6) |
 | `sachiel` | nix-darwin | MacBook Air |
 
 ## Bootstrap runbook (macOS / nix-darwin)
@@ -29,6 +28,10 @@ sudo nix --extra-experimental-features "nix-command flakes" \
 ```
 
 Subsequent rebuilds use `darwin-rebuild` directly (see below).
+
+The `sachiel` configuration manages Nix, shell and CLI tooling, Git/SSH, and
+Home Manager configuration for Feishin, Ghostty, Vesktop, and Zed. Desktop
+applications are installed natively; LLM agents come from `llm-agents.nix`.
 
 ## Rebuild runbook (nix-darwin)
 
@@ -81,22 +84,6 @@ umount -Rl /mnt
 reboot
 ```
 
-## Plasma settings (lilith)
-
-KDE settings are managed with
-[plasma-manager](https://github.com/nix-community/plasma-manager)
-(`programs.plasma` in `modules/hosts/lilith/desktop/plasma.nix`); the custom
-look-and-feel packages are built in `theme.nix` and re-applied on every
-login. Only keys set in Nix are managed — to promote a GUI tweak into the
-config, capture the live state on lilith and diff:
-
-```bash
-nix run github:nix-community/plasma-manager -- rc2nix > /tmp/plasma-capture.nix
-```
-
-Once everything worth keeping is in Nix, set
-`programs.plasma.overrideConfig = true` to make the desktop fully
-reproducible (any setting not in Nix then resets to default on login).
 
 ## Secrets bootstrap (sops-nix, adam only)
 

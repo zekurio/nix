@@ -20,9 +20,6 @@
         claude = "claude --dangerously-skip-permissions";
         codex = "codex --dangerously-bypass-approvals-and-sandbox";
       };
-      functions.omp.body = ''
-        command omp --allow-home $argv
-      '';
     };
 
     carapace = {
