@@ -78,6 +78,10 @@
       url = "github:zekurio/anvil";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    arr-cal-proxy = {
+      url = "github:zekurio/arr-cal-proxy";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     jellything = {
       url = "github:zekurio/jellything";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
