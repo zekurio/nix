@@ -21,13 +21,12 @@ in {
           font-family = "FiraCode Nerd Font Mono";
           font-size = 14;
           term = "xterm-256color";
+          theme = "light:Catppuccin Latte,dark:Catppuccin Frappe";
           window-inherit-font-size = false;
         }
         // lib.optionalAttrs isDarwin {
           macos-titlebar-style = "transparent";
         };
     };
-
-    catppuccin.ghostty.enable = true;
   };
 }
