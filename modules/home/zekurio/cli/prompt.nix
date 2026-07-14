@@ -3,10 +3,6 @@
   pkgs,
   ...
 }: {
-  # Starship palette (Frappé) provided by catppuccin/nix; the module sets
-  # `palette` and injects the color definitions used by the styles below.
-  catppuccin.starship.enable = true;
-
   programs.starship = {
     enable = true;
     enableFishIntegration = true;

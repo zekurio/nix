@@ -1,6 +1,5 @@
-# Single source of truth for the Catppuccin look. Imported by both the
-# home-manager and NixOS catppuccin modules; per-port options inherit these
-# values, so changing the theme means editing exactly this file.
+# Default Catppuccin look for ports without runtime appearance switching.
+# Appearance-aware terminal tools override this with Latte/Frappé pairs.
 {
   flavor = "frappe";
   accent = "blue";

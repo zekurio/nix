@@ -36,8 +36,4 @@
       ];
     };
   };
-
-  # Fish colors come from catppuccin/nix, which installs the Frappé theme and
-  # selects it with `fish_config theme choose`.
-  catppuccin.fish.enable = true;
 }
