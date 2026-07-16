@@ -6,6 +6,7 @@
     ./beets
     ./blitzcrank
     ./caddy
+    ./configarr
     ./coolercontrol
     ./immich
     ./jellyfin
