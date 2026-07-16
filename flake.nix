@@ -63,6 +63,10 @@
       url = "github:zekurio/anvil";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    configarr = {
+      url = "github:raydak-labs/configarr/v1.30.0";
+      inputs.flake-parts.follows = "flake-parts";
+    };
     arr-cal-proxy = {
       url = "github:zekurio/arr-cal-proxy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
