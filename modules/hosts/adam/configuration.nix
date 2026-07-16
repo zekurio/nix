@@ -214,6 +214,7 @@ in {
     arr-cal-proxy.enable = true;
     beets.enable = true;
     blitzcrank.enable = true;
+    configarr.enable = true;
     coolercontrol = {
       enable = true;
       listenAddress = "0.0.0.0";
