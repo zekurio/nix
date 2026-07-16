@@ -1,33 +1,29 @@
 {
-  lib,
-  pkgs,
-  ...
-}: let
-  homeDirectory =
-    if pkgs.stdenv.hostPlatform.isDarwin
-    then "/Users/zekurio"
-    else "/home/zekurio";
-in {
-  imports = [
-    ./apps
-    ./cli
-    ./git
-  ];
-
-  config = {
-    home = {
-      username = lib.mkDefault "zekurio";
-      homeDirectory = lib.mkDefault homeDirectory;
-      stateVersion = lib.mkDefault "25.05";
-      enableNixpkgsReleaseCheck = lib.mkDefault false;
-      sessionPath = [
-        "$HOME/.local/bin"
-      ];
-      sessionVariables = {
-        SOPS_AGE_KEY_FILE = "${homeDirectory}/.config/sops/age/keys.txt";
+  flake.modules.homeManager.zekurio = {
+    lib,
+    pkgs,
+    ...
+  }: let
+    homeDirectory =
+      if pkgs.stdenv.hostPlatform.isDarwin
+      then "/Users/zekurio"
+      else "/home/zekurio";
+  in {
+    config = {
+      home = {
+        username = lib.mkDefault "zekurio";
+        homeDirectory = lib.mkDefault homeDirectory;
+        stateVersion = lib.mkDefault "25.05";
+        enableNixpkgsReleaseCheck = lib.mkDefault false;
+        sessionPath = [
+          "$HOME/.local/bin"
+        ];
+        sessionVariables = {
+          SOPS_AGE_KEY_FILE = "${homeDirectory}/.config/sops/age/keys.txt";
+        };
       };
-    };
 
-    fonts.fontconfig.enable = false;
+      fonts.fontconfig.enable = false;
+    };
   };
 }

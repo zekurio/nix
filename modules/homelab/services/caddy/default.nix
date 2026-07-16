@@ -1,170 +1,172 @@
 {
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.homelab.caddy;
+  flake.modules.nixos.homelab = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.homelab.caddy;
 
-  acmeEmail = "admin@zekurio.me";
+    acmeEmail = "admin@zekurio.me";
 
-  # Helper to replace generic matchers with service-specific ones
-  makeMatchersUnique = name: config: let
-    # Replace @blocked with @blocked_<servicename>
-    uniqueBlockedMatcher = "@blocked_${name}";
-  in
-    builtins.replaceStrings ["@blocked"] [uniqueBlockedMatcher] config;
-
-  # Group virtual hosts by domain and merge their configurations
-  groupedHosts = lib.foldl' (
-    acc: name: let
-      hostCfg = cfg.virtualHosts.${name};
-      domain = hostCfg.domain or name;
-      existing =
-        acc.${
-          domain
-        } or {
-          reverseProxies = [];
-          extraConfigs = [];
-          forwardAuth = null;
-        };
-      # Make matchers unique to avoid conflicts
-      uniqueExtraConfig =
-        if hostCfg.extraConfig != ""
-        then makeMatchersUnique name hostCfg.extraConfig
-        else "";
+    # Helper to replace generic matchers with service-specific ones
+    makeMatchersUnique = name: config: let
+      # Replace @blocked with @blocked_<servicename>
+      uniqueBlockedMatcher = "@blocked_${name}";
     in
-      acc
-      // {
-        ${domain} = {
-          reverseProxies =
-            existing.reverseProxies
-            ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
-          extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
-          # First non-null forwardAuth across all entries for this domain wins
-          forwardAuth =
-            if hostCfg.forwardAuth != null
-            then hostCfg.forwardAuth
-            else existing.forwardAuth;
-        };
-      }
-  ) {} (builtins.attrNames cfg.virtualHosts);
-in {
-  options.services.homelab.caddy = {
-    enable =
-      lib.mkEnableOption "Caddy reverse proxy with Cloudflare DNS"
-      // {
-        default = true;
-      };
+      builtins.replaceStrings ["@blocked"] [uniqueBlockedMatcher] config;
 
-    virtualHosts = lib.mkOption {
-      type = lib.types.attrsOf (
-        lib.types.submodule {
-          options = {
-            domain = lib.mkOption {
-              type = lib.types.str;
-              description = "Domain name (can be shared across multiple services)";
-            };
-            reverseProxy = lib.mkOption {
-              type = lib.types.nullOr lib.types.str;
-              default = null;
-              description = "Backend address to proxy to (e.g., localhost:8096)";
-            };
-            extraConfig = lib.mkOption {
-              type = lib.types.lines;
-              default = "";
-              description = "Extra Caddy configuration for this virtual host";
-            };
-            forwardAuth = lib.mkOption {
-              type = lib.types.nullOr lib.types.str;
-              default = null;
-              description = "oauth2-proxy address for forward auth (e.g. 127.0.0.1:4180). When set, all requests to this domain (except /oauth2/*) are gated behind Pocket ID.";
-            };
+    # Group virtual hosts by domain and merge their configurations
+    groupedHosts = lib.foldl' (
+      acc: name: let
+        hostCfg = cfg.virtualHosts.${name};
+        domain = hostCfg.domain or name;
+        existing =
+          acc.${
+            domain
+          } or {
+            reverseProxies = [];
+            extraConfigs = [];
+            forwardAuth = null;
+          };
+        # Make matchers unique to avoid conflicts
+        uniqueExtraConfig =
+          if hostCfg.extraConfig != ""
+          then makeMatchersUnique name hostCfg.extraConfig
+          else "";
+      in
+        acc
+        // {
+          ${domain} = {
+            reverseProxies =
+              existing.reverseProxies
+              ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
+            extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
+            # First non-null forwardAuth across all entries for this domain wins
+            forwardAuth =
+              if hostCfg.forwardAuth != null
+              then hostCfg.forwardAuth
+              else existing.forwardAuth;
           };
         }
-      );
-      default = {};
-      description = "Virtual host configurations for Caddy";
-    };
-  };
+    ) {} (builtins.attrNames cfg.virtualHosts);
+  in {
+    options.services.homelab.caddy = {
+      enable =
+        lib.mkEnableOption "Caddy reverse proxy with Cloudflare DNS"
+        // {
+          default = true;
+        };
 
-  config = lib.mkIf (cfg.enable && cfg.virtualHosts != {}) {
-    services.caddy = {
-      enable = true;
-      package = pkgs.caddy.withPlugins {
-        plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
-        hash = "sha256-I0FjQOfFaGlOEJlQECmYNBKjIY4CIg5aCCQ/ORmnrSU=";
-      };
-      globalConfig = ''
-        email ${acmeEmail}
-        acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} {
-          resolvers 1.1.1.1 1.0.0.1
-        }
-        servers {
-          listener_wrappers {
-            proxy_protocol {
-              timeout 5s
-              allow 127.0.0.1/32
-            }
-            tls
+      virtualHosts = lib.mkOption {
+        type = lib.types.attrsOf (
+          lib.types.submodule {
+            options = {
+              domain = lib.mkOption {
+                type = lib.types.str;
+                description = "Domain name (can be shared across multiple services)";
+              };
+              reverseProxy = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Backend address to proxy to (e.g., localhost:8096)";
+              };
+              extraConfig = lib.mkOption {
+                type = lib.types.lines;
+                default = "";
+                description = "Extra Caddy configuration for this virtual host";
+              };
+              forwardAuth = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "oauth2-proxy address for forward auth (e.g. 127.0.0.1:4180). When set, all requests to this domain (except /oauth2/*) are gated behind Pocket ID.";
+              };
+            };
           }
-          trusted_proxies static 127.0.0.1/32
-        }
-      '';
-      virtualHosts =
-        lib.mapAttrs (_: hostCfg: {
-          extraConfig = ''
-            header {
-              X-Robots-Tag "noindex, nofollow"
-            }
-            tls {
-              dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-              resolvers 1.1.1.1 1.0.0.1
-            }
-            ${lib.optionalString (hostCfg.forwardAuth != null) ''
-              handle /oauth2/* {
-                reverse_proxy ${hostCfg.forwardAuth}
+        );
+        default = {};
+        description = "Virtual host configurations for Caddy";
+      };
+    };
+
+    config = lib.mkIf (cfg.enable && cfg.virtualHosts != {}) {
+      services.caddy = {
+        enable = true;
+        package = pkgs.caddy.withPlugins {
+          plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
+          hash = "sha256-I0FjQOfFaGlOEJlQECmYNBKjIY4CIg5aCCQ/ORmnrSU=";
+        };
+        globalConfig = ''
+          email ${acmeEmail}
+          acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} {
+            resolvers 1.1.1.1 1.0.0.1
+          }
+          servers {
+            listener_wrappers {
+              proxy_protocol {
+                timeout 5s
+                allow 127.0.0.1/32
               }
-              # Bypass token: skip OIDC for API clients (e.g. nzb360)
-              @not_bypass {
-                not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
-                not path /oauth2/*
+              tls
+            }
+            trusted_proxies static 127.0.0.1/32
+          }
+        '';
+        virtualHosts =
+          lib.mapAttrs (_: hostCfg: {
+            extraConfig = ''
+              header {
+                X-Robots-Tag "noindex, nofollow"
               }
-              forward_auth @not_bypass ${hostCfg.forwardAuth} {
-                uri /oauth2/auth
-                copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
-                @unauthorized status 401
-                handle_response @unauthorized {
-                  redir * /oauth2/start?rd={http.request.uri} 302
+              tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+                resolvers 1.1.1.1 1.0.0.1
+              }
+              ${lib.optionalString (hostCfg.forwardAuth != null) ''
+                handle /oauth2/* {
+                  reverse_proxy ${hostCfg.forwardAuth}
                 }
-              }
-            ''}
-            ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
-            ${lib.optionalString (
-              hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
-            ) "reverse_proxy ${builtins.head hostCfg.reverseProxies}"}
-          '';
-        })
-        groupedHosts;
-    };
+                # Bypass token: skip OIDC for API clients (e.g. nzb360)
+                @not_bypass {
+                  not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
+                  not path /oauth2/*
+                }
+                forward_auth @not_bypass ${hostCfg.forwardAuth} {
+                  uri /oauth2/auth
+                  copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
+                  @unauthorized status 401
+                  handle_response @unauthorized {
+                    redir * /oauth2/start?rd={http.request.uri} 302
+                  }
+                }
+              ''}
+              ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
+              ${lib.optionalString (
+                hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
+              ) "reverse_proxy ${builtins.head hostCfg.reverseProxies}"}
+            '';
+          })
+          groupedHosts;
+      };
 
-    # Make Cloudflare API token and email available to Caddy
-    systemd.services.caddy.serviceConfig = {
-      EnvironmentFile = [config.sops.secrets.caddy_env.path];
-    };
+      # Make Cloudflare API token and email available to Caddy
+      systemd.services.caddy.serviceConfig = {
+        EnvironmentFile = [config.sops.secrets.caddy_env.path];
+      };
 
-    # SOPS secret for Caddy environment variables
-    sops.secrets.caddy_env = {
-      owner = "caddy";
-      group = "caddy";
-      mode = "0400";
-    };
+      # SOPS secret for Caddy environment variables
+      sops.secrets.caddy_env = {
+        owner = "caddy";
+        group = "caddy";
+        mode = "0400";
+      };
 
-    # Open firewall ports for HTTP/HTTPS
-    networking.firewall.allowedTCPPorts = [
-      80
-      443
-    ];
-    networking.firewall.allowedUDPPorts = [443];
+      # Open firewall ports for HTTP/HTTPS
+      networking.firewall.allowedTCPPorts = [
+        80
+        443
+      ];
+      networking.firewall.allowedUDPPorts = [443];
+    };
   };
 }
