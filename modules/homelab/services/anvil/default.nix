@@ -143,8 +143,8 @@
               bitDepth = 10;
               crfMin = 14;
               crfMax = 38;
-              targetVmaf = 95;
-              minSavingsPercent = 5;
+              targetVmaf = 96;
+              minSavingsPercent = 15;
               forceEncodeOnNoFit = true;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
@@ -225,8 +225,8 @@
               bitDepth = 10;
               crfMin = 14;
               crfMax = 38;
-              targetVmaf = 95;
-              minSavingsPercent = 5;
+              targetVmaf = 96;
+              minSavingsPercent = 15;
               forceEncodeOnNoFit = true;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
