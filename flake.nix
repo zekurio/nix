@@ -1,7 +1,7 @@
 {
   description = "Nix configurations for my NixOS hosts and macOS";
 
-  # nixConfig is parsed statically and cannot import modules/caches.nix;
+  # nixConfig is parsed statically and cannot import modules/_caches.nix;
   # keep this list in sync with that file by hand.
   nixConfig = {
     extra-substituters = [
@@ -28,6 +28,7 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
     };
+    import-tree.url = "github:vic/import-tree";
 
     disko = {
       url = "github:nix-community/disko";
@@ -95,8 +96,8 @@
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        ./modules/hosts
-        ./modules/darwin
+        inputs.flake-parts.flakeModules.modules
+        (inputs.import-tree ./modules)
       ];
 
       systems = [
