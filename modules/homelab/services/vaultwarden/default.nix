@@ -1,44 +1,46 @@
 {
-  config,
-  lib,
-  ...
-}: let
-  domain = "vw.zekurio.me";
-  port = 8222;
-in {
-  options.services.homelab.vaultwarden = {
-    enable = lib.mkEnableOption "Vaultwarden password manager with Caddy integration";
-  };
+  flake.modules.nixos.homelab = {
+    config,
+    lib,
+    ...
+  }: let
+    domain = "vw.${config.services.homelab.domains.zekurio}";
+    port = 8222;
+  in {
+    options.services.homelab.vaultwarden = {
+      enable = lib.mkEnableOption "Vaultwarden password manager with Caddy integration";
+    };
 
-  config = lib.mkIf config.services.homelab.vaultwarden.enable {
-    services.vaultwarden = {
-      enable = true;
-      domain = domain;
-      environmentFile = config.sops.secrets.vaultwarden_env.path;
-      config = {
-        ROCKET_ADDRESS = "127.0.0.1";
-        ROCKET_PORT = port;
-        SIGNUPS_ALLOWED = false;
-        INVITATIONS_ALLOWED = true;
-        WEBSOCKET_ENABLED = true;
-        SMTP_HOST = "smtp.purelymail.com";
-        SMTP_PORT = 465;
-        SMTP_SECURITY = "force_tls";
-        SMTP_FROM = "homelab@zekurio.me";
-        SMTP_FROM_NAME = "Vaultwarden";
-        SMTP_USERNAME = "homelab@zekurio.me";
+    config = lib.mkIf config.services.homelab.vaultwarden.enable {
+      services.vaultwarden = {
+        enable = true;
+        domain = domain;
+        environmentFile = config.sops.secrets.vaultwarden_env.path;
+        config = {
+          ROCKET_ADDRESS = "127.0.0.1";
+          ROCKET_PORT = port;
+          SIGNUPS_ALLOWED = false;
+          INVITATIONS_ALLOWED = true;
+          WEBSOCKET_ENABLED = true;
+          SMTP_HOST = "smtp.purelymail.com";
+          SMTP_PORT = 465;
+          SMTP_SECURITY = "force_tls";
+          SMTP_FROM = "homelab@zekurio.me";
+          SMTP_FROM_NAME = "Vaultwarden";
+          SMTP_USERNAME = "homelab@zekurio.me";
+        };
       };
-    };
 
-    sops.secrets.vaultwarden_env = {
-      owner = "vaultwarden";
-      group = "vaultwarden";
-      mode = "0400";
-    };
+      sops.secrets.vaultwarden_env = {
+        owner = "vaultwarden";
+        group = "vaultwarden";
+        mode = "0400";
+      };
 
-    services.homelab.caddy.virtualHosts."vaultwarden" = {
-      domain = domain;
-      reverseProxy = "127.0.0.1:${toString port}";
+      services.homelab.caddy.virtualHosts."vaultwarden" = {
+        domain = domain;
+        reverseProxy = "127.0.0.1:${toString port}";
+      };
     };
   };
 }
