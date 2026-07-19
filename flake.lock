@@ -636,7 +636,7 @@
         "type": "github"
       }
     },
-    "jellything": {
+    "inviterr": {
       "inputs": {
         "flake-utils": "flake-utils_3",
         "nixpkgs": [
@@ -644,16 +644,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1783624427,
-        "narHash": "sha256-4biI+gd2AWqi4D7mSnG/JBkMk3I0sm8O0nkoZqVfmiA=",
+        "lastModified": 1784462853,
+        "narHash": "sha256-sNpvEQa5048xF0jJTzIwhEjbpGJ0u69UTlHs+ZbyVt4=",
         "owner": "zekurio",
-        "repo": "jellything",
-        "rev": "3a4cde8185e661f9a649ef986efa7d5d484317c1",
+        "repo": "inviterr",
+        "rev": "852c605e8eeaaa7b8433652a6cd2bde9eb14e5b3",
         "type": "github"
       },
       "original": {
         "owner": "zekurio",
-        "repo": "jellything",
+        "repo": "inviterr",
         "type": "github"
       }
     },
@@ -929,7 +929,7 @@
         "flake-parts": "flake-parts_3",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
-        "jellything": "jellything",
+        "inviterr": "inviterr",
         "llm-agents": "llm-agents_2",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
