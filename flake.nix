@@ -72,8 +72,8 @@
       url = "github:zekurio/arr-cal-proxy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    jellything = {
-      url = "github:zekurio/jellything";
+    inviterr = {
+      url = "github:zekurio/inviterr";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
