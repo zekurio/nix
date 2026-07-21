@@ -32,6 +32,7 @@
       "/tank/media/shows"
       "/tank/media/anime"
       "/tank/media/movies"
+      "/tank/media/porn"
       usenetDownloadsDir
       "${usenetDownloadsDir}/complete"
       "${usenetDownloadsDir}/complete/manual"
