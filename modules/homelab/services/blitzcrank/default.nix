@@ -25,10 +25,8 @@
         environmentFile = config.sops.secrets.blitzcrank_env.path;
         dataDir = dataDir;
         piModels = {
-          default = "openai-codex/gpt-5.6-luna:high";
+          default = "openai-codex/gpt-5.6-sol:medium";
           seerr = "openai-codex/gpt-5.6-sol:high";
-          automation = "openai-codex/gpt-5.6-luna:high";
-          discord = "openai-codex/gpt-5.6-luna:high";
           discord_triage = "openai-codex/gpt-5.6-luna:low";
           review = "openai-codex/gpt-5.6-luna:medium";
         };
