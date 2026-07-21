@@ -9,8 +9,8 @@
 
     shareUser = cfg.user;
     shareGroup = cfg.group;
-    shareUid = 995;
-    shareGid = 995;
+    shareUid = 950;
+    shareGid = 950;
     shareDirMode = "2775";
     shareFileMode = "0664";
     usenetDownloadsDir = cfg.downloadsRoot;
