@@ -37,5 +37,8 @@
         ];
       };
     };
+
+    # Fish colors come from the fixed global Catppuccin flavor.
+    catppuccin.fish.enable = true;
   };
 }
