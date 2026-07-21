@@ -9,6 +9,7 @@
     cfg = config.services.homelab.blitzcrank;
     dataDir = "/var/lib/blitzcrank";
     package = inputs.blitzcrank.packages.${pkgs.system}.default;
+    anvilPackage = inputs.anvil.packages.${pkgs.system}.default;
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default
@@ -24,6 +25,10 @@
         package = package;
         environmentFile = config.sops.secrets.blitzcrank_env.path;
         dataDir = dataDir;
+        anvil = {
+          command = "${anvilPackage}/bin/anvilctl";
+          controlSocket = config.services.anvil.daemon.controlSocket;
+        };
         piModels = {
           default = "openai-codex/gpt-5.6-sol:medium";
           seerr = "openai-codex/gpt-5.6-sol:high";
