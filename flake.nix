@@ -57,7 +57,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     alloy = {
-      url = "github:zekurio/alloy";
+      url = "github:zekurio/alloy/v1.3.4";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     anvil = {

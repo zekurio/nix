@@ -18,6 +18,8 @@
     radarrAnimeProfileName = "qsv-av1-radarr-anime-slow";
     flowName = "download-av1-handoff";
     qsvFfmpegArgs = [
+      "-look_ahead"
+      "1"
       "-extbrc"
       "1"
       "-look_ahead_depth"
@@ -32,6 +34,8 @@
       "7"
     ];
     qsvAbAv1Args = [
+      "--enc"
+      "look_ahead=1"
       "--enc"
       "extbrc=1"
       "--enc"
@@ -144,7 +148,7 @@
               crfMin = 14;
               crfMax = 38;
               targetVmaf = 96;
-              minSavingsPercent = 15;
+              minSavingsPercent = 5;
               forceEncodeOnNoFit = true;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
@@ -184,9 +188,9 @@
               bitDepth = 10;
               crfMin = 14;
               crfMax = 38;
-              targetVmaf = 97;
-              minSavingsPercent = 0;
-              forceEncodeOnNoFit = true;
+              targetVmaf = 96;
+              minSavingsPercent = 10;
+              forceEncodeOnNoFit = false;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
 
@@ -226,7 +230,7 @@
               crfMin = 14;
               crfMax = 38;
               targetVmaf = 96;
-              minSavingsPercent = 15;
+              minSavingsPercent = 5;
               forceEncodeOnNoFit = true;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
@@ -266,9 +270,9 @@
               bitDepth = 10;
               crfMin = 14;
               crfMax = 38;
-              targetVmaf = 97;
-              minSavingsPercent = 0;
-              forceEncodeOnNoFit = true;
+              targetVmaf = 96;
+              minSavingsPercent = 10;
+              forceEncodeOnNoFit = false;
               ffmpegArgs = qsvFfmpegArgs;
               abAv1Args = qsvAbAv1Args;
 
