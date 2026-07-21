@@ -1,5 +1,4 @@
-# Default Catppuccin look for ports without runtime appearance switching.
-# Appearance-aware terminal tools override this with Latte/Frappé pairs.
+# Single fixed Catppuccin look shared by all themed ports.
 {
   flavor = "frappe";
   accent = "blue";

@@ -10,11 +10,12 @@
     };
 
     # autoEnable is off so only the ports enabled next to each program are
-    # themed. Appearance-aware CLI ports are managed by appearance/default.nix.
+    # themed; flavor and accent cascade to every port.
     catppuccin =
       {
         enable = true;
         autoEnable = false;
+        bat.enable = true;
       }
       // import ../../../_palette.nix;
   };

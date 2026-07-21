@@ -1,15 +1,10 @@
 {
-  flake.modules.homeManager.zekurio = {lib, ...}: {
-    # Config/theme only; the binary comes from the host. Follow the system
-    # appearance while retaining the global blue accent.
+  flake.modules.homeManager.zekurio = {...}: {
+    # Config/theme only; the binary comes from the host. Flavor and accent
+    # cascade from the global Catppuccin settings.
     programs.zed-editor = {
       enable = true;
       package = null;
-      userSettings.theme = {
-        mode = "system";
-        light = lib.mkForce "Catppuccin Latte (blue)";
-        dark = lib.mkForce "Catppuccin Frappé (blue)";
-      };
       extensions = [
         "astro"
         "dockerfile"
