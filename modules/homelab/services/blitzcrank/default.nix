@@ -26,11 +26,11 @@
         dataDir = dataDir;
         piModels = {
           default = "openai-codex/gpt-5.6-luna:high";
-          seerr = "openai-codex/gpt-5.6-luna:high";
+          seerr = "openai-codex/gpt-5.6-sol:high";
           automation = "openai-codex/gpt-5.6-luna:high";
           discord = "openai-codex/gpt-5.6-luna:high";
           discord_triage = "openai-codex/gpt-5.6-luna:low";
-          review = "openai-codex/gpt-5.6-luna:high";
+          review = "openai-codex/gpt-5.6-luna:medium";
         };
         settings = {
           bot = {
