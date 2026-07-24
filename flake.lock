@@ -42,26 +42,6 @@
         "type": "github"
       }
     },
-    "arr-cal-proxy": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784060396,
-        "narHash": "sha256-bgxDsAF2i3un6Rwq7ujb/VOnhMvpXcSUHWR2sIGR5Ic=",
-        "owner": "zekurio",
-        "repo": "arr-cal-proxy",
-        "rev": "e542f4df7e4445406437f5e15528690bbdf44e56",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "arr-cal-proxy",
-        "type": "github"
-      }
-    },
     "autoaspm": {
       "inputs": {
         "nixpkgs": [
@@ -252,6 +232,26 @@
         "owner": "cachix",
         "ref": "latest",
         "repo": "cachix",
+        "type": "github"
+      }
+    },
+    "calthing": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784904598,
+        "narHash": "sha256-AANxlGxTY462b6LDYfO7IlJgpWSiqVT+svmE/ruPu4Y=",
+        "owner": "zekurio",
+        "repo": "calthing",
+        "rev": "954403bd13f3ddc05818c9a4ea33fb34ef966917",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "calthing",
         "type": "github"
       }
     },
@@ -919,9 +919,9 @@
       "inputs": {
         "alloy": "alloy",
         "anvil": "anvil",
-        "arr-cal-proxy": "arr-cal-proxy",
         "autoaspm": "autoaspm",
         "blitzcrank": "blitzcrank",
+        "calthing": "calthing",
         "catppuccin": "catppuccin",
         "configarr": "configarr",
         "cpu-microcodes": "cpu-microcodes",
