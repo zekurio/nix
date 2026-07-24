@@ -57,7 +57,7 @@
           };
           jellyfin = {
             url = config.services.homelab.jellyfin.baseUrl;
-            public_url = "https://${config.services.homelab.domains.schnitzelflix}";
+            public_url = config.services.homelab.jellyfin.publicUrl;
             api_key = "\${JELLYFIN_API_KEY}";
           };
           instances = [
