@@ -6,16 +6,16 @@
     pkgs,
     ...
   }: let
-    cfg = config.services.homelab.arr-cal-proxy;
+    cfg = config.services.homelab.calthing;
     domain = "calendar.${config.services.homelab.domains.schnitzelflix}";
     port = 8090;
-    package = inputs.arr-cal-proxy.packages.${pkgs.system}.default;
+    package = inputs.calthing.packages.${pkgs.system}.default;
   in {
     imports = [
-      inputs.arr-cal-proxy.nixosModules.default
+      inputs.calthing.nixosModules.default
     ];
 
-    options.services.homelab.arr-cal-proxy = {
+    options.services.homelab.calthing = {
       enable = lib.mkEnableOption "merged Radarr and Sonarr calendar with Caddy integration";
     };
 
@@ -23,22 +23,22 @@
       assertions = [
         {
           assertion = config.services.homelab.radarr.enable;
-          message = "services.homelab.arr-cal-proxy requires services.homelab.radarr.";
+          message = "services.homelab.calthing requires services.homelab.radarr.";
         }
         {
           assertion = config.services.homelab.sonarr.enable;
-          message = "services.homelab.arr-cal-proxy requires services.homelab.sonarr.";
+          message = "services.homelab.calthing requires services.homelab.sonarr.";
         }
         {
           assertion = config.services.homelab.jellyfin.enable;
-          message = "services.homelab.arr-cal-proxy requires services.homelab.jellyfin.";
+          message = "services.homelab.calthing requires services.homelab.jellyfin.";
         }
       ];
 
-      services.arr-cal-proxy = {
+      services.calthing = {
         enable = true;
         inherit package;
-        environmentFile = config.sops.templates."arr-cal-proxy.env".path;
+        environmentFile = config.sops.templates."calthing.env".path;
         settings = {
           listen = "127.0.0.1:${toString port}";
           cache.ttl = "10m";
@@ -48,7 +48,8 @@
             name = "SchnitzelFlix";
             availability_delay = "1h";
           };
-          auth.token = "";
+          # public calendar; set auth.secret (via sops) to require Jellyfin login
+          auth.secret = "";
           branding = {
             name = "SchnitzelFlix";
             icon_url = "";
@@ -79,21 +80,24 @@
         };
       };
 
-      sops.templates."arr-cal-proxy.env" = {
+      sops.templates."calthing.env" = {
         content = ''
           RADARR_API_KEY=${config.sops.placeholder.anvil_radarr_api_key}
           SONARR_API_KEY=${config.sops.placeholder.anvil_sonarr_api_key}
-          JELLYFIN_API_KEY=${config.sops.placeholder.arr_cal_proxy_jellyfin_api_key}
+          JELLYFIN_API_KEY=${config.sops.placeholder.calthing_jellyfin_api_key}
         '';
         mode = "0400";
       };
       sops.secrets = {
         anvil_radarr_api_key = {};
         anvil_sonarr_api_key = {};
-        arr_cal_proxy_jellyfin_api_key = {};
+        calthing_jellyfin_api_key = {
+          # value still lives under its pre-rename key in secrets/adam.yaml
+          key = "arr_cal_proxy_jellyfin_api_key";
+        };
       };
 
-      systemd.services.arr-cal-proxy = {
+      systemd.services.calthing = {
         after = [
           "radarr.service"
           "sonarr.service"
@@ -104,7 +108,7 @@
         ];
       };
 
-      services.homelab.caddy.virtualHosts."arr-cal-proxy" = {
+      services.homelab.caddy.virtualHosts."calthing" = {
         inherit domain;
         reverseProxy = "127.0.0.1:${toString port}";
       };
