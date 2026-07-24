@@ -61,7 +61,7 @@
 
           jellyfin = {
             base_url = config.services.homelab.jellyfin.baseUrl;
-            public_url = "https://${config.services.homelab.domains.schnitzelflix}";
+            public_url = config.services.homelab.jellyfin.publicUrl;
           };
           sonarr = {
             base_url = config.services.homelab.sonarr.baseUrl;

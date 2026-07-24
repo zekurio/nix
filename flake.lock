@@ -298,6 +298,26 @@
         "type": "github"
       }
     },
+    "costthing": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784905638,
+        "narHash": "sha256-yA3Tkq/1c6yQif91m4NOQP887TCH6T18O7RwG/iRZgY=",
+        "owner": "zekurio",
+        "repo": "costthing",
+        "rev": "68a7f6ef94af4fa19096881e8b635bab84b2f49a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "costthing",
+        "type": "github"
+      }
+    },
     "cpu-microcodes": {
       "flake": false,
       "locked": {
@@ -924,6 +944,7 @@
         "calthing": "calthing",
         "catppuccin": "catppuccin",
         "configarr": "configarr",
+        "costthing": "costthing",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts_3",

@@ -21,7 +21,12 @@
       baseUrl = lib.mkOption {
         type = lib.types.str;
         default = "http://127.0.0.1:${toString config.services.homelab.jellyfin.port}";
-        description = "URL other services use to reach the Jellyfin API.";
+        description = "Internal URL other services use to reach the Jellyfin API.";
+      };
+      publicUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "https://${domain}";
+        description = "Public URL users and external clients use to reach Jellyfin.";
       };
     };
 
