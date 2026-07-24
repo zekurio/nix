@@ -68,8 +68,8 @@
       url = "github:raydak-labs/configarr/v1.30.0";
       inputs.flake-parts.follows = "flake-parts";
     };
-    arr-cal-proxy = {
-      url = "github:zekurio/arr-cal-proxy";
+    calthing = {
+      url = "github:zekurio/calthing";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     inviterr = {
