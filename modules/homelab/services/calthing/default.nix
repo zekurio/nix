@@ -47,9 +47,8 @@
             future_days = 90;
             name = "SchnitzelFlix";
             availability_delay = "1h";
+            feed_secret = "\${CALTHING_FEED_SECRET}";
           };
-          # public calendar; set auth.secret (via sops) to require Jellyfin login
-          auth.secret = "";
           branding = {
             name = "SchnitzelFlix";
             icon_url = "";
@@ -85,6 +84,7 @@
           RADARR_API_KEY=${config.sops.placeholder.anvil_radarr_api_key}
           SONARR_API_KEY=${config.sops.placeholder.anvil_sonarr_api_key}
           JELLYFIN_API_KEY=${config.sops.placeholder.calthing_jellyfin_api_key}
+          CALTHING_FEED_SECRET=${config.sops.placeholder.calthing_feed_secret}
         '';
         mode = "0400";
       };
@@ -95,6 +95,7 @@
           # value still lives under its pre-rename key in secrets/adam.yaml
           key = "arr_cal_proxy_jellyfin_api_key";
         };
+        calthing_feed_secret = {};
       };
 
       systemd.services.calthing = {
