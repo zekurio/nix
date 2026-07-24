@@ -76,6 +76,10 @@
       url = "github:zekurio/inviterr";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    costthing = {
+      url = "github:zekurio/costthing";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
