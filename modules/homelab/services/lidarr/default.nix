@@ -24,10 +24,10 @@
           server.urlBase = "/lidarr";
           # delegate auth to the Caddy / Pocket ID forward-auth layer
           auth.method = "External";
-          # The package is built from the plugins branch (see
+          # The package is built from the develop line (see
           # modules/nixpkgs/overlays/lidarr). Leaving this at master would make
           # the update check compare against releases this build is not from.
-          update.branch = "plugins";
+          update.branch = "develop";
         };
       };
 
