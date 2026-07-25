@@ -7,14 +7,13 @@
   in {
     programs.direnv = {
       enable = true;
-      enableFishIntegration = true;
       enableZshIntegration = true;
       nix-direnv.enable = true;
     };
 
     programs.zellij = {
       enable = true;
-      enableFishIntegration = false;
+      enableZshIntegration = false;
       settings = {
         show_startup_tips = false;
         support_kitty_keyboard_protocol = true;
