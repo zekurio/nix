@@ -36,19 +36,13 @@
       }
     ];
 
+    # Substituters, experimental features and store optimisation are shared
+    # across platforms and live in modules/nix.
     nix = {
-      settings = {
-        experimental-features = [
-          "nix-command"
-          "flakes"
-        ];
-        trusted-users = [
-          "root"
-          "@wheel"
-        ];
-        inherit (import ../../_caches.nix) substituters trusted-public-keys;
-        auto-optimise-store = true;
-      };
+      settings.trusted-users = [
+        "root"
+        "@wheel"
+      ];
 
       gc = {
         automatic = mkDefault true;

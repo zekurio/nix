@@ -1,8 +1,8 @@
 {
   description = "Nix configurations for my NixOS hosts and macOS";
 
-  # nixConfig is parsed statically and cannot import modules/_caches.nix;
-  # keep this list in sync with that file by hand.
+  # nixConfig is parsed statically and cannot import modules/nix/default.nix;
+  # keep this list in sync with that module by hand.
   nixConfig = {
     extra-substituters = [
       "https://cache.numtide.com"
@@ -94,10 +94,9 @@
     };
   };
 
-  outputs = inputs @ {flake-parts, ...}: let
-    unstable = inputs."nixpkgs-unstable";
-    lib = unstable.lib;
-  in
+  # Dendritic layout: every file under ./modules is a flake-parts module and is
+  # discovered by import-tree, so this file only wires inputs and systems.
+  outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.flake-parts.flakeModules.modules
@@ -109,18 +108,19 @@
         "aarch64-darwin"
       ];
 
-      _module.args = {
-        inherit inputs lib;
-      };
-
       perSystem = {system, ...}: let
-        pkgs = import unstable {inherit system;};
+        pkgs = import inputs.nixpkgs-unstable {inherit system;};
       in {
         formatter = pkgs.writeShellApplication {
           name = "nix-fmt";
           runtimeInputs = [pkgs.alejandra];
           text = ''
-            exec alejandra . "$@"
+            # Format the whole tree when `nix fmt` is called without paths,
+            # but honour the paths it passes when it does.
+            if [ "$#" -eq 0 ]; then
+              set -- .
+            fi
+            exec alejandra "$@"
           '';
         };
       };
