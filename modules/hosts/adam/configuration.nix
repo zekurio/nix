@@ -1,4 +1,4 @@
-{
+{inputs, ...}: {
   flake.modules.nixos.adam = {
     config,
     pkgs,
@@ -11,7 +11,13 @@
   in {
     imports = [
       (modulesPath + "/installer/scan/not-detected.nix")
+      # Third-party modules are imported next to the options they provide.
+      inputs.autoaspm.nixosModules.default
+      inputs.sops-nix.nixosModules.sops
+      inputs.ucodenix.nixosModules.default
     ];
+
+    nixpkgs.hostPlatform = "x86_64-linux";
 
     # Boot configuration
     boot = {

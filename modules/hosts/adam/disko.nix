@@ -1,5 +1,7 @@
-{
+{inputs, ...}: {
   flake.modules.nixos.adam = {...}: {
+    imports = [inputs.disko.nixosModules.disko];
+
     disko.devices = {
       disk = {
         main = {
