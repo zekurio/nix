@@ -242,11 +242,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784926081,
-        "narHash": "sha256-pRuOEMVcze+eoVvLJFtHC0BORgR8xVwt0/MGayal8/U=",
+        "lastModified": 1784974179,
+        "narHash": "sha256-nNZZDsMNAoQUeRyfb2TvQHmJS2NxMEbzIS1tN+cFMj8=",
         "owner": "zekurio",
         "repo": "calthing",
-        "rev": "56a32104c4407c80307b5cdf6d592b4628cd26a4",
+        "rev": "20621de7025828d138367d4bed0d7b64bf1a43fe",
         "type": "github"
       },
       "original": {
