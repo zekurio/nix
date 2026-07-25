@@ -15,7 +15,7 @@
     beetsConfig = (pkgs.formats.yaml {}).generate "beets-config.yaml" {
       directory = musicDir;
       library = "${stateDir}/library.db";
-      plugins = "fetchart embedart replaygain lastgenre chroma duplicates";
+      plugins = "fetchart embedart lastgenre chroma duplicates";
       import = {
         copy = false;
         move = true;
@@ -64,14 +64,6 @@
         auto = true;
         ifempty = false;
         remove_art_file = false;
-      };
-      replaygain = {
-        auto = true;
-        backend = "ffmpeg";
-        overwrite = true;
-        parallel_on_import = true;
-        peak = "true";
-        targetlevel = 89;
       };
     };
     beetMusic = pkgs.writeShellApplication {
