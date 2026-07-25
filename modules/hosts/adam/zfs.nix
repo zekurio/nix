@@ -25,6 +25,44 @@
       '')
       mediaShare.userShares);
   in {
+    # Automatic ZFS snapshots. Retention is deliberately asymmetric: irreplaceable
+    # data (photos, per-user shares) keeps a month of dailies, while the media
+    # library only keeps enough to undo an accidental mass deletion — its
+    # snapshots pin deleted/upgraded release files, so deep retention would
+    # bloat the pool with churn from the arr pipeline.
+    services.sanoid = {
+      enable = true;
+      templates = {
+        precious = {
+          hourly = 24;
+          daily = 30;
+          monthly = 6;
+          autosnap = true;
+          autoprune = true;
+        };
+        replaceable = {
+          hourly = 24;
+          daily = 7;
+          autosnap = true;
+          autoprune = true;
+        };
+      };
+      datasets = {
+        "tank/immich".useTemplate = ["precious"];
+        "tank/shares" = {
+          useTemplate = ["precious"];
+          # Cover current and future per-user share datasets.
+          recursive = true;
+        };
+        "tank/media".useTemplate = ["replaceable"];
+        "tank/alloy" = {
+          daily = 7;
+          autosnap = true;
+          autoprune = true;
+        };
+      };
+    };
+
     systemd.services.tank-datasets = {
       description = "Ensure tank ZFS datasets and quotas";
       wantedBy = ["multi-user.target"];
