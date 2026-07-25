@@ -16,13 +16,16 @@
       };
     };
 
-    environment.shells = [pkgs.fish];
+    environment.shells = [
+      pkgs.fish
+      pkgs.nushell
+    ];
 
     users = {
-      defaultUserShell = pkgs.fish;
+      defaultUserShell = pkgs.nushell;
 
       users.${username} = {
-        shell = pkgs.fish;
+        shell = pkgs.nushell;
         # Keeps the user's systemd instance (and XDG_RUNTIME_DIR) alive after
         # the last SSH session ends, so a detached zellij session stays
         # reattachable instead of dying with the runtime dir.
