@@ -32,16 +32,7 @@
     programs = {
       atuin = {
         enable = true;
-        enableFishIntegration = true;
         enableNushellIntegration = true;
-      };
-
-      fish = {
-        enable = true;
-        interactiveShellInit = ''
-          set fish_greeting
-
-        '';
       };
 
       nushell = {
@@ -63,10 +54,8 @@
           table.mode = "rounded";
         };
         extraConfig = lib.mkOrder 100 ''
-          # Preserve Nushell's structured built-ins before applying the shared
-          # Fish-style aliases below.
-          alias nu-ls = ls
-          alias nu-cat = cat
+          # On macOS, preserve Nushell's structured `open` before replacing it
+          # with the native application launcher below.
           alias nu-open = open
         '';
         shellAliases = lib.optionalAttrs isDarwin {
@@ -77,13 +66,11 @@
 
       carapace = {
         enable = true;
-        enableFishIntegration = true;
         enableNushellIntegration = true;
       };
 
       zoxide = {
         enable = true;
-        enableFishIntegration = true;
         enableNushellIntegration = true;
         options = [
           "--cmd"
@@ -93,7 +80,6 @@
     };
 
     # Shell colors come from the fixed global Catppuccin flavor.
-    catppuccin.fish.enable = true;
     catppuccin.nushell.enable = true;
   };
 }

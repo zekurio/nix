@@ -21,11 +21,7 @@ in {
     documentation.doc.enable = false;
     system.tools.darwin-uninstaller.enable = false;
 
-    programs.fish.enable = true;
-    environment.shells = [
-      pkgs.fish
-      pkgs.nushell
-    ];
+    environment.shells = [pkgs.nushell];
     users.knownUsers = [username];
     users.users.${username} = {
       uid = 501;
@@ -70,7 +66,7 @@ in {
     nix-homebrew = {
       enable = true;
       autoMigrate = true;
-      enableFishIntegration = true;
+      enableFishIntegration = false;
       user = username;
     };
 

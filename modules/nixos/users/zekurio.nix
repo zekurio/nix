@@ -9,17 +9,13 @@
     nix.settings.trusted-users = [username];
 
     programs = {
-      fish.enable = true;
       vim = {
         enable = true;
         defaultEditor = true;
       };
     };
 
-    environment.shells = [
-      pkgs.fish
-      pkgs.nushell
-    ];
+    environment.shells = [pkgs.nushell];
 
     users = {
       defaultUserShell = pkgs.nushell;
