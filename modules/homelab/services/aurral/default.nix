@@ -86,6 +86,15 @@
         "d ${configDir} 0750 ${shareUid} ${shareGid} -"
       ];
 
+      # The container reaches its integrations across the podman bridge, which
+      # the default-deny input policy drops. Scope the opening to podman0 so
+      # these stay closed on the LAN and tailnet.
+      networking.firewall.interfaces."podman0".allowedTCPPorts = [
+        config.services.lidarr.settings.server.port
+        config.services.slskd.settings.web.port
+        config.services.navidrome.settings.Port
+      ];
+
       services.homelab.caddy.virtualHosts."aurral" = {
         inherit domain;
         forwardAuth = config.services.homelab.oauth2-proxy.zekurio.forwardAuthAddress;
