@@ -214,8 +214,8 @@
     services.homelab = {
       alloy.enable = true;
       anvil.enable = true;
+      aurral.enable = true;
       calthing.enable = true;
-      beets.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
       costthing.enable = true;
@@ -228,6 +228,7 @@
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
+      lidarr.enable = true;
       navidrome.enable = true;
       oauth2-proxy.enable = true;
       paperless-ngx.enable = true;
