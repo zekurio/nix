@@ -9,19 +9,20 @@
     nix.settings.trusted-users = [username];
 
     programs = {
+      fish.enable = true;
       vim = {
         enable = true;
         defaultEditor = true;
       };
     };
 
-    environment.shells = [pkgs.nushell];
+    environment.shells = [pkgs.fish];
 
     users = {
-      defaultUserShell = pkgs.nushell;
+      defaultUserShell = pkgs.fish;
 
       users.${username} = {
-        shell = pkgs.nushell;
+        shell = pkgs.fish;
         # Keeps the user's systemd instance (and XDG_RUNTIME_DIR) alive after
         # the last SSH session ends, so a detached zellij session stays
         # reattachable instead of dying with the runtime dir.

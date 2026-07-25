@@ -6,7 +6,7 @@
   }: {
     programs.starship = {
       enable = true;
-      enableNushellIntegration = true;
+      enableFishIntegration = true;
       package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (pkgs.callPackage ./_starship-darwin.nix {});
       settings = {
         palette = "catppuccin_frappe";
