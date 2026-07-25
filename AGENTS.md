@@ -6,6 +6,7 @@ Repo-specific context for AI agents working in this Nix configuration repository
 - Before running Nix evaluation commands such as `nix flake check` or `nix build`, run `git add` for files changed in the task. Nix flakes only see files tracked by Git, so newly created modules must be added to the index before checks or builds.
 - Never edit files under `secrets/` directly as plaintext. Never modify SOPS-managed secret files without using `sops`. Use `sops secrets/<file>.yaml` for secret edits.
 - Commit scopes when helpful: `adam`, `homelab`, `users`, `overlays`, `secrets`, `flake`. Example: `fix(adam): correct DNS`.
+- `adam` is stateless: it has no local checkout and only consumes `github:zekurio/nix`. Commit and push before deploying; see "Adam Deployment (Stateless Host)".
 
 ## Nushell Ban (Non-Negotiable)
 
@@ -39,6 +40,22 @@ nix build .#nixosConfigurations.adam.config.system.build.toplevel
 ```
 
 Builds should only be issued when warranted by the changed surface.
+
+## Adam Deployment (Stateless Host)
+
+`adam` is stateless with respect to this repository: it keeps no local checkout and solely consumes the flake from GitHub. Uncommitted or unpushed changes never reach the host — a rebuild on `adam` resolves `github:zekurio/nix`, not the local working tree.
+
+Deployment workflow for changes affecting `adam`:
+
+1. Run the completion checks above (`nix fmt`, `git add`, `nix flake check`, plus the targeted host build when warranted).
+2. Commit and push to `origin/main`.
+3. Deploy from the Mac over SSH (LAN/Tailscale only):
+
+   ```sh
+   ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'
+   ```
+
+`--sudo` is unguarded on `adam` (passwordless sudo; SSH is only reachable via local LAN and Tailscale), so the remote rebuild needs no interactive prompting. Never point `nixos-rebuild` at a local path or use `--target-host` from a dirty tree as a substitute for pushing.
 
 ## Project Structure
 
