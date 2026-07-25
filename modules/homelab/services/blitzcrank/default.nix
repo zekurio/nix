@@ -8,8 +8,8 @@
   }: let
     cfg = config.services.homelab.blitzcrank;
     dataDir = "/var/lib/blitzcrank";
-    package = inputs.blitzcrank.packages.${pkgs.system}.default;
-    anvilPackage = inputs.anvil.packages.${pkgs.system}.default;
+    package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    anvilPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.default;
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default

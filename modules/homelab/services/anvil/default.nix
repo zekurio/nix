@@ -8,7 +8,7 @@
   }: let
     cfg = config.services.homelab.anvil;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
-    package = inputs.anvil.packages.${pkgs.system}.default;
+    package = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.default;
     shareUser = config.modules.homelab.mediaShare.user;
     shareGroup = config.modules.homelab.mediaShare.group;
     shareUmask = config.modules.homelab.mediaShare.umask;
