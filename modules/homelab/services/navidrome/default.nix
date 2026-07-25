@@ -4,7 +4,8 @@
     lib,
     ...
   }: let
-    domain = "nv.${config.services.homelab.domains.zekurio}";
+    domain = "music.${config.services.homelab.domains.zekurio}";
+    legacyDomain = "nv.${config.services.homelab.domains.zekurio}";
     port = 4533;
     musicDir = config.modules.homelab.mediaShare.musicDir;
   in {
@@ -31,7 +32,15 @@
 
       services.homelab.caddy.virtualHosts."navidrome" = {
         inherit domain;
+        # Navidrome owns the root of the music domain and keeps its own auth:
+        # Subsonic clients cannot complete an OIDC flow, so no gating here.
         reverseProxy = "127.0.0.1:${toString port}";
+      };
+
+      # Keep the old hostname working so existing players survive the move.
+      services.homelab.caddy.virtualHosts."navidrome-legacy" = {
+        domain = legacyDomain;
+        extraConfig = "redir https://${domain}{uri} permanent";
       };
     };
   };
