@@ -1,11 +1,13 @@
-{config, ...}: {
-  flake.modules.nixos.base = {
-    inputs,
-    pkgs,
-    ...
-  }: let
+{
+  config,
+  inputs,
+  ...
+}: {
+  flake.modules.nixos.base = {pkgs, ...}: let
     username = "zekurio";
   in {
+    imports = [inputs.home-manager.nixosModules.home-manager];
+
     nix.settings.trusted-users = [username];
 
     programs = {
