@@ -24,6 +24,9 @@
 
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
+    # Only consumed by modules/nixpkgs/overlays/vaultwarden; remove both once
+    # nixos-unstable carries vaultwarden >= 1.37.0.
+    nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
