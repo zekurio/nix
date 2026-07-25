@@ -25,10 +25,20 @@
 let
   rev = "e42a7ca4fd633e021d69da7daa0368b870b0282e";
 
-  # Lidarr reports its branch from AssemblyConfiguration, and nixpkgs stamps it
-  # to match the release it builds.
-  masterStamp = "--property:AssemblyConfiguration=master";
-  pluginsStamp = "--property:AssemblyConfiguration=plugins";
+  # The branch carries no version of its own — src/Directory.Build.props holds
+  # only the CI placeholder 10.0.0.* — but upstream's pipeline publishes this
+  # exact commit to the `plugins` update channel as 3.1.2.4913 (Azure build
+  # 4872, stamped 2026-01-18T18:25:33, 34 seconds after the commit). Reuse that
+  # number: Lidarr gates plugin compatibility on BuildInfo.Version, and a lower
+  # one makes the update check offer this build to itself.
+  version = "3.1.2.4913";
+
+  # Lidarr takes its reported version and branch from these two assembly
+  # attributes, which nixpkgs stamps to match the master release it builds.
+  restampedProperties = [
+    "AssemblyVersion"
+    "AssemblyConfiguration"
+  ];
 
   overlay = final: prev: let
     src = final.applyPatches {
@@ -43,9 +53,7 @@ let
     };
   in {
     lidarr = prev.lidarr.overrideAttrs (old: {
-      version = "3.1.0.4875-plugins-${builtins.substring 0 7 rev}";
-
-      inherit src;
+      inherit src version;
 
       # yarn.lock is byte-identical to v3.1.0.4875, so upstream's hash still
       # holds. Refetch against this source anyway, otherwise the master tarball
@@ -55,18 +63,29 @@ let
         hash = "sha256-Jq2O7gvB+PKcz6uDBMg7ox6/Bu+pikXH6JGuLfKG5fI=";
       };
 
-      # AssemblyVersion stays 3.1.0.4875: the branch has no version of its own
-      # and the attribute only accepts a dotted quad.
-      dotnetFlags =
-        prev.lib.throwIf (!prev.lib.elem masterStamp old.dotnetFlags) ''
-          lidarr overlay: upstream no longer stamps ${masterStamp}, so the build
-          would silently report the wrong branch. Re-check modules/nixpkgs/overlays/lidarr.
+      dotnetFlags = let
+        isRestamped = flag:
+          prev.lib.any (property: prev.lib.hasPrefix "--property:${property}=" flag) restampedProperties;
+        kept = prev.lib.filter (flag: !isRestamped flag) old.dotnetFlags;
+        dropped = builtins.length old.dotnetFlags - builtins.length kept;
+      in
+        prev.lib.throwIf (dropped != builtins.length restampedProperties) ''
+          lidarr overlay: expected upstream to stamp ${toString (builtins.length restampedProperties)} of
+          ${builtins.concatStringsSep ", " restampedProperties} but matched ${toString dropped}, so this
+          build would report the wrong version or branch. Re-check modules/nixpkgs/overlays/lidarr.
         ''
-        (map (flag:
-          if flag == masterStamp
-          then pluginsStamp
-          else flag)
-        old.dotnetFlags);
+        (kept
+          ++ [
+            "--property:AssemblyVersion=${version}"
+            "--property:AssemblyConfiguration=plugins"
+          ]);
+
+      meta =
+        old.meta
+        // {
+          # The upstream tag belongs to master and does not describe this build.
+          changelog = "https://github.com/Lidarr/Lidarr/commits/plugins";
+        };
     });
   };
 in {
