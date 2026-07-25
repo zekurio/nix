@@ -33,7 +33,7 @@
 
       services.configarr = {
         enable = true;
-        package = inputs.configarr.packages.${pkgs.system}.default;
+        package = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default;
         schedule = "*-*-* 05:00:00";
         environmentFile = config.sops.templates."configarr.env".path;
         config = ''

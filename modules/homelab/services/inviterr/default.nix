@@ -10,7 +10,7 @@
     domain = "account.${config.services.homelab.domains.schnitzelflix}";
     port = 4173;
     jellyfinDataDir = config.services.jellyfin.dataDir;
-    package = inputs.inviterr.packages.${pkgs.system}.default;
+    package = inputs.inviterr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   in {
     imports = [
       inputs.inviterr.nixosModules.default
