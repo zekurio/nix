@@ -15,12 +15,27 @@
       # visible because it contains optional, repository-owned postcreate hooks.
       programs.git.ignores = [".rift"];
 
-      programs.nushell.extraConfig = ''
-        source ${
-          pkgs.runCommand "rift-nushell-config.nu" {} ''
-            ${lib.getExe rift} shell-init nushell > "$out"
-          ''
-        }
-      '';
+      # Upstream only emits shell integration for Bash, Zsh, and Nushell.
+      programs.fish.functions.rift = {
+        description = "Manage copy-on-write workspaces";
+        body = ''
+          set -l subcommand
+          if test (count $argv) -gt 0
+            set subcommand $argv[1]
+          end
+
+          switch $subcommand
+            case init create remove
+              set -l rift_cwd (command rift --shell-cwd $argv)
+              or return $status
+              if test -n "$rift_cwd"
+                builtin cd -- "$rift_cwd"
+                or return $status
+              end
+            case '*'
+              command rift $argv
+          end
+        '';
+      };
     });
 }
