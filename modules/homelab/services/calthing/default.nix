@@ -9,7 +9,7 @@
     cfg = config.services.homelab.calthing;
     domain = "calendar.${config.services.homelab.domains.schnitzelflix}";
     port = 8090;
-    package = inputs.calthing.packages.${pkgs.system}.default;
+    package = inputs.calthing.packages.${pkgs.stdenv.hostPlatform.system}.default;
   in {
     imports = [
       inputs.calthing.nixosModules.default

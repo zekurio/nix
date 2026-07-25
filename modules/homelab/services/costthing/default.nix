@@ -9,7 +9,7 @@
     cfg = config.services.homelab.costthing;
     domain = "costs.${config.services.homelab.domains.schnitzelflix}";
     port = 8081;
-    package = inputs.costthing.packages.${pkgs.system}.default;
+    package = inputs.costthing.packages.${pkgs.stdenv.hostPlatform.system}.default;
   in {
     options.services.homelab.costthing = {
       enable = lib.mkEnableOption "Jellyfin cost dashboard with Caddy integration";
