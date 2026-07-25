@@ -28,6 +28,7 @@
             reverseProxies = [];
             extraConfigs = [];
             forwardAuth = null;
+            authPaths = [];
           };
         # Make matchers unique to avoid conflicts
         uniqueExtraConfig =
@@ -47,6 +48,7 @@
               if hostCfg.forwardAuth != null
               then hostCfg.forwardAuth
               else existing.forwardAuth;
+            authPaths = lib.unique (existing.authPaths ++ hostCfg.authPaths);
           };
         }
     ) {} (builtins.attrNames cfg.virtualHosts);
@@ -80,6 +82,16 @@
                 type = lib.types.nullOr lib.types.str;
                 default = null;
                 description = "oauth2-proxy address for forward auth (e.g. 127.0.0.1:4180). When set, all requests to this domain (except /oauth2/*) are gated behind Pocket ID.";
+              };
+              authPaths = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                description = ''
+                  Path matchers to restrict forward auth to, e.g. ["/lidarr*"].
+                  Empty gates the whole domain. Use this when several services
+                  share a domain and only some of them need gating, such as an
+                  admin UI sitting next to an app that does its own auth.
+                '';
               };
             };
           }
@@ -130,6 +142,7 @@
                 @not_bypass {
                   not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
                   not path /oauth2/*
+                  ${lib.optionalString (hostCfg.authPaths != []) "path ${lib.concatStringsSep " " hostCfg.authPaths}"}
                 }
                 forward_auth @not_bypass ${hostCfg.forwardAuth} {
                   uri /oauth2/auth
