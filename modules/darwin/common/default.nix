@@ -22,14 +22,17 @@ in {
     system.tools.darwin-uninstaller.enable = false;
 
     programs.fish.enable = true;
-    environment.shells = [pkgs.fish];
+    environment.shells = [
+      pkgs.fish
+      pkgs.nushell
+    ];
     users.knownUsers = [username];
     users.users.${username} = {
       uid = 501;
       gid = 20;
       description = "Michael";
       home = homeDirectory;
-      shell = pkgs.fish;
+      shell = pkgs.nushell;
     };
 
     # Vanilla (upstream) Nix, managed declaratively by nix-darwin. These settings
