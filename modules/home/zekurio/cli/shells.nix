@@ -14,6 +14,10 @@
         "/opt/homebrew/bin"
         "/opt/homebrew/sbin"
       ]
+      ++ lib.optionals (!isDarwin) [
+        # NixOS installs privileged commands such as sudo as setuid wrappers.
+        "/run/wrappers/bin"
+      ]
       ++ [
         "${config.home.profileDirectory}/bin"
         "/run/current-system/sw/bin"
