@@ -5,7 +5,7 @@
     ...
   }: let
     mediaShare = config.modules.homelab.mediaShare;
-    domain = "arr.${config.services.homelab.domains.schnitzelflix}";
+    domain = "music.${config.services.homelab.domains.zekurio}";
     port = 8686;
   in {
     options.services.homelab.lidarr = {
@@ -36,7 +36,9 @@
       # Caddy virtual host configuration with base URL
       services.homelab.caddy.virtualHosts."lidarr" = {
         inherit domain;
-        forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;
+        # Gate only /lidarr*: Navidrome serves the root of this domain.
+        forwardAuth = config.services.homelab.oauth2-proxy.zekurio.forwardAuthAddress;
+        authPaths = ["/lidarr*"];
         extraConfig = ''
           redir /lidarr /lidarr/
           @lidarr path /lidarr*

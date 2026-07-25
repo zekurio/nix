@@ -6,9 +6,8 @@
   }: let
     cfg = config.services.homelab.slskd;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
-    domain = "nv.${config.services.homelab.domains.zekurio}";
+    domain = "music.${config.services.homelab.domains.zekurio}";
     webPort = 5030;
-    oauth2ProxyPort = 4181;
     listenPort = 50300;
     mediaShare = config.modules.homelab.mediaShare;
     musicDir = mediaShare.musicDir;
@@ -101,22 +100,11 @@
 
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
+        # Gate only /slskd*: Navidrome shares this domain at the root and must
+        # stay reachable for Subsonic clients.
+        forwardAuth = config.services.homelab.oauth2-proxy.zekurio.forwardAuthAddress;
+        authPaths = ["/slskd*"];
         extraConfig = ''
-          handle /oauth2/* {
-            reverse_proxy 127.0.0.1:${toString oauth2ProxyPort}
-          }
-          @slskd_not_bypass {
-            path /slskd*
-            not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
-          }
-          forward_auth @slskd_not_bypass 127.0.0.1:${toString oauth2ProxyPort} {
-            uri /oauth2/auth
-            copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
-            @slskd_unauthorized status 401
-            handle_response @slskd_unauthorized {
-              redir * /oauth2/start?rd={http.request.uri} 302
-            }
-          }
           redir /slskd /slskd/
           @slskd path /slskd*
           reverse_proxy @slskd 127.0.0.1:${toString webPort} {
