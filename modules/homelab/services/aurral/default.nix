@@ -24,6 +24,19 @@
         description = "Container image to run. Pin by digest; `test` is the v2 pre-release tag.";
       };
 
+      trustedProxyIps = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        # Published ports are DNAT'd through the podman bridge, so requests
+        # proxied from Caddy on the host reach the container with the gateway
+        # address as their source, not 127.0.0.1.
+        default = ["10.88.0.1" "127.0.0.1"];
+        description = ''
+          Addresses allowed to assert identity via the x-forwarded-user header.
+          Without this, anything able to reach the container port can
+          impersonate any user.
+        '';
+      };
+
       environmentFile = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
@@ -52,6 +65,7 @@
           # Caddy already gates this vhost behind Pocket ID, so trust the
           # upstream identity header instead of a second login prompt.
           AUTH_PROXY_ENABLED = "true";
+          AUTH_PROXY_TRUSTED_IPS = lib.concatStringsSep "," cfg.trustedProxyIps;
         };
 
         environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
