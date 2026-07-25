@@ -84,7 +84,7 @@
     home-manager.users.${mainUser} = {
       programs.keychain = {
         enable = true;
-        enableFishIntegration = true;
+        enableNushellIntegration = true;
         keys = [mainUserSshKey];
       };
 
