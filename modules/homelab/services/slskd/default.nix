@@ -67,6 +67,12 @@
               "Thumbs.db$"
               "\\.ini$"
             ];
+            # Without a retention interval slskd only indexes shares at
+            # startup. Lidarr imports into this tree continuously, so the index
+            # goes stale and we end up advertising far less than we hold — and
+            # Soulseek peers withhold search results from users who share
+            # nothing, which silently breaks acquisition.
+            cache.retention = 360;
           };
           soulseek = {
             listen_port = listenPort;
