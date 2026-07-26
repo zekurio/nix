@@ -214,7 +214,12 @@
     services.homelab = {
       alloy.enable = true;
       anvil.enable = true;
-      aurral.enable = true;
+      aurral = {
+        enable = true;
+        # Pocket ID decides who reaches this vhost at all, so everyone who gets
+        # through the forward-auth layer is meant to administer it.
+        defaultRole = "admin";
+      };
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;

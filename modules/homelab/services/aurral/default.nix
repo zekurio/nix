@@ -17,11 +17,22 @@
 
       image = lib.mkOption {
         type = lib.types.str;
-        # v2 has no tagged release yet: upstream releases are still v1.76.x and
-        # v2 lives on the `test` branch. Pin the digest so the moving `test`
-        # tag cannot change what gets deployed.
-        default = "ghcr.io/lklynet/aurral@sha256:a2ce2e4ae4767c3fb445728c3af2e972823b874c7813d290a2054b736100bbf6";
-        description = "Container image to run. Pin by digest; `test` is the v2 pre-release tag.";
+        # v1.76.51, the current stable release (`latest`, 2026-07-07). The v2
+        # pre-release on the `test` tag was tried and reverted: it is still too
+        # unstable to run. Pin the digest so neither tag can move underneath us.
+        default = "ghcr.io/lklynet/aurral@sha256:cf04da830f6965d9bd27d533eddddb0b3430390efe7b4f6f4338e486d4e3ec94";
+        description = "Container image to run, pinned by digest. Currently aurral 1.76.51.";
+      };
+
+      defaultRole = lib.mkOption {
+        type = lib.types.enum ["user" "admin"];
+        default = "user";
+        description = ''
+          Role granted to identities arriving through the proxy auth header.
+          Aurral defaults these to `user`, which cannot open its settings, so a
+          deployment whose only entrance is the SSO-gated vhost has no way to
+          administer itself until this is `admin`.
+        '';
       };
 
       trustedProxyIps = lib.mkOption {
@@ -66,6 +77,7 @@
           # upstream identity header instead of a second login prompt.
           AUTH_PROXY_ENABLED = "true";
           AUTH_PROXY_TRUSTED_IPS = lib.concatStringsSep "," cfg.trustedProxyIps;
+          AUTH_PROXY_DEFAULT_ROLE = cfg.defaultRole;
         };
 
         environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
@@ -73,8 +85,9 @@
         ports = ["127.0.0.1:${toString port}:${toString port}"];
 
         volumes = [
-          # v2 moved the state mount from /app/backend/data to /config
-          "${configDir}:/config"
+          # v1 keeps its SQLite database and caches here; /config is the v2
+          # layout and this release does not read it.
+          "${configDir}:/app/backend/data"
           # Aurral must see the media and download trees at exactly the paths
           # Lidarr uses, otherwise imports and file reuse resolve wrongly.
           "${mediaShare.musicDir}:${mediaShare.musicDir}"
@@ -86,13 +99,16 @@
         "d ${configDir} 0750 ${shareUid} ${shareGid} -"
       ];
 
-      # The container reaches its integrations across the podman bridge, which
-      # the default-deny input policy drops. Scope the opening to podman0 so
-      # these stay closed on the LAN and tailnet.
+      # The container reaches Lidarr across the podman bridge, which the
+      # default-deny input policy drops. Scope the opening to podman0 so the
+      # port stays closed on the LAN and tailnet.
+      #
+      # Only Lidarr is reachable on purpose: slskd is driven by Lidarr's own
+      # plugin now, so aurral has no reason to speak to it, and leaving those
+      # ports open would let its optional slskd and Navidrome integrations be
+      # switched on in the UI and quietly reintroduce a second acquisition path.
       networking.firewall.interfaces."podman0".allowedTCPPorts = [
         config.services.lidarr.settings.server.port
-        config.services.slskd.settings.web.port
-        config.services.navidrome.settings.Port
       ];
 
       services.homelab.caddy.virtualHosts."aurral" = {
