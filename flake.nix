@@ -60,7 +60,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     alloy = {
-      url = "github:zekurio/alloy/be36f3e3f88ebefe4ab22ce0c23f103f64ac389a";
+      url = "github:zekurio/alloy/mastodon-embeds";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     anvil = {
