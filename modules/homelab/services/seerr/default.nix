@@ -37,6 +37,12 @@
         inherit domain;
         reverseProxy = "127.0.0.1:${toString port}";
       };
+
+      services.homelab.newt.resources.seerr = {
+        displayName = "Seerr";
+        inherit domain;
+        target = "127.0.0.1:${toString port}";
+      };
     };
   };
 }

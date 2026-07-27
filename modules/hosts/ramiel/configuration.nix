@@ -26,6 +26,9 @@
           443
         ];
         allowedUDPPorts = [
+          # HTTP/3. Traefik advertises h3 over alt-svc, so this must stay open or
+          # browsers stall on QUIC before falling back to TCP.
+          443
           51820
           21820
         ];
