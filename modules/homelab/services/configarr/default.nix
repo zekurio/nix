@@ -34,15 +34,55 @@
             api_key: !env LIDARR_API_KEY
 
             quality_profiles:
-              # `qualities` is deliberately omitted: naming it would make
-              # configarr rewrite the profile's quality list and flatten the
-              # Lossless and lossy groups it ships with.
+              # The quality list has to be spelled out: configarr skips a
+              # profile entirely when `qualities` is absent ("filtered because
+              # no qualities provided"), which would silently drop the score
+              # assignments below. Listing a quality allows it, omitting it
+              # blocks it, and the order is best-first.
+              #
+              # WAV and the Poor/Trash lossy tiers are intentionally absent:
+              # they are worse than having no file at all. Unknown stays last
+              # but allowed, because Lidarr has no Opus quality and genuine
+              # Opus rips parse as Unknown.
               - name: ${lidarrProfile}
                 min_format_score: 0
+                quality_sort: top
                 upgrade:
                   allowed: true
                   until_quality: Lossless
                   until_score: 10000
+                qualities:
+                  - name: Lossless
+                    qualities:
+                      - FLAC 24bit
+                      - ALAC 24bit
+                      - FLAC
+                      - ALAC
+                      - APE
+                      - WavPack
+                  - name: High Quality Lossy
+                    qualities:
+                      - MP3-320
+                      - MP3-VBR-V0
+                      - AAC-320
+                      - AAC-VBR
+                      - OGG Vorbis Q10
+                      - OGG Vorbis Q9
+                  - name: Mid Quality Lossy
+                    qualities:
+                      - MP3-256
+                      - AAC-256
+                      - MP3-VBR-V2
+                      - OGG Vorbis Q8
+                      - OGG Vorbis Q7
+                  - name: Low Quality Lossy
+                    qualities:
+                      - MP3-224
+                      - MP3-192
+                      - AAC-192
+                      - OGG Vorbis Q6
+                      - WMA
+                  - name: Unknown
 
             custom_formats:
       ''
