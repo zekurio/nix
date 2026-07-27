@@ -24,12 +24,16 @@
 #     matches none of the Soulseek formats, so without a baseline it scores 0,
 #     loses every equal-quality tie, and the delay profile never gets consulted.
 #
-# The baseline is therefore set to the best score a Soulseek release can
-# possibly reach, which makes Usenet win outright: a flawless peer only ever
-# draws with it, and CompareProtocol breaks the draw using the delay profile,
-# where Usenet sits at index 0. Usenet completes whether or not a stranger stays
-# online, so it deserves that. Reordering the protocols in Settings → Profiles →
-# Delay Profiles flips the preference without touching any score here.
+# The baseline is therefore derived from the best score a Soulseek release can
+# possibly reach, plus a margin, so Usenet wins outright at equal quality rather
+# than drawing and depending on CompareProtocol and the delay profile's protocol
+# order. Usenet completes whether or not a stranger stays online, so it earns
+# that. Soulseek still decides among its own peers, and still wins any quality
+# tier Usenet simply does not carry — which, for most of this library, is most
+# of them.
+#
+# Drop the margin to zero to go back to a draw settled by the delay profile, or
+# below the Soulseek maximum to let an excellent peer outrank Usenet again.
 #
 # Regexes are .NET. Emoji are written literally because .NET only understands
 # \uHHHH escapes, which cannot express 📋 (U+1F4CB) without a surrogate pair.
@@ -57,11 +61,13 @@
     # The speed tiers are mutually exclusive by construction, as are the queue
     # tiers, so the best a Soulseek release can do is a free slot plus the
     # better of each pair. Derived rather than written out so that changing any
-    # score keeps Usenet exactly level with a perfect peer.
+    # score below keeps the margin intact.
     bestSoulseekScore =
       scores.freeSlot
       + (lib.max scores.fastPeer scores.mediumPeer)
       + (lib.max scores.noQueue scores.shortQueue);
+
+    usenetMargin = 10;
 
     releaseTitle = regex: {
       name = "release title";
@@ -102,7 +108,7 @@
       default = {
         "baseline-non-soulseek" = {
           name = "Baseline: Non-Soulseek";
-          score = bestSoulseekScore;
+          score = bestSoulseekScore + usenetMargin;
           specifications = [(notReleaseTitle soulseekMarker)];
         };
         "soulseek-free-slot" = {
