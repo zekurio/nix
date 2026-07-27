@@ -264,8 +264,8 @@
 
       sops.templates."configarr.env" = {
         content = ''
-          SONARR_API_KEY=${config.sops.placeholder.anvil_sonarr_api_key}
-          RADARR_API_KEY=${config.sops.placeholder.anvil_radarr_api_key}
+          SONARR_API_KEY=${config.sops.placeholder.sonarr_api_key}
+          RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
           LIDARR_API_KEY=${config.sops.placeholder.lidarr_api_key}
           STOP_ON_ERROR=true
           TZ=${config.time.timeZone}
@@ -276,8 +276,8 @@
       };
 
       sops.secrets = {
-        anvil_radarr_api_key = {};
-        anvil_sonarr_api_key = {};
+        radarr_api_key = {};
+        sonarr_api_key = {};
         lidarr_api_key = {};
       };
 
