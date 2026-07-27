@@ -7,6 +7,46 @@
     ...
   }: let
     cfg = config.services.homelab.configarr;
+    lidarr = config.services.homelab.lidarr;
+    lidarrProfile = "Anything goes";
+
+    # Rendered from the same attrset that defines the formats, so a score can
+    # never disagree with the format it belongs to. Built by concatenation with
+    # explicit indentation: an indented Nix string strips its own leading
+    # whitespace, which would flatten these list items back to column zero.
+    lidarrFormatsYaml = lib.concatStrings (
+      lib.mapAttrsToList (
+        trashId: format:
+          "      - trash_ids:\n"
+          + "          - ${trashId}\n"
+          + "        assign_scores_to:\n"
+          + "          - name: ${lidarrProfile}\n"
+          + "            score: ${toString format.score}\n"
+      )
+      lidarr.customFormats
+    );
+
+    lidarrSection =
+      ''
+        lidarr:
+          lidarr:
+            base_url: ${lidarr.baseUrl}
+            api_key: !env LIDARR_API_KEY
+
+            quality_profiles:
+              # `qualities` is deliberately omitted: naming it would make
+              # configarr rewrite the profile's quality list and flatten the
+              # Lossless and lossy groups it ships with.
+              - name: ${lidarrProfile}
+                min_format_score: 0
+                upgrade:
+                  allowed: true
+                  until_quality: Lossless
+                  until_score: 10000
+
+            custom_formats:
+      ''
+      + lidarrFormatsYaml;
     normalProfile = "[German] HD Bluray + WEB";
     animeProfile = "[German] Anime HD Bluray + WEB";
     animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
@@ -16,7 +56,7 @@
     ];
 
     options.services.homelab.configarr = {
-      enable = lib.mkEnableOption "Configarr synchronization for Sonarr and Radarr";
+      enable = lib.mkEnableOption "Configarr synchronization for Sonarr, Radarr and Lidarr";
     };
 
     config = lib.mkIf cfg.enable {
@@ -39,6 +79,11 @@
         config = ''
           trashRevision: 34e6a8cc67621052a6903dcc912eb515332fb3b8
           telemetry: false
+
+          # Trash publishes no Lidarr formats, so the Soulseek ones are defined
+          # in modules/homelab/services/lidarr/custom-formats.nix and rendered
+          # into this directory.
+          localCustomFormatsPath: ${lidarr.customFormatsPath}
 
           sonarr:
             sonarr:
@@ -172,6 +217,8 @@
                         - Bluray-720p
                         - WEBDL-720p
                         - WEBRip-720p
+
+          ${lidarrSection}
         '';
       };
 
@@ -179,6 +226,7 @@
         content = ''
           SONARR_API_KEY=${config.sops.placeholder.anvil_sonarr_api_key}
           RADARR_API_KEY=${config.sops.placeholder.anvil_radarr_api_key}
+          LIDARR_API_KEY=${config.sops.placeholder.lidarr_api_key}
           STOP_ON_ERROR=true
           TZ=${config.time.timeZone}
         '';
@@ -190,10 +238,12 @@
       sops.secrets = {
         anvil_radarr_api_key = {};
         anvil_sonarr_api_key = {};
+        lidarr_api_key = {};
       };
 
       systemd.services.configarr = {
         after = [
+          "lidarr.service"
           "radarr.service"
           "sonarr.service"
         ];
