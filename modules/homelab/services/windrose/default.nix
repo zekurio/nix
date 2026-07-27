@@ -132,6 +132,8 @@
         allowedUDPPorts = [cfg.serverPort];
       };
 
+      # The value was dropped from secrets/adam.yaml while this service is
+      # disabled; recreate it with `sops secrets/adam.yaml` before enabling.
       sops.secrets.windrose_env = {
         mode = "0400";
       };

@@ -305,12 +305,12 @@
           radarr = {
             type = "radarr";
             baseUrl = config.services.homelab.radarr.baseUrl;
-            apiKeyFile = config.sops.secrets.anvil_radarr_api_key.path;
+            apiKeyFile = config.sops.secrets.radarr_api_key.path;
           };
           sonarr = {
             type = "sonarr";
             baseUrl = config.services.homelab.sonarr.baseUrl;
-            apiKeyFile = config.sops.secrets.anvil_sonarr_api_key.path;
+            apiKeyFile = config.sops.secrets.sonarr_api_key.path;
           };
         };
 
@@ -368,14 +368,16 @@
         config.environment.etc."anvil/anvil.toml".source
       ];
 
+      # Radarr/Sonarr issue one global API key each, so these are shared with
+      # calthing and configarr rather than scoped per consumer.
       sops.secrets = {
-        anvil_radarr_api_key = {
+        radarr_api_key = {
           owner = shareUser;
           group = shareGroup;
           mode = "0400";
         };
 
-        anvil_sonarr_api_key = {
+        sonarr_api_key = {
           owner = shareUser;
           group = shareGroup;
           mode = "0400";
