@@ -171,8 +171,9 @@
     };
 
     # The only config file containing a secret (the CrowdSec bouncer key).
+    # Every container runs as root, so it never needs to be world-readable.
     sops.templates."traefik-dynamic-config.yml" = {
-      mode = "0444";
+      mode = "0400";
       content = ''
         http:
           middlewares:
@@ -288,12 +289,20 @@
             RemainAfterExit = true;
           };
           script = ''
-            mkdir -p ${configDir}/db ${configDir}/letsencrypt \
-              ${configDir}/traefik/logs \
-              ${configDir}/crowdsec/acquis.d ${configDir}/crowdsec/db
+            # 0700 on the tree: gerbil writes its WireGuard private key and
+            # pangolin its SQLite database (sessions, site credentials) here,
+            # both with world-readable modes of their own. All containers run
+            # as root, so nothing needs traversal from other accounts.
+            install -d -m 0700 -o root -g root ${stateDir} ${configDir}
+            install -d -m 0700 -o root -g root \
+              ${configDir}/db ${configDir}/letsencrypt \
+              ${configDir}/traefik ${configDir}/traefik/logs \
+              ${configDir}/crowdsec ${configDir}/crowdsec/acquis.d ${configDir}/crowdsec/db
             cp -f ${crowdsecAcquisTraefik} ${configDir}/crowdsec/acquis.d/traefik.yaml
             cp -f ${crowdsecAcquisAppsec} ${configDir}/crowdsec/acquis.d/appsec.yaml
             cp -f ${crowdsecProfiles} ${configDir}/crowdsec/profiles.yaml
+            # Defence in depth for the two files that carry key material.
+            chmod 0600 ${configDir}/key ${configDir}/db/db.sqlite 2>/dev/null || true
           '';
         };
 
