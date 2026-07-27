@@ -79,6 +79,15 @@
         inherit domain;
         reverseProxy = "127.0.0.1:${toString port}";
       };
+
+      # Same service published through the Pangolin edge. Both definitions can
+      # coexist: whichever address the domain resolves to is the one serving,
+      # so cutting over (or rolling back) is a DNS change.
+      services.homelab.newt.resources.costthing = {
+        displayName = "Costthing";
+        inherit domain;
+        target = "127.0.0.1:${toString port}";
+      };
     };
   };
 }

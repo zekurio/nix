@@ -23,6 +23,17 @@ Every `.nix` file under `modules/` is a flake-parts module, discovered automatic
 - One concern per file, named after that concern. Do not add configuration to a root-level file.
 - Never nest `imports` to influence merge order. Use `lib.mkBefore`/`lib.mkAfter`/`lib.mkDefault` when order or priority genuinely matters, with a comment saying why.
 
+## Service Exposure
+
+A homelab service declares how it is reached from within its own module, never from a host module:
+
+- `services.homelab.caddy.virtualHosts.<name>` — served by Caddy on `adam` over the home connection.
+- `services.homelab.newt.resources.<name>` — published through the Pangolin edge on `ramiel`, rendered into the blueprint Newt applies at every start.
+
+The two options are deliberately shaped alike (`domain`, `target`/`reverseProxy`), and a service may declare both at once: DNS decides which one actually serves the domain, so a cutover and its rollback are a DNS change rather than a rebuild.
+
+Pangolin resource settings belong in the repo. A blueprint applied through Newt is a continuous source of truth and overwrites changes made in the Pangolin dashboard on the next apply. Note that removing a resource from the blueprint is not known to delete it in Pangolin — prune those in the dashboard until proven otherwise.
+
 ## SOPS Secret Conventions
 
 Secrets live in `secrets/<host>.yaml`, encrypted to that host's age key only. Edit exclusively via `sops secrets/<host>.yaml`.
