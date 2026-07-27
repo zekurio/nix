@@ -116,8 +116,12 @@
             encodedCharacters:
               allowEncodedSlash: true
               allowEncodedQuestionMark: true
+            # Entrypoint-level so that resource routers, which Pangolin feeds
+            # in over the HTTP provider, inherit them too. Only the dashboard
+            # routers are defined in the file provider.
             middlewares:
               - crowdsec@file
+              - security-headers@file
       serversTransport:
         insecureSkipVerify: true
       ping:
@@ -195,6 +199,9 @@
                 customResponseHeaders:
                   Server: ""
                   X-Powered-By: ""
+                  # Matches what Caddy sets on every vhost on adam, so moving a
+                  # service to the edge does not make it search-indexable.
+                  X-Robots-Tag: "noindex, nofollow"
             crowdsec:
               plugin:
                 crowdsec:
