@@ -23,6 +23,24 @@ Every `.nix` file under `modules/` is a flake-parts module, discovered automatic
 - One concern per file, named after that concern. Do not add configuration to a root-level file.
 - Never nest `imports` to influence merge order. Use `lib.mkBefore`/`lib.mkAfter`/`lib.mkDefault` when order or priority genuinely matters, with a comment saying why.
 
+## SOPS Secret Conventions
+
+Secrets live in `secrets/<host>.yaml`, encrypted to that host's age key only. Edit exclusively via `sops secrets/<host>.yaml`.
+
+**Name after the owner, not the consumer.** The name describes the system that issued the credential, because one credential is often consumed by several services: `radarr_api_key` (used by anvil, calthing, and configarr), `jellyfin_api_key`, `tailscale_auth_key`. Never prefix with a consumer (`anvil_radarr_api_key` was wrong: Radarr issues that key, anvil merely reads it). Note that Sonarr/Radarr/Lidarr each expose exactly one global API key, so sharing is inherent and cannot be scoped per consumer.
+
+**Storage form follows how the value is consumed:**
+
+| Form | Use when | Examples |
+|------|----------|----------|
+| Raw single value | Shared by two or more consumers, or the option wants a file holding just the value (`authKeyFile`, `apiKeyFile`, password files) | `radarr_api_key`, `tailscale_auth_key`, `crowdsec_bouncer_key` |
+| `<service>_env` | Values private to exactly one service, consumed as a systemd `EnvironmentFile` | `caddy_env`, `slskd_env`, `pangolin_env` |
+| `sops.templates` | Several secrets must be composed into one env or config file | `calthing.env`, `configarr.env`, `traefik-dynamic-config.yml` |
+
+**The Nix-side name must equal the YAML key.** Do not use sops-nix's `key = "..."` indirection to paper over a rename: it hides drift between the module and the secret file. Rename both together instead.
+
+Renaming a key means editing `secrets/<host>.yaml` and every referencing module in the same commit, so no intermediate state is broken. `nix flake check` runs `checks.sops-secret-names`, which compares every declared `sops.secrets` entry against the plaintext key names in the sops file (no decryption, no age key needed) and fails on any mismatch.
+
 ## Repo-Specific Style
 
 - Prefer small, composable modules over expanding root-level files. Add new functionality as a focused module with a `default.nix`.

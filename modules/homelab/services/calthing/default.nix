@@ -81,20 +81,17 @@
 
       sops.templates."calthing.env" = {
         content = ''
-          RADARR_API_KEY=${config.sops.placeholder.anvil_radarr_api_key}
-          SONARR_API_KEY=${config.sops.placeholder.anvil_sonarr_api_key}
-          JELLYFIN_API_KEY=${config.sops.placeholder.calthing_jellyfin_api_key}
+          RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
+          SONARR_API_KEY=${config.sops.placeholder.sonarr_api_key}
+          JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
           CALTHING_FEED_SECRET=${config.sops.placeholder.calthing_feed_secret}
         '';
         mode = "0400";
       };
       sops.secrets = {
-        anvil_radarr_api_key = {};
-        anvil_sonarr_api_key = {};
-        calthing_jellyfin_api_key = {
-          # value still lives under its pre-rename key in secrets/adam.yaml
-          key = "arr_cal_proxy_jellyfin_api_key";
-        };
+        radarr_api_key = {};
+        sonarr_api_key = {};
+        jellyfin_api_key = {};
         calthing_feed_secret = {};
       };
 
