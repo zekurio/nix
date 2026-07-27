@@ -47,6 +47,29 @@
         '';
       };
 
+      services.homelab.newt.resources.paperless = {
+        displayName = "Paperless";
+        inherit domain;
+        target = "127.0.0.1:${toString port}";
+        settings.rules =
+          # Mirrors the Caddy block above. Pangolin matches paths segment by
+          # segment and a wildcard never spans a "/", so Django admin URLs such
+          # as /admin/auth/user/1/change need one pattern per depth rather than
+          # a single /admin* catch-all.
+          map (path: {
+            action = "deny";
+            match = "path";
+            value = path;
+          }) [
+            "/admin"
+            "/admin/*"
+            "/admin/*/*"
+            "/admin/*/*/*"
+            "/admin/*/*/*/*"
+            "/admin/*/*/*/*/*"
+          ];
+      };
+
       users.users.paperless.extraGroups = ["share"];
 
       sops.secrets.paperless_env = {
