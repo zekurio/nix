@@ -23,11 +23,13 @@
 #   * CompareCustomFormatScore runs before CompareProtocol. A Usenet release
 #     matches none of the Soulseek formats, so without a baseline it scores 0,
 #     loses every equal-quality tie, and the delay profile never gets consulted.
-#     baseline gives non-Soulseek sources a neutral midpoint instead of a zero.
 #
-# Raise baseline to prefer Usenet more strongly, lower it to prefer Soulseek.
-# At 50 a peer must be better than merely reachable to win, and an exact tie
-# falls through to the delay profile, which already ranks Usenet first.
+# The baseline is therefore set to the best score a Soulseek release can
+# possibly reach, which makes Usenet win outright: a flawless peer only ever
+# draws with it, and CompareProtocol breaks the draw using the delay profile,
+# where Usenet sits at index 0. Usenet completes whether or not a stranger stays
+# online, so it deserves that. Reordering the protocols in Settings → Profiles →
+# Delay Profiles flips the preference without touching any score here.
 #
 # Regexes are .NET. Emoji are written literally because .NET only understands
 # \uHHHH escapes, which cannot express 📋 (U+1F4CB) without a surrogate pair.
@@ -43,6 +45,23 @@
     # Emitted only by the slskd indexer, so its absence identifies every other
     # source.
     soulseekMarker = "MB/s ";
+
+    scores = {
+      freeSlot = 50;
+      fastPeer = 20;
+      mediumPeer = 10;
+      noQueue = 20;
+      shortQueue = 10;
+    };
+
+    # The speed tiers are mutually exclusive by construction, as are the queue
+    # tiers, so the best a Soulseek release can do is a free slot plus the
+    # better of each pair. Derived rather than written out so that changing any
+    # score keeps Usenet exactly level with a perfect peer.
+    bestSoulseekScore =
+      scores.freeSlot
+      + (lib.max scores.fastPeer scores.mediumPeer)
+      + (lib.max scores.noQueue scores.shortQueue);
 
     releaseTitle = regex: {
       name = "release title";
@@ -83,12 +102,12 @@
       default = {
         "baseline-non-soulseek" = {
           name = "Baseline: Non-Soulseek";
-          score = 50;
+          score = bestSoulseekScore;
           specifications = [(notReleaseTitle soulseekMarker)];
         };
         "soulseek-free-slot" = {
           name = "Soulseek: Free Slot";
-          score = 50;
+          score = scores.freeSlot;
           specifications = [(releaseTitle "\\[⚡ ")];
         };
         # Anchored right after "[<emoji> " so the speed tiers stay mutually
@@ -96,19 +115,19 @@
         # character following "1" is not a separator.
         "soulseek-fast-peer" = {
           name = "Soulseek: Fast Peer";
-          score = 20;
+          score = scores.fastPeer;
           specifications = [(releaseTitle "\\[[⚡❌] \\d{2,}[.,]")];
         };
         "soulseek-medium-peer" = {
           name = "Soulseek: Medium Peer";
-          score = 10;
+          score = scores.mediumPeer;
           specifications = [(releaseTitle "\\[[⚡❌] [1-9][.,]")];
         };
         # An empty queue can only be matched as an absence, and absence alone
         # would match every Usenet release too, so require the speed token.
         "soulseek-no-queue" = {
           name = "Soulseek: No Queue";
-          score = 20;
+          score = scores.noQueue;
           specifications = [
             (releaseTitle soulseekMarker)
             (notReleaseTitle "\\[📋")
@@ -116,7 +135,7 @@
         };
         "soulseek-short-queue" = {
           name = "Soulseek: Short Queue";
-          score = 10;
+          score = scores.shortQueue;
           specifications = [(releaseTitle "\\[📋 [1-9]\\]")];
         };
       };
