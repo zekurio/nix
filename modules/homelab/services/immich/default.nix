@@ -36,6 +36,12 @@
         reverseProxy = "127.0.0.1:${toString port}";
       };
 
+      services.homelab.newt.resources.immich = {
+        displayName = "Immich";
+        inherit domain;
+        target = "127.0.0.1:${toString port}";
+      };
+
       users.users.immich.extraGroups = [
         "share"
         "video"
