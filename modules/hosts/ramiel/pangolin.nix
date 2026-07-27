@@ -9,7 +9,10 @@
     configDir = "${stateDir}/config";
 
     dashboardDomain = "pangolin.zekurio.me";
+    # Both zones are offered to Pangolin so resources can be created on either
+    # without touching this file again.
     baseDomain = "zekurio.me";
+    mediaDomain = "schnitzelflix.xyz";
     acmeEmail = "admin@zekurio.me";
 
     # Pinned against upstream's installer templates (fosrl/pangolin install/).
@@ -34,6 +37,8 @@
       domains:
         domain1:
           base_domain: "${baseDomain}"
+        domain2:
+          base_domain: "${mediaDomain}"
       server:
         cors:
           origins: ["https://${dashboardDomain}"]
