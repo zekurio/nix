@@ -17,7 +17,10 @@
 
     # Pinned against upstream's installer templates (fosrl/pangolin install/).
     versions = {
-      pangolin = "1.21.0";
+      # Enterprise Edition image. Behaves exactly like Community until a key is
+      # activated under Server Admin -> License, so the switch is safe on its
+      # own; the licence itself lives in Pangolin's database, not here.
+      pangolin = "ee-1.21.0";
       gerbil = "1.4.3";
       traefik = "v3.7.9";
       crowdsec = "v1.7.8";
