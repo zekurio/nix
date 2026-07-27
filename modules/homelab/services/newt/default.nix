@@ -75,6 +75,26 @@
                   '';
                 };
 
+                ssoRoles = lib.mkOption {
+                  type = lib.types.listOf lib.types.str;
+                  default = [];
+                  example = ["Admin"];
+                  description = ''
+                    Restrict the resource to these Pangolin roles. Empty means
+                    every authenticated user reaches it, so infrastructure
+                    surfaces should name a role explicitly: signing in is not
+                    the same as being allowed in. Roles must already exist in
+                    the organisation and match by exact name.
+                  '';
+                };
+
+                ssoUsers = lib.mkOption {
+                  type = lib.types.listOf lib.types.str;
+                  default = [];
+                  example = ["zekurio@example.com"];
+                  description = "Restrict the resource to these individual users, by email.";
+                };
+
                 settings = lib.mkOption {
                   type = lib.types.attrs;
                   default = {};
@@ -107,7 +127,10 @@
                 name = resource.displayName;
                 mode = "http";
                 full-domain = resource.domain;
-                auth.sso-enabled = resource.sso;
+                auth =
+                  {sso-enabled = resource.sso;}
+                  // lib.optionalAttrs (resource.ssoRoles != []) {sso-roles = resource.ssoRoles;}
+                  // lib.optionalAttrs (resource.ssoUsers != []) {sso-users = resource.ssoUsers;};
                 targets = [
                   (splitTarget resource.target // {method = "http";})
                 ];
