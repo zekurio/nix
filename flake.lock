@@ -8,16 +8,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1785164415,
-        "narHash": "sha256-6nAONL1CGmzz16NA5YEkZjrVNcj7tX+2hBpNQcwTQOo=",
+        "lastModified": 1785165274,
+        "narHash": "sha256-WK1YjFajqpvFYFQktp3eQTAuWpuOHyjw7IKgHTWQUtg=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "4d3362aded925b9f868f08040277add99cf773a1",
+        "rev": "be9ee5e46c8782ee3ec2236e66e8804433bd2da5",
         "type": "github"
       },
       "original": {
         "owner": "zekurio",
-        "ref": "mastodon-embeds",
         "repo": "alloy",
         "type": "github"
       }
