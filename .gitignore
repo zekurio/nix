@@ -17,3 +17,7 @@ examples/
 
 # trash-guides
 files/adam/trash-guides/
+
+# Agent session exports and scratch fetches (never belong in the repo)
+pi-session-*.html
+tmp/
