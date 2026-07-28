@@ -59,6 +59,15 @@
         allow_raw_resources: true
     '';
 
+    # Enterprise-only file, ignored by the Community build. "org" scopes
+    # identity providers to a single organisation instead of sharing the
+    # server's global IdPs with every org, so each org can bring its own
+    # Pocket ID instance. Global IdPs stop being offered once this is set.
+    pangolinPrivateConfig = pkgs.writeText "pangolin-private-config.yml" ''
+      app:
+        identity_provider_mode: "org"
+    '';
+
     traefikStaticConfig = pkgs.writeText "traefik_config.yml" ''
       api:
         insecure: true
@@ -402,6 +411,7 @@
         image = "docker.io/fosrl/pangolin:${versions.pangolin}";
         volumes = [
           "${pangolinConfig}:/app/config/config.yml:ro"
+          "${pangolinPrivateConfig}:/app/config/privateConfig.yml:ro"
           "${configDir}/db:/app/config/db"
           # Pangolin reads Traefik's ACME store to learn which certificates
           # exist; without it every certificate shows as pending in the
