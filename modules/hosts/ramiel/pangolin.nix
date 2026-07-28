@@ -170,6 +170,14 @@
     virtualisation.docker.enable = true;
     virtualisation.oci-containers.backend = "docker";
 
+    # cscli lives inside the container; this makes it usable as a normal
+    # command, e.g. `cscli decisions list` or `cscli metrics`.
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "cscli" ''
+        exec ${pkgs.docker}/bin/docker exec crowdsec cscli "$@"
+      '')
+    ];
+
     sops.secrets.pangolin_env = {
       mode = "0400";
     };
