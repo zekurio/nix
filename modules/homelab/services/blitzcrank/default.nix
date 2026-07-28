@@ -7,7 +7,7 @@
     ...
   }: let
     cfg = config.services.homelab.blitzcrank;
-    dataDir = "/var/lib/blitzcrank";
+    port = 8484;
     package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
     anvilPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.default;
   in {
@@ -20,75 +20,73 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.homelab.seerr.enable;
+          message = "services.homelab.blitzcrank requires services.homelab.seerr; Seerr is the only mandatory backend.";
+        }
+      ];
+
       services.blitzcrank = {
         enable = true;
-        package = package;
-        environmentFile = config.sops.secrets.blitzcrank_env.path;
-        dataDir = dataDir;
-        anvil = {
-          command = "${anvilPackage}/bin/anvilctl";
-          controlSocket = config.services.anvil.daemon.controlSocket;
-        };
-        piModels = {
-          default = "openai-codex/gpt-5.6-sol:medium";
-          seerr = "openai-codex/gpt-5.6-sol:high";
-          discord_triage = "openai-codex/gpt-5.6-luna:low";
-          review = "openai-codex/gpt-5.6-luna:medium";
-        };
+        inherit package port;
+        # Subscription auth: credentials come from the pi auth.json seeded
+        # below, not from a provider API key in the environment file.
+        model = "openai-codex/gpt-5.6-sol:high";
+        language = "German";
+        environmentFile = config.sops.templates."blitzcrank.env".path;
+        authSeedFile = config.sops.secrets.pi_auth_json.path;
+
+        # Non-secret configuration; every API key lives in the env template.
         settings = {
-          bot = {
-            public_name = "blitzcrank";
-          };
-
-          discord = {
-            guild_id = "418795186475237376";
-            automation_channel_id = "1473398718127407188";
-            automation_thread_lock = true;
-            watched_channel_ids = ["1473398718127407188"];
-          };
-
-          seerr = {
-            base_url = config.services.homelab.seerr.baseUrl;
-            webhook_path = "/webhooks/seerr";
-            bot_user_id = "2";
-            bot_display_name = "blitzcrank";
-            revisits_enabled = true;
-          };
-
-          web = {
-            listen_addr = "127.0.0.1:8080";
-          };
-
-          jellyfin = {
-            base_url = config.services.homelab.jellyfin.baseUrl;
-            public_url = config.services.homelab.jellyfin.publicUrl;
-          };
-          sonarr = {
-            base_url = config.services.homelab.sonarr.baseUrl;
-          };
-          radarr = {
-            base_url = config.services.homelab.radarr.baseUrl;
-          };
-          sabnzbd = {
-            base_url = config.services.homelab.sabnzbd.baseUrl;
-          };
-
-          runtime = {
-            automations_enabled = true;
-            run_timeout = "5m";
-            timezone = config.time.timeZone;
-          };
+          SEERR_URL = config.services.homelab.seerr.baseUrl;
+          # The Seerr account blitzcrank comments as: the id attributes its
+          # comments, the name makes the server drop its own webhooks.
+          SEERR_BOT_USER_ID = "2";
+          SEERR_BOT_USERNAME = "blitzcrank";
+          SONARR_URL = config.services.homelab.sonarr.baseUrl;
+          RADARR_URL = config.services.homelab.radarr.baseUrl;
+          SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
+          JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
+          ANVIL_COMMAND = "${anvilPackage}/bin/anvilctl";
+          ANVIL_CONTROL_SOCKET = config.services.anvil.daemon.controlSocket;
+          # Automation cron expressions are evaluated in local time.
+          TZ = config.time.timeZone;
         };
       };
 
+      # anvilctl talks to the daemon socket, which anvil owns as the share user.
       systemd.services.blitzcrank = {
         serviceConfig.SupplementaryGroups = ["share"];
+        after = ["seerr.service"];
+        wants = ["seerr.service"];
       };
 
-      sops.secrets.blitzcrank_env = {
-        owner = "blitzcrank";
-        group = "blitzcrank";
+      sops.templates."blitzcrank.env" = {
+        content = ''
+          SEERR_API_KEY=${config.sops.placeholder.seerr_api_key}
+          SONARR_API_KEY=${config.sops.placeholder.sonarr_api_key}
+          RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
+          SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
+          JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
+          BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
+          FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
+        '';
         mode = "0400";
+      };
+
+      sops.secrets = {
+        seerr_api_key = {};
+        sonarr_api_key = {};
+        radarr_api_key = {};
+        sabnzbd_api_key = {};
+        jellyfin_api_key = {};
+        blitzcrank_webhook_secret = {};
+        firecrawl_api_key = {};
+        # Bootstrap copy of the pi auth.json (OpenAI Codex OAuth). blitzcrank
+        # copies it into its state directory on start and refreshes tokens
+        # there, so this value is a restore seed rather than a live mirror.
+        pi_auth_json = {};
       };
     };
   };
