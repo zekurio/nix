@@ -172,6 +172,9 @@
         owner = "caddy";
         group = "caddy";
         mode = "0400";
+        # EnvironmentFile is read once at start, so a rotated Cloudflare or
+        # bypass token would otherwise stay unused until an unrelated restart.
+        restartUnits = ["caddy.service"];
       };
 
       # Open firewall ports for HTTP/HTTPS
