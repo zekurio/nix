@@ -41,24 +41,31 @@
       clientId,
       listenAddress,
       cookieDomain,
-    }: [
-      "--provider=oidc"
-      "--oidc-issuer-url=${oidcIssuerUrl}"
-      "--client-id=${clientId}"
-      "--http-address=${listenAddress}"
-      "--cookie-domain=${cookieDomain}"
-      "--whitelist-domain=${cookieDomain}"
-      # Allow any email; Pocket ID manages which users can access each client
-      "--email-domain=*"
-      "--skip-provider-button=true"
-      "--reverse-proxy=true"
-      "--trusted-proxy-ip=127.0.0.1/32"
-      "--trusted-proxy-ip=::1/128"
-      "--set-xauthrequest=true"
-      "--proxy-prefix=/oauth2"
-      # Skip auth check on oauth2-proxy's own routes
-      "--skip-auth-regex=^/oauth2/"
-    ];
+      extraArgs ? [],
+    }:
+      [
+        "--provider=oidc"
+        "--oidc-issuer-url=${oidcIssuerUrl}"
+        "--client-id=${clientId}"
+        "--http-address=${listenAddress}"
+        "--cookie-domain=${cookieDomain}"
+        "--whitelist-domain=${cookieDomain}"
+        # Allow any email; Pocket ID manages which users can access each client
+        "--email-domain=*"
+        # Sessions must carry Pocket ID group membership so the admin instance
+        # can evaluate --allowed-group against them. Sessions issued before
+        # this scope was added hold no groups and fail the check on re-use.
+        "--scope=openid email profile groups"
+        "--skip-provider-button=true"
+        "--reverse-proxy=true"
+        "--trusted-proxy-ip=127.0.0.1/32"
+        "--trusted-proxy-ip=::1/128"
+        "--set-xauthrequest=true"
+        "--proxy-prefix=/oauth2"
+        # Skip auth check on oauth2-proxy's own routes
+        "--skip-auth-regex=^/oauth2/"
+      ]
+      ++ extraArgs;
 
     mkService = {
       name,
@@ -66,6 +73,7 @@
       listenAddress,
       cookieDomain,
       secretName,
+      extraArgs ? [],
     }: {
       description = "oauth2-proxy forward auth for ${cookieDomain}";
       wantedBy = ["multi-user.target"];
@@ -78,7 +86,7 @@
         ExecStartPre = waitForOidcDiscovery;
         ExecStart = lib.escapeShellArgs (
           ["${pkgs.oauth2-proxy}/bin/oauth2-proxy"]
-          ++ mkArgs {inherit clientId listenAddress cookieDomain;}
+          ++ mkArgs {inherit clientId listenAddress cookieDomain extraArgs;}
         );
         Restart = "on-failure";
         RestartSec = "5s";
@@ -96,6 +104,16 @@
         type = lib.types.str;
         default = "127.0.0.1:4181";
         description = "Listen address of the zekurio oauth2-proxy instance; also the forward_auth upstream for its vhosts.";
+      };
+      admin.forwardAuthAddress = lib.mkOption {
+        type = lib.types.str;
+        default = "127.0.0.1:4182";
+        description = "Listen address of the admin oauth2-proxy instance; the forward_auth upstream for vhosts gating admin paths.";
+      };
+      admin.allowedGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "admin";
+        description = "Pocket ID group required by the admin instance. The other instances accept any user, so this check is what makes an admin gate admin-only.";
       };
     };
 
@@ -131,6 +149,19 @@
         listenAddress = cfg.zekurio.forwardAuthAddress;
         cookieDomain = ".${config.services.homelab.domains.zekurio}";
         secretName = "oauth2_proxy_zekurio_env";
+      };
+
+      # Shares the zekurio client, secrets and cookie domain with the main
+      # instance, so a login on any zekurio.me service is a valid session
+      # here too; the group check runs per request against the groups stored
+      # in that session.
+      systemd.services.oauth2-proxy-admin = mkService {
+        name = "admin";
+        clientId = clientIdZekurio;
+        listenAddress = cfg.admin.forwardAuthAddress;
+        cookieDomain = ".${config.services.homelab.domains.zekurio}";
+        secretName = "oauth2_proxy_zekurio_env";
+        extraArgs = ["--allowed-group=${cfg.admin.allowedGroup}"];
       };
     };
   };
