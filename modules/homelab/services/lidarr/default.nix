@@ -38,6 +38,10 @@
       };
 
       # Caddy virtual host configuration with base URL
+      # Published through the edge as a whole domain; Caddy keeps gating
+      # /lidarr* behind forward auth.
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."lidarr" = {
         inherit domain;
         # Gate only /lidarr*: Navidrome serves the root of this domain.
