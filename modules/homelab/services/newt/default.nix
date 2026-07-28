@@ -18,6 +18,15 @@
     # target, so an unhealthy verdict takes the service out of routing with
     # nothing to fail over to. Most of these answer 302 (redirect to Pocket ID)
     # or 307 at /, which an HTTP probe expecting 2xx would read as down.
+    # Pangolin matches paths segment by segment and a wildcard never spans a
+    # "/", so covering a subtree takes one pattern per depth: "/admin/*"
+    # alone cannot match /admin/auth/user/1/change.
+    maxRuleDepth = 8;
+    expandPath = base:
+      map (depth: base + lib.concatStrings (lib.replicate depth "/*")) (
+        lib.range 0 maxRuleDepth
+      );
+
     healthcheckFor = {
       hostname,
       port,
@@ -174,6 +183,25 @@
                   description = "Restrict the resource to these individual users, by email.";
                 };
 
+                ssoPaths = lib.mkOption {
+                  type = lib.types.listOf lib.types.str;
+                  default = [];
+                  example = ["/admin"];
+                  description = ''
+                    Paths that require Pangolin SSO (ssoRoles/ssoUsers applied)
+                    while every other path bypasses edge auth entirely, for apps
+                    that do their own authentication but keep an admin surface
+                    worth gating harder. Requires sso = true. Note that the
+                    built-in Admin role is reserved and rejected in blueprint
+                    sso-roles; use a custom org role.
+
+                    Rendered as ordered blueprint rules - "pass" for these
+                    paths, then a catch-all "allow" - because Pangolin applies
+                    the first matching rule. A rules key in settings replaces
+                    the generated list.
+                  '';
+                };
+
                 settings = lib.mkOption {
                   type = lib.types.attrs;
                   default = {};
@@ -217,6 +245,19 @@
                     // healthcheckFor (splitTarget resource.target)
                   )
                 ];
+              }
+              // lib.optionalAttrs (resource.ssoPaths != []) {
+                rules =
+                  map (value: {
+                    action = "pass";
+                    match = "path";
+                    inherit value;
+                  }) (lib.concatMap expandPath resource.ssoPaths)
+                  ++ map (value: {
+                    action = "allow";
+                    match = "path";
+                    inherit value;
+                  }) (["/"] ++ expandPath "*");
               }
               // resource.settings
           )
