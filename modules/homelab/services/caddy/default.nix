@@ -105,8 +105,10 @@
       services.caddy = {
         enable = true;
         package = pkgs.caddy.withPlugins {
-          plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
-          hash = "sha256-I0FjQOfFaGlOEJlQECmYNBKjIY4CIg5aCCQ/ORmnrSU=";
+          # v0.2.4 is the first release that accepts Cloudflare's prefixed
+          # token format (cfut_...); older builds reject those outright.
+          plugins = ["github.com/caddy-dns/cloudflare@v0.2.4"];
+          hash = "sha256-7GoH8YLCoPmPExQxoga2FHB58zQDoZVf1BBwkVi0SsQ=";
         };
         globalConfig = ''
           email ${acmeEmail}
