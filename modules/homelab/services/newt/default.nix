@@ -13,6 +13,25 @@
       hostname = builtins.head parts;
       port = lib.toInt (builtins.elemAt parts 1);
     };
+
+    # Deliberately TCP rather than HTTP: every resource here has a single
+    # target, so an unhealthy verdict takes the service out of routing with
+    # nothing to fail over to. Most of these answer 302 (redirect to Pocket ID)
+    # or 307 at /, which an HTTP probe expecting 2xx would read as down.
+    healthcheckFor = {
+      hostname,
+      port,
+    }:
+      lib.optionalAttrs cfg.healthcheck.enable {
+        healthcheck = {
+          enabled = true;
+          mode = "tcp";
+          inherit hostname port;
+          interval = cfg.healthcheck.interval;
+          unhealthy-interval = cfg.healthcheck.unhealthyInterval;
+          timeout = cfg.healthcheck.timeout;
+        };
+      };
   in {
     options.services.homelab.newt = {
       enable = lib.mkEnableOption ''
@@ -25,6 +44,32 @@
         type = lib.types.str;
         default = "https://pangolin.zekurio.me";
         description = "Pangolin dashboard this site registers with.";
+      };
+
+      healthcheck = {
+        enable =
+          lib.mkEnableOption ''
+            TCP health checks on every published target
+          ''
+          // {default = true;};
+
+        interval = lib.mkOption {
+          type = lib.types.int;
+          default = 30;
+          description = "Seconds between probes while a target is healthy.";
+        };
+
+        unhealthyInterval = lib.mkOption {
+          type = lib.types.int;
+          default = 30;
+          description = "Seconds between probes while a target is unhealthy.";
+        };
+
+        timeout = lib.mkOption {
+          type = lib.types.int;
+          default = 5;
+          description = "Seconds a probe may take before counting as failed.";
+        };
       };
 
       localOnlyDomains = lib.mkOption {
@@ -166,7 +211,11 @@
                   // lib.optionalAttrs (resource.ssoRoles != []) {sso-roles = resource.ssoRoles;}
                   // lib.optionalAttrs (resource.ssoUsers != []) {sso-users = resource.ssoUsers;};
                 targets = [
-                  (splitTarget resource.target // {method = "http";})
+                  (
+                    splitTarget resource.target
+                    // {method = "http";}
+                    // healthcheckFor (splitTarget resource.target)
+                  )
                 ];
               }
               // resource.settings
@@ -184,11 +233,15 @@
                 host-header = domain;
                 tls-server-name = domain;
                 targets = [
-                  {
-                    hostname = "127.0.0.1";
-                    port = 443;
-                    method = "https";
-                  }
+                  ({
+                      hostname = "127.0.0.1";
+                      port = 443;
+                      method = "https";
+                    }
+                    // healthcheckFor {
+                      hostname = "127.0.0.1";
+                      port = 443;
+                    })
                 ];
               };
             })
