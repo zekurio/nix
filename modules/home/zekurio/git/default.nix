@@ -116,6 +116,12 @@
             User = "zekurio";
             IdentityFile = "~/.ssh/id_ed25519";
           };
+
+          ramiel = {
+            HostName = "46.225.238.253";
+            User = "zekurio";
+            IdentityFile = "~/.ssh/id_ed25519";
+          };
         };
       };
     };
