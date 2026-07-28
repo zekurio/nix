@@ -111,6 +111,11 @@
         config.services.lidarr.settings.server.port
       ];
 
+      # Published through the edge as a whole domain: Caddy gates it behind
+      # forward auth and rewrites the identity into X-Forwarded-User, which
+      # aurral trusts from the podman gateway only.
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."aurral" = {
         inherit domain;
         forwardAuth = config.services.homelab.oauth2-proxy.zekurio.forwardAuthAddress;
