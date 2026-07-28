@@ -16,10 +16,12 @@
       authorizedKeys = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [
-          # SHA256:0SptJB/dEKnGpQECOo+XhbFIl6O5AlCI0VQ+pxTqAkg
+          # SHA256:0SptJB/dEKnGpQECOo+XhbFIl6O5AlCI0VQ+pxTqAkg // sachiel
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq"
-          # SHA256:FL+rSaV0v9JKGs9IhZ5lP1upFEYqUGSEajWllGMgXvk
+          # SHA256:FL+rSaV0v9JKGs9IhZ5lP1upFEYqUGSEajWllGMgXvk // lilith
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ"
+          # SHA256:Irmy4a5KEHwokp0/d2yCR2O4Hd8SGr56toUQBL00PHA // adam
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOkmYfqv/9dCuR6yLGxao2VqR/gILe8ctZMijsaZ9AH"
         ];
         description = ''
           SSH public keys accepted for every user in modules.ssh.users. Pinned
