@@ -27,6 +27,25 @@
         description = "Pangolin dashboard this site registers with.";
       };
 
+      caddyDomains = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        example = ["arr.schnitzelflix.xyz"];
+        description = ''
+          Domains published through the edge as a whole, with Caddy on this host
+          left in charge of routing and authentication.
+
+          Pangolin maps a domain to a target and cannot route paths to
+          different backends, so domains that Caddy splits by path (or that mix
+          public and gated paths) are handed to Caddy intact instead. The
+          resource carries no Pangolin SSO: forward auth, the bypass token for
+          API clients and per-path rules all keep working exactly as they do on
+          the local path.
+
+          Several service modules may name the same domain; duplicates collapse.
+        '';
+      };
+
       resources = lib.mkOption {
         default = {};
         description = ''
@@ -137,7 +156,28 @@
               }
               // resource.settings
           )
-          cfg.resources;
+          cfg.resources
+          // lib.listToAttrs (map (domain: {
+              name = lib.replaceStrings ["."] ["-"] domain;
+              value = {
+                name = domain;
+                mode = "http";
+                full-domain = domain;
+                auth.sso-enabled = false;
+                # Caddy selects the virtual host by SNI and Host, so both must
+                # carry the public name rather than the loopback target.
+                host-header = domain;
+                tls-server-name = domain;
+                targets = [
+                  {
+                    hostname = "127.0.0.1";
+                    port = 443;
+                    method = "https";
+                  }
+                ];
+              };
+            })
+            (lib.unique cfg.caddyDomains));
 
         # NEWT_ID and NEWT_SECRET come from the site created in Pangolin; the
         # upstream module reads them as environment variables, which also keeps
