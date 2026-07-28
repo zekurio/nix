@@ -87,6 +87,11 @@
         "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
       ];
 
+      # Published through the edge as a whole domain so Caddy keeps the forward
+      # auth gate and the bypass token that API clients such as nzb360 rely on;
+      # SABnzbd's own web UI has no authentication.
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."sabnzbd" = {
         inherit domain;
         forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;

@@ -29,6 +29,11 @@
 
       users.users.navidrome.extraGroups = ["share"];
 
+      # music.zekurio.me mixes a public root (Subsonic clients cannot do SSO)
+      # with gated /slskd* and /lidarr* paths, so Caddy keeps routing and
+      # authenticating it behind the edge.
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."navidrome" = {
         inherit domain;
         # Navidrome owns the root of the music domain and keeps its own auth:

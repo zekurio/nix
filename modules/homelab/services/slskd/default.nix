@@ -104,6 +104,10 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
+      # Published through the edge as a whole domain; Caddy keeps gating
+      # /slskd* behind forward auth (slskd has no authentication of its own).
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
         # Gate only /slskd*: Navidrome shares this domain at the root and must
