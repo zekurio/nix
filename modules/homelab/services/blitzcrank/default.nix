@@ -73,6 +73,9 @@
           FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
         '';
         mode = "0400";
+        # Rendering a changed template does not touch the unit, so without this
+        # a rotated key would sit unread until the next unrelated restart.
+        restartUnits = ["blitzcrank.service"];
       };
 
       sops.secrets = {
@@ -86,7 +89,7 @@
         # Bootstrap copy of the pi auth.json (OpenAI Codex OAuth). blitzcrank
         # copies it into its state directory on start and refreshes tokens
         # there, so this value is a restore seed rather than a live mirror.
-        pi_auth_json = {};
+        pi_auth_json.restartUnits = ["blitzcrank.service"];
       };
     };
   };
