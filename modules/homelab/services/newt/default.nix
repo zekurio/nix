@@ -27,6 +27,21 @@
         description = "Pangolin dashboard this site registers with.";
       };
 
+      localOnlyDomains = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        example = ["internal.zekurio.me"];
+        description = ''
+          Caddy virtual hosts deliberately not published through the edge, and
+          therefore reachable only over the local network.
+
+          checks.edge-coverage fails when a virtual host has no edge route, so
+          a domain that is meant to stay local has to say so here. That keeps
+          the difference between "local on purpose" and "forgotten" visible in
+          the repo rather than discovered when the router ports close.
+        '';
+      };
+
       caddyDomains = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
