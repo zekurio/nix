@@ -22,6 +22,11 @@
       };
 
       # Caddy virtual host configuration with base URL
+      # Caddy splits this domain across the arr services by path, which a
+      # Pangolin resource cannot express, so the whole domain goes through
+      # the edge with Caddy still routing and authenticating behind it.
+      services.homelab.newt.caddyDomains = [domain];
+
       services.homelab.caddy.virtualHosts."prowlarr" = {
         inherit domain;
         forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;
