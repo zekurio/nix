@@ -40,12 +40,20 @@
       services.homelab.caddy.virtualHosts."vaultwarden" = {
         domain = domain;
         reverseProxy = "127.0.0.1:${toString port}";
+        # /admin is gated by the admin oauth2-proxy instance (Pocket ID admin
+        # group), mirroring the pass rule on the Pangolin edge. Everything
+        # else stays on Vaultwarden's own auth so clients keep working.
+        forwardAuth = config.services.homelab.oauth2-proxy.admin.forwardAuthAddress;
+        authPaths = ["/admin" "/admin/*"];
       };
 
       services.homelab.newt.resources.vaultwarden = {
         displayName = "Vaultwarden";
         inherit domain;
         target = "127.0.0.1:${toString port}";
+        sso = true;
+        ssoRoles = ["Admins"];
+        ssoPaths = ["/admin"];
       };
     };
   };
