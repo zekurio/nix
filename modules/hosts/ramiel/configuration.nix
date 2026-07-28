@@ -64,9 +64,16 @@
 
     # SOPS secrets for this host live in secrets/ramiel.yaml, keyed by the
     # host's own SSH key (derived automatically by sops-nix).
+    # Secrets are keyed to a dedicated age key placed by hand at install time,
+    # matching adam. Deriving it from the SSH host key was simpler but tied
+    # every secret to a key that a reinstall silently replaces.
     sops = {
       defaultSopsFile = ../../../secrets/ramiel.yaml;
-      # Default age.sshKeyPaths already covers /etc/ssh/ssh_host_ed25519_key.
+      age = {
+        keyFile = "/var/lib/sops-nix/key.txt";
+        generateKey = false;
+        sshKeyPaths = [];
+      };
       gnupg.sshKeyPaths = [];
     };
 

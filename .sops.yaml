@@ -1,6 +1,6 @@
 keys:
     - &adam age1308nxr6h57dvujczq29kc8du8qylnma8m5utn905en758qck0fwssmytrm
-    - &ramiel age1ftgvcpnq5vcrgcnr7y6td2d54x8sgmjll646ffhal08vk5x0favsg62qde
+    - &ramiel age1l89lumsrstssgjmw40n9u8pvq2mppcm4kfp4s4dc5v98tsvy33pqgfgl32
 
 creation_rules:
     - path_regex: secrets/adam\.yaml$

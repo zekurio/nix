@@ -40,8 +40,12 @@
       domains:
         domain1:
           base_domain: "${baseDomain}"
+          prefer_wildcard_cert: true
+          cert_resolver: "letsencrypt"
         domain2:
           base_domain: "${mediaDomain}"
+          prefer_wildcard_cert: true
+          cert_resolver: "letsencrypt"
       server:
         cors:
           origins: ["https://${dashboardDomain}"]
@@ -98,8 +102,15 @@
       certificatesResolvers:
         letsencrypt:
           acme:
-            httpChallenge:
-              entryPoint: web
+            # DNS-01 rather than HTTP-01: wildcard certificates are only issued
+            # over DNS, and one per zone replaces a certificate per hostname.
+            # The single resolver is deliberate - a second one would race the
+            # first for the same names against Let's Encrypt's rate limits.
+            dnsChallenge:
+              provider: "cloudflare"
+              resolvers:
+                - "1.1.1.1:53"
+                - "1.0.0.1:53"
             email: "${acmeEmail}"
             storage: "/letsencrypt/acme.json"
             caServer: "https://acme-v02.api.letsencrypt.org/directory"
@@ -184,6 +195,11 @@
     sops.secrets.crowdsec_bouncer_key = {
       mode = "0400";
     };
+    # Cloudflare token traefik uses to solve DNS-01 challenges. Scoped to
+    # Zone:Read plus DNS:Edit on the two zones, nothing else.
+    sops.secrets.traefik_env = {
+      mode = "0400";
+    };
 
     # The only config file containing a secret (the CrowdSec bouncer key).
     # Every container runs as root, so it never needs to be world-readable.
@@ -254,6 +270,12 @@
                 - security-headers
               tls:
                 certResolver: letsencrypt
+                # prefer_wildcard_cert only covers routers Pangolin generates,
+                # so the dashboard asks for the wildcard explicitly.
+                domains:
+                  - main: "${baseDomain}"
+                    sans:
+                      - "*.${baseDomain}"
             api-router:
               rule: "Host(`${dashboardDomain}`) && PathPrefix(`/api/v1`)"
               service: api-service
@@ -381,6 +403,10 @@
         volumes = [
           "${pangolinConfig}:/app/config/config.yml:ro"
           "${configDir}/db:/app/config/db"
+          # Pangolin reads Traefik's ACME store to learn which certificates
+          # exist; without it every certificate shows as pending in the
+          # dashboard even while Traefik serves them fine.
+          "${configDir}/letsencrypt:/app/config/letsencrypt:ro"
         ];
         environmentFiles = [config.sops.secrets.pangolin_env.path];
         extraOptions = [
@@ -416,6 +442,7 @@
       traefik = {
         image = "docker.io/traefik:${versions.traefik}";
         cmd = ["--configFile=/etc/traefik/traefik_config.yml"];
+        environmentFiles = [config.sops.secrets.traefik_env.path];
         volumes = [
           "${traefikStaticConfig}:/etc/traefik/traefik_config.yml:ro"
           "${config.sops.templates."traefik-dynamic-config.yml".path}:/etc/traefik/dynamic_config.yml:ro"
