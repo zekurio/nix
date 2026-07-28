@@ -54,6 +54,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
     llm-agents.url = "github:numtide/llm-agents.nix";
     sops-nix = {
       url = "github:Mic92/sops-nix";
