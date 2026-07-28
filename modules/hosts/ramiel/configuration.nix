@@ -14,6 +14,12 @@
 
     networking = {
       hostName = "ramiel";
+      # Reach Pocket ID at adam directly instead of through the Cloudflare
+      # proxy. Cloudflare answers requests from datacenter IPs with a managed
+      # challenge, which turns Pangolin's OIDC token exchange into an HTML page
+      # and breaks every SSO login. Browsers keep using the proxied record; only
+      # this host bypasses it. Update if adam's WAN address ever changes.
+      hosts."213.47.142.146" = ["auth.zekurio.me"];
       # Hetzner Cloud hands out the IPv4 via DHCP (point-to-point /32). IPv6 is
       # deliberately left unconfigured: the /64 needs static setup and nothing
       # here requires it yet.
