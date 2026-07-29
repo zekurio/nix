@@ -9,7 +9,9 @@
     cfg = config.services.homelab.blitzcrank;
     port = 8484;
     package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
-    anvilPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    anvilctlPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.anvilctl;
+    shareGroup = config.modules.homelab.mediaShare.group;
+    downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default
@@ -34,6 +36,18 @@
         # below, not from a provider API key in the environment file.
         model = "openai-codex/gpt-5.6-sol:high";
         language = "German";
+
+        # Directories blitzcrank may inspect with ffprobe, and nothing else.
+        # The three pipeline stages a language question needs, in order:
+        # SABnzbd's completed tree, Anvil's converted output beside it (both
+        # under downloadsRoot), and the imported library. Music and the private
+        # tree are deliberately absent: Seerr issues never concern them.
+        mediaRoots = [
+          downloadsRoot
+          "/tank/media/shows"
+          "/tank/media/anime"
+          "/tank/media/movies"
+        ];
         environmentFile = config.sops.templates."blitzcrank.env".path;
         authSeedFile = config.sops.secrets.pi_auth_json.path;
 
@@ -48,18 +62,19 @@
           RADARR_URL = config.services.homelab.radarr.baseUrl;
           SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
           JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
-          ANVIL_COMMAND = "${anvilPackage}/bin/anvilctl";
+          ANVIL_COMMAND = "${anvilctlPackage}/bin/anvilctl";
           ANVIL_CONTROL_SOCKET = config.services.anvil.daemon.controlSocket;
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
         };
       };
 
-      # anvilctl talks to the daemon socket, which anvil owns as the share user.
+      # anvilctl talks to the daemon socket, which anvil owns as the share
+      # user; the same membership makes the media tree readable for ffprobe.
       systemd.services.blitzcrank = {
-        serviceConfig.SupplementaryGroups = ["share"];
-        after = ["seerr.service"];
-        wants = ["seerr.service"];
+        serviceConfig.SupplementaryGroups = [shareGroup];
+        after = ["seerr.service" "anvil.service"];
+        wants = ["seerr.service" "anvil.service"];
       };
 
       sops.templates."blitzcrank.env" = {
