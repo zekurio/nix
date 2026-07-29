@@ -8,7 +8,8 @@
   }: let
     cfg = config.services.homelab.anvil;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
-    package = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    daemonPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.anvild;
+    controlPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.anvilctl;
     shareUser = config.modules.homelab.mediaShare.user;
     shareGroup = config.modules.homelab.mediaShare.group;
     shareUmask = config.modules.homelab.mediaShare.umask;
@@ -113,9 +114,13 @@
 
       services.anvil = {
         enable = true;
-        inherit package;
+        package = daemonPackage;
         user = shareUser;
         group = shareGroup;
+        controlClient = {
+          install = true;
+          package = controlPackage;
+        };
 
         daemon.scanInterval = "5m";
         daemon.workerCount = 2;
