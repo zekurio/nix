@@ -56,6 +56,13 @@
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Skill definitions shared by every coding agent. Consumed as a plain source
+    # tree, so `nix flake update pi-skills` is what publishes a skill edit.
+    pi-skills = {
+      url = "github:zekurio/pi-skills";
+      flake = false;
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

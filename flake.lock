@@ -856,6 +856,22 @@
         "type": "github"
       }
     },
+    "pi-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785317041,
+        "narHash": "sha256-YbhXZYdb7pBlQjO43d4kHcxrKQ6aP1GMH6dGF9ZI3Nw=",
+        "owner": "zekurio",
+        "repo": "pi-skills",
+        "rev": "eab83998a0d3e79a72930b4735cc6dd5773696c8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "pi-skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "alloy": "alloy",
@@ -879,6 +895,7 @@
         "nixpkgs-small": "nixpkgs-small",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "pi-skills": "pi-skills",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix"
       }
