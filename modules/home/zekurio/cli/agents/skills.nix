@@ -1,0 +1,45 @@
+{
+  flake.modules.homeManager.zekurio = {
+    inputs,
+    lib,
+    ...
+  }: let
+    source = inputs.pi-skills;
+
+    # A skill is any top-level directory holding a SKILL.md, so adding one to
+    # the pi-skills repo reaches every agent here after `nix flake update
+    # pi-skills` without touching this file.
+    available =
+      lib.filter (name: builtins.pathExists "${source}/${name}/SKILL.md")
+      (builtins.attrNames (builtins.readDir source));
+
+    # The zed skill only pays for itself in the agents driven from Zed, so it is
+    # kept out of Claude Code's and Codex's context.
+    shared = lib.filter (name: name != "zed") available;
+
+    # Claude Code and Codex only look one level deep, at <directory>/<skill>/
+    # SKILL.md, so each skill is linked on its own. Linking the pi-skills repo
+    # root instead would bury every skill one directory too deep for them.
+    linkSkills = directory: skills:
+      lib.listToAttrs (map (name:
+        lib.nameValuePair "${directory}/${name}" {
+          source = "${source}/${name}";
+        })
+      skills);
+  in {
+    home.file =
+      linkSkills ".pi/agent/skills" available
+      // linkSkills ".claude/skills" shared
+      # Codex's documented user scope.
+      // linkSkills ".agents/skills" shared
+      // linkSkills ".config/opencode/skills" available;
+
+    # Left alone, opencode also scans ~/.claude/skills and ~/.agents/skills, so
+    # every shared skill would be discovered three times. It keys skills by name
+    # and resolves the collision by whichever file parses last, which makes the
+    # reported skill location flip between sessions and busts the prompt cache
+    # (anomalyco/opencode#29950). Confining it to its own directory keeps
+    # discovery deterministic.
+    home.sessionVariables.OPENCODE_DISABLE_EXTERNAL_SKILLS = "1";
+  };
+}
