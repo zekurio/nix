@@ -50,6 +50,14 @@
       "--enc"
       "bf=7"
     ];
+    audioCleanup = {
+      languagesToKeep = [
+        "orig"
+        "deu"
+      ];
+      fallback = "keep_first";
+      unknownAsOriginal = true;
+    };
     subtitleCleanup = {
       languagesToKeep = [
         "orig"
@@ -60,6 +68,80 @@
       keepSdh = true;
       keepCommentary = true;
       unknownAsOriginal = true;
+    };
+
+    # Search baseline: VMAF 96 with a 10% savings target; non-anime profiles
+    # still force an encode when search finds no fit. HEVC sources are already
+    # efficiently compressed, so they must justify a re-encode with stricter
+    # targets: 98 VMAF / 15% savings for anime, 97 / 10% otherwise. AV1
+    # sources are never re-encoded.
+    mkProfile = {
+      codec,
+      preset,
+      anime ? false,
+    }: {
+      metadataMode = "preserve";
+      trackTitleMode = "standardize";
+
+      video = {
+        inherit codec preset;
+        accelerator = "qsv";
+        bitDepth = 10;
+        crfMin = 14;
+        crfMax = 38;
+        targetVmaf = 96;
+        minSavingsPercent = 10;
+        forceEncodeOnNoFit = !anime;
+        ffmpegArgs = qsvFfmpegArgs;
+        abAv1Args = qsvAbAv1Args;
+
+        overrides = {
+          # AV1 sources are already at or above the target codec; a re-encode
+          # only burns quality and cycles. Copy the video stream and let
+          # audio/subtitle cleanup and handoff still run.
+          av1.skipEncode = true;
+
+          hevc =
+            if anime
+            then {
+              # Anime HEVC releases tend to be well-compressed already: only
+              # re-encode when it is clearly worth it.
+              targetVmaf = 98;
+              minSavingsPercent = 15;
+            }
+            else {
+              targetVmaf = 97;
+              minSavingsPercent = 10;
+              # Forcing hevc->hevc when search finds no fit would re-encode
+              # for nothing; fall back to video-copy/remux instead.
+              forceEncodeOnNoFit = false;
+            };
+
+          dolby_vision =
+            {
+              codec = "hevc";
+              accelerator = "qsv";
+              inherit preset;
+              bitDepth = 10;
+            }
+            // lib.optionalAttrs (!anime) {
+              # Match the strict HEVC targets even for the rare non-HEVC
+              # Dolby Vision source. Anime DV inherits 98/15 from the hevc
+              # override above.
+              targetVmaf = 97;
+              minSavingsPercent = 10;
+            };
+        };
+
+        dolbyVision = {
+          mode = "auto";
+          removeHDR10Plus = false;
+        };
+      };
+
+      audio = audioCleanup;
+      subtitles = subtitleCleanup;
+      validation.durationToleranceSeconds = 2;
     };
 
     mkDownloadLibrary = {
@@ -135,174 +217,33 @@
           "crf-search"
           "encode"
           "dovi-fix"
+          "track-stats"
           "validate"
           "handoff"
           "cleanup"
         ];
 
         profiles = {
-          ${profileName} = {
-            metadataMode = "preserve";
-            trackTitleMode = "standardize";
-
-            video = {
-              codec = "hevc";
-              accelerator = "qsv";
-              preset = "veryslow";
-              bitDepth = 10;
-              crfMin = 14;
-              crfMax = 38;
-              targetVmaf = 96;
-              minSavingsPercent = 5;
-              forceEncodeOnNoFit = true;
-              ffmpegArgs = qsvFfmpegArgs;
-              abAv1Args = qsvAbAv1Args;
-
-              dolbyVision = {
-                mode = "auto";
-                codec = "hevc";
-                accelerator = "qsv";
-                preset = "veryslow";
-                bitDepth = 10;
-                removeHDR10Plus = false;
-              };
-            };
-
-            audio = {
-              languagesToKeep = [
-                "orig"
-                "deu"
-              ];
-              fallback = "keep_first";
-              unknownAsOriginal = true;
-            };
-
-            subtitles = subtitleCleanup;
-
-            validation.durationToleranceSeconds = 2;
+          ${profileName} = mkProfile {
+            codec = "hevc";
+            preset = "veryslow";
           };
 
-          ${animeProfileName} = {
-            metadataMode = "preserve";
-            trackTitleMode = "standardize";
-
-            video = {
-              codec = "av1";
-              accelerator = "qsv";
-              preset = "veryslow";
-              bitDepth = 10;
-              crfMin = 14;
-              crfMax = 38;
-              targetVmaf = 96;
-              minSavingsPercent = 10;
-              forceEncodeOnNoFit = false;
-              ffmpegArgs = qsvFfmpegArgs;
-              abAv1Args = qsvAbAv1Args;
-
-              dolbyVision = {
-                mode = "auto";
-                codec = "hevc";
-                accelerator = "qsv";
-                preset = "veryslow";
-                bitDepth = 10;
-                removeHDR10Plus = false;
-              };
-            };
-
-            audio = {
-              languagesToKeep = [
-                "orig"
-                "deu"
-              ];
-              fallback = "keep_first";
-              unknownAsOriginal = true;
-            };
-
-            subtitles = subtitleCleanup;
-
-            validation.durationToleranceSeconds = 2;
+          ${animeProfileName} = mkProfile {
+            codec = "av1";
+            preset = "veryslow";
+            anime = true;
           };
 
-          ${radarrProfileName} = {
-            metadataMode = "preserve";
-            trackTitleMode = "standardize";
-
-            video = {
-              codec = "hevc";
-              accelerator = "qsv";
-              preset = "slow";
-              bitDepth = 10;
-              crfMin = 14;
-              crfMax = 38;
-              targetVmaf = 96;
-              minSavingsPercent = 5;
-              forceEncodeOnNoFit = true;
-              ffmpegArgs = qsvFfmpegArgs;
-              abAv1Args = qsvAbAv1Args;
-
-              dolbyVision = {
-                mode = "auto";
-                codec = "hevc";
-                accelerator = "qsv";
-                preset = "slow";
-                bitDepth = 10;
-                removeHDR10Plus = false;
-              };
-            };
-
-            audio = {
-              languagesToKeep = [
-                "orig"
-                "deu"
-              ];
-              fallback = "keep_first";
-              unknownAsOriginal = true;
-            };
-
-            subtitles = subtitleCleanup;
-
-            validation.durationToleranceSeconds = 2;
+          ${radarrProfileName} = mkProfile {
+            codec = "hevc";
+            preset = "slow";
           };
 
-          ${radarrAnimeProfileName} = {
-            metadataMode = "preserve";
-            trackTitleMode = "standardize";
-
-            video = {
-              codec = "av1";
-              accelerator = "qsv";
-              preset = "slow";
-              bitDepth = 10;
-              crfMin = 14;
-              crfMax = 38;
-              targetVmaf = 96;
-              minSavingsPercent = 10;
-              forceEncodeOnNoFit = false;
-              ffmpegArgs = qsvFfmpegArgs;
-              abAv1Args = qsvAbAv1Args;
-
-              dolbyVision = {
-                mode = "auto";
-                codec = "hevc";
-                accelerator = "qsv";
-                preset = "slow";
-                bitDepth = 10;
-                removeHDR10Plus = false;
-              };
-            };
-
-            audio = {
-              languagesToKeep = [
-                "orig"
-                "deu"
-              ];
-              fallback = "keep_first";
-              unknownAsOriginal = true;
-            };
-
-            subtitles = subtitleCleanup;
-
-            validation.durationToleranceSeconds = 2;
+          ${radarrAnimeProfileName} = mkProfile {
+            codec = "av1";
+            preset = "slow";
+            anime = true;
           };
         };
 
