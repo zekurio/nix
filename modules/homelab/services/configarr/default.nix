@@ -164,13 +164,20 @@
                       score: -10000
                     - name: "${animeProfile}"
                       score: -10000
+                # Trash's german-anime score set copies the german -35000 for
+                # x265, which is correct for live action (there it flags bad
+                # re-encodes of an x264 source) but wrong for anime: fansub and
+                # BD encode groups ship HEVC 10-bit as their primary format, so
+                # a penalty below the profile's min_format_score of 0 rejects
+                # most of what is actually released. Neutral 0 keeps x265
+                # eligible without preferring it over an equivalent x264 file.
                 - trash_ids:
                     - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
                   assign_scores_to:
                     - name: "${normalProfile}"
                       score: -35000
                     - name: "${animeProfile}"
-                      score: -35000
+                      score: 0
 
           radarr:
             radarr:
@@ -233,15 +240,19 @@
                       score: -10000
                     - name: "${animeUhdProfile}"
                       score: -10000
+                # Neutral for anime, see the Sonarr block above. It matters
+                # twice over for the UHD clone: practically every 2160p release
+                # is HEVC, so the penalty made that profile unable to grab the
+                # resolution it exists for.
                 - trash_ids:
                     - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
                   assign_scores_to:
                     - name: "${normalProfile}"
                       score: -35000
                     - name: "${animeProfile}"
-                      score: -35000
+                      score: 0
                     - name: "${animeUhdProfile}"
-                      score: -35000
+                      score: 0
 
               quality_profiles:
                 - name: "${animeUhdProfile}"
