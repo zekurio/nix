@@ -64,6 +64,10 @@
           JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
           ANVIL_COMMAND = "${anvilctlPackage}/bin/anvilctl";
           ANVIL_CONTROL_SOCKET = config.services.anvil.daemon.controlSocket;
+          # Automation report threads + /automation trigger. Snowflakes are
+          # not secrets; the bot token lives in the env template.
+          DISCORD_GUILD_ID = "418795186475237376";
+          DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
         };
@@ -86,6 +90,7 @@
           JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
           BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
           FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
+          DISCORD_BOT_TOKEN=${config.sops.placeholder.discord_bot_token}
         '';
         mode = "0400";
         # Rendering a changed template does not touch the unit, so without this
@@ -101,6 +106,7 @@
         jellyfin_api_key = {};
         blitzcrank_webhook_secret = {};
         firecrawl_api_key = {};
+        discord_bot_token = {};
         # Bootstrap copy of the pi auth.json (OpenAI Codex OAuth). blitzcrank
         # copies it into its state directory on start and refreshes tokens
         # there, so this value is a restore seed rather than a live mirror.
