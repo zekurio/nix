@@ -9,8 +9,9 @@
     configDir = "${stateDir}/config";
 
     dashboardDomain = "pangolin.zekurio.me";
-    # Both zones are offered to Pangolin so resources can be created on either
-    # without touching this file again.
+    # Config-managed domains are offered to every Pangolin organisation. Keep
+    # these global only until they can be migrated into the owner's org in a
+    # maintenance window; removing them directly would break existing routes.
     baseDomain = "zekurio.me";
     mediaDomain = "schnitzelflix.xyz";
     acmeEmail = "admin@zekurio.me";
@@ -55,8 +56,12 @@
       flags:
         require_email_verification: false
         disable_signup_without_invite: true
-        disable_user_create_org: false
-        allow_raw_resources: true
+        # Only the server admin may provision a tenant. This prevents invited
+        # users from creating unreviewed organisations of their own.
+        disable_user_create_org: true
+        # Public TCP/UDP resources allocate ports directly on the shared edge;
+        # keep tenants on the HTTP reverse proxy unless explicitly reconsidered.
+        allow_raw_resources: false
     '';
 
     # Enterprise-only file, ignored by the Community build. "org" scopes
