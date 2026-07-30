@@ -104,10 +104,9 @@
           hevc =
             if anime
             then {
-              # Anime HEVC releases tend to be well-compressed already: only
-              # re-encode when it is clearly worth it.
-              targetVmaf = 98;
-              minSavingsPercent = 15;
+              # Anime HEVC releases are already efficiently compressed. Keep
+              # their video stream and still run cleanup plus handoff.
+              skipEncode = true;
             }
             else {
               targetVmaf = 97;
