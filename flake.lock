@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785173136,
-        "narHash": "sha256-135+fhaLtVXTsoJmmVlUV2cR4Z+nxLhHhfJEmG8aq6k=",
+        "lastModified": 1785434792,
+        "narHash": "sha256-cTcamkyyQw1+WVJaLTvsIrKv1dvOxWiwM27FgVTzVw0=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "149d741e0f99ea0513f3ffe2379fa3d3a74991bd",
+        "rev": "6b5ba27bca1025d1955562f44edd2b6a6ffc2f38",
         "type": "github"
       },
       "original": {
