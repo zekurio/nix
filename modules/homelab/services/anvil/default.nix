@@ -70,11 +70,10 @@
       unknownAsOriginal = true;
     };
 
-    # Search baseline: VMAF 96 with a 10% savings target; non-anime profiles
-    # still force an encode when search finds no fit. HEVC sources are already
-    # efficiently compressed, so they must justify a re-encode with stricter
-    # targets: 98 VMAF / 15% savings for anime, 97 / 10% otherwise. AV1
-    # sources are never re-encoded.
+    # Search baseline: VMAF 96 with a 1% savings target; non-anime profiles
+    # still force an encode when search finds no fit. Normal content encodes
+    # to HEVC, while anime content encodes to AV1. Normal HEVC sources use the
+    # stricter VMAF 97 target; anime HEVC sources are copied instead.
     mkProfile = {
       codec,
       preset,
@@ -90,17 +89,12 @@
         crfMin = 14;
         crfMax = 38;
         targetVmaf = 96;
-        minSavingsPercent = 10;
+        minSavingsPercent = 1;
         forceEncodeOnNoFit = !anime;
         ffmpegArgs = qsvFfmpegArgs;
         abAv1Args = qsvAbAv1Args;
 
         overrides = {
-          # AV1 sources are already at or above the target codec; a re-encode
-          # only burns quality and cycles. Copy the video stream and let
-          # audio/subtitle cleanup and handoff still run.
-          av1.skipEncode = true;
-
           hevc =
             if anime
             then {
@@ -110,7 +104,7 @@
             }
             else {
               targetVmaf = 97;
-              minSavingsPercent = 10;
+              minSavingsPercent = 1;
               # Forcing hevc->hevc when search finds no fit would re-encode
               # for nothing; fall back to video-copy/remux instead.
               forceEncodeOnNoFit = false;
@@ -124,11 +118,11 @@
               bitDepth = 10;
             }
             // lib.optionalAttrs (!anime) {
-              # Match the strict HEVC targets even for the rare non-HEVC
-              # Dolby Vision source. Anime DV inherits 98/15 from the hevc
-              # override above.
+              # Match the strict normal HEVC target even for the rare
+              # non-HEVC Dolby Vision source. Anime HEVC Dolby Vision sources
+              # retain skipEncode from the source-codec override.
               targetVmaf = 97;
-              minSavingsPercent = 10;
+              minSavingsPercent = 1;
             };
         };
 
