@@ -21,6 +21,15 @@ buildNpmPackage {
     # Pi executes TypeScript extensions directly; only the source and production
     # dependencies are needed at runtime.
     npm prune --omit=dev --ignore-scripts
+
+    # Pi's bundled Bun runtime rejects follow-redirects' Error subclass in
+    # Error.captureStackTrace on Linux. Pass a real Error until Bun fixes its
+    # Node compatibility (oven-sh/bun#15750).
+    substituteInPlace node_modules/follow-redirects/index.js \
+      --replace-fail \
+      'Error.captureStackTrace(this, this.constructor);' \
+      'Error.captureStackTrace(new Error(), this.constructor);'
+
     mkdir -p $out
     cp index.ts prompt.ts package.json $out/
     cp -r node_modules $out/
