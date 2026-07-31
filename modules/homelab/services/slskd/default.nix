@@ -116,6 +116,20 @@
         authPaths = ["/slskd*"];
         extraConfig = ''
           redir /slskd /slskd/
+
+          # slskd's packaged index keeps the same size and timestamp across
+          # some upgrades, so Kestrel can reuse its metadata-based ETag even
+          # when the hashed JS and CSS asset names changed. Force the index to
+          # refresh or browsers keep stale HTML that points at removed assets.
+          @slskd_index path /slskd/
+          request_header @slskd_index -If-None-Match
+          request_header @slskd_index -If-Modified-Since
+          header @slskd_index {
+            Cache-Control "no-store"
+            -ETag
+            -Last-Modified
+          }
+
           @slskd path /slskd*
           reverse_proxy @slskd 127.0.0.1:${toString webPort} {
             header_up Host {http.request.host}
