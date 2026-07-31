@@ -20,8 +20,15 @@
     systemd.services.t3code = {
       description = "T3 Code headless server";
       wantedBy = ["multi-user.target"];
-      wants = ["network-online.target"];
-      after = ["network-online.target" "tailscaled.service"];
+      wants = [
+        "network-online.target"
+        "tailscaled-set.service"
+      ];
+      after = [
+        "network-online.target"
+        "tailscaled.service"
+        "tailscaled-set.service"
+      ];
       path = [
         pkgs.coreutils
         pkgs.git
