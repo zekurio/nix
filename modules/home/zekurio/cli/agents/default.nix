@@ -1,33 +1,70 @@
 {
-  flake.modules.homeManager.zekurio = {
-    inputs,
-    lib,
-    pkgs,
-    ...
-  }: let
-    agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-    pi =
-      if pkgs.stdenv.hostPlatform.isDarwin
-      then
-        agents.pi.overrideAttrs (oldAttrs: {
-          # Bun mutates its linker-signed executable while embedding the app,
-          # leaving macOS to kill it on launch unless it is signed again.
-          nativeBuildInputs = (oldAttrs.nativeBuildInputs or []) ++ [pkgs.rcodesign];
-          postFixup =
-            (oldAttrs.postFixup or "")
-            + ''
-              ${lib.getExe pkgs.rcodesign} sign --code-signature-flags linker-signed $out/libexec/pi/pi
-            '';
-        })
-      else agents.pi;
+  flake.modules.homeManager.zekurio = {pkgs, ...}: let
+    agentFlake = "github:numtide/llm-agents.nix";
+    agentNames = [
+      "claude-code"
+      "codex"
+      "opencode"
+      "pi"
+    ];
+    agentsProfileBin = "$HOME/.local/state/nix/profiles/agents/bin";
+
+    agentsUpdate = pkgs.writeShellApplication {
+      name = "agents-update";
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.jq
+        pkgs.nix
+      ];
+      text = ''
+        profile="$HOME/.local/state/nix/profiles/agents"
+        profile_json='{"elements":{}}'
+
+        if [[ -e "$profile" ]]; then
+          profile_json="$(nix profile list --profile "$profile" --json)"
+        fi
+
+        missing=()
+        for name in ${builtins.concatStringsSep " " agentNames}; do
+          if ! jq --exit-status --arg suffix ".$name" \
+            '.elements | any(.[]; .attrPath | endswith($suffix))' \
+            <<<"$profile_json" >/dev/null
+          then
+            missing+=("${agentFlake}#$name")
+          fi
+        done
+
+        if (( ''${#missing[@]} > 0 )); then
+          nix profile add --accept-flake-config --profile "$profile" "''${missing[@]}"
+        fi
+
+        nix profile upgrade --accept-flake-config --all --profile "$profile"
+        nix profile list --profile "$profile"
+      '';
+    };
+
+    agentsRollback = pkgs.writeShellApplication {
+      name = "agents-rollback";
+      runtimeInputs = [pkgs.nix];
+      text = ''
+        profile="$HOME/.local/state/nix/profiles/agents"
+
+        if [[ ! -e "$profile" ]]; then
+          echo "The agents profile has not been initialized." >&2
+          exit 1
+        fi
+
+        nix profile rollback --profile "$profile"
+        nix profile list --profile "$profile"
+      '';
+    };
   in {
-    # Every agent here ships a compiled binary with its runtime embedded, so
-    # none of them needs a global node or bun on the host.
+    # Keep fast-moving agent binaries outside the Home Manager generation so
+    # they can be upgraded or rolled back without activating the host.
+    home.sessionPath = [agentsProfileBin];
     home.packages = [
-      agents.claude-code
-      agents.codex
-      agents.opencode
-      pi
+      agentsRollback
+      agentsUpdate
     ];
   };
 }
