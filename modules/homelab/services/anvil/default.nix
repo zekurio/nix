@@ -70,10 +70,11 @@
       unknownAsOriginal = true;
     };
 
-    # Search baseline: VMAF 96 with a 1% savings target; non-anime profiles
-    # still force an encode when search finds no fit. Normal content encodes
-    # to HEVC, while anime content encodes to AV1. Normal HEVC sources use the
-    # stricter VMAF 97 target; anime HEVC sources are copied instead.
+    # Savings are a hard gate: an encode that cannot reduce the source by the
+    # applicable threshold is copied instead. H.264 normal content targets
+    # HEVC at VMAF 95, while H.264 anime targets AV1 at 96. Already-compressed
+    # HEVC/Dolby Vision normal releases need 10% savings at VMAF 96; HEVC anime
+    # targets AV1 at VMAF 97 with a 1% savings floor.
     mkProfile = {
       codec,
       preset,
@@ -88,9 +89,9 @@
         bitDepth = 10;
         crfMin = 14;
         crfMax = 38;
-        targetVmaf = 96;
+        targetVmaf = if anime then 96 else 95;
         minSavingsPercent = 1;
-        forceEncodeOnNoFit = !anime;
+        forceEncodeOnNoFit = false;
         ffmpegArgs = qsvFfmpegArgs;
         abAv1Args = qsvAbAv1Args;
 
@@ -98,15 +99,12 @@
           hevc =
             if anime
             then {
-              # Anime HEVC releases are already efficiently compressed. Keep
-              # their video stream and still run cleanup plus handoff.
-              skipEncode = true;
-            }
-            else {
               targetVmaf = 97;
               minSavingsPercent = 1;
-              # Forcing hevc->hevc when search finds no fit would re-encode
-              # for nothing; fall back to video-copy/remux instead.
+            }
+            else {
+              targetVmaf = 96;
+              minSavingsPercent = 10;
               forceEncodeOnNoFit = false;
             };
 
@@ -118,11 +116,11 @@
               bitDepth = 10;
             }
             // lib.optionalAttrs (!anime) {
-              # Match the strict normal HEVC target even for the rare
-              # non-HEVC Dolby Vision source. Anime HEVC Dolby Vision sources
-              # retain skipEncode from the source-codec override.
-              targetVmaf = 97;
-              minSavingsPercent = 1;
+              # Dolby Vision stays in HEVC and follows the normal HEVC
+              # source policy rather than the ordinary H.264 baseline.
+              targetVmaf = 96;
+              minSavingsPercent = 10;
+              forceEncodeOnNoFit = false;
             };
         };
 
