@@ -24,11 +24,52 @@ in {
       enableGit = false;
       enableGitHub = false;
     };
-    updateT3code = pkgs.writeShellApplication {
-      name = "update-t3code";
+    updateExtras = pkgs.writeShellApplication {
+      name = "update-extras";
       runtimeInputs = [pkgs.nix-update];
       text = ''
-        exec nix-update t3code --flake --use-github-releases "$@"
+        # Add future repo-pinned, fast-moving packages here and in the case
+        # statement below. Runtime-profile agents intentionally stay separate.
+        registered=(
+          t3code
+        )
+
+        usage() {
+          echo "Usage: update-extras [--list | TARGET...]"
+          echo
+          echo "With no targets, update every registered extra."
+        }
+
+        if [[ "$#" -eq 1 ]]; then
+          case "$1" in
+            --list)
+              printf '%s\n' "''${registered[@]}"
+              exit 0
+              ;;
+            --help | -h)
+              usage
+              exit 0
+              ;;
+          esac
+        fi
+
+        if [[ "$#" -eq 0 ]]; then
+          set -- "''${registered[@]}"
+        fi
+
+        for target in "$@"; do
+          case "$target" in
+            t3code)
+              nix-update t3code --flake --use-github-releases
+              ;;
+            *)
+              echo "Unknown extra: $target" >&2
+              echo "Registered extras:" >&2
+              printf '  %s\n' "''${registered[@]}" >&2
+              exit 2
+              ;;
+          esac
+        done
       '';
     };
   in {
@@ -36,12 +77,12 @@ in {
     # lets Adam validate only T3 with `nix build .#t3code`.
     packages = {
       inherit t3code;
-      update-t3code = updateT3code;
+      update-extras = updateExtras;
     };
-    apps.update-t3code = {
+    apps.update-extras = {
       type = "app";
-      program = lib.getExe updateT3code;
-      meta.description = "Update the pinned stable T3 Code package";
+      program = lib.getExe updateExtras;
+      meta.description = "Update fast-moving packages maintained outside nixpkgs";
     };
   };
 }
