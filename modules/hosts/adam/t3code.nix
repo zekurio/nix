@@ -14,9 +14,9 @@
       enableGitHub = false;
     };
   in {
-    # Keep this code-execution surface on the tailnet. The desktop client
-    # cannot pass a Pangolin SSO gate, while T3's own pairing token is not a
-    # sufficient outer boundary for public exposure.
+    # Keep this code-execution surface private: plain HTTP is available on the
+    # LAN, while T3 manages a tailnet-only HTTPS endpoint through Tailscale
+    # Serve. Nothing is published through Caddy or Pangolin.
     systemd.services.t3code = {
       description = "T3 Code headless server";
       wantedBy = ["multi-user.target"];
@@ -39,17 +39,17 @@
       script = ''
         export PATH="${agentsProfile}/bin:$PATH"
 
-        # tailscaled being active does not mean its interface has an address
-        # yet, so wait for one rather than asking T3 to bind an empty host.
-        until ts_ip="$(tailscale ip -4 2>/dev/null)" && [ -n "$ts_ip" ]; do
-          sleep 1
-        done
-
-        exec ${lib.getExe' t3code "t3"} serve --host "$ts_ip"
+        exec ${lib.getExe' t3code "t3"} serve \
+          --host 0.0.0.0 \
+          --port 3773 \
+          --tailscale-serve \
+          --tailscale-serve-port 443
       '';
     };
 
-    # T3's default server port, reachable only through the Tailscale interface.
+    # Direct HTTP is private to the LAN and tailnet. Tailscale Serve terminates
+    # HTTPS separately and proxies to the same local port.
+    networking.firewall.interfaces.enp42s0.allowedTCPPorts = [3773];
     networking.firewall.interfaces.tailscale0.allowedTCPPorts = [3773];
   };
 }
