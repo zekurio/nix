@@ -72,9 +72,9 @@
 
     # Savings are a hard gate: an encode that cannot reduce the source by the
     # applicable threshold is copied instead. H.264 normal content targets
-    # HEVC at VMAF 95, while H.264 anime targets AV1 at 96. Already-compressed
-    # HEVC/Dolby Vision normal releases need 10% savings at VMAF 96; HEVC anime
-    # targets AV1 at VMAF 97 with a 1% savings floor.
+    # HEVC at VMAF 95, while H.264 anime targets AV1 at 96. Normal HEVC and
+    # HEVC anime both use a 1% savings floor at VMAF 96. Dolby Vision normal
+    # releases remain stricter: 10% savings at VMAF 96.
     mkProfile = {
       codec,
       preset,
@@ -99,12 +99,12 @@
           hevc =
             if anime
             then {
-              targetVmaf = 97;
+              targetVmaf = 96;
               minSavingsPercent = 1;
             }
             else {
               targetVmaf = 96;
-              minSavingsPercent = 10;
+              minSavingsPercent = 1;
               forceEncodeOnNoFit = false;
             };
 
