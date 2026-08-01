@@ -1030,7 +1030,7 @@ const Params = Type.Object({
 	task: Type.Optional(Type.String({ description: "The task for the subagent. Required for 'start'. Be specific and self-contained: the subagent sees none of this conversation." })),
 	model: Type.Optional(
 		Type.String({
-			description: "Model slug, e.g. 'anthropic/claude-sonnet-5' or 'openai-codex/gpt-5.6-sol'. Optional ':<thinking>' suffix (e.g. ':high'). Defaults to the current model.",
+			description: "Model slug, e.g. 'anthropic/claude-opus-5' or 'openai-codex/gpt-5.6-sol'. Optional ':<thinking>' suffix (e.g. ':high'). Defaults to the current model.",
 		}),
 	),
 	label: Type.Optional(Type.String({ description: "Short name for this job, shown in the UI. Defaults to a slug of the task." })),
