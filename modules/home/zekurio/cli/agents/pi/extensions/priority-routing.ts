@@ -1,7 +1,18 @@
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { getAgentDir, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import {
+	getAgentDir,
+	type ExtensionAPI,
+	type ExtensionContext,
+	type Theme,
+} from "@earendil-works/pi-coding-agent";
+import { getCapabilities, hyperlink, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import {
+	GIT_FLOW_REFRESH_EVENT,
+	GIT_FLOW_STATE_EVENT,
+	type GitFlowFooterState,
+	type PullRequestStatus,
+} from "./lib/git-flow-state.ts";
 
 type Routing = {
 	label: string;
@@ -125,6 +136,69 @@ function sanitize(text: string): string {
 	return text.replace(/[\r\n\t]/g, " ").replace(/ +/g, " ").trim();
 }
 
+const OSC8_CLOSE = "\u001B]8;;\u001B\\";
+
+function columns(left: string, right: string, width: number, ellipsis = "..."): string {
+	if (!right) return truncateToWidth(left, width, `${OSC8_CLOSE}${ellipsis}`);
+
+	// Keep the right-hand metadata subordinate to the repository/PR details.
+	// At tiny widths, drop the right side entirely before sacrificing a PR label.
+	const minimumLeftWidth = Math.min(width, visibleWidth(left), 10);
+	const rightWidth = Math.max(
+		0,
+		Math.min(Math.floor(width * 0.45), width - minimumLeftWidth - 2),
+	);
+	const fittedRight = truncateToWidth(right, rightWidth, "");
+	const gap = fittedRight ? 2 : 0;
+	const leftWidth = Math.max(0, width - visibleWidth(fittedRight) - gap);
+	// If truncation lands inside the PR link, close OSC 8 before the ellipsis so
+	// the padding and right-hand column never inherit the link target.
+	const fittedLeft = truncateToWidth(
+		left,
+		leftWidth,
+		leftWidth >= 3 ? `${OSC8_CLOSE}${ellipsis}` : OSC8_CLOSE,
+	);
+	const padding = " ".repeat(Math.max(0, width - visibleWidth(fittedLeft) - visibleWidth(fittedRight)));
+	return fittedLeft + padding + fittedRight;
+}
+
+function isInside(root: string, path: string): boolean {
+	const fromRoot = relative(resolve(root), resolve(path));
+	return fromRoot === "" || (fromRoot !== ".." && !fromRoot.startsWith(`..${sep}`) && !isAbsolute(fromRoot));
+}
+
+function terminalLink(label: string, url: string): string {
+	return getCapabilities().hyperlinks ? hyperlink(label, url) : `${label} (${url})`;
+}
+
+function pullRequestColor(status: PullRequestStatus): "dim" | "success" | "error" | "thinkingHigh" {
+	if (status === "mergeable") return "success";
+	if (status === "not-mergeable") return "error";
+	if (status === "merged") return "thinkingHigh";
+	return "dim";
+}
+
+function gitFlowDetails(
+	theme: Theme,
+	state: GitFlowFooterState | undefined,
+	cwd: string,
+	branch: string | null,
+): string[] {
+	if (!state || state.branch !== branch || !isInside(state.root, cwd)) return [];
+
+	const parts: string[] = [];
+	if (state.gitStatus) parts.push(theme.fg("error", state.gitStatus));
+	if (state.pullRequest) {
+		parts.push(
+			theme.fg(
+				pullRequestColor(state.pullRequest.status),
+				terminalLink(`#${state.pullRequest.number}`, state.pullRequest.url),
+			),
+		);
+	}
+	return parts;
+}
+
 function appendHeader(headers: Record<string, string | null>, name: string, value: string): void {
 	const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === name.toLowerCase());
 	if (!existingKey) {
@@ -145,6 +219,14 @@ function appendHeader(headers: Record<string, string | null>, name: string, valu
 export default function priorityRouting(pi: ExtensionAPI): void {
 	const state = loadState();
 	let startupEnabledModelKey: string | undefined;
+	let gitFlowState: GitFlowFooterState | undefined;
+	let requestFooterRender: (() => void) | undefined;
+
+	const unsubscribeGitFlow = pi.events.on(GIT_FLOW_STATE_EVENT, (data) => {
+		if (data !== undefined && !isRecord(data)) return;
+		gitFlowState = data as GitFlowFooterState | undefined;
+		requestFooterRender?.();
+	});
 
 	function isEnabled(ctx: ExtensionContext): boolean {
 		const key = modelKey(ctx);
@@ -159,9 +241,18 @@ export default function priorityRouting(pi: ExtensionAPI): void {
 		if (ctx.mode !== "tui") return;
 
 		ctx.ui.setFooter((tui, theme, footerData) => {
-			const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
+			const requestRender = () => tui.requestRender();
+			requestFooterRender = requestRender;
+			const unsubscribeBranch = footerData.onBranchChange(() => {
+				gitFlowState = undefined;
+				requestRender();
+				pi.events.emit(GIT_FLOW_REFRESH_EVENT, undefined);
+			});
 			return {
-				dispose: unsubscribe,
+				dispose() {
+					unsubscribeBranch();
+					if (requestFooterRender === requestRender) requestFooterRender = undefined;
+				},
 				invalidate() {},
 				render(width: number): string[] {
 					let input = 0;
@@ -183,30 +274,36 @@ export default function priorityRouting(pi: ExtensionAPI): void {
 						latestCacheHitRate = promptTokens > 0 ? (usage.cacheRead / promptTokens) * 100 : undefined;
 					}
 
-					let cwd = formatCwd(ctx.cwd, process.env.HOME || process.env.USERPROFILE);
+					const extensionStatuses = footerData.getExtensionStatuses();
+					const cwd = formatCwd(ctx.cwd, process.env.HOME || process.env.USERPROFILE);
 					const branch = footerData.getGitBranch();
-					if (branch) cwd += ` (${branch})`;
+					const gitAndSessionParts = [theme.fg("dim", cwd)];
+					if (branch) gitAndSessionParts.push(theme.fg("dim", branch));
+					gitAndSessionParts.push(...gitFlowDetails(theme, gitFlowState, ctx.cwd, branch));
+					const gitFlowOperation = sanitize(extensionStatuses.get("git-flow") ?? "");
+					if (gitFlowOperation) gitAndSessionParts.push(theme.fg("dim", gitFlowOperation));
 					const sessionName = pi.getSessionName();
-					if (sessionName) cwd += ` • ${sessionName}`;
+					if (sessionName) gitAndSessionParts.push(theme.fg("dim", sessionName));
+					const gitAndSession = gitAndSessionParts.join(theme.fg("dim", " • "));
 
-					const stats: string[] = [];
-					if (input) stats.push(`↑${formatTokens(input)}`);
-					if (output) stats.push(`↓${formatTokens(output)}`);
-					if (cacheRead) stats.push(`R${formatTokens(cacheRead)}`);
-					if (cacheWrite) stats.push(`W${formatTokens(cacheWrite)}`);
+					const traffic: string[] = [];
+					if (input) traffic.push(`↑${formatTokens(input)}`);
+					if (output) traffic.push(`↓${formatTokens(output)}`);
+					if (cacheRead) traffic.push(`R${formatTokens(cacheRead)}`);
+					if (cacheWrite) traffic.push(`W${formatTokens(cacheWrite)}`);
 					if ((cacheRead || cacheWrite) && latestCacheHitRate !== undefined) {
-						stats.push(`CH${latestCacheHitRate.toFixed(1)}%`);
+						traffic.push(`CH${latestCacheHitRate.toFixed(1)}%`);
 					}
-					const subscription = ctx.model ? ctx.modelRegistry.isUsingOAuth(ctx.model) : false;
-					if (cost || subscription) stats.push(`$${cost.toFixed(3)}${subscription ? " (sub)" : ""}`);
 
+					const billingAndContext: string[] = [];
+					const subscription = ctx.model ? ctx.modelRegistry.isUsingOAuth(ctx.model) : false;
+					if (cost || subscription) billingAndContext.push(`$${cost.toFixed(3)}${subscription ? " (sub)" : ""}`);
 					const context = ctx.getContextUsage();
 					const contextWindow = context?.contextWindow ?? ctx.model?.contextWindow ?? 0;
 					const percent = context?.percent;
-					stats.push(`${percent === null || percent === undefined ? "?" : percent.toFixed(1)}/${formatTokens(contextWindow)} (auto)`);
-
-					let left = stats.join(" ");
-					if (visibleWidth(left) > width) left = truncateToWidth(left, width, "...");
+					billingAndContext.push(
+						`${percent === null || percent === undefined ? "?" : percent.toFixed(1)}/${formatTokens(contextWindow)} (auto)`,
+					);
 
 					const lightning = isEffective(ctx) ? " ⚡" : "";
 					const modelName = `${ctx.model?.id ?? "no-model"}${lightning}`;
@@ -215,22 +312,25 @@ export default function priorityRouting(pi: ExtensionAPI): void {
 						const thinking = pi.getThinkingLevel();
 						modelAndThinking = thinking === "off" ? `${modelName} • thinking off` : `${modelName} • ${thinking}`;
 					}
-
-					let right = modelAndThinking;
 					if (footerData.getAvailableProviderCount() > 1 && ctx.model) {
 						const withProvider = `(${ctx.model.provider}) ${modelAndThinking}`;
-						if (visibleWidth(left) + 2 + visibleWidth(withProvider) <= width) right = withProvider;
+						if (visibleWidth(withProvider) <= Math.max(20, Math.floor(width * 0.45))) modelAndThinking = withProvider;
 					}
 
-					const available = Math.max(0, width - visibleWidth(left) - 2);
-					const fittedRight = truncateToWidth(right, available, "");
-					const padding = " ".repeat(Math.max(0, width - visibleWidth(left) - visibleWidth(fittedRight)));
 					const lines = [
-						truncateToWidth(theme.fg("dim", cwd), width, theme.fg("dim", "...")),
-						theme.fg("dim", left + padding + fittedRight),
+						columns(
+							gitAndSession,
+							theme.fg("dim", modelAndThinking),
+							width,
+							theme.fg("dim", "..."),
+						),
+						theme.fg("dim", columns(traffic.join(" "), billingAndContext.join(" • "), width)),
 					];
 
-					const statuses = [...footerData.getExtensionStatuses().values()].map(sanitize).filter(Boolean);
+					const statuses = [...extensionStatuses.entries()]
+						.filter(([key]) => key !== "git-flow")
+						.map(([, value]) => sanitize(value))
+						.filter(Boolean);
 					if (statuses.length) lines.push(truncateToWidth(statuses.join(" "), width, theme.fg("dim", "...")));
 					return lines;
 				},
@@ -307,6 +407,7 @@ export default function priorityRouting(pi: ExtensionAPI): void {
 		handler: handleCommand,
 	});
 	pi.on("session_start", (_event, ctx) => {
+		gitFlowState = undefined;
 		const key = modelKey(ctx);
 		if (state.legacyEnabled !== undefined) {
 			if (state.legacyEnabled && key && routeFor(ctx)) state.models[key] = true;
@@ -330,5 +431,10 @@ export default function priorityRouting(pi: ExtensionAPI): void {
 	pi.on("before_provider_request", (event, ctx) => {
 		if (!isEffective(ctx) || !isRecord(event.payload)) return;
 		return { ...event.payload, ...routeFor(ctx)!.payload };
+	});
+
+	pi.on("session_shutdown", () => {
+		requestFooterRender = undefined;
+		unsubscribeGitFlow();
 	});
 }
