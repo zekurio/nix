@@ -1,29 +1,15 @@
 {
   flake.modules.homeManager.zekurio = {
     config,
+    inputs,
     lib,
     pkgs,
     ...
   }: let
-    firecrawlSearch = pkgs.callPackage ./_firecrawl-search.nix {};
-    npmExtension = pkgs.callPackage ./_npm-extension.nix {};
-    anthropicAuth = npmExtension {
-      pname = "pi-anthropic-auth";
-      npmName = "@gotgenes/pi-anthropic-auth";
-      version = "2.0.1";
-      hash = "sha512-zxRjTL5QMDj3VlfJ0vAKATh0ArqeAAOHyQRJW8K+ol73/8773Q/JthYu6BGtPRM5KNg/OnR1dXsSKTgaZBLhoQ==";
-    };
-    direnv = npmExtension {
-      pname = "pi-direnv";
-      version = "0.1.0";
-      hash = "sha512-N+njfllbcKvd5qbtSMS1nP5QTSaqVZSmo8gQk8TCgWefPQidcg+FG6cY79HIJggS9RiI4FjhGyhVX8DY9kcuIA==";
+    agentStuff = pkgs.callPackage ./_agent-stuff.nix {} {
+      src = inputs.agent-stuff;
     };
     jsonFormat = pkgs.formats.json {};
-    gitFlowConfig = jsonFormat.generate "pi-git-flow.json" {
-      # Override per project with .pi/git-flow.json or temporarily with
-      # PI_GIT_MODEL=provider/model.
-      model = "openai-codex/gpt-5.6-luna";
-    };
     piSettings = jsonFormat.generate "pi-settings.json" {
       theme = "catppuccin-frappe";
       defaultProvider = "openai-codex";
@@ -38,26 +24,13 @@
         "openai-codex/gpt-5.6-terra"
         "openai-codex/gpt-5.6-luna"
         "opencode-go/kimi-k3"
+        "opencode-go/glm-5.2"
+        "opencode-go/deepseek-v4-flash"
       ];
 
-      # Nix provides every extension below, so Pi never needs npm or Bun to
-      # materialize packages at runtime.
-      packages = [];
-    };
-    effortState = jsonFormat.generate "pi-effort.json" {
-      models = {
-        "anthropic/claude-fable-5" = "xhigh";
-        "anthropic/claude-opus-5" = "xhigh";
-        "openai-codex/gpt-5.6-sol" = "high";
-        "opencode-go/glm-5.2" = "high";
-        "opencode-go/kimi-k3" = "max";
-      };
-    };
-    priorityRoutingState = jsonFormat.generate "pi-priority-routing.json" {
-      models = {
-        "openai-codex/gpt-5.6-luna" = true;
-        "openai-codex/gpt-5.6-sol" = true;
-      };
+      # Home Manager provides this local package and its dependencies, so Pi
+      # only loads it and never needs npm or Bun to materialize resources.
+      packages = ["./packages/agent-stuff"];
     };
     agentDirectory = "${config.home.homeDirectory}/.pi/agent";
     mergeMutableJson = target: static: operation: ''
@@ -73,34 +46,13 @@
       unset dynamic
     '';
   in {
-    home.file = {
-      ".pi/agent/extensions/answer.ts".source = ./extensions/answer.ts;
-      ".pi/agent/extensions/async-agents.ts".source = ./extensions/async-agents.ts;
-      ".pi/agent/extensions/btw.ts".source = ./extensions/btw.ts;
-      ".pi/agent/extensions/effort.ts".source = ./extensions/effort.ts;
-      ".pi/agent/extensions/git-flow.ts".source = ./extensions/git-flow.ts;
-      # Shared event protocol for git-flow and the custom footer; this nested
-      # path is not an extension entrypoint, so Pi does not load it itself.
-      ".pi/agent/extensions/lib/git-flow-state.ts".source = ./extensions/lib/git-flow-state.ts;
-      ".pi/agent/extensions/image-anchors.ts".source = ./extensions/image-anchors.ts;
-      # Shared with adam, where caffeinate does not exist. The extension checks
-      # process.platform itself and stays inert off darwin.
-      ".pi/agent/extensions/no-sleep.ts".source = ./extensions/no-sleep.ts;
-      ".pi/agent/extensions/priority-routing.ts".source = ./extensions/priority-routing.ts;
-      ".pi/agent/extensions/firecrawl-search".source = firecrawlSearch;
-      ".pi/agent/extensions/pi-anthropic-auth".source = anthropicAuth;
-      ".pi/agent/extensions/pi-direnv".source = direnv;
-      ".pi/agent/git-flow.json".source = gitFlowConfig;
-      ".pi/agent/themes/catppuccin-frappe.json".source = ./themes/catppuccin-frappe.json;
-    };
+    home.file.".pi/agent/packages/agent-stuff".source = agentStuff;
 
-    # Pi updates bookkeeping and extension preference files itself. Merge the
-    # declarative portion on every activation rather than making these files
-    # read-only Nix store symlinks.
+    # Pi updates bookkeeping in settings.json itself. Merge the declarative
+    # settings rather than making the file a read-only store symlink; package
+    # resources remain declarative. Extension-owned state is entirely Pi-managed.
     home.activation.piConfiguration = lib.hm.dag.entryAfter ["linkGeneration"] ''
       ${mergeMutableJson "${agentDirectory}/settings.json" piSettings ".[0] * .[1]"}
-      ${mergeMutableJson "${agentDirectory}/effort.json" effortState ".[1] * .[0]"}
-      ${mergeMutableJson "${agentDirectory}/priority-routing.json" priorityRoutingState ".[1] * .[0]"}
     '';
   };
 }

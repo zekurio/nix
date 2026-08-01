@@ -4,11 +4,11 @@
     lib,
     ...
   }: let
-    source = inputs.pi-skills;
+    source = "${inputs.agent-stuff}/skills";
 
     # A skill is any top-level directory holding a SKILL.md, so adding one to
-    # the pi-skills repo reaches every agent here after `nix flake update
-    # pi-skills` without touching this file.
+    # agent-stuff reaches every agent after `nix flake update agent-stuff`
+    # without touching this file. Pi receives the same source as a package.
     available =
       lib.filter (name: builtins.pathExists "${source}/${name}/SKILL.md")
       (builtins.attrNames (builtins.readDir source));
@@ -18,7 +18,7 @@
     shared = lib.filter (name: name != "zed") available;
 
     # Claude Code and Codex only look one level deep, at <directory>/<skill>/
-    # SKILL.md, so each skill is linked on its own. Linking the pi-skills repo
+    # SKILL.md, so each skill is linked on its own. Linking agent-stuff's skills
     # root instead would bury every skill one directory too deep for them.
     linkSkills = directory: skills:
       lib.listToAttrs (map (name:
@@ -28,8 +28,7 @@
       skills);
   in {
     home.file =
-      linkSkills ".pi/agent/skills" available
-      // linkSkills ".claude/skills" shared
+      linkSkills ".claude/skills" shared
       # Codex's documented user scope.
       // linkSkills ".agents/skills" shared
       // linkSkills ".config/opencode/skills" available;
