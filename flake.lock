@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "agent-stuff": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785620870,
+        "narHash": "sha256-Km+pDqhZA9QXUlf6wmYmqdjQGHE3gJal76K1tnJ6mY4=",
+        "owner": "zekurio",
+        "repo": "agent-stuff",
+        "rev": "d4afe0fb599575331c4694306c5539ec39c5b30e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "agent-stuff",
+        "type": "github"
+      }
+    },
     "alloy": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -748,24 +764,9 @@
         "type": "github"
       }
     },
-    "pi-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1785454283,
-        "narHash": "sha256-KYbGFBF6WnpHgONc4DvacmKBRAinu21xdiNIY4oVGig=",
-        "owner": "zekurio",
-        "repo": "pi-skills",
-        "rev": "f2c6ee8b555958506eaa2dbaa3481d8f2ca9d0ae",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "pi-skills",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
+        "agent-stuff": "agent-stuff",
         "alloy": "alloy",
         "anvil": "anvil",
         "autoaspm": "autoaspm",
@@ -785,7 +786,6 @@
         "nix-linux-builder": "nix-linux-builder",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "pi-skills": "pi-skills",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix"
       }
