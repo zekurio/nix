@@ -6,9 +6,6 @@
       extraUpFlags = [
         "--hostname=adam"
       ];
-      # T3 Code manages its tailnet-only HTTPS proxy through `tailscale serve`
-      # while running as this unprivileged user.
-      extraSetFlags = ["--operator=zekurio"];
       openFirewall = true;
     };
 
