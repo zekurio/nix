@@ -79,6 +79,9 @@
       ".pi/agent/extensions/btw.ts".source = ./extensions/btw.ts;
       ".pi/agent/extensions/effort.ts".source = ./extensions/effort.ts;
       ".pi/agent/extensions/git-flow.ts".source = ./extensions/git-flow.ts;
+      # Shared event protocol for git-flow and the custom footer; this nested
+      # path is not an extension entrypoint, so Pi does not load it itself.
+      ".pi/agent/extensions/lib/git-flow-state.ts".source = ./extensions/lib/git-flow-state.ts;
       ".pi/agent/extensions/image-anchors.ts".source = ./extensions/image-anchors.ts;
       # Shared with adam, where caffeinate does not exist. The extension checks
       # process.platform itself and stays inert off darwin.
