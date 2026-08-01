@@ -76,6 +76,7 @@ interface LiveTool {
 
 interface Job {
 	id: string;
+	sessionId: string;
 	label: string;
 	task: string;
 	model: string;
@@ -99,17 +100,36 @@ interface Job {
 	proc?: ChildProcess;
 	promise: Promise<void>;
 	collected: boolean;
+	finished: boolean;
+	killTimer?: ReturnType<typeof setTimeout>;
 }
 
-const jobs = new Map<string, Job>();
-let jobCounter = 0;
+interface AsyncAgentsRuntime {
+	schemaVersion: 1;
+	jobs: Map<string, Job>;
+	jobCounter: number;
+	listeners: Set<() => void>;
+	notifyTimer?: ReturnType<typeof setTimeout>;
+	statusTimer?: ReturnType<typeof setTimeout>;
+	uiCtx?: ExtensionContext;
+	sessionId?: string;
+}
+
+const RUNTIME_KEY = Symbol.for("zekurio.pi.async-agents.runtime");
+const globalRuntime = globalThis as any;
+const runtime: AsyncAgentsRuntime = globalRuntime[RUNTIME_KEY] ?? {
+	schemaVersion: 1,
+	jobs: new Map<string, Job>(),
+	jobCounter: 0,
+	listeners: new Set<() => void>(),
+};
+globalRuntime[RUNTIME_KEY] = runtime;
+const jobs = runtime.jobs;
 
 // --- Change notification -------------------------------------------------------
 // The overlay views subscribe here so a streaming child repaints live.
 
-const listeners = new Set<() => void>();
-let notifyTimer: ReturnType<typeof setTimeout> | undefined;
-let statusTimer: ReturnType<typeof setTimeout> | undefined;
+const listeners = runtime.listeners;
 
 function subscribe(listener: () => void): () => void {
 	listeners.add(listener);
@@ -118,25 +138,25 @@ function subscribe(listener: () => void): () => void {
 
 /** Coalesce token-rate events into at most one repaint per 60ms. */
 function notifyChanged(): void {
-	if (!notifyTimer) {
-		notifyTimer = setTimeout(() => {
-			notifyTimer = undefined;
+	if (!runtime.notifyTimer) {
+		runtime.notifyTimer = setTimeout(() => {
+			runtime.notifyTimer = undefined;
 			for (const listener of listeners) listener();
 		}, 60);
 	}
 	// The footer redraws the whole bar, so it gets a slower cadence than the
 	// overlay: 500ms is enough for elapsed seconds and tool-name changes.
-	if (!statusTimer) {
-		statusTimer = setTimeout(() => {
-			statusTimer = undefined;
+	if (!runtime.statusTimer) {
+		runtime.statusTimer = setTimeout(() => {
+			runtime.statusTimer = undefined;
 			updateStatus();
 		}, 500);
 	}
 }
 
 function nextJobId(): string {
-	jobCounter += 1;
-	return `a${jobCounter}`;
+	runtime.jobCounter += 1;
+	return `a${runtime.jobCounter}`;
 }
 
 function formatTokens(count: number): string {
@@ -324,55 +344,136 @@ function ingest(job: Job, event: any): void {
 	notifyChanged();
 }
 
+// --- Approved models / tiers ---------------------------------------------------
+
+type TierName = "easy" | "medium" | "hard";
+
+interface Tier {
+	/** What kind of job this tier is for; shown to the caller verbatim. */
+	blurb: string;
+	/** Ordered "provider/id[:thinking]" candidates; the first one the registry has wins. */
+	candidates: string[];
+}
+
+/**
+ * The approved subagent models, grouped by how hard the job is. Callers pick a
+ * tier, not a slug: exposing the whole registry made the caller anchor on
+ * whatever cheap entry it happened to see first (haiku, gpt-5.4-mini) and hand
+ * real work to it. Nothing outside this table is ever named to the model, and
+ * an unapproved slug is rejected rather than fuzzy-matched into the registry.
+ *
+ * Candidates degrade in order, so an unauthenticated provider does not break a
+ * tier. Edit this table to change what subagents may run on.
+ */
+const TIERS: Record<TierName, Tier> = {
+	easy: {
+		blurb: "search, recon, log/diff triage, summarising, mechanical edits",
+		candidates: ["openai-codex/gpt-5.6-luna:high", "opencode-go/deepseek-v4-flash:max"],
+	},
+	medium: {
+		blurb: "scoped implementation, tests, docs, reviewing a known-shape change",
+		candidates: ["openai-codex/gpt-5.6-terra:xhigh", "opencode-go/glm-5.2:max"],
+	},
+	hard: {
+		blurb: "design, cross-cutting refactors, ambiguous debugging, tricky code",
+		candidates: ["openai-codex/gpt-5.6-sol:xhigh", "anthropic/claude-fable-5:high", "opencode-go/kimi-k3:max"],
+	},
+};
+
+const TIER_NAMES = Object.keys(TIERS) as TierName[];
+const DEFAULT_TIER: TierName = "medium";
+
+/** Forgiving synonyms, so a near-miss tier name is not treated as a model slug. */
+const TIER_ALIASES: Record<string, TierName> = {
+	small: "easy",
+	fast: "easy",
+	cheap: "easy",
+	scout: "easy",
+	low: "easy",
+	mid: "medium",
+	normal: "medium",
+	standard: "medium",
+	default: "medium",
+	big: "hard",
+	deep: "hard",
+	large: "hard",
+	smart: "hard",
+	complex: "hard",
+};
+
+function splitThinking(raw: string): { base: string; thinking?: string } {
+	const i = raw.lastIndexOf(":");
+	if (i <= 0 || i < raw.indexOf("/")) return { base: raw };
+	return { base: raw.slice(0, i), thinking: raw.slice(i + 1) };
+}
+
+function tierModels(name: TierName): string[] {
+	return TIERS[name].candidates.map((candidate) => splitThinking(candidate).base);
+}
+
+/** Tier list for descriptions and errors; never leaks the full registry. */
+function tierHelp(): string {
+	// Shows the raw first candidate, thinking suffix included: two tiers may share a
+	// model and differ only in reasoning effort.
+	return TIER_NAMES.map((name) => `'${name}' — ${TIERS[name].blurb} (${TIERS[name].candidates[0]})`).join("; ");
+}
+
+function approvedHelp(): string {
+	return TIER_NAMES.map((name) => `${name}: ${tierModels(name).join(", ")}`).join(" | ");
+}
+
+/** Exact provider/id lookup in the live registry, preserving any thinking suffix. */
+function findAvailable(ctx: ExtensionContext, slug: string): string | undefined {
+	const { base, thinking } = splitThinking(slug);
+	const [provider, ...rest] = base.split("/");
+	const id = rest.join("/");
+	const hit = ctx.modelRegistry.getAvailable().find((m) => m.provider === provider && m.id === id);
+	return hit ? `${hit.provider}/${hit.id}${thinking ? `:${thinking}` : ""}` : undefined;
+}
+
+type Resolved = { slug: string; error?: undefined } | { slug?: undefined; error: string };
+
+function resolveTier(ctx: ExtensionContext, name: TierName, thinkingOverride?: string): Resolved {
+	for (const candidate of TIERS[name].candidates) {
+		const found = findAvailable(ctx, candidate);
+		if (!found) continue;
+		if (!thinkingOverride) return { slug: found };
+		return { slug: `${splitThinking(found).base}:${thinkingOverride}` };
+	}
+	return {
+		error: `No model for tier '${name}' is available in this session (approved for it: ${TIERS[name].candidates.join(", ")}). Try another tier (${TIER_NAMES.join(", ")}) or edit TIERS in async-agents.ts.`,
+	};
+}
+
 // --- Model resolution / spawning -----------------------------------------------
 
-/** Resolve a user-supplied slug to a concrete "provider/model[:thinking]" string. */
-function resolveModel(
-	ctx: ExtensionContext,
-	slug: string | undefined,
-): { slug: string; error?: undefined } | { slug?: undefined; error: string } {
-	const available = ctx.modelRegistry.getAvailable();
+/** Resolve a tier name (preferred) or an approved slug to "provider/model[:thinking]". */
+function resolveModel(ctx: ExtensionContext, slug: string | undefined): Resolved {
+	const raw = slug?.trim();
+	if (!raw) return resolveTier(ctx, DEFAULT_TIER);
 
-	if (!slug || !slug.trim()) {
-		const current = ctx.model;
-		if (!current) return { error: "No model specified and no active model to inherit from." };
-		return { slug: `${current.provider}/${current.id}` };
+	const { base, thinking } = splitThinking(raw);
+	const key = base.toLowerCase();
+	const tier = (TIER_NAMES as string[]).includes(key) ? (key as TierName) : TIER_ALIASES[key];
+	if (tier) return resolveTier(ctx, tier, thinking);
+
+	// Explicit slugs still work, but only for models on the approved list above.
+	const approved = TIER_NAMES.flatMap(tierModels);
+	const match =
+		approved.find((s) => s === base) ??
+		approved.find((s) => s.split("/").slice(1).join("/") === base) ??
+		approved.find((s) => s.toLowerCase().includes(key));
+	if (!match) {
+		return {
+			error: `"${raw}" is not an approved subagent model. Pass a difficulty tier instead — ${tierHelp()}. Approved slugs: ${approvedHelp()}.`,
+		};
 	}
 
-	const raw = slug.trim();
-	const thinkingSplit = raw.lastIndexOf(":");
-	const hasThinking = thinkingSplit > raw.indexOf("/") && thinkingSplit !== -1;
-	const base = hasThinking ? raw.slice(0, thinkingSplit) : raw;
-	const thinking = hasThinking ? raw.slice(thinkingSplit + 1) : undefined;
-
-	const [maybeProvider, ...rest] = base.split("/");
-	const modelId = rest.join("/");
-
-	let matches = modelId
-		? available.filter((m) => m.provider === maybeProvider && m.id === modelId)
-		: available.filter((m) => m.id === base);
-
-	if (matches.length === 0) {
-		// Fall back to a case-insensitive substring match on the id.
-		const needle = (modelId || base).toLowerCase();
-		matches = available.filter((m) => m.id.toLowerCase().includes(needle));
+	const found = findAvailable(ctx, thinking ? `${match}:${thinking}` : match);
+	if (!found) {
+		return { error: `Approved model "${match}" is not available in this session. Pass a tier instead: ${TIER_NAMES.join(", ")}.` };
 	}
-
-	if (matches.length === 0) {
-		const sample = available
-			.slice(0, 25)
-			.map((m) => `${m.provider}/${m.id}`)
-			.join(", ");
-		return { error: `Unknown model "${raw}". Available: ${sample}${available.length > 25 ? ", ..." : ""}` };
-	}
-
-	if (matches.length > 1) {
-		const options = matches.map((m) => `${m.provider}/${m.id}`).join(", ");
-		return { error: `Ambiguous model "${raw}". Matches: ${options}. Use the full provider/model form.` };
-	}
-
-	const model = matches[0];
-	return { slug: `${model.provider}/${model.id}${thinking ? `:${thinking}` : ""}` };
+	return { slug: found };
 }
 
 /** Mirrors the bundled subagent example so this works from a compiled binary too. */
@@ -410,6 +511,7 @@ function launch(
 
 	const job: Job = {
 		id,
+		sessionId: ctx.sessionManager.getSessionId(),
 		label: options.label,
 		task: options.task,
 		model: options.modelSlug,
@@ -424,6 +526,7 @@ function launch(
 		usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, turns: 0 },
 		promise: Promise.resolve(),
 		collected: false,
+		finished: false,
 	};
 
 	job.promise = new Promise<void>((resolve) => {
@@ -461,6 +564,10 @@ function launch(
 		});
 
 		const finish = (code: number | null) => {
+			if (job.finished) return;
+			job.finished = true;
+			if (job.killTimer) clearTimeout(job.killTimer);
+			job.killTimer = undefined;
 			if (buffer.trim()) processLine(buffer);
 			job.exitCode = code ?? 0;
 			job.endedAt = Date.now();
@@ -478,9 +585,14 @@ function launch(
 					/* ignore */
 				}
 			}
-			if (ctx.hasUI) {
+			const activeCtx = runtime.uiCtx;
+			if (
+				activeCtx?.hasUI &&
+				runtime.sessionId === job.sessionId &&
+				jobs.get(job.id) === job
+			) {
 				const verb = job.status === "done" ? "finished" : job.status;
-				ctx.ui.notify(
+				activeCtx.ui.notify(
 					`Subagent ${job.id} (${job.label}) ${verb} in ${formatDuration(job)} — /agents to view`,
 					job.status === "done" ? "info" : "warning",
 				);
@@ -507,13 +619,13 @@ function launch(
 /**
  * The session UI context. Tool-execution contexts expose a reduced `ui` whose
  * status registration does not survive an overlay teardown, so every footer
- * write goes through the context captured at session_start.
+ * write goes through the context captured at session_start. It lives in the
+ * process-global runtime so running children can attach to the new UI on reload.
  */
-let uiCtx: ExtensionContext | undefined;
 
 /** Compact one-liner rendered in pi's bottom bar via ui.setStatus. */
 function updateStatus(): void {
-	const ctx = uiCtx;
+	const ctx = runtime.uiCtx;
 	if (!ctx?.hasUI || ctx.mode !== "tui") return;
 	const all = [...jobs.values()];
 	if (all.length === 0) {
@@ -534,7 +646,7 @@ function updateStatus(): void {
 	if (newest) parts.push(theme.fg("dim", `${newest.id} ${activityLine(newest)} ${formatDuration(newest)}`));
 	parts.push(theme.fg("accent", "/agents") + theme.fg("dim", " to view"));
 
-	ctx.ui.setStatus("agents", `${theme.fg("muted", "agents:")} ${parts.join(theme.fg("dim", " · "))}`);
+	ctx.ui.setStatus("agents", `${theme.fg("dim", "agents:")} ${parts.join(theme.fg("dim", " · "))}`);
 }
 
 function jobSummaryLine(job: Job): string {
@@ -549,7 +661,7 @@ function jobSummaryLine(job: Job): string {
 function resetJobs(): void {
 	for (const job of jobs.values()) if (job.status === "running") killJob(job);
 	jobs.clear();
-	jobCounter = 0;
+	runtime.jobCounter = 0;
 	updateStatus();
 }
 
@@ -567,7 +679,8 @@ function killJob(job: Job): void {
 			/* ignore */
 		}
 	}
-	setTimeout(() => {
+	if (job.killTimer) clearTimeout(job.killTimer);
+	job.killTimer = setTimeout(() => {
 		try {
 			if (proc.pid) process.kill(-proc.pid, "SIGKILL");
 		} catch {
@@ -1029,8 +1142,9 @@ const Params = Type.Object({
 	action: ActionSchema,
 	task: Type.Optional(Type.String({ description: "The task for the subagent. Required for 'start'. Be specific and self-contained: the subagent sees none of this conversation." })),
 	model: Type.Optional(
-		Type.String({
-			description: "Model slug, e.g. 'anthropic/claude-opus-5' or 'openai-codex/gpt-5.6-sol'. Optional ':<thinking>' suffix (e.g. ':high'). Defaults to the current model.",
+		StringEnum(TIER_NAMES, {
+			description: `Difficulty tier of the job, which selects the model: ${tierHelp()}. Defaults to '${DEFAULT_TIER}'. Match the tier to the work, not to cost.`,
+			default: DEFAULT_TIER,
 		}),
 	),
 	label: Type.Optional(Type.String({ description: "Short name for this job, shown in the UI. Defaults to a slug of the task." })),
@@ -1101,10 +1215,11 @@ export default function asyncAgents(pi: ExtensionAPI): void {
 	};
 
 	pi.on("session_start", (event, ctx) => {
-		uiCtx = ctx;
 		// New/resumed/forked thread: never inherit the previous thread's jobs or footer.
 		// "startup" and "reload" keep the current thread, so they keep their agents.
 		if (event.reason !== "startup" && event.reason !== "reload") resetJobs();
+		runtime.sessionId = ctx.sessionManager.getSessionId();
+		runtime.uiCtx = ctx;
 		if (!ctx.hasUI || ctx.mode !== "tui") return;
 		updateStatus();
 		// ctrl+g mirrors /agents without stealing an existing pi binding.
@@ -1123,12 +1238,13 @@ export default function asyncAgents(pi: ExtensionAPI): void {
 			"'start' returns a job id immediately and does NOT block — keep working, then 'wait' to collect results.",
 			"Launch several jobs back-to-back to parallelize, then 'wait' once for all of them.",
 			"Each subagent starts with a blank context: put every needed detail in `task` and ask for a concrete written answer.",
-			"Pick `model` per task: a small fast model for search/recon, a large one for design or tricky code.",
+			`Set \`model\` to the difficulty tier of the job — ${tierHelp()} — not to a model name; the tier picks an approved model.`,
 		].join(" "),
-		promptSnippet: "agent: delegate work to background subagents (start/list/check/wait/cancel) with a per-task model",
+		promptSnippet: "agent: delegate work to background subagents (start/list/check/wait/cancel) with a per-task difficulty tier",
 		promptGuidelines: [
 			"Use the agent tool for independent, well-scoped work (codebase recon, test runs, doc drafting) so it overlaps with your own work.",
 			"Prefer starting several agents at once and calling wait a single time over interleaving start/wait pairs.",
+			`Choose the agent \`model\` tier by task difficulty (${TIER_NAMES.join(" < ")}); do not downgrade a hard task to a cheaper tier.`,
 		],
 		parameters: Params,
 
@@ -1231,7 +1347,7 @@ export default function asyncAgents(pi: ExtensionAPI): void {
 			if (args.action === "start") {
 				const preview = (args.task ?? "").slice(0, 60);
 				return new Text(
-					`${head} ${theme.fg("muted", args.model ?? "current model")}\n  ${theme.fg("dim", preview)}`,
+					`${head} ${theme.fg("muted", args.model ?? DEFAULT_TIER)}\n  ${theme.fg("dim", preview)}`,
 					0,
 					0,
 				);
@@ -1308,17 +1424,22 @@ export default function asyncAgents(pi: ExtensionAPI): void {
 	pi.on("session_shutdown", (event) => {
 		unbindHotkey?.();
 		unbindHotkey = undefined;
-		if (uiCtx?.hasUI) uiCtx.ui.setStatus("agents", undefined);
-		uiCtx = undefined;
-		if (notifyTimer) clearTimeout(notifyTimer);
-		if (statusTimer) clearTimeout(statusTimer);
-		notifyTimer = undefined;
-		statusTimer = undefined;
-		for (const job of jobs.values()) if (job.status === "running") killJob(job);
-		// Quit or a session swap ends the thread; only an extension reload keeps it.
+		if (event.reason !== "reload" && runtime.uiCtx?.hasUI) {
+			runtime.uiCtx.ui.setStatus("agents", undefined);
+		}
+		runtime.uiCtx = undefined;
+		if (runtime.notifyTimer) clearTimeout(runtime.notifyTimer);
+		if (runtime.statusTimer) clearTimeout(runtime.statusTimer);
+		runtime.notifyTimer = undefined;
+		runtime.statusTimer = undefined;
+		listeners.clear();
+		// Reload only detaches the old UI. Children and job history remain in the
+		// process-global runtime and session_start immediately reattaches them.
 		if (event.reason !== "reload") {
+			for (const job of jobs.values()) if (job.status === "running") killJob(job);
 			jobs.clear();
-			jobCounter = 0;
+			runtime.jobCounter = 0;
+			runtime.sessionId = undefined;
 		}
 	});
 }
