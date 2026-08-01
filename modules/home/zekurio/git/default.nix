@@ -115,6 +115,8 @@
             HostName = "10.0.0.2";
             User = "zekurio";
             IdentityFile = "~/.ssh/id_ed25519";
+            # Preserve Ghostty's truecolor and terminal identity over SSH.
+            SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
 
           ramiel = {
