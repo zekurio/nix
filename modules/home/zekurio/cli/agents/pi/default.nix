@@ -19,6 +19,11 @@
       hash = "sha512-N+njfllbcKvd5qbtSMS1nP5QTSaqVZSmo8gQk8TCgWefPQidcg+FG6cY79HIJggS9RiI4FjhGyhVX8DY9kcuIA==";
     };
     jsonFormat = pkgs.formats.json {};
+    gitFlowConfig = jsonFormat.generate "pi-git-flow.json" {
+      # Override per project with .pi/git-flow.json or temporarily with
+      # PI_GIT_MODEL=provider/model.
+      model = "openai-codex/gpt-5.4-mini";
+    };
     piSettings = jsonFormat.generate "pi-settings.json" {
       theme = "catppuccin-frappe";
       defaultProvider = "openai-codex";
@@ -29,8 +34,9 @@
       enabledModels = [
         "anthropic/claude-fable-5"
         "anthropic/claude-opus-5"
-        "anthropic/claude-sonnet-5"
         "openai-codex/gpt-5.6-sol"
+        "openai-codex/gpt-5.6-terra"
+        "openai-codex/gpt-5.6-luna"
         "opencode-go/kimi-k3"
       ];
 
@@ -42,7 +48,6 @@
       models = {
         "anthropic/claude-fable-5" = "xhigh";
         "anthropic/claude-opus-5" = "xhigh";
-        "anthropic/claude-sonnet-5" = "high";
         "openai-codex/gpt-5.6-sol" = "high";
         "opencode-go/glm-5.2" = "high";
         "opencode-go/kimi-k3" = "max";
@@ -69,13 +74,20 @@
     '';
   in {
     home.file = {
+      ".pi/agent/extensions/answer.ts".source = ./extensions/answer.ts;
       ".pi/agent/extensions/async-agents.ts".source = ./extensions/async-agents.ts;
+      ".pi/agent/extensions/btw.ts".source = ./extensions/btw.ts;
       ".pi/agent/extensions/effort.ts".source = ./extensions/effort.ts;
+      ".pi/agent/extensions/git-flow.ts".source = ./extensions/git-flow.ts;
       ".pi/agent/extensions/image-anchors.ts".source = ./extensions/image-anchors.ts;
+      # Shared with adam, where caffeinate does not exist. The extension checks
+      # process.platform itself and stays inert off darwin.
+      ".pi/agent/extensions/no-sleep.ts".source = ./extensions/no-sleep.ts;
       ".pi/agent/extensions/priority-routing.ts".source = ./extensions/priority-routing.ts;
       ".pi/agent/extensions/firecrawl-search".source = firecrawlSearch;
       ".pi/agent/extensions/pi-anthropic-auth".source = anthropicAuth;
       ".pi/agent/extensions/pi-direnv".source = direnv;
+      ".pi/agent/git-flow.json".source = gitFlowConfig;
       ".pi/agent/themes/catppuccin-frappe.json".source = ./themes/catppuccin-frappe.json;
     };
 
