@@ -52,10 +52,10 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
-    # Skill definitions shared by every coding agent. Consumed as a plain source
-    # tree, so `nix flake update pi-skills` is what publishes a skill edit.
-    pi-skills = {
-      url = "github:zekurio/pi-skills";
+    # Extensions, skills, and themes shared by Pi and the other coding agents.
+    # Consumed as a plain source tree and materialized as a local Pi package.
+    agent-stuff = {
+      url = "github:zekurio/agent-stuff";
       flake = false;
     };
 
