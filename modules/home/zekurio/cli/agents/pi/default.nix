@@ -22,7 +22,7 @@
     gitFlowConfig = jsonFormat.generate "pi-git-flow.json" {
       # Override per project with .pi/git-flow.json or temporarily with
       # PI_GIT_MODEL=provider/model.
-      model = "openai-codex/gpt-5.4-mini";
+      model = "openai-codex/gpt-5.6-luna";
     };
     piSettings = jsonFormat.generate "pi-settings.json" {
       theme = "catppuccin-frappe";

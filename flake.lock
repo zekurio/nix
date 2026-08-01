@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785454283,
-        "narHash": "sha256-atIuQEavI0di5zCT8o3JNLvgwweVBm90zbHpVfJGkL0=",
+        "lastModified": 1785591303,
+        "narHash": "sha256-sGdZFe3KL9aBAIk7M4N1iHLkNYExGThB1NvBTGV3SwE=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "d380f3d5c7fdbd090875c32ef4d6517e8274975c",
+        "rev": "aa1a44c5e4ae3dc364bb184bb2683bbea03e6500",
         "type": "github"
       },
       "original": {
@@ -69,11 +69,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785454283,
-        "narHash": "sha256-JofQw7RGcarKX0z3CHRCoZnKfp3OI+130LPH1ncEE3E=",
+        "lastModified": 1785590993,
+        "narHash": "sha256-BE9Nz3yfyyEbjvy3Fdmp0blZ5SV4T22DLtzHef/sWVc=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "7f7054cd456b667b98e351eedd28939f8c2e13e8",
+        "rev": "ee9c99e5bd32c6aab9a0f6ba8c9e7f7ad288de31",
         "type": "github"
       },
       "original": {

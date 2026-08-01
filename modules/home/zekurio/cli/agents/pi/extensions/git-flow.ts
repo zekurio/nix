@@ -26,7 +26,7 @@ import {
 
 const CONFIG_FILE = "git-flow.json";
 // Keep the declarative default in ../default.nix in sync.
-const DEFAULT_MODEL = "openai-codex/gpt-5.4-mini";
+const DEFAULT_MODEL = "openai-codex/gpt-5.6-luna";
 const MAX_CONTEXT_CHARS = 60_000;
 const MAX_DIFF_CHARS = 120_000;
 const MAX_UNTRACKED_FILES = 40;
@@ -200,7 +200,7 @@ async function generateJson(
 			apiKey: auth.apiKey,
 			headers: auth.headers,
 			env: auth.env,
-			reasoningEffort: "low",
+			reasoningEffort: "medium",
 			maxTokens: 4_096,
 			cacheRetention: "none",
 			sessionId: uuidv7(),
