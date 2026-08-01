@@ -41,6 +41,9 @@
       services.openssh = {
         enable = true;
         settings = {
+          # Terminal capability hints let remote TUIs retain truecolor and
+          # terminal-specific behavior; these are not credentials.
+          AcceptEnv = ["COLORTERM" "TERM_PROGRAM"];
           PasswordAuthentication = lib.mkDefault false;
           KbdInteractiveAuthentication = lib.mkDefault false;
           PermitRootLogin = lib.mkDefault "no";
