@@ -10,7 +10,7 @@
       programs.ghostty = {
         enable = true;
         package = null;
-        enableZshIntegration = true;
+        enableFishIntegration = true;
         systemd.enable = false;
         settings =
           {

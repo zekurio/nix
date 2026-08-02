@@ -3,13 +3,15 @@
     programs = {
       atuin = {
         enable = true;
-        enableZshIntegration = true;
+        enableFishIntegration = true;
       };
 
-      zsh = {
+      fish = {
         enable = true;
-        autosuggestion.enable = true;
-        syntaxHighlighting.enable = true;
+        interactiveShellInit = ''
+          set fish_greeting
+
+        '';
         shellAliases = {
           ls = "eza";
           ll = "eza -lah";
@@ -23,12 +25,12 @@
 
       carapace = {
         enable = true;
-        enableZshIntegration = true;
+        enableFishIntegration = true;
       };
 
       zoxide = {
         enable = true;
-        enableZshIntegration = true;
+        enableFishIntegration = true;
         options = [
           "--cmd"
           "cd"
@@ -36,7 +38,7 @@
       };
     };
 
-    # Highlighting colors come from the fixed global Catppuccin flavor.
-    catppuccin.zsh-syntax-highlighting.enable = true;
+    # Fish colors come from the fixed global Catppuccin flavor.
+    catppuccin.fish.enable = true;
   };
 }
