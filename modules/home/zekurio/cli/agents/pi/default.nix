@@ -30,7 +30,15 @@
 
       # Home Manager provides this local package and its dependencies, so Pi
       # only loads it and never needs npm or Bun to materialize resources.
-      packages = ["./packages/agent-stuff"];
+      # Shared skills arrive through ~/.agents/skills; disabling package skill
+      # discovery avoids collisions while retaining the Pi-only zed skill.
+      packages = [
+        {
+          source = "./packages/agent-stuff";
+          skills = [];
+        }
+      ];
+      skills = ["./packages/agent-stuff/skills/zed"];
     };
     agentDirectory = "${config.home.homeDirectory}/.pi/agent";
     mergeMutableJson = target: static: operation: ''
