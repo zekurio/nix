@@ -1,7 +1,8 @@
 # nix
 
 Nix configurations for my NixOS hosts and my Mac: a homelab server, a public
-edge VPS, and a laptop, plus the Home Manager profile they share.
+edge VPS, a gaming desktop, and a laptop, plus the Home Manager profile they
+share.
 
 Built with [flake-parts](https://flake.parts) in a dendritic layout — every file
 under `modules/` is a flake-parts module discovered by
@@ -14,6 +15,7 @@ inputs, systems, and the formatter.
 |------|------|---------|-------------|
 | `adam` | NixOS | unstable | Homelab server: media, photos, documents, passwords, behind Caddy and a Newt tunnel |
 | `ramiel` | NixOS | 26.05 | Hetzner Cloud edge: Pangolin, Gerbil, Traefik, CrowdSec |
+| `lilith` | NixOS | unstable | Ryzen/Radeon desktop: niri, DankMaterialShell, gaming |
 | `sachiel` | nix-darwin | unstable | MacBook Air |
 
 ### Layout
@@ -40,10 +42,11 @@ must be pushed to `main` first. They also auto-upgrade from `main` on a timer
 ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'
 ```
 
-`sachiel` builds from the local checkout. `path:` keeps the root activation step
-from treating the Git working tree as root-owned:
+`lilith` and `sachiel` build from their local checkouts. `path:` keeps the root
+activation step from treating the Git working tree as root-owned:
 
 ```bash
+sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
@@ -89,6 +92,30 @@ nixos-install --root /mnt --no-root-passwd --flake "github:zekurio/nix#${HOST}"
 umount -Rl /mnt
 reboot
 ```
+
+#### Lilith: dual boot and Secure Boot
+
+Lilith's disko layout owns the complete Crucial NVMe at
+`nvme-CT1000P3PSSD8_2322E6DD1319_1`; Windows is expected to remain on its own
+drive. Verify that by-id path before running disko, because the command above is
+destructive. Limine returns to the firmware's existing `Windows Boot Manager`
+entry rather than directly chainloading it, which preserves Windows' expected
+BitLocker PCR measurements.
+
+The Limine module generates signing keys but deliberately does not enroll them.
+Install and test both operating systems with firmware Secure Boot disabled
+first. Back up the BitLocker recovery key, put the firmware into Setup/Custom
+Mode, boot Lilith again, inspect the keys, then retain the firmware/OEM and
+Microsoft certificates while enrolling:
+
+```bash
+sudo sbctl status
+sudo sbctl enroll-keys --microsoft --firmware-builtin
+```
+
+Current `sbctl` carries both the Microsoft 2011 and 2023 certificate generations.
+Only enable firmware Secure Boot after that command succeeds. Keep
+`/var/lib/sbctl` backed up; future Limine updates need its private signing keys.
 
 ### Secrets
 

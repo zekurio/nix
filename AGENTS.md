@@ -1,10 +1,11 @@
 # Repository Guidelines
 
-- This flake configures three machines: `adam` (NixOS homelab server on
+- This flake configures four machines: `adam` (NixOS homelab server on
   nixpkgs-unstable), `ramiel` (Hetzner Cloud edge VPS running Pangolin, pinned
-  to nixpkgs-stable for less churn), and `sachiel` (nix-darwin MacBook Air). It
-  also carries the `zekurio` Home Manager profile, homelab service modules,
-  nixpkgs overlays, and sops-encrypted host secrets.
+  to nixpkgs-stable for less churn), `lilith` (NixOS gaming desktop on
+  nixpkgs-unstable), and `sachiel` (nix-darwin MacBook Air). It also carries the
+  `zekurio` Home Manager profile, homelab service modules, nixpkgs overlays, and
+  sops-encrypted host secrets.
 - The default branch is `main`; use `main` or `origin/main` for diffs.
 - Dendritic layout: every `.nix` file under `modules/` is a flake-parts module
   discovered by `import-tree`. There is no import list — `flake.nix` only wires
@@ -15,8 +16,9 @@
 - `nix flake check` runs `checks.sops-secret-names` (declared `sops.secrets`
   vs. plaintext keys in the sops file) and `checks.edge-coverage` (Caddy vhosts
   without an edge route). Both live in `modules/checks/`.
-- Build a host only when the changed surface warrants it:
-  `nix build .#nixosConfigurations.adam.config.system.build.toplevel`.
+- Build a host only when the changed surface warrants it, for example:
+  `nix build .#nixosConfigurations.adam.config.system.build.toplevel` or
+  `nix build .#nixosConfigurations.lilith.config.system.build.toplevel`.
 - Never read or write anything under `secrets/` as plaintext; edit exclusively
   via `sops secrets/<host>.yaml`.
 - The substituter list is duplicated in `flake.nix`'s `nixConfig` (parsed
@@ -139,9 +141,10 @@ Passwordless sudo makes `--sudo` non-interactive. Never point `nixos-rebuild` at
 a local path or use `--target-host` from a dirty tree as a substitute for
 pushing.
 
-`sachiel` rebuilds from the local checkout; `path:` keeps the root activation
-step from treating the working tree as root-owned:
+`lilith` and `sachiel` rebuild from their local checkouts; `path:` keeps the
+root activation step from treating the working tree as root-owned:
 
 ```sh
+sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
