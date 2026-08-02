@@ -8,7 +8,8 @@
 
     # A skill is any top-level directory holding a SKILL.md, so adding one to
     # agent-stuff reaches every agent after `nix flake update agent-stuff`
-    # without touching this file. Pi receives the same source as a package.
+    # without touching this file. Pi discovers shared skills through .agents;
+    # its package configuration loads the Pi-only zed skill separately.
     available =
       lib.filter (name: builtins.pathExists "${source}/${name}/SKILL.md")
       (builtins.attrNames (builtins.readDir source));
