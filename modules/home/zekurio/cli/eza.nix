@@ -4,8 +4,8 @@
       enable = true;
       icons = "always";
       colors = "always";
-      # Aliases are hand-maintained in zsh.nix; don't let eza inject its own.
-      enableZshIntegration = false;
+      # Aliases are hand-maintained in fish.nix; don't let eza inject its own.
+      enableFishIntegration = false;
     };
 
     catppuccin.eza.enable = true;

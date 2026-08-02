@@ -94,7 +94,7 @@
 
       programs.keychain = {
         enable = true;
-        enableZshIntegration = true;
+        enableFishIntegration = true;
         keys = [mainUserSshKey];
       };
 

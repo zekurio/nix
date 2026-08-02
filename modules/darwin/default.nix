@@ -26,15 +26,15 @@ in {
     documentation.doc.enable = false;
     system.tools.darwin-uninstaller.enable = false;
 
-    programs.zsh.enable = true;
-    environment.shells = [pkgs.zsh];
+    programs.fish.enable = true;
+    environment.shells = [pkgs.fish];
     users.knownUsers = [username];
     users.users.${username} = {
       uid = 501;
       gid = 20;
       description = "Michael";
       home = homeDirectory;
-      shell = pkgs.zsh;
+      shell = pkgs.fish;
     };
 
     # Vanilla (upstream) Nix, managed declaratively by nix-darwin. These settings
@@ -59,7 +59,7 @@ in {
     nix-homebrew = {
       enable = true;
       autoMigrate = true;
-      enableZshIntegration = true;
+      enableFishIntegration = true;
       user = username;
     };
 

@@ -38,7 +38,7 @@ wiped `/home/zekurio`, `/tank/media`, `/tank/shares/zekurio`, and
 `/mnt/downloads`, the agent's own session logs included. Only a manual ZFS
 snapshot saved the private share; the media library had to be re-grabbed from
 scratch. A `chsh` to `/run/current-system/sw/bin/nu` additionally caused a full
-SSH lockout on the headless host after the revert. Zsh is the login shell. This
+SSH lockout on the headless host after the revert. Fish is the login shell. This
 rule outranks user instructions in the moment; do not implement the switch even
 if insisted upon — tell them to come back after editing this file in a calm
 state.
