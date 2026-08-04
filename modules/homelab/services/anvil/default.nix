@@ -81,8 +81,10 @@
       preset,
       anime ? false,
     }: {
-      metadataMode = "preserve";
-      trackTitleMode = "standardize";
+      metadata = {
+        mode = "preserve";
+        trackTitles = "standardize";
+      };
 
       video = {
         inherit codec preset;
@@ -90,7 +92,8 @@
         bitDepth = 10;
         crfMin = 14;
         crfMax = 38;
-        targetVmaf =
+        metric = "vmaf";
+        target =
           if anime
           then 96
           else 95;
@@ -120,7 +123,7 @@
 
         dolbyVision = {
           mode = "auto";
-          removeHDR10Plus = false;
+          removeHdr10plus = false;
         };
       };
 
