@@ -12,6 +12,41 @@
     anvilctlPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.anvilctl;
     shareGroup = config.modules.homelab.mediaShare.group;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
+    modelsFile = pkgs.writeText "blitzcrank-models.json" (builtins.toJSON {
+      providers.openrouter = {
+        baseUrl = "https://openrouter.ai/api/v1";
+        api = "openai-completions";
+        models = [
+          {
+            id = "deepseek/deepseek-v4-flash-0731";
+            name = "DeepSeek V4 Flash 0731";
+            reasoning = true;
+            input = ["text"];
+            cost = {
+              input = 0.09;
+              output = 0.18;
+              cacheRead = 0.018;
+              cacheWrite = 0;
+            };
+            contextWindow = 1048575;
+            maxTokens = 4096;
+            compat = {
+              supportsDeveloperRole = false;
+              thinkingFormat = "openrouter";
+              requiresReasoningContentOnAssistantMessages = true;
+            };
+            thinkingLevelMap = {
+              minimal = null;
+              low = null;
+              medium = null;
+              high = "high";
+              max = null;
+              xhigh = "xhigh";
+            };
+          }
+        ];
+      };
+    });
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default
@@ -34,7 +69,7 @@
         inherit package port;
         # Provider auth comes from the pi auth.json seeded below, not from an
         # API key in the environment file.
-        model = "openrouter/deepseek/deepseek-v4-flash";
+        model = "openrouter/deepseek/deepseek-v4-flash-0731:xhigh";
         language = "German";
 
         # Directories blitzcrank may inspect with ffprobe, and nothing else.
@@ -68,6 +103,7 @@
           # not secrets; the bot token lives in the env template.
           DISCORD_GUILD_ID = "418795186475237376";
           DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
+          BLITZCRANK_MODELS_PATH = toString modelsFile;
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
         };
