@@ -2,7 +2,6 @@
   flake.modules.homeManager.zekurio = {pkgs, ...}: let
     agentFlake = "github:numtide/llm-agents.nix";
     agentNames = [
-      "claude-code"
       "codex"
       "opencode"
       "pi"
