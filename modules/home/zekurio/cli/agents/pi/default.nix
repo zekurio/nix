@@ -18,8 +18,6 @@
       hideThinkingBlock = true;
       steeringMode = "all";
       enabledModels = [
-        "anthropic/claude-fable-5"
-        "anthropic/claude-opus-5"
         "openai-codex/gpt-5.6-sol"
         "openai-codex/gpt-5.6-terra"
         "openai-codex/gpt-5.6-luna"
