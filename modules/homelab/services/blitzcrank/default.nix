@@ -40,7 +40,7 @@
               low = null;
               medium = null;
               high = "high";
-              max = null;
+              max = "max";
               xhigh = "xhigh";
             };
           }
@@ -69,7 +69,7 @@
         inherit package port;
         # Provider auth comes from the pi auth.json seeded below, not from an
         # API key in the environment file.
-        model = "openrouter/deepseek/deepseek-v4-flash-0731:xhigh";
+        model = "openrouter/deepseek/deepseek-v4-flash-0731:max";
         language = "German";
 
         # Directories blitzcrank may inspect with ffprobe, and nothing else.
