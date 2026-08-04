@@ -32,9 +32,9 @@
       services.blitzcrank = {
         enable = true;
         inherit package port;
-        # Subscription auth: credentials come from the pi auth.json seeded
-        # below, not from a provider API key in the environment file.
-        model = "openai-codex/gpt-5.6-sol:high";
+        # Provider auth comes from the pi auth.json seeded below, not from an
+        # API key in the environment file.
+        model = "openrouter/deepseek/deepseek-v4-flash";
         language = "German";
 
         # Directories blitzcrank may inspect with ffprobe, and nothing else.
