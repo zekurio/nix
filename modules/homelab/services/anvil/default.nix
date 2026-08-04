@@ -35,6 +35,11 @@
       "7"
     ];
     qsvAbAv1Args = [
+      # ab-av1's native 10-bit XPSNR path can produce invalid scores for
+      # portrait and some non-16:9 sources. Compare in 8-bit until upstream's
+      # XPSNR filter handles those layouts reliably.
+      "--xpsnr-pix-format"
+      "yuv420p"
       "--enc"
       "look_ahead=1"
       "--enc"
@@ -71,11 +76,9 @@
     };
 
     # Savings are a hard gate: an encode that cannot reduce the source by the
-    # applicable threshold is copied instead. H.264 normal content targets
-    # HEVC at VMAF 95, while H.264 anime targets AV1 at 96. HEVC and Dolby
-    # Vision sources are copied for normal content; anime HEVC is likewise
-    # retained because releases are commonly already high-quality 10-bit
-    # encodes.
+    # applicable threshold is copied instead. Normal content targets XPSNR 40;
+    # anime and already-compressed HEVC sources use the stricter XPSNR 42
+    # target. Normal Dolby Vision sources remain untouched.
     mkProfile = {
       codec,
       preset,
@@ -92,21 +95,23 @@
         bitDepth = 10;
         crfMin = 14;
         crfMax = 38;
-        metric = "vmaf";
+        metric = "xpsnr";
         target =
           if anime
-          then 96
-          else 95;
+          then 42
+          else 40;
         minSavingsPercent = 1;
         forceEncodeOnNoFit = false;
         ffmpegArgs = qsvFfmpegArgs;
         abAv1Args = qsvAbAv1Args;
 
         overrides = {
-          # Retain HEVC sources: re-encoding them is not worth the quality
-          # loss or negligible space recovery. This also keeps anime's common
-          # high-quality 10-bit releases intact.
-          hevc.skipEncode = true;
+          # Require a higher score for another lossy generation, while still
+          # letting the savings gate preserve efficient HEVC releases.
+          hevc = {
+            target = 42;
+            skipEncode = false;
+          };
 
           dolby_vision =
             {
