@@ -35,8 +35,6 @@
       "7"
     ];
     qsvAbAv1Args = [
-      "--samples"
-      "8"
       "--enc"
       "look_ahead=1"
       "--enc"
@@ -79,6 +77,7 @@
     mkProfile = {
       codec,
       preset,
+      samples ? 8,
     }: {
       metadata = {
         mode = "preserve";
@@ -96,7 +95,12 @@
         minSavingsPercent = 1;
         forceEncodeOnNoFit = false;
         ffmpegArgs = qsvFfmpegArgs;
-        abAv1Args = qsvAbAv1Args;
+        abAv1Args =
+          [
+            "--samples"
+            (toString samples)
+          ]
+          ++ qsvAbAv1Args;
 
         overrides = {
           hevc = {
@@ -210,11 +214,13 @@
           ${profileName} = mkProfile {
             codec = "hevc";
             preset = "veryslow";
+            samples = 12;
           };
 
           ${animeProfileName} = mkProfile {
             codec = "hevc";
             preset = "veryslow";
+            samples = 12;
           };
 
           ${radarrProfileName} = mkProfile {
