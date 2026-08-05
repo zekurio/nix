@@ -90,6 +90,7 @@
     normalProfile = "[German] HD Bluray + WEB";
     animeProfile = "[German] Anime HD Bluray + WEB";
     animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
+    animeRemuxScore = 5000;
   in {
     imports = [
       inputs.configarr.nixosModules.default
@@ -124,6 +125,28 @@
           # in modules/homelab/services/lidarr/custom-formats.nix and rendered
           # into this directory.
           localCustomFormatsPath: ${lidarr.customFormatsPath}
+
+          # TRaSH has release-group tiers for remuxes, but no generic Radarr
+          # format for the remux quality modifier. Keep the anime qualities
+          # merged so their language/group scores remain authoritative, then
+          # add enough of a bonus to prefer a remux at the same resolution,
+          # all else being equal.
+          # The UHD profile's 9000-point resolution boost still wins over this
+          # bonus, so it alone cannot make a 1080p remux displace a 2160p encode.
+          customFormatDefinitions:
+            - trash_id: radarr-anime-remux
+              trash_scores:
+                default: ${toString animeRemuxScore}
+              trash_description: Prefer Radarr anime remuxes within a resolution
+              name: Anime Remux
+              includeCustomFormatWhenRenaming: false
+              specifications:
+                - name: Remux
+                  implementation: QualityModifierSpecification
+                  negate: false
+                  required: true
+                  fields:
+                    value: 5
 
           sonarr:
             sonarr:
@@ -195,6 +218,13 @@
 
               custom_formats:
                 - trash_ids:
+                    - radarr-anime-remux # Anime Remux
+                  assign_scores_to:
+                    - name: "${animeProfile}"
+                      score: ${toString animeRemuxScore}
+                    - name: "${animeUhdProfile}"
+                      score: ${toString animeRemuxScore}
+                - trash_ids:
                     - cc7b1e64e2513a6a271090cdfafaeb55 # German 2160p Booster
                   assign_scores_to:
                     - name: "${animeUhdProfile}"
@@ -255,13 +285,26 @@
                       score: 0
 
               quality_profiles:
+                - name: "${animeProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - Remux-1080p
+                        - Bluray-1080p
+                        - WEBRip-1080p
+                        - WEBDL-1080p
+                        - Bluray-720p
+                        - WEBDL-720p
+                        - WEBRip-720p
                 - name: "${animeUhdProfile}"
                   qualities:
                     - name: Merged QPs
                       qualities:
+                        - Remux-2160p
                         - Bluray-2160p
                         - WEBDL-2160p
                         - WEBRip-2160p
+                        - Remux-1080p
                         - Bluray-1080p
                         - WEBRip-1080p
                         - WEBDL-1080p
