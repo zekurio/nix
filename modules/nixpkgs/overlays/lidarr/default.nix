@@ -2,7 +2,7 @@
 # plugin register a first-party download client — does not exist on master,
 # which is what nixpkgs packages. Without it Soulseek can only ever be bridged
 # by an external script; with it, slskd appears as a real download client and
-# indexer, so aurral has nothing to talk to but Lidarr.
+# indexer directly in Lidarr.
 #
 # Target: tag v3.1.3.4975 on the develop line, which is where upstream merged
 # plugin support. Two constraints pin it there rather than anywhere else:
