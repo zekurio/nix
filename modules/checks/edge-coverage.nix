@@ -11,8 +11,7 @@
   in {
     # Once the router stops forwarding 80/443, a Caddy virtual host without a
     # matching edge route is simply unreachable, and nothing says so until
-    # someone tries to use it. aurral.zekurio.me was one migration away from
-    # exactly that.
+    # someone tries to use it.
     checks.edge-coverage = let
       uncoveredFor = hostName: hostCfg: let
         homelab = hostCfg.config.services.homelab or {};
