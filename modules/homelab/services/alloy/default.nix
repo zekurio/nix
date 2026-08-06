@@ -15,24 +15,6 @@
       assets = "/var/lib/alloy/assets/users";
     };
     upstreamPackage = inputs.alloy.packages.${pkgs.stdenv.hostPlatform.system}.alloy;
-    zodSource = pkgs.applyPatches {
-      name = "alloy-1.0.1-zod-source";
-      src = upstreamPackage.src;
-      patches = [
-        (pkgs.fetchpatch {
-          # The v1.0.1 TypeBox refactor crashes while parsing default config
-          # and string-valued environment variables. Revert it until fixed.
-          url = "https://github.com/zekurio/alloy/commit/14675809fe5562730f7a009a9720e23c494c428c.patch";
-          hash = "sha256-kdyidnp22YzF+mKWo94tBx43Omb/7spaAbeAVSxHDNo=";
-          revert = true;
-          excludes = ["nix/package.nix"];
-        })
-      ];
-    };
-    alloyPackage = upstreamPackage.override {
-      source = zodSource;
-      pnpmDepsHash = "sha256-Ct4PiLUKiyui1bqfDmA7vJGmpMuD08zIcNb2RcE0ZCA=";
-    };
   in {
     imports = [
       inputs.alloy.nixosModules.default
@@ -47,7 +29,7 @@
         enable = true;
         inherit port;
         publicServerUrl = "https://${domain}";
-        package = alloyPackage;
+        package = upstreamPackage;
         ffmpegPackage = pkgs.jellyfin-ffmpeg;
         extraGroups = [
           "render"
