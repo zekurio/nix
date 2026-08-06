@@ -13,43 +13,8 @@
     shareUser = config.modules.homelab.mediaShare.user;
     shareGroup = config.modules.homelab.mediaShare.group;
     shareUmask = config.modules.homelab.mediaShare.umask;
-    profileName = "qsv-hevc-sonarr-veryslow";
-    animeProfileName = "qsv-hevc-sonarr-anime-veryslow";
-    radarrProfileName = "qsv-hevc-radarr-slow";
-    radarrAnimeProfileName = "qsv-hevc-radarr-anime-slow";
-    flowName = "download-hevc-handoff";
-    qsvFfmpegArgs = [
-      "-look_ahead"
-      "1"
-      "-extbrc"
-      "1"
-      "-look_ahead_depth"
-      "40"
-      "-adaptive_i"
-      "1"
-      "-adaptive_b"
-      "1"
-      "-b_strategy"
-      "1"
-      "-bf"
-      "7"
-    ];
-    qsvAbAv1Args = [
-      "--enc"
-      "look_ahead=1"
-      "--enc"
-      "extbrc=1"
-      "--enc"
-      "look_ahead_depth=40"
-      "--enc"
-      "adaptive_i=1"
-      "--enc"
-      "adaptive_b=1"
-      "--enc"
-      "b_strategy=1"
-      "--enc"
-      "bf=7"
-    ];
+    profileName = "audio-cleanup";
+    flowName = "download-audio-cleanup-handoff";
     audioCleanup = {
       languagesToKeep = [
         "orig"
@@ -58,76 +23,15 @@
       fallback = "keep_first";
       unknownAsOriginal = true;
     };
-    subtitleCleanup = {
-      languagesToKeep = [
-        "orig"
-        "deu"
-      ];
-      fallback = "keep_all";
-      keepForced = true;
-      keepSdh = true;
-      keepCommentary = true;
-      unknownAsOriginal = true;
-    };
-
-    # Savings are a hard gate: an encode that cannot reduce the source by the
-    # applicable threshold is copied instead. Normal and anime content target
-    # VMAF 95 with a 1% gate. HEVC and Dolby Vision sources target VMAF 97 and
-    # must save at least 15% to justify another lossy generation.
-    mkProfile = {
-      codec,
-      preset,
-      samples ? 8,
-    }: {
+    profileConfig = {
       metadata = {
         mode = "preserve";
         trackTitles = "standardize";
       };
 
-      video = {
-        inherit codec preset;
-        accelerator = "qsv";
-        bitDepth = 10;
-        crfMin = 14;
-        crfMax = 38;
-        metric = "vmaf";
-        target = 95;
-        minSavingsPercent = 1;
-        forceEncodeOnNoFit = false;
-        ffmpegArgs = qsvFfmpegArgs;
-        abAv1Args =
-          [
-            "--samples"
-            (toString samples)
-          ]
-          ++ qsvAbAv1Args;
-
-        overrides = {
-          hevc = {
-            target = 97;
-            minSavingsPercent = 15;
-            skipEncode = false;
-          };
-
-          dolby_vision = {
-            codec = "hevc";
-            accelerator = "qsv";
-            inherit preset;
-            bitDepth = 10;
-            target = 97;
-            minSavingsPercent = 15;
-            skipEncode = false;
-          };
-        };
-
-        dolbyVision = {
-          mode = "auto";
-          removeHdr10plus = false;
-        };
-      };
+      video.skipEncode = true;
 
       audio = audioCleanup;
-      subtitles = subtitleCleanup;
       validation.durationToleranceSeconds = 2;
     };
 
@@ -135,13 +39,12 @@
       path,
       handoffPath,
       arr,
-      profile ? profileName,
       priority,
     }: {
       kind = "download";
       inherit path arr priority;
       flow = flowName;
-      inherit profile;
+      profile = profileName;
       include = [
         "*.mkv"
         "*.mp4"
@@ -170,7 +73,7 @@
     ];
 
     options.services.homelab.anvil = {
-      enable = lib.mkEnableOption "Anvil AV1 encoding daemon";
+      enable = lib.mkEnableOption "Anvil media cleanup daemon";
     };
 
     config = lib.mkIf cfg.enable {
@@ -193,46 +96,20 @@
 
         daemon.scanInterval = "5m";
         daemon.workerCount = 2;
-        daemon.totalThreads = 8;
 
         flows.${flowName}.steps = [
           "probe"
-          "crop-detect"
           "audio-cleanup"
-          "subtitle-cleanup"
           "stage"
-          "crf-search"
+          # The encode block performs the remux; skipEncode above guarantees
+          # that the video stream is copied rather than transcoded.
           "encode"
-          "dovi-fix"
-          "track-stats"
           "validate"
           "handoff"
           "cleanup"
         ];
 
-        profiles = {
-          ${profileName} = mkProfile {
-            codec = "hevc";
-            preset = "veryslow";
-            samples = 12;
-          };
-
-          ${animeProfileName} = mkProfile {
-            codec = "hevc";
-            preset = "veryslow";
-            samples = 12;
-          };
-
-          ${radarrProfileName} = mkProfile {
-            codec = "hevc";
-            preset = "slow";
-          };
-
-          ${radarrAnimeProfileName} = mkProfile {
-            codec = "hevc";
-            preset = "slow";
-          };
-        };
+        profiles.${profileName} = profileConfig;
 
         arrs = {
           radarr = {
@@ -252,7 +129,6 @@
             path = "${downloadsRoot}/complete/radarr";
             handoffPath = "${downloadsRoot}/converted/radarr";
             arr = "radarr";
-            profile = radarrProfileName;
             priority = 10;
           };
 
@@ -260,7 +136,6 @@
             path = "${downloadsRoot}/complete/radarr-anime";
             handoffPath = "${downloadsRoot}/converted/radarr-anime";
             arr = "radarr";
-            profile = radarrAnimeProfileName;
             priority = 20;
           };
 
@@ -275,24 +150,17 @@
             path = "${downloadsRoot}/complete/sonarr-anime";
             handoffPath = "${downloadsRoot}/converted/sonarr-anime";
             arr = "sonarr";
-            profile = animeProfileName;
             priority = 20;
           };
         };
 
         service.extraServiceConfig = {
-          SupplementaryGroups = [
-            shareGroup
-            "render"
-            "video"
-          ];
           UMask = shareUmask;
           WorkingDirectory = "/var/lib/anvil/tmp";
         };
       };
 
       systemd.services.anvil.environment = {
-        LIBVA_DRIVER_NAME = "iHD";
         TEMP = "/var/lib/anvil/tmp";
         TMP = "/var/lib/anvil/tmp";
         TMPDIR = "/var/lib/anvil/tmp";
