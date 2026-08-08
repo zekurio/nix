@@ -32,6 +32,10 @@
           misc = {
             host = "0.0.0.0";
             port = port;
+            bandwidth_max = "70M";
+            bandwidth_perc = 100;
+            # The Arr clients remove completed entries after a successful import.
+            history_retention_option = "all";
             username = "";
             password = "";
             html_login = false;
@@ -82,6 +86,20 @@
         SupplementaryGroups = [mediaShare.group];
         UMask = lib.mkForce mediaShare.umask;
       };
+
+      # Reset the history and traffic statistics once. Bump the marker name to
+      # intentionally repeat the reset without affecting the queue or config.
+      systemd.services.sabnzbd.preStart = lib.mkBefore ''
+        resetMarker=/var/lib/sabnzbd/.history-stats-reset-v1
+        if [ ! -e "$resetMarker" ]; then
+          rm -f \
+            /var/lib/sabnzbd/admin/history1.db \
+            /var/lib/sabnzbd/admin/history1.db-shm \
+            /var/lib/sabnzbd/admin/history1.db-wal \
+            /var/lib/sabnzbd/admin/totals10.sab
+          touch "$resetMarker"
+        fi
+      '';
 
       systemd.tmpfiles.rules = [
         "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"

@@ -217,7 +217,7 @@
 
     services.homelab = {
       alloy.enable = true;
-      anvil.enable = true;
+      anvil.enable = false;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;

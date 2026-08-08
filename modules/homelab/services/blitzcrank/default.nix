@@ -39,10 +39,9 @@
         language = "German";
 
         # Directories blitzcrank may inspect with ffprobe, and nothing else.
-        # The three pipeline stages a language question needs, in order:
-        # SABnzbd's completed tree, Anvil's converted output beside it (both
-        # under downloadsRoot), and the imported library. Music and the private
-        # tree are deliberately absent: Seerr issues never concern them.
+        # Include SABnzbd's completed tree and the imported libraries. Music and
+        # the private tree are deliberately absent: Seerr issues never concern
+        # them.
         mediaRoots = [
           downloadsRoot
           "/tank/media/shows"

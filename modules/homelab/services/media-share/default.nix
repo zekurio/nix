@@ -38,17 +38,10 @@
       "${usenetDownloadsDir}/complete/manual"
       "${usenetDownloadsDir}/complete/lidarr"
       "${usenetDownloadsDir}/complete/radarr"
-      "${usenetDownloadsDir}/complete/radarr-anime"
       "${usenetDownloadsDir}/complete/sonarr"
-      "${usenetDownloadsDir}/complete/sonarr-anime"
       "${usenetDownloadsDir}/complete/slskd"
       "${usenetDownloadsDir}/incomplete"
       "${usenetDownloadsDir}/incomplete/slskd"
-      "${usenetDownloadsDir}/converted"
-      "${usenetDownloadsDir}/converted/radarr"
-      "${usenetDownloadsDir}/converted/radarr-anime"
-      "${usenetDownloadsDir}/converted/sonarr"
-      "${usenetDownloadsDir}/converted/sonarr-anime"
     ];
     sharedDirs = mediaDirs;
 
