@@ -95,7 +95,7 @@
         };
 
         daemon.scanInterval = "5m";
-        daemon.workerCount = 2;
+        daemon.workerCount = 1;
 
         flows.${flowName}.steps = [
           "probe"
