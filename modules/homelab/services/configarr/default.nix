@@ -7,86 +7,6 @@
     ...
   }: let
     cfg = config.services.homelab.configarr;
-    lidarr = config.services.homelab.lidarr;
-    lidarrProfile = "Anything goes";
-
-    # Rendered from the same attrset that defines the formats, so a score can
-    # never disagree with the format it belongs to. Built by concatenation with
-    # explicit indentation: an indented Nix string strips its own leading
-    # whitespace, which would flatten these list items back to column zero.
-    lidarrFormatsYaml = lib.concatStrings (
-      lib.mapAttrsToList (
-        trashId: format:
-          "      - trash_ids:\n"
-          + "          - ${trashId}\n"
-          + "        assign_scores_to:\n"
-          + "          - name: ${lidarrProfile}\n"
-          + "            score: ${toString format.score}\n"
-      )
-      lidarr.customFormats
-    );
-
-    lidarrSection =
-      ''
-        lidarr:
-          lidarr:
-            base_url: ${lidarr.baseUrl}
-            api_key: !env LIDARR_API_KEY
-
-            quality_profiles:
-              # The quality list has to be spelled out: configarr skips a
-              # profile entirely when `qualities` is absent ("filtered because
-              # no qualities provided"), which would silently drop the score
-              # assignments below. Listing a quality allows it, omitting it
-              # blocks it, and the order is best-first.
-              #
-              # WAV and the Poor/Trash lossy tiers are intentionally absent:
-              # they are worse than having no file at all. Unknown stays last
-              # but allowed, because Lidarr has no Opus quality and genuine
-              # Opus rips parse as Unknown.
-              - name: ${lidarrProfile}
-                min_format_score: 0
-                quality_sort: top
-                upgrade:
-                  allowed: true
-                  until_quality: Lossless
-                  until_score: 10000
-                qualities:
-                  - name: Lossless
-                    qualities:
-                      - FLAC 24bit
-                      - ALAC 24bit
-                      - FLAC
-                      - ALAC
-                      - APE
-                      - WavPack
-                  - name: High Quality Lossy
-                    qualities:
-                      - MP3-320
-                      - MP3-VBR-V0
-                      - AAC-320
-                      - AAC-VBR
-                      - OGG Vorbis Q10
-                      - OGG Vorbis Q9
-                  - name: Mid Quality Lossy
-                    qualities:
-                      - MP3-256
-                      - AAC-256
-                      - MP3-VBR-V2
-                      - OGG Vorbis Q8
-                      - OGG Vorbis Q7
-                  - name: Low Quality Lossy
-                    qualities:
-                      - MP3-224
-                      - MP3-192
-                      - AAC-192
-                      - OGG Vorbis Q6
-                      - WMA
-                  - name: Unknown
-
-            custom_formats:
-      ''
-      + lidarrFormatsYaml;
     normalProfile = "[German] HD Bluray + WEB";
     animeProfile = "[German] Anime HD Bluray + WEB";
     animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
@@ -97,7 +17,7 @@
     ];
 
     options.services.homelab.configarr = {
-      enable = lib.mkEnableOption "Configarr synchronization for Sonarr, Radarr and Lidarr";
+      enable = lib.mkEnableOption "Configarr synchronization for Sonarr and Radarr";
     };
 
     config = lib.mkIf cfg.enable {
@@ -120,11 +40,6 @@
         config = ''
           trashRevision: 34e6a8cc67621052a6903dcc912eb515332fb3b8
           telemetry: false
-
-          # Trash publishes no Lidarr formats, so the Soulseek ones are defined
-          # in modules/homelab/services/lidarr/custom-formats.nix and rendered
-          # into this directory.
-          localCustomFormatsPath: ${lidarr.customFormatsPath}
 
           # TRaSH has release-group tiers for remuxes, but no generic Radarr
           # format for the remux quality modifier. Keep the anime qualities
@@ -311,8 +226,6 @@
                         - Bluray-720p
                         - WEBDL-720p
                         - WEBRip-720p
-
-          ${lidarrSection}
         '';
       };
 
@@ -320,7 +233,6 @@
         content = ''
           SONARR_API_KEY=${config.sops.placeholder.sonarr_api_key}
           RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
-          LIDARR_API_KEY=${config.sops.placeholder.lidarr_api_key}
           STOP_ON_ERROR=true
           TZ=${config.time.timeZone}
         '';
@@ -332,12 +244,10 @@
       sops.secrets = {
         radarr_api_key = {};
         sonarr_api_key = {};
-        lidarr_api_key = {};
       };
 
       systemd.services.configarr = {
         after = [
-          "lidarr.service"
           "radarr.service"
           "sonarr.service"
         ];
