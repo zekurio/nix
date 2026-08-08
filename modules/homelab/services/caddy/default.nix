@@ -87,7 +87,7 @@
                 type = lib.types.listOf lib.types.str;
                 default = [];
                 description = ''
-                  Path matchers to restrict forward auth to, e.g. ["/lidarr*"].
+                  Path matchers to restrict forward auth to, e.g. ["/slskd*"].
                   Empty gates the whole domain. Use this when several services
                   share a domain and only some of them need gating, such as an
                   admin UI sitting next to an app that does its own auth.

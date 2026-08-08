@@ -111,7 +111,7 @@ Secrets live in `secrets/<host>.yaml`, encrypted to that host's age key only
 **Name after the owner, not the consumer.** One credential is often read by
 several services: `radarr_api_key` (anvil, calthing, configarr),
 `jellyfin_api_key`, `tailscale_auth_key`. `anvil_radarr_api_key` was wrong —
-Radarr issues that key. Sonarr/Radarr/Lidarr expose exactly one global API key,
+Radarr issues that key. Sonarr and Radarr expose exactly one global API key,
 so sharing is inherent and cannot be scoped per consumer.
 
 **Storage form follows how the value is consumed:**
