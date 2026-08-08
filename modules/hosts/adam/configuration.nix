@@ -218,6 +218,7 @@
     services.homelab = {
       alloy.enable = true;
       anvil.enable = false;
+      beets.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
@@ -231,7 +232,6 @@
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
-      lidarr.enable = true;
       navidrome.enable = true;
       # Registers adam as a site on the ramiel Pangolin edge and applies the
       # resource blueprint declared by the service modules.
