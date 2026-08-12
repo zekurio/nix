@@ -13,6 +13,7 @@
     importDir = "${mediaShare.downloadsRoot}/complete/slskd";
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
+    slskdApi = "http://127.0.0.1:5030/slskd/api/v0/transfers/downloads";
 
     pluginNames = [
       "chroma"
@@ -41,11 +42,16 @@
         copy = false;
         duplicate_action = "skip";
         from_scratch = true;
+        incremental = true;
+        # Record rejected path sets so the timer does not keep fingerprinting
+        # the same bad rip. A changed file set is considered a new import.
+        incremental_skip_later = false;
+        languages = ["en"];
         log = importLog;
         move = true;
         quiet = false;
         quiet_fallback = "skip";
-        resume = true;
+        resume = false;
         write = true;
       };
 
@@ -55,20 +61,17 @@
         comp = "Compilations/$album%aunique{}/$track - $title";
       };
 
-      match.preferred = {
-        media = [
-          "Digital Media"
-          "CD"
-          "Vinyl"
-        ];
-        countries = [
-          "XW"
-          "US"
-          "GB"
-          "DE"
-          "JP"
-          "XE"
-        ];
+      match = {
+        # This is Beets' internal metadata-provider identity, not an audio tag.
+        # Penalizing its absence dominates otherwise exact MusicBrainz-ID and
+        # track matches when more than one metadata-capable plugin is loaded.
+        distance_weights.data_source = 0.0;
+
+        # Soulseek tags commonly differ by transliteration, punctuation, or a
+        # single alternate track title even when their MusicBrainz IDs match.
+        # Accept that moderate distance unattended; Beets' default max_rec
+        # still prevents missing or unmatched tracks from becoming strong.
+        strong_rec_thresh = 0.35;
       };
 
       musicbrainz.genres = true;
@@ -155,6 +158,42 @@
         exec ${lib.getExe beetInternal} "$@"
       '';
     };
+
+    beetsImportWorker = pkgs.writeShellApplication {
+      name = "beets-import-worker";
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.curl
+        pkgs.findutils
+        pkgs.gnugrep
+        pkgs.jq
+      ];
+      text = ''
+        if ! find ${lib.escapeShellArg importDir} -mindepth 1 -type f -print -quit | grep -q .; then
+          echo "No completed Soulseek files to import."
+          exit 0
+        fi
+
+        transfers=$(mktemp)
+        trap 'rm -f "$transfers"' EXIT
+        curl --fail --silent --show-error ${lib.escapeShellArg slskdApi} > "$transfers"
+
+        if jq --exit-status '
+          [.. | objects | .state? // empty | select(startswith("Completed") | not)]
+          | length > 0
+        ' "$transfers" >/dev/null; then
+          echo "Deferring Beets import while Soulseek downloads are active."
+          exit 0
+        fi
+
+        if find ${lib.escapeShellArg importDir} -type f -mmin -2 -print -quit | grep -q .; then
+          echo "Deferring Beets import until the completed tree has settled."
+          exit 0
+        fi
+
+        exec ${lib.getExe beetInternal} import -m -q --from-scratch ${lib.escapeShellArg importDir}
+      '';
+    };
   in {
     options.services.homelab.beets = {
       enable = lib.mkEnableOption "Beets music metadata and import tooling";
@@ -188,13 +227,11 @@
         fi
       '';
 
-      # This is deliberately manual until the request frontend owns a durable
-      # acquisition queue. It provides the eventual worker boundary without
-      # running Beets inside slskd.service or racing incomplete downloads.
       systemd.services.beets-import = {
         description = "Import completed Soulseek downloads with Beets";
         after = [
           "local-fs.target"
+          "slskd.service"
           "systemd-tmpfiles-setup.service"
         ];
         requires = ["systemd-tmpfiles-setup.service"];
@@ -204,7 +241,7 @@
           User = serviceUser;
           Group = mediaShare.group;
           UMask = lib.mkForce mediaShare.umask;
-          ExecStart = "${lib.getExe beetInternal} import -m -q --from-scratch ${lib.escapeShellArg importDir}";
+          ExecStart = lib.getExe beetsImportWorker;
           NoNewPrivileges = true;
           PrivateTmp = true;
           ProtectHome = true;
@@ -214,6 +251,30 @@
             musicDir
             importDir
           ];
+        };
+      };
+
+      # Path activation gives normal downloads a prompt handoff. The timer
+      # recovers changes below an already-existing directory and any event
+      # missed while the host was down. The worker independently verifies the
+      # slskd queue and a quiet filesystem before invoking Beets.
+      systemd.paths.beets-import = {
+        description = "Watch for completed Soulseek downloads";
+        wantedBy = ["multi-user.target"];
+        pathConfig = {
+          PathChanged = importDir;
+          Unit = "beets-import.service";
+        };
+      };
+
+      systemd.timers.beets-import = {
+        description = "Periodically import completed Soulseek downloads";
+        wantedBy = ["timers.target"];
+        timerConfig = {
+          OnBootSec = "5m";
+          OnUnitActiveSec = "5m";
+          AccuracySec = "30s";
+          Unit = "beets-import.service";
         };
       };
     };
