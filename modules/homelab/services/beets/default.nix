@@ -173,7 +173,16 @@
 
         transfers=$(mktemp)
         trap 'rm -f "$transfers"' EXIT
-        curl --fail --silent --show-error ${lib.escapeShellArg slskdApi} > "$transfers"
+        if ! curl \
+          --connect-timeout 5 \
+          --max-time 15 \
+          --fail \
+          --silent \
+          --show-error \
+          ${lib.escapeShellArg slskdApi} > "$transfers"; then
+          echo "Deferring Beets import because the slskd API is unavailable."
+          exit 0
+        fi
 
         if jq --exit-status '
           [.. | objects | .state? // empty | select(startswith("Completed") | not)]
@@ -231,6 +240,7 @@
           "slskd.service"
           "systemd-tmpfiles-setup.service"
         ];
+        wants = ["slskd.service"];
         requires = ["systemd-tmpfiles-setup.service"];
         unitConfig.RequiresMountsFor = "${stateDir} ${musicDir} ${importDir}";
         serviceConfig = {
