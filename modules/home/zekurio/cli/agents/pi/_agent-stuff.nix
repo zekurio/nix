@@ -9,28 +9,6 @@ buildNpmPackage {
   dontNpmBuild = true;
   doCheck = false;
 
-  # Keep the shared package focused on the providers used by this profile. The
-  # upstream source is also consumed by other agents, so strip provider-specific
-  # fallbacks and routing here instead of changing the shared input.
-  postPatch = ''
-    sed -i '/pi-anthropic-auth/d' package.json
-    rm -rf extensions/pi-anthropic-auth
-    sed -i '/const HAIKU_MODEL_ID/d' extensions/answer.ts
-    sed -i 's/then haiku, then the/then the/' extensions/answer.ts
-    sed -i 's/(haiku, gpt-5.4-mini)/(gpt-5.4-mini)/' extensions/async-agents.ts
-    sed -i '/^[[:space:]]*const haikuModel = modelRegistry.find/,/^[[:space:]]*return haikuModel;/d' extensions/answer.ts
-    sed -i '/async function selectExtractionModel/,/^}$/ {
-      /^}$/i\
-     return currentModel;
-    }' extensions/answer.ts
-    sed -i 's/^ return currentModel;/    return currentModel;/' extensions/answer.ts
-    sed -i 's|, "anthropic/claude-fable-5:high"||' extensions/async-agents.ts
-    sed -i '/^[[:space:]]*anthropic: {/,/^[[:space:]]*},/d' extensions/priority-routing.ts
-    sed -i 's/ && basename !== "claude.md"//' extensions/git-flow.ts
-    sed -i '/Anthropic authentication/d' README.md
-    sed -i '/^The Anthropic authentication extension is derived from/,/^License is included at extensions\/pi-anthropic-auth\/LICENSE\.$/d' NOTICE
-  '';
-
   installPhase = ''
     runHook preInstall
 
