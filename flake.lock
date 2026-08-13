@@ -3,11 +3,11 @@
     "agent-stuff": {
       "flake": false,
       "locked": {
-        "lastModified": 1785620870,
-        "narHash": "sha256-Km+pDqhZA9QXUlf6wmYmqdjQGHE3gJal76K1tnJ6mY4=",
+        "lastModified": 1786612118,
+        "narHash": "sha256-VjqgUJihAODkw3kkMAgE5VP0sQrBdwpflJPX3Wti+0s=",
         "owner": "zekurio",
         "repo": "agent-stuff",
-        "rev": "d4afe0fb599575331c4694306c5539ec39c5b30e",
+        "rev": "171a4613ac90b045a7c60f3313351a2fee5ec936",
         "type": "github"
       },
       "original": {
