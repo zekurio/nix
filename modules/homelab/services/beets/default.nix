@@ -80,7 +80,9 @@
         auto = true;
         cautious = false;
         cover_format = "JPEG";
-        enforce_ratio = true;
+        # Cover Art Archive scans are often a few pixels off-square. Beets'
+        # strict ratio check rejected otherwise valid release artwork.
+        enforce_ratio = false;
         maxwidth = 1400;
         sources = [
           {coverart = "release";}
