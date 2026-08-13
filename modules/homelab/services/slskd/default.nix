@@ -25,7 +25,6 @@
         environmentFile = config.sops.secrets.slskd_env.path;
         openFirewall = true;
         settings = {
-          flags.force_share_scan = true;
           rooms = [];
           filters.search.request = [];
           global = {
