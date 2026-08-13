@@ -109,10 +109,7 @@
         auto = true;
         fallback = "";
         force = false;
-        sources = [
-          "lrclib"
-          "genius"
-        ];
+        sources = ["lrclib"];
         synced = true;
       };
 
@@ -272,7 +269,7 @@
         wantedBy = ["timers.target"];
         timerConfig = {
           OnBootSec = "5m";
-          OnUnitActiveSec = "5m";
+          OnUnitInactiveSec = "5m";
           AccuracySec = "30s";
           Unit = "beets-import.service";
         };
