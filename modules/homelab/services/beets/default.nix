@@ -13,6 +13,7 @@
     importDir = "${mediaShare.downloadsRoot}/complete/slskd";
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
+    scanStamp = "${stateDir}/import.scan";
     slskdApi = "http://127.0.0.1:5030/slskd/api/v0/transfers/downloads";
 
     pluginNames = [
@@ -43,8 +44,9 @@
         duplicate_action = "skip";
         from_scratch = true;
         incremental = true;
-        # Record rejected path sets so the timer does not keep fingerprinting
-        # the same bad rip. A changed file set is considered a new import.
+        # Record rejected paths for ad-hoc incremental imports. The worker
+        # separately detects changed sets because Beets only remembers the
+        # directory name, not its contents.
         incremental_skip_later = false;
         languages = ["en"];
         log = importLog;
@@ -174,7 +176,8 @@
         fi
 
         transfers=$(mktemp)
-        trap 'rm -f "$transfers"' EXIT
+        scan_boundary=$(mktemp)
+        trap 'rm -f "$transfers" "$scan_boundary"' EXIT
         if ! curl \
           --connect-timeout 5 \
           --max-time 15 \
@@ -199,7 +202,33 @@
           exit 0
         fi
 
-        exec ${lib.getExe beetInternal} import -m -q --from-scratch ${lib.escapeShellArg importDir}
+        # Beets' incremental history keys only on the directory path, so a
+        # repaired or resumed download at the same path would otherwise never
+        # be reconsidered. Select changed top-level sets ourselves and disable
+        # Beets' path-only incremental check for this bounded import.
+        candidates=()
+        shopt -s dotglob nullglob
+        for path in ${lib.escapeShellArg importDir}/*; do
+          if [ ! -e ${lib.escapeShellArg scanStamp} ] \
+            || [ "$path" -nt ${lib.escapeShellArg scanStamp} ] \
+            || find "$path" -type f -newer ${lib.escapeShellArg scanStamp} -print -quit | grep -q .; then
+            candidates+=("$path")
+          fi
+        done
+
+        if [ "''${#candidates[@]}" -eq 0 ]; then
+          echo "No new or changed completed Soulseek paths to import."
+          exit 0
+        fi
+
+        if ${lib.getExe beetInternal} import -I -m -q --from-scratch "''${candidates[@]}"; then
+          # Preserve the scan's start time so a download that appears while
+          # Beets is running remains newer and is picked up on the next pass.
+          touch --reference="$scan_boundary" ${lib.escapeShellArg scanStamp}
+        else
+          status=$?
+          exit "$status"
+        fi
       '';
     };
   in {
