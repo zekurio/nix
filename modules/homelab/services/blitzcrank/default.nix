@@ -88,7 +88,6 @@
           SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
           JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
           BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
-          FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
           DISCORD_BOT_TOKEN=${config.sops.placeholder.discord_bot_token}
         '';
         mode = "0400";
@@ -104,7 +103,6 @@
         sabnzbd_api_key = {};
         jellyfin_api_key = {};
         blitzcrank_webhook_secret = {};
-        firecrawl_api_key = {};
         discord_bot_token = {};
       };
     };
