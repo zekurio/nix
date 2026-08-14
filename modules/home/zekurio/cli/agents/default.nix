@@ -4,7 +4,6 @@
     agentNames = [
       "codex"
       "opencode"
-      "pi"
     ];
     agentsProfileBin = "$HOME/.local/state/nix/profiles/agents/bin";
 
@@ -21,6 +20,15 @@
 
         if [[ -e "$profile" ]]; then
           profile_json="$(nix profile list --profile "$profile" --json)"
+        fi
+
+        mapfile -t unwanted < <(
+          jq --raw-output --argjson desired '${builtins.toJSON agentNames}' \
+            '.elements | keys[] | select(. as $name | ($desired | index($name)) == null)' \
+            <<<"$profile_json"
+        )
+        if (( ''${#unwanted[@]} > 0 )); then
+          nix profile remove --profile "$profile" "''${unwanted[@]}"
         fi
 
         missing=()
