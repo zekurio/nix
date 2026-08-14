@@ -8,8 +8,8 @@
 
     # A skill is any top-level directory holding a SKILL.md, so adding one to
     # agent-stuff reaches every agent after `nix flake update agent-stuff`
-    # without touching this file. Codex, opencode, and Pi all discover skills
-    # from ~/.agents/skills.
+    # without touching this file. Codex and OpenCode both discover skills from
+    # ~/.agents/skills.
     available =
       lib.filter (name: builtins.pathExists "${source}/${name}/SKILL.md")
       (builtins.attrNames (builtins.readDir source));

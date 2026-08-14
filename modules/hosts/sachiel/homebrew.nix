@@ -17,6 +17,7 @@
         "mullvad-vpn"
         "notion"
         "steam"
+        "t3-code@nightly"
         "tailscale-app"
         "vesktop"
         "zed"

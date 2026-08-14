@@ -66,8 +66,7 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
-    # Extensions, skills, and themes shared by Pi and the other coding agents.
-    # Consumed as a plain source tree and materialized as a local Pi package.
+    # Shared skills for Codex and OpenCode, consumed as a plain source tree.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";
       flake = false;
