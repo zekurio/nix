@@ -32,8 +32,6 @@
       services.blitzcrank = {
         enable = true;
         inherit package port;
-        # Provider auth comes from the pi auth.json seeded below, not from an
-        # API key in the environment file.
         model = "openai-codex/gpt-5.6-sol:high";
         automationModel = "openai-codex/gpt-5.6-luna:max";
         language = "German";
@@ -49,7 +47,8 @@
           "/tank/media/movies"
         ];
         environmentFile = config.sops.templates."blitzcrank.env".path;
-        authSeedFile = config.sops.secrets.pi_auth_json.path;
+        # Provider auth is managed interactively in pi's writable state rather
+        # than seeded from SOPS.
 
         # Non-secret configuration; every API key lives in the env template.
         settings = {
@@ -107,10 +106,6 @@
         blitzcrank_webhook_secret = {};
         firecrawl_api_key = {};
         discord_bot_token = {};
-        # Bootstrap copy of the pi auth.json (OpenAI Codex OAuth). blitzcrank
-        # copies it into its state directory on start and refreshes tokens
-        # there, so this value is a restore seed rather than a live mirror.
-        pi_auth_json.restartUnits = ["blitzcrank.service"];
       };
     };
   };
