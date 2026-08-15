@@ -169,12 +169,18 @@ def process(path):
 
     try:
         audio.save()
-        # Content changes should not make an already-settled download look new
-        # to the Beets worker's timestamp-based candidate selection.
-        os.utime(path, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
     except (mutagen.MutagenError, OSError) as error:
         log(f"could not save {path}: {error}")
         return False
+
+    # Content changes should not make an already-settled download look new to
+    # the Beets worker's timestamp-based candidate selection. Restoring an
+    # arbitrary timestamp requires ownership even when group permissions allow
+    # Beets to rewrite the file, so this optimization is best-effort.
+    try:
+        os.utime(path, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
+    except OSError as error:
+        log(f"warning: could not restore timestamp for {path}: {error}")
 
     log(f"stripped {len(keys)} provenance tag(s) from {path}")
     return True
