@@ -964,6 +964,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix",
+        "wavexlr-on-linux-cfg": "wavexlr-on-linux-cfg",
         "zed": "zed"
       }
     },
@@ -1148,6 +1149,22 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "wavexlr-on-linux-cfg": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776282660,
+        "narHash": "sha256-+mVZm7JENSvhQPincMHqc5XDdF1Txv3hUUj4PVBzdso=",
+        "owner": "jmansar",
+        "repo": "wavexlr-on-linux-cfg",
+        "rev": "37eb2d774e750a8446c251e33fc2171eb9277248",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jmansar",
+        "repo": "wavexlr-on-linux-cfg",
         "type": "github"
       }
     },
