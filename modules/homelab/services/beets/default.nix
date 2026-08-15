@@ -14,6 +14,7 @@
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
     scanStamp = "${stateDir}/import.scan";
+    cleanupStamp = "${stateDir}/metadata-cleanup-v1";
     slskdApi = "http://127.0.0.1:5030/slskd/api/v0/transfers/downloads";
 
     pluginNames = [
@@ -31,6 +32,14 @@
     beetsPackage = pkgs.python3Packages.beets.override {
       disableAllPlugins = true;
       pluginOverrides = lib.genAttrs pluginNames (_: {enable = true;});
+    };
+
+    cleanMusicMetadata = pkgs.writeShellApplication {
+      name = "clean-music-metadata";
+      text = ''
+        exec ${lib.getExe (pkgs.python3.withPackages (pythonPackages: [pythonPackages.mutagen]))} \
+          ${./clean-music-metadata.py} "$@"
+      '';
     };
 
     beetsConfig = (pkgs.formats.yaml {}).generate "beets-config.yaml" {
@@ -209,7 +218,8 @@
         candidates=()
         shopt -s dotglob nullglob
         for path in ${lib.escapeShellArg importDir}/*; do
-          if [ ! -e ${lib.escapeShellArg scanStamp} ] \
+          if [ ! -e ${lib.escapeShellArg cleanupStamp} ] \
+            || [ ! -e ${lib.escapeShellArg scanStamp} ] \
             || [ "$path" -nt ${lib.escapeShellArg scanStamp} ] \
             || find "$path" -type f -newer ${lib.escapeShellArg scanStamp} -print -quit | grep -q .; then
             candidates+=("$path")
@@ -220,6 +230,16 @@
           echo "No new or changed completed Soulseek paths to import."
           exit 0
         fi
+
+        # Strip downloader advertising and source URLs before Beets reads the
+        # files. Fail closed so unclean metadata cannot reach the library when
+        # a file is malformed or Mutagen cannot safely rewrite it.
+        ${lib.getExe cleanMusicMetadata} "''${candidates[@]}"
+
+        # The versioned stamp makes the first deployment clean every completed
+        # path, including sets older than the incremental import watermark.
+        # Bump the version when expanding the cleanup migration in the future.
+        touch ${lib.escapeShellArg cleanupStamp}
 
         if ${lib.getExe beetInternal} import -I -m -q --from-scratch "''${candidates[@]}"; then
           # Preserve the scan's start time so a download that appears while

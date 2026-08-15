@@ -12,6 +12,7 @@
       jq
       nil
       nixd
+      nodejs
       ripgrep
       sops
     ];
