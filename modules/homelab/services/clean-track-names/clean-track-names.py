@@ -29,10 +29,14 @@ def command_error(command, error):
 
 def get_transfer_mode():
     """Return the transfer mode supplied by the active Arr application."""
+    # Arr builds these names with title-case prefixes, but .NET exposes them in
+    # lowercase to import scripts on Linux. Environment names are case-sensitive
+    # there, so normalize the complete environment before looking them up.
+    environment = {name.casefold(): value for name, value in os.environ.items()}
     modes = {
         value.casefold()
         for variable in TRANSFER_MODE_VARIABLES
-        if (value := os.environ.get(variable))
+        if (value := environment.get(variable.casefold()))
     }
     if len(modes) != 1:
         names = " or ".join(TRANSFER_MODE_VARIABLES)
