@@ -71,6 +71,10 @@
       url = "github:zekurio/agent-stuff";
       flake = false;
     };
+    wavexlr-on-linux-cfg = {
+      url = "github:jmansar/wavexlr-on-linux-cfg";
+      flake = false;
+    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
