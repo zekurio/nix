@@ -10,7 +10,10 @@
     # host module contributed openssh last; mkAfter restores that position so the
     # merged system-path is byte-identical.
     environment.systemPackages = lib.mkAfter (with pkgs; [
+      nodejs
       openssh
+      python3
+      uv
     ]);
   };
 }
