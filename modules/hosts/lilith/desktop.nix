@@ -79,7 +79,6 @@
         vesktop
         wl-clipboard
         xwayland-satellite
-        inputs.helium.packages.${system}.default
         inputs.zed.packages.${system}.default
       ];
     };

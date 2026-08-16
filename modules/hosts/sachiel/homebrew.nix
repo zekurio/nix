@@ -10,6 +10,7 @@
         }
       ];
       casks = [
+        "1password"
         "feishin"
         "ghostty"
         "helium-browser"
