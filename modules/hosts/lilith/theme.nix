@@ -104,7 +104,7 @@
       fonts.fontconfig.enable = lib.mkForce true;
 
       # Keep user-facing authentication surfaces aligned with AccountsService.
-      home.file.".face.icon".source = faceImage;
+      home.file.".face.jpg".source = faceImage;
 
       gtk = {
         enable = true;
