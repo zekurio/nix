@@ -50,6 +50,12 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # This reviewed PR packages OpenAI's official Linux build. Remove the
+    # revision once the package reaches llm-agents.nix main.
+    llm-agents-chatgpt = {
+      url = "github:numtide/llm-agents.nix/c42ba4938e70b396b132860b4b77654e3beea8b5";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
