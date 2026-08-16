@@ -1,6 +1,6 @@
 {...}: {
   flake.modules.nixos.lilith = {pkgs, ...}: let
-    faceImage = ../../../assets/face.png;
+    faceImage = ../../../assets/kusanagi-parking-lot.jpg;
     ini = pkgs.formats.ini {};
     accountsServiceUser = ini.generate "zekurio-accountsservice" {
       User = {
@@ -78,8 +78,8 @@
         iconThemeDark = "Papirus-Dark";
         iconThemeLight = "Papirus-Dark";
         cursorSettings = {
-          theme = "catppuccin-frappe-blue-cursors";
-          size = 24;
+          theme = "BreezeX-RosePine-Linux";
+          size = 28;
           niri = {
             hideWhenTyping = false;
             hideAfterInactiveMs = 0;
@@ -126,11 +126,13 @@
         enable = true;
         gtk.enable = true;
         x11.enable = true;
-        size = 24;
+        package = pkgs.rose-pine-cursor;
+        name = "BreezeX-RosePine-Linux";
+        size = 28;
       };
 
       catppuccin = {
-        cursors.enable = true;
+        cursors.enable = false;
         gtk.icon.enable = true;
       };
 
@@ -143,15 +145,6 @@
           "niri/config.kdl".text = ''
             config-notification {
                 disable-failed
-            }
-
-            input {
-                keyboard {
-                    xkb {
-                        layout "at"
-                    }
-                    numlock
-                }
             }
 
             layout {
@@ -200,6 +193,8 @@
 
             prefer-no-csd
             screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+            include "input.kdl"
 
             binds {
                 Mod+Return hotkey-overlay-title="Fallback Terminal" { spawn "ghostty"; }
@@ -278,7 +273,10 @@
           '';
         };
 
-        dataFile."backgrounds/cyberpunk-catppuccin.png".source = wallpaper;
+        dataFile."backgrounds" = {
+          source = ../../../assets/wallpapers;
+          recursive = true;
+        };
       };
 
       # Keep DMS settings mutable after seeding so changes made in its GUI can
@@ -286,7 +284,7 @@
       home.activation.seedDms = lib.hm.dag.entryAfter ["writeBoundary"] ''
         export XDG_CONFIG_HOME="${config.xdg.configHome}"
         export XDG_STATE_HOME="${config.xdg.stateHome}"
-        export PATH="${lib.makeBinPath [pkgs.ghostty pkgs.niri]}:$PATH"
+        export PATH="${lib.makeBinPath [pkgs.ghostty pkgs.niri pkgs.sudo]}:$PATH"
 
         settings="$XDG_CONFIG_HOME/DankMaterialShell/settings.json"
         session="$XDG_STATE_HOME/DankMaterialShell/session.json"
@@ -299,7 +297,9 @@
         fi
 
         for fragment in binds layout alttab outputs cursor windowrules; do
-          $DRY_RUN_CMD ${pkgs.dms-shell}/bin/dms setup "$fragment"
+          if [[ ! -e "$XDG_CONFIG_HOME/niri/dms/$fragment.kdl" ]]; then
+            $DRY_RUN_CMD ${pkgs.dms-shell}/bin/dms setup "$fragment"
+          fi
         done
       '';
     };

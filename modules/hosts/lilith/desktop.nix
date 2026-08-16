@@ -83,5 +83,20 @@
         inputs.zed.packages.${system}.default
       ];
     };
+
+    home-manager.users.zekurio.xdg.configFile."niri/input.kdl".text = ''
+      input {
+          keyboard {
+              xkb {
+                  layout "at"
+              }
+              numlock
+          }
+
+          mouse {
+              accel-profile "flat"
+          }
+      }
+    '';
   };
 }

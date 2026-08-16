@@ -59,7 +59,7 @@
       limine.enable = true;
       plymouth.enable = true;
       tty.enable = true;
-      cursors.enable = true;
+      cursors.enable = false;
     };
   };
 }
