@@ -13,6 +13,8 @@
     };
 
     config = lib.mkIf config.services.homelab.navidrome.enable {
+      sops.secrets.navidrome_env = {};
+
       services.navidrome = {
         enable = true;
         settings = {
@@ -23,6 +25,9 @@
           ScanSchedule = "1h";
         };
       };
+
+      systemd.services.navidrome.serviceConfig.EnvironmentFile =
+        config.sops.secrets.navidrome_env.path;
 
       users.users.navidrome.extraGroups = ["share"];
 
