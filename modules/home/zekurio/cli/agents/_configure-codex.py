@@ -94,6 +94,13 @@ def configure_theme() -> None:
 def configure_router_catalog() -> None:
     files = {
         "enabled-providers.json": {"version": 1, "providers": ["kimi-api"]},
+        "vision-bridge.json": {
+            "version": 1,
+            "enabled": True,
+            "engine": "gpt-5.6-luna",
+            "effort": "max",
+            "local": None,
+        },
         "model-picker.json": {
             "version": 1,
             "hidden": [

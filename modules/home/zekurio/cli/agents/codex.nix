@@ -16,17 +16,39 @@
         pkgs.curl
         pkgs.coreutils
         pkgs.git
+        pkgs.gnused
         pkgs.nodejs_24
         pkgs.uv
       ];
       text = ''
         installer="$(mktemp)"
-        trap 'rm -f "$installer"' EXIT
+        router_dir="''${XDG_DATA_HOME:-$HOME/.local/share}/codex-router"
+        provider_key_source="$router_dir/src/provider-key.mjs"
+        provider_key_backup="$(mktemp)"
+        cleanup() {
+          if [[ -s "$provider_key_backup" ]]; then
+            cp "$provider_key_backup" "$provider_key_source"
+          fi
+          rm -f "$installer" "$provider_key_backup"
+        }
+        trap cleanup EXIT
 
         curl --fail --silent --show-error --location \
           https://raw.githubusercontent.com/duolahypercho/codex-router/main/install.sh \
           --output "$installer"
-        sh "$installer" --target codex --kimi-api-key --auto
+        sh "$installer" --target codex --prepare-only
+
+        # The upstream hidden prompt hardcodes /bin/stty, which is absent on
+        # NixOS. Patch it only while collecting the key, then restore the clean
+        # checkout before the installer verifies and installs it.
+        cp "$provider_key_source" "$provider_key_backup"
+        sed -i 's|/bin/stty|${pkgs.coreutils}/bin/stty|g' "$provider_key_source"
+        "$router_dir/bin/model-router" codex provider-key kimi-api set
+        cp "$provider_key_backup" "$provider_key_source"
+        : >"$provider_key_backup"
+
+        sh "$router_dir/install.sh" \
+          --target codex --auto --providers configured
         ${configureCodex}/bin/codex-configure
 
         if [[ "$(uname -s)" == "Darwin" ]]; then
