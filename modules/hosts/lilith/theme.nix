@@ -1,6 +1,6 @@
 {...}: {
   flake.modules.nixos.lilith = {pkgs, ...}: let
-    faceImage = ../../../assets/kusanagi-parking-lot.jpg;
+    faceImage = ../../../assets/face.jpg;
     ini = pkgs.formats.ini {};
     accountsServiceUser = ini.generate "zekurio-accountsservice" {
       User = {
@@ -102,6 +102,9 @@
       });
     in {
       fonts.fontconfig.enable = lib.mkForce true;
+
+      # Keep user-facing authentication surfaces aligned with AccountsService.
+      home.file.".face.icon".source = faceImage;
 
       gtk = {
         enable = true;
