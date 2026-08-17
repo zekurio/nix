@@ -80,5 +80,10 @@
         ${ensureUserShareDatasets}
       '';
     };
+
+    # Dataset reconciliation reapplies the private 0700 modes, which collapses
+    # the named Immich ACL mask. Re-run the ACL service after every dataset-unit
+    # restart, including those caused by nixos-rebuild.
+    systemd.services.mediaShare-user-library-acl.partOf = ["tank-datasets.service"];
   };
 }

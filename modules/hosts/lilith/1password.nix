@@ -21,10 +21,21 @@
     in {
       home = {
         sessionVariables.SSH_AUTH_SOCK = agentSocket;
-        file.".config/1Password/ssh/agent.toml".text = ''
-          [[ssh-keys]]
-          item = "zekurio@lilith"
-        '';
+        file = {
+          ".config/1Password/ssh/agent.toml".text = ''
+            [[ssh-keys]]
+            item = "zekurio@lilith"
+          '';
+
+          # 1Password only installs its native-messaging manifest for known
+          # Chromium variants; Helium uses its own profile directory.
+          ".config/net.imput.helium/NativeMessagingHosts/com.1password.1password.json" = {
+            force = true;
+            source =
+              config.lib.file.mkOutOfStoreSymlink
+              "${config.home.homeDirectory}/.config/chromium/NativeMessagingHosts/com.1password.1password.json";
+          };
+        };
       };
 
       programs.ssh.settings = {
