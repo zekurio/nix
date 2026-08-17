@@ -73,9 +73,9 @@
       systemPackages = with pkgs; [
         ddcutil
         feishin
-        ghostty
         libnotify
         mpv
+        nautilus
         vesktop
         wl-clipboard
         xwayland-satellite

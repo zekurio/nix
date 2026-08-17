@@ -187,8 +187,20 @@
 
             binds {
                 Mod+Return hotkey-overlay-title="Fallback Terminal" { spawn "ghostty"; }
+                Mod+F1 hotkey-overlay-title="DMS Keybind Cheatsheet" {
+                    spawn "dms" "ipc" "call" "keybinds" "toggle" "niri";
+                }
                 Alt+F4 { close-window; }
                 Mod+Shift+Escape { quit; }
+            }
+
+            window-rule {
+                exclude app-id=r#"^helium$"#
+                // Niri automatically restores full opacity while fullscreen.
+                opacity 0.95
+                background-effect {
+                    blur true
+                }
             }
 
             window-rule {
@@ -198,9 +210,13 @@
             }
 
             window-rule {
+                match app-id=r#"(?i)^1password$"#
+                match app-id=r#"^org\.coolercontrol\.CoolerControl$"#
+                match app-id=r#"^(com\.heroicgameslauncher\.hgl|heroic)$"#
                 match app-id=r#"^org\.gnome\.Nautilus$"#
                 match app-id=r#"^org\.gnome\.Calculator$"#
                 match app-id=r#"^pavucontrol$"#
+                match app-id=r#"(?i)^steam$"#
                 open-floating true
             }
 
