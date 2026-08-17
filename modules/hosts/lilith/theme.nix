@@ -1,13 +1,7 @@
 {...}: {
   flake.modules.nixos.lilith = {pkgs, ...}: let
-    faceImage = ../../../assets/face.jpg;
-    ini = pkgs.formats.ini {};
-    accountsServiceUser = ini.generate "zekurio-accountsservice" {
-      User = {
-        Icon = "/var/lib/AccountsService/icons/zekurio";
-        SystemAccount = false;
-      };
-    };
+    cursorTheme = "BreezeX-RosePine-Linux";
+    cursorSize = 28;
   in {
     fonts = {
       packages = with pkgs; [
@@ -24,10 +18,12 @@
       };
     };
 
-    systemd.tmpfiles.rules = [
-      "L+ /var/lib/AccountsService/icons/zekurio - - - - ${faceImage}"
-      "L+ /var/lib/AccountsService/users/zekurio - - - - ${accountsServiceUser}"
-    ];
+    # The compositor starts before Home Manager's shell environment is loaded,
+    # so expose the cursor through the display-manager session as well.
+    environment.sessionVariables = {
+      XCURSOR_THEME = cursorTheme;
+      XCURSOR_SIZE = toString cursorSize;
+    };
 
     home-manager.users.zekurio = {
       config,
@@ -39,8 +35,6 @@
         variant = "frappe";
         accents = ["blue"];
       };
-      wallpaper = ../../../assets/wallpapers/cyberpunk-catppuccin.png;
-      wallpaperPath = "/home/zekurio/.local/share/backgrounds/cyberpunk-catppuccin.png";
       customThemePath = "/home/zekurio/.config/DankMaterialShell/themes/catppuccin-frappe-blue.json";
       dmsTheme = pkgs.writeText "dms-catppuccin-frappe-blue.json" (builtins.toJSON {
         name = "Catppuccin Frappé Blue";
@@ -78,8 +72,8 @@
         iconThemeDark = "Papirus-Dark";
         iconThemeLight = "Papirus-Dark";
         cursorSettings = {
-          theme = "BreezeX-RosePine-Linux";
-          size = 28;
+          theme = cursorTheme;
+          size = cursorSize;
           niri = {
             hideWhenTyping = false;
             hideAfterInactiveMs = 0;
@@ -95,16 +89,8 @@
         fontFamily = "Fira Sans";
         monoFontFamily = "FiraCode Nerd Font Mono";
       });
-      initialDmsSession = pkgs.writeText "dms-session.json" (builtins.toJSON {
-        isLightMode = false;
-        wallpaperPath = wallpaperPath;
-        wallpaperPathDark = wallpaperPath;
-      });
     in {
       fonts.fontconfig.enable = lib.mkForce true;
-
-      # Keep user-facing authentication surfaces aligned with AccountsService.
-      home.file.".face.jpg".source = faceImage;
 
       gtk = {
         enable = true;
@@ -130,8 +116,8 @@
         gtk.enable = true;
         x11.enable = true;
         package = pkgs.rose-pine-cursor;
-        name = "BreezeX-RosePine-Linux";
-        size = 28;
+        name = cursorTheme;
+        size = cursorSize;
       };
 
       catppuccin = {
@@ -234,7 +220,7 @@
             include optional=true "dms/alttab.kdl"
             include optional=true "dms/binds.kdl"
             include optional=true "dms/outputs.kdl"
-            include optional=true "dms/cursor.kdl"
+            include "cursor.kdl"
             include optional=true "dms/windowrules.kdl"
             include optional=true "dms/wpblur.kdl"
           '';
@@ -274,32 +260,31 @@
                 }
             }
           '';
-        };
 
-        dataFile."backgrounds" = {
-          source = ../../../assets/wallpapers;
-          recursive = true;
+          # Niri draws the cursor over the desktop and server-side surfaces;
+          # GTK settings alone only affect cursors drawn by GTK clients.
+          "niri/cursor.kdl".text = ''
+            cursor {
+                xcursor-theme "${cursorTheme}"
+                xcursor-size ${toString cursorSize}
+            }
+          '';
         };
       };
 
       # Keep DMS settings mutable after seeding so changes made in its GUI can
-      # be saved. The managed theme and niri color fragment remain immutable.
+      # be saved. Theme, color, and cursor fragments remain immutable.
       home.activation.seedDms = lib.hm.dag.entryAfter ["writeBoundary"] ''
         export XDG_CONFIG_HOME="${config.xdg.configHome}"
-        export XDG_STATE_HOME="${config.xdg.stateHome}"
         export PATH="${lib.makeBinPath [pkgs.ghostty pkgs.niri pkgs.sudo]}:$PATH"
 
         settings="$XDG_CONFIG_HOME/DankMaterialShell/settings.json"
-        session="$XDG_STATE_HOME/DankMaterialShell/session.json"
-        $DRY_RUN_CMD mkdir -p "$(dirname "$settings")" "$(dirname "$session")"
+        $DRY_RUN_CMD mkdir -p "$(dirname "$settings")"
         if [[ ! -e "$settings" ]]; then
           $DRY_RUN_CMD install -m 0600 ${initialDmsSettings} "$settings"
         fi
-        if [[ ! -e "$session" ]]; then
-          $DRY_RUN_CMD install -m 0600 ${initialDmsSession} "$session"
-        fi
 
-        for fragment in binds layout alttab outputs cursor windowrules; do
+        for fragment in binds layout alttab outputs windowrules; do
           if [[ ! -e "$XDG_CONFIG_HOME/niri/dms/$fragment.kdl" ]]; then
             $DRY_RUN_CMD ${pkgs.dms-shell}/bin/dms setup "$fragment"
           fi
