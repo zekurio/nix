@@ -8,9 +8,14 @@
     };
 
     # Permit 1Password's browser integration to connect to Helium.
-    environment.etc."1password/custom_allowed_browsers".text = ''
-      helium
-    '';
+    environment.etc."1password/custom_allowed_browsers" = {
+      # 1Password ignores this allowlist unless only root can modify it and it
+      # has the exact mode its browser verifier expects.
+      mode = "0755";
+      text = ''
+        helium
+      '';
+    };
 
     home-manager.users.${username} = {
       config,
