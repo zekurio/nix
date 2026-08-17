@@ -20,7 +20,8 @@
       programs.ssh.settings = {
         "*" = {
           AddKeysToAgent = lib.mkForce "no";
-          IdentityAgent = agentSocket;
+          # OpenSSH splits unquoted paths at spaces.
+          IdentityAgent = ''"${agentSocket}"'';
           IdentityFile = "none";
         };
         "github.com" = {
