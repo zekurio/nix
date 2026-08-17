@@ -64,25 +64,30 @@
       '';
     };
   in {
-    home.packages = [
-      configureCodex
-      setupRouter
-    ];
+    options.modules.codexRouter.enable =
+      lib.mkEnableOption "the Kimi K3 Codex Router setup";
 
-    # The router's Linux service does not copy provider endpoint overrides
-    # from its setup process. Keep the Kimi Code subscription endpoint in a
-    # systemd drop-in. The setup command patches the equivalent macOS plist.
-    xdg.configFile = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      "systemd/user/codex-router.service.d/kimi-code-api.conf".text = ''
-        [Service]
-        Environment="KIMI_API_BASE_URL=${kimiCodeApiBaseUrl}"
+    config = lib.mkIf config.modules.codexRouter.enable {
+      home.packages = [
+        configureCodex
+        setupRouter
+      ];
+
+      # The router's Linux service does not copy provider endpoint overrides
+      # from its setup process. Keep the Kimi Code subscription endpoint in a
+      # systemd drop-in. The setup command patches the equivalent macOS plist.
+      xdg.configFile = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+        "systemd/user/codex-router.service.d/kimi-code-api.conf".text = ''
+          [Service]
+          Environment="KIMI_API_BASE_URL=${kimiCodeApiBaseUrl}"
+        '';
+      };
+
+      # Codex and the router both update files below ~/.codex. Keep these files
+      # writable and merge the theme into the existing Codex configuration.
+      home.activation.configureCodex = config.lib.dag.entryAfter ["writeBoundary"] ''
+        run ${configureCodex}/bin/codex-configure
       '';
     };
-
-    # Codex and the router both update files below ~/.codex. Keep these files
-    # writable and merge the theme into the existing Codex configuration.
-    home.activation.configureCodex = config.lib.dag.entryAfter ["writeBoundary"] ''
-      run ${configureCodex}/bin/codex-configure
-    '';
   };
 }
