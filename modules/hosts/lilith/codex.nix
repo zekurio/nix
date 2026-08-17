@@ -5,7 +5,5 @@
     environment.systemPackages = [
       inputs.llm-agents-chatgpt.packages.${system}.chatgpt
     ];
-
-    home-manager.users.zekurio.modules.codexRouter.enable = true;
   };
 }
