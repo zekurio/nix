@@ -3,17 +3,31 @@
   # absolute paths into this library, so changing either side requires a
   # coordinated update.
   serverPath = "/tank/shares/zekurio/Immich External Library";
+  exportPath = "/tank/pictures";
   clientPath = "/home/zekurio/Pictures/Immich";
   lanCidr = "10.0.0.0/24";
 in {
   flake.modules.nixos = {
     adam = {lib, ...}: {
+      # Export a dedicated mount root instead of a nested directory in the
+      # private tank/shares/zekurio ZFS filesystem. NFSv4 cannot graft that
+      # nested export into /tank without also exporting its filesystem root.
+      fileSystems.${exportPath} = {
+        device = serverPath;
+        fsType = "none";
+        options = [
+          "bind"
+          "ro"
+        ];
+        depends = ["/tank/shares/zekurio"];
+      };
+
       # NFSv4 clients first enter the pseudo-root and can then traverse only
       # explicitly exported child filesystems. Do not use crossmnt here: that
       # would expose unrelated datasets below /tank to the home LAN.
       services.nfs.server.exports = lib.mkAfter ''
         /tank ${lanCidr}(ro,fsid=0,no_subtree_check)
-        ${builtins.replaceStrings [" "] ["\\040"] serverPath} ${lanCidr}(ro,sync,no_subtree_check)
+        ${exportPath} ${lanCidr}(ro,sync,no_subtree_check)
       '';
 
       networking.firewall.interfaces.enp42s0.allowedTCPPorts = [2049];
@@ -21,7 +35,7 @@ in {
 
     lilith = {lib, ...}: {
       fileSystems.${clientPath} = {
-        device = "adam:${lib.removePrefix "/tank" serverPath}";
+        device = "adam:${lib.removePrefix "/tank" exportPath}";
         fsType = "nfs";
         options = [
           "nfsvers=4.2"
