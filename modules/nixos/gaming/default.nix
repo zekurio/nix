@@ -17,6 +17,9 @@
       } ''
         mkdir -p "$out" "$steamcompattool"
         ln -s ${source}/bin/* "$steamcompattool/"
+        # Steam ignores a symlinked compatibility manifest in current clients.
+        rm "$steamcompattool/compatibilitytool.vdf"
+        cp ${source}/bin/compatibilitytool.vdf "$steamcompattool/"
         ln -s "$steamcompattool" "$out/${name}"
       '';
 
