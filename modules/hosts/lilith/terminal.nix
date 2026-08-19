@@ -37,9 +37,6 @@
   in {
     environment.systemPackages = [ghostty];
 
-    home-manager.users.zekurio.programs.ghostty.settings = {
-      command = "${pkgs.zellij}/bin/zellij attach --create ghostty";
-      keybind = ["ctrl+shift+n=unbind"];
-    };
+    home-manager.users.zekurio.programs.ghostty.settings.keybind = ["ctrl+shift+n=unbind"];
   };
 }
