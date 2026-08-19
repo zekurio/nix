@@ -15,9 +15,10 @@
     config = lib.mkIf config.services.homelab.immich.enable {
       services.immich = {
         enable = true;
-        host = "0.0.0.0";
+        # Loopback-only: external access goes through the public Caddy vhost.
+        host = "127.0.0.1";
         port = port;
-        openFirewall = true;
+        openFirewall = false;
         mediaLocation = "/tank/immich";
         machine-learning.enable = true;
         accelerationDevices = ["/dev/dri/renderD128"];
@@ -33,13 +34,8 @@
       # Caddy virtual host configuration
       services.homelab.caddy.virtualHosts."immich" = {
         domain = domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      services.homelab.newt.resources.immich = {
-        displayName = "Immich";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
 
       users.users.immich.extraGroups = [

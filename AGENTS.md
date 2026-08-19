@@ -1,11 +1,11 @@
 # Repository Guidelines
 
-- This flake configures four machines: `adam` (NixOS homelab server on
-  nixpkgs-unstable), `ramiel` (Hetzner Cloud edge VPS running Pangolin, pinned
-  to nixpkgs-stable for less churn), `lilith` (NixOS gaming desktop on
-  nixpkgs-unstable), and `sachiel` (nix-darwin MacBook Air). It also carries the
-  `zekurio` Home Manager profile, homelab service modules, nixpkgs overlays, and
-  sops-encrypted host secrets.
+- This flake configures three machines: `adam` (NixOS homelab server on
+  nixpkgs-unstable, serving everything through Caddy on the home connection),
+  `lilith` (NixOS gaming desktop on nixpkgs-unstable), and `sachiel`
+  (nix-darwin MacBook Air). It also carries the `zekurio` Home Manager
+  profile, homelab service modules, nixpkgs overlays, and sops-encrypted host
+  secrets.
 - The default branch is `main`; use `main` or `origin/main` for diffs.
 - Dendritic layout: every `.nix` file under `modules/` is a flake-parts module
   discovered by `import-tree`. There is no import list — `flake.nix` only wires
@@ -14,8 +14,7 @@
   before any evaluation. `nix fmt` and `nix flake check` must pass before a
   coding task is complete.
 - `nix flake check` runs `checks.sops-secret-names` (declared `sops.secrets`
-  vs. plaintext keys in the sops file) and `checks.edge-coverage` (Caddy vhosts
-  without an edge route). Both live in `modules/checks/`.
+  vs. plaintext keys in the sops file), defined in `modules/checks/`.
 - Build a host only when the changed surface warrants it, for example:
   `nix build .#nixosConfigurations.adam.config.system.build.toplevel` or
   `nix build .#nixosConfigurations.lilith.config.system.build.toplevel`.
@@ -55,7 +54,7 @@ Examples: `edge-coverage-check`, `fix-caddy-tls`, `split-media-share`.
 Use conventional commit-style messages and PR titles: `type(scope): summary`.
 
 Valid types are `feat`, `fix`, `docs`, `chore`, `refactor`, and `test`. Scopes
-are optional; useful ones are `adam`, `ramiel`, `sachiel`, `homelab`, `users`,
+are optional; useful ones are `adam`, `sachiel`, `homelab`, `users`,
 `overlays`, `secrets`, and `flake`.
 
 Examples: `fix(adam): correct DNS`, `chore(flake): update inputs`.
@@ -63,7 +62,7 @@ Examples: `fix(adam): correct DNS`, `chore(flake): update inputs`.
 ## Repo Patterns
 
 - A file contributes to an aggregate by defining it (`flake.modules.nixos.base`,
-  `.adam`, `.ramiel`, `.homelab`, `flake.modules.darwin.base`, `.sachiel`,
+  `.adam`, `.homelab`, `flake.modules.darwin.base`, `.sachiel`,
   `flake.modules.homeManager.zekurio`); several files may define the same
   aggregate and the module system merges them. Host entrypoints
   (`modules/hosts/<host>/system.nix`) only assemble aggregates and contain no
@@ -85,23 +84,22 @@ Examples: `fix(adam): correct DNS`, `chore(flake): update inputs`.
 ## Service Exposure
 
 A homelab service declares how it is reached from within its own module, never
-from a host module:
+from a host module, via `services.homelab.caddy.virtualHosts.<name>` — served
+by Caddy on `adam` over the home connection.
 
-- `services.homelab.caddy.virtualHosts.<name>` — served by Caddy on `adam` over
-  the home connection.
-- `services.homelab.newt.resources.<name>` — published through the Pangolin edge
-  on `ramiel`, rendered into the blueprint Newt applies at every start.
+Vhosts are **private by default**: Caddy answers them only from the LAN
+(`10.0.0.0/24`) and the tailnet (`100.64.0.0/10`, `fd7a:115c:a1e0::/48`),
+returning 403 to anything else. Set `public = true` on the vhost to expose a
+service to the internet — that flag is the public allowlist, so flip it
+deliberately. A private service sharing a public domain restricts its own
+paths in `extraConfig` instead (see the slskd module's `@blocked` matcher).
 
-The two options are deliberately shaped alike (`domain`, `target`/`reverseProxy`),
-and a service may declare both at once: DNS decides which one actually serves the
-domain, so a cutover and its rollback are a DNS change rather than a rebuild. A
-vhost meant to stay LAN-only must be listed in `newt.localOnlyDomains`, or
-`checks.edge-coverage` fails.
-
-Pangolin resource settings belong in the repo. The blueprint is a continuous
-source of truth and overwrites dashboard edits on the next apply. Removing a
-resource from the blueprint is not known to delete it in Pangolin — prune those
-in the dashboard until proven otherwise.
+Private-name DNS is split-horizon and lives outside this repo: the LAN
+resolver points them at `10.0.0.2`, external records point at adam's Tailscale
+address, and public names use Cloudflare DDNS to the home WAN address. The
+router forwards only 443/tcp (plus optional 80/tcp and 443/udp) and 50300/tcp
+for Soulseek; backend ports stay closed — public traffic goes through Caddy,
+never an app's native listener.
 
 ## SOPS Secret Conventions
 
@@ -118,9 +116,9 @@ so sharing is inherent and cannot be scoped per consumer.
 
 | Form | Use when | Examples |
 |------|----------|----------|
-| Raw single value | Shared by two or more consumers, or the option wants a file holding just the value (`authKeyFile`, `apiKeyFile`, password files) | `radarr_api_key`, `tailscale_auth_key`, `crowdsec_bouncer_key` |
-| `<service>_env` | Values private to exactly one service, consumed as a systemd `EnvironmentFile` | `caddy_env`, `slskd_env`, `pangolin_env` |
-| `sops.templates` | Several secrets composed into one env or config file | `calthing.env`, `configarr.env`, `traefik-dynamic-config.yml` |
+| Raw single value | Shared by two or more consumers, or the option wants a file holding just the value (`authKeyFile`, `apiKeyFile`, password files) | `radarr_api_key`, `tailscale_auth_key` |
+| `<service>_env` | Values private to exactly one service, consumed as a systemd `EnvironmentFile` | `caddy_env`, `slskd_env`, `pocket_id_env` |
+| `sops.templates` | Several secrets composed into one env or config file | `calthing.env`, `configarr.env` |
 
 **The Nix-side name must equal the YAML key.** Do not paper over a rename with
 sops-nix's `key = "..."` indirection; it hides drift. Rename the sops file and
@@ -128,10 +126,10 @@ every referencing module in the same commit so no intermediate state is broken.
 
 ## Deployment
 
-`adam` and `ramiel` are stateless with respect to this repo: they keep no local
-checkout and resolve `github:zekurio/nix` on every rebuild, including their
-`system.autoUpgrade` timers (adam Sundays 03:00, ramiel monthly). Uncommitted or
-unpushed work never reaches them — commit and push to `origin/main` first, then:
+`adam` is stateless with respect to this repo: it keeps no local
+checkout and resolves `github:zekurio/nix` on every rebuild, including its
+`system.autoUpgrade` timer (Sundays 03:00). Uncommitted or
+unpushed work never reaches it — commit and push to `origin/main` first, then:
 
 ```sh
 ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'

@@ -22,8 +22,10 @@
         enable = true;
         settings = {
           server.urlBase = "/radarr";
-          # delegate auth to the Caddy / Pocket ID forward-auth layer
-          auth.method = "External";
+          # App-native login; the vhost is LAN/tailnet-only, so no forward
+          # auth layer in front. Radarr prompts to create the admin user on
+          # first visit when none exists yet.
+          auth.method = "Forms";
         };
       };
 
@@ -33,15 +35,8 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
-      # Caddy virtual host configuration with base URL
-      # Caddy splits this domain across the arr services by path, which a
-      # Pangolin resource cannot express, so the whole domain goes through
-      # the edge with Caddy still routing and authenticating behind it.
-      services.homelab.newt.caddyDomains = [domain];
-
       services.homelab.caddy.virtualHosts."radarr" = {
         inherit domain;
-        forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;
         extraConfig = ''
           redir /radarr /radarr/
           @radarr path /radarr*
