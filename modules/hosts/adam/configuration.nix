@@ -241,6 +241,7 @@
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
+      qbittorrent.enable = true;
       radarr.enable = true;
       sabnzbd.enable = true;
       seerr.enable = true;
