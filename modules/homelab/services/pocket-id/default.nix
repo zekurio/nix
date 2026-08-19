@@ -29,19 +29,12 @@
         mode = "0400";
       };
 
+      # Public: external OIDC clients (Immich mobile sync, Paperless redirects)
+      # need discovery, authorization and callback reachability.
       services.homelab.caddy.virtualHosts."pocket-id" = {
         domain = domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      # Published through the edge like every other service. Pangolin's own SSO
-      # depends on this being reachable, so the Pangolin break-glass admin (a
-      # local password account, no Pocket ID involved) is what recovers a
-      # tunnel outage.
-      services.homelab.newt.resources.pocket-id = {
-        displayName = "Pocket ID";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
     };
   };

@@ -9,6 +9,12 @@
 
     acmeEmail = "admin@zekurio.me";
 
+    # Source ranges allowed to reach private virtual hosts: the home LAN and
+    # the Tailscale tailnet (v4 and v6), plus loopback for local tooling and
+    # health checks. Everything else gets a 403 before routing happens.
+    privateRanges = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
+    privateRangesStr = lib.concatStringsSep " " privateRanges;
+
     # Helper to replace generic matchers with service-specific ones
     makeMatchersUnique = name: config: let
       # Replace @blocked with @blocked_<servicename>
@@ -27,8 +33,7 @@
           } or {
             reverseProxies = [];
             extraConfigs = [];
-            forwardAuth = null;
-            authPaths = [];
+            public = false;
           };
         # Make matchers unique to avoid conflicts
         uniqueExtraConfig =
@@ -43,12 +48,10 @@
               existing.reverseProxies
               ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
             extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
-            # First non-null forwardAuth across all entries for this domain wins
-            forwardAuth =
-              if hostCfg.forwardAuth != null
-              then hostCfg.forwardAuth
-              else existing.forwardAuth;
-            authPaths = lib.unique (existing.authPaths ++ hostCfg.authPaths);
+            # One public entry makes the whole domain public; a private
+            # service sharing the domain must restrict its own paths in
+            # extraConfig (see the slskd module for the pattern).
+            public = existing.public || hostCfg.public;
           };
         }
     ) {} (builtins.attrNames cfg.virtualHosts);
@@ -78,19 +81,13 @@
                 default = "";
                 description = "Extra Caddy configuration for this virtual host";
               };
-              forwardAuth = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
-                default = null;
-                description = "oauth2-proxy address for forward auth (e.g. 127.0.0.1:4180). When set, all requests to this domain (except /oauth2/*) are gated behind Pocket ID.";
-              };
-              authPaths = lib.mkOption {
-                type = lib.types.listOf lib.types.str;
-                default = [];
+              public = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
                 description = ''
-                  Path matchers to restrict forward auth to, e.g. ["/slskd*"].
-                  Empty gates the whole domain. Use this when several services
-                  share a domain and only some of them need gating, such as an
-                  admin UI sitting next to an app that does its own auth.
+                  Serve this domain to the internet. Private by default:
+                  without this flag the domain answers only the LAN and
+                  tailnet source ranges, everything else gets a 403.
                 '';
               };
             };
@@ -115,16 +112,6 @@
           acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} {
             resolvers 1.1.1.1 1.0.0.1
           }
-          servers {
-            listener_wrappers {
-              proxy_protocol {
-                timeout 5s
-                allow 127.0.0.1/32
-              }
-              tls
-            }
-            trusted_proxies static 127.0.0.1/32
-          }
         '';
         virtualHosts =
           lib.mapAttrs (_: hostCfg: {
@@ -136,24 +123,9 @@
                 dns cloudflare {env.CLOUDFLARE_API_TOKEN}
                 resolvers 1.1.1.1 1.0.0.1
               }
-              ${lib.optionalString (hostCfg.forwardAuth != null) ''
-                handle /oauth2/* {
-                  reverse_proxy ${hostCfg.forwardAuth}
-                }
-                # Bypass token: skip OIDC for API clients (e.g. nzb360)
-                @not_bypass {
-                  not header X-Bypass-Token {$CADDY_BYPASS_TOKEN}
-                  not path /oauth2/*
-                  ${lib.optionalString (hostCfg.authPaths != []) "path ${lib.concatStringsSep " " hostCfg.authPaths}"}
-                }
-                forward_auth @not_bypass ${hostCfg.forwardAuth} {
-                  uri /oauth2/auth
-                  copy_headers X-Auth-Request-User X-Auth-Request-Email X-Auth-Request-Groups
-                  @unauthorized status 401
-                  handle_response @unauthorized {
-                    redir * /oauth2/start?rd={http.request.uri} 302
-                  }
-                }
+              ${lib.optionalString (!hostCfg.public) ''
+                @not_local not remote_ip ${privateRangesStr}
+                respond @not_local 403
               ''}
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
               ${lib.optionalString (
@@ -164,7 +136,7 @@
           groupedHosts;
       };
 
-      # Make Cloudflare API token and email available to Caddy
+      # Make Cloudflare API token available to Caddy
       systemd.services.caddy.serviceConfig = {
         EnvironmentFile = [config.sops.secrets.caddy_env.path];
       };
@@ -174,12 +146,13 @@
         owner = "caddy";
         group = "caddy";
         mode = "0400";
-        # EnvironmentFile is read once at start, so a rotated Cloudflare or
-        # bypass token would otherwise stay unused until an unrelated restart.
+        # EnvironmentFile is read once at start, so a rotated Cloudflare
+        # token would otherwise stay unused until an unrelated restart.
         restartUnits = ["caddy.service"];
       };
 
-      # Open firewall ports for HTTP/HTTPS
+      # Open firewall ports for HTTP/HTTPS (80 exists only for HTTP→HTTPS
+      # redirects; UDP 443 is HTTP/3)
       networking.firewall.allowedTCPPorts = [
         80
         443

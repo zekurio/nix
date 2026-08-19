@@ -82,7 +82,10 @@
             port = webPort;
             url_base = "/slskd";
             https.disabled = true;
-            authentication.disabled = true;
+            # App-native login (defaults slskd/slskd until overridden via
+            # SLSKD_WEB_AUTHENTICATION_* in slskd_env); Caddy additionally
+            # restricts /slskd* to LAN/tailnet sources.
+            authentication.disabled = false;
           };
           logger.disk = false;
         };
@@ -103,18 +106,19 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
-      # Published through the edge as a whole domain; Caddy keeps gating
-      # /slskd* behind forward auth (slskd has no authentication of its own).
-      services.homelab.newt.caddyDomains = [domain];
-
+      # music.zekurio.me is public for Navidrome, so the /slskd* subtree
+      # carries its own source restriction (the Caddy module renames the
+      # generic @blocked matcher to @blocked_slskd when merging).
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
-        # Gate only /slskd*: Navidrome shares this domain at the root and must
-        # stay reachable for Subsonic clients.
-        forwardAuth = config.services.homelab.oauth2-proxy.zekurio.forwardAuthAddress;
-        authPaths = ["/slskd*"];
         extraConfig = ''
           redir /slskd /slskd/
+
+          @blocked {
+            path /slskd*
+            not remote_ip 10.0.0.0/24 100.64.0.0/10 fd7a:115c:a1e0::/48 127.0.0.1 ::1
+          }
+          respond @blocked 403
 
           # slskd's packaged index keeps the same size and timestamp across
           # some upgrades, so Kestrel can reuse its metadata-based ETag even

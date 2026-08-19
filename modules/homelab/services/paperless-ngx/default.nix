@@ -38,23 +38,11 @@
         "d /var/lib/paperless/consume 0770 paperless paperless -"
       ];
 
+      # The whole vhost is LAN/tailnet-only; Paperless' own login (OIDC
+      # against Pocket ID via paperless_env) stays as the app-level auth.
       services.homelab.caddy.virtualHosts."paperless-ngx" = {
         domain = domain;
         reverseProxy = "127.0.0.1:${toString port}";
-        # /admin is gated by the admin oauth2-proxy instance (Pocket ID admin
-        # group), mirroring the pass rule on the Pangolin edge. Everything
-        # else keeps Paperless' own login.
-        forwardAuth = config.services.homelab.oauth2-proxy.admin.forwardAuthAddress;
-        authPaths = ["/admin" "/admin/*"];
-      };
-
-      services.homelab.newt.resources.paperless = {
-        displayName = "Paperless";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
-        sso = true;
-        ssoRoles = ["Admins"];
-        ssoPaths = ["/admin"];
       };
 
       users.users.paperless.extraGroups = ["share"];

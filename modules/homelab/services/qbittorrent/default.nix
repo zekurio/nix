@@ -130,8 +130,6 @@
             Connection.UPnP = false;
             WebUI = {
               Address = "*";
-              AuthSubnetWhitelist = "${hostAddress}/32";
-              AuthSubnetWhitelistEnabled = true;
               CSRFProtection = true;
               ClickjackingProtection = true;
               HostHeaderValidation = true;
@@ -180,14 +178,12 @@
         };
       };
 
+      # LAN/tailnet-only vhost; qBittorrent's own WebUI login is the auth
+      # boundary (the temporary password is logged on first start).
       services.homelab.caddy.virtualHosts.qbittorrent = {
         inherit domain;
-        forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;
         reverseProxy = "${namespaceAddress}:${toString webuiPort}";
       };
-
-      # Publish the whole domain so Caddy remains the authentication boundary.
-      services.homelab.newt.caddyDomains = [domain];
     };
   };
 }
