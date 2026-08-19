@@ -82,9 +82,8 @@
             port = webPort;
             url_base = "/slskd";
             https.disabled = true;
-            # App-native login (defaults slskd/slskd until overridden via
-            # SLSKD_USERNAME/SLSKD_PASSWORD in slskd_env); the vhost on the
-            # admin domain is LAN/tailnet-only.
+            # App-native login is provisioned from the shared admin password;
+            # the vhost on the admin domain is LAN/tailnet-only.
             authentication.disabled = false;
           };
           logger.disk = false;
