@@ -10,7 +10,7 @@
     downloadsRoot = mediaShare.torrentDownloadsRoot;
     completeDir = "${downloadsRoot}/complete";
     incompleteDir = "${downloadsRoot}/incomplete";
-    domain = "qbit.${config.services.homelab.domains.schnitzelflix}";
+    domain = "admin.${config.services.homelab.domains.zekurio}";
     namespace = "qbittorrent";
     namespaceAddress = "10.254.0.2";
     hostAddress = "10.254.0.1";
@@ -182,7 +182,17 @@
       # boundary (the temporary password is logged on first start).
       services.homelab.caddy.virtualHosts.qbittorrent = {
         inherit domain;
-        reverseProxy = "${namespaceAddress}:${toString webuiPort}";
+        extraConfig = ''
+          redir /qbittorrent /qbittorrent/
+          # qBittorrent cannot serve under a base path
+          # (qbittorrent/qBittorrent#5693), so the proxy strips the prefix;
+          # the WebUI's relative URLs keep the browser under /qbittorrent/.
+          handle_path /qbittorrent/* {
+            reverse_proxy ${namespaceAddress}:${toString webuiPort} {
+              header_up X-Forwarded-Host {http.request.host}
+            }
+          }
+        '';
       };
     };
   };
