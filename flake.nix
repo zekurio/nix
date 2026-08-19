@@ -28,10 +28,6 @@
 
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable?shallow=true";
-    # Stable channel for ramiel, the publicly exposed edge host: less churn and
-    # security backports where freshness matters least (its workload runs in
-    # containers anyway).
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05?shallow=true";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-unstable";

@@ -48,13 +48,8 @@
 
       services.homelab.caddy.virtualHosts."inviterr" = {
         inherit domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      services.homelab.newt.resources.inviterr = {
-        displayName = "Inviterr";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
     };
   };

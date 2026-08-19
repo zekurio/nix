@@ -1,8 +1,7 @@
 # nix
 
-Nix configurations for my NixOS hosts and my Mac: a homelab server, a public
-edge VPS, a gaming desktop, and a laptop, plus the Home Manager profile they
-share.
+Nix configurations for my NixOS hosts and my Mac: a homelab server, a gaming
+desktop, and a laptop, plus the Home Manager profile they share.
 
 Built with [flake-parts](https://flake.parts) in a dendritic layout — every file
 under `modules/` is a flake-parts module discovered by
@@ -13,8 +12,7 @@ inputs, systems, and the formatter.
 
 | Host | Type | Channel | Description |
 |------|------|---------|-------------|
-| `adam` | NixOS | unstable | Homelab server: media, photos, documents, passwords, behind Caddy and a Newt tunnel |
-| `ramiel` | NixOS | 26.05 | Hetzner Cloud edge: Pangolin, Gerbil, Traefik, CrowdSec |
+| `adam` | NixOS | unstable | Homelab server: media, photos, documents, behind Caddy; public services on 443, management UIs LAN/tailnet-only |
 | `lilith` | NixOS | unstable | Ryzen/Radeon desktop: niri, DankMaterialShell, gaming |
 | `sachiel` | nix-darwin | unstable | MacBook Air |
 
@@ -34,9 +32,8 @@ secrets/                sops-encrypted, one file per host
 
 ### Rebuilding
 
-`adam` and `ramiel` hold no checkout and build straight from GitHub, so changes
-must be pushed to `main` first. They also auto-upgrade from `main` on a timer
-(adam weekly, ramiel monthly).
+`adam` holds no checkout and builds straight from GitHub, so changes must be
+pushed to `main` first. It also auto-upgrades from `main` on a weekly timer.
 
 ```bash
 ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'
@@ -123,7 +120,7 @@ Host secrets are [sops](https://github.com/getsops/sops)-encrypted under
 `secrets/<host>.yaml`, each keyed to that host's age recipient in `.sops.yaml`.
 Edit them only with `sops secrets/<host>.yaml`.
 
-`adam` and `ramiel` decrypt with an age key at `/var/lib/sops-nix/key.txt` that
+`adam` decrypts with an age key at `/var/lib/sops-nix/key.txt` that
 is deliberately **not** generated on the host (`generateKey = false`), so a
 fresh install has one manual step — without it every secret-dependent service
 fails to activate:

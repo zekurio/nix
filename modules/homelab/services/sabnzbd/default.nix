@@ -36,10 +36,12 @@
             bandwidth_perc = 100;
             # The Arr clients remove completed entries after a successful import.
             history_retention_option = "all";
+            # Login required always once credentials exist; with both empty
+            # SABnzbd skips the prompt, so set them in the UI after deploy.
             username = "";
             password = "";
-            html_login = false;
-            inet_exposure = "api+web (locally no auth)";
+            html_login = true;
+            inet_exposure = "api+web (auth needed)";
             complete_dir = "${downloadsRoot}/complete";
             download_dir = "${downloadsRoot}/incomplete";
             dirscan_dir = "/var/lib/sabnzbd/nzb";
@@ -97,14 +99,9 @@
         "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
       ];
 
-      # Published through the edge as a whole domain so Caddy keeps the forward
-      # auth gate and the bypass token that API clients such as nzb360 rely on;
-      # SABnzbd's own web UI has no authentication.
-      services.homelab.newt.caddyDomains = [domain];
-
+      # LAN/tailnet-only vhost with SABnzbd's own login in front.
       services.homelab.caddy.virtualHosts."sabnzbd" = {
         inherit domain;
-        forwardAuth = config.services.homelab.oauth2-proxy.schnitzelflix.forwardAuthAddress;
         reverseProxy = "127.0.0.1:${toString port}";
       };
     };

@@ -100,13 +100,8 @@
 
       services.homelab.caddy.virtualHosts."alloy" = {
         inherit domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      services.homelab.newt.resources.alloy = {
-        displayName = "Alloy";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
     };
   };

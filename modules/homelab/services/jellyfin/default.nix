@@ -33,7 +33,9 @@
     config = lib.mkIf config.services.homelab.jellyfin.enable {
       services.jellyfin = {
         enable = true;
-        openFirewall = true;
+        # Native ports stay closed; external clients reach Jellyfin through
+        # the public Caddy vhost on 443.
+        openFirewall = false;
         dataDir = "/var/lib/jellyfin";
         cacheDir = "/var/cache/jellyfin";
       };
@@ -68,13 +70,8 @@
 
       services.homelab.caddy.virtualHosts."jellyfin" = {
         domain = domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      services.homelab.newt.resources.jellyfin = {
-        displayName = "Jellyfin";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
     };
   };

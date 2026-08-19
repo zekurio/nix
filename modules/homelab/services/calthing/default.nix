@@ -108,13 +108,8 @@
 
       services.homelab.caddy.virtualHosts."calthing" = {
         inherit domain;
+        public = true;
         reverseProxy = "127.0.0.1:${toString port}";
-      };
-
-      services.homelab.newt.resources.calthing = {
-        displayName = "Calthing";
-        inherit domain;
-        target = "127.0.0.1:${toString port}";
       };
     };
   };
