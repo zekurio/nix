@@ -46,6 +46,10 @@
       torrentDownloadsParent
       torrentDownloadsDir
       "${torrentDownloadsDir}/complete"
+      # qBittorrent category save paths (categories.json is runtime state and
+      # cannot be managed declaratively; these dirs must exist for it)
+      "${torrentDownloadsDir}/complete/radarr"
+      "${torrentDownloadsDir}/complete/sonarr"
       "${torrentDownloadsDir}/incomplete"
     ];
     sharedDirs = mediaDirs;
