@@ -6,7 +6,7 @@
   }: let
     cfg = config.services.homelab.slskd;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
-    domain = "music.${config.services.homelab.domains.zekurio}";
+    domain = "admin.${config.services.homelab.domains.zekurio}";
     webPort = 5030;
     listenPort = 50300;
     mediaShare = config.modules.homelab.mediaShare;
@@ -83,8 +83,8 @@
             url_base = "/slskd";
             https.disabled = true;
             # App-native login (defaults slskd/slskd until overridden via
-            # SLSKD_WEB_AUTHENTICATION_* in slskd_env); Caddy additionally
-            # restricts /slskd* to LAN/tailnet sources.
+            # SLSKD_USERNAME/SLSKD_PASSWORD in slskd_env); the vhost on the
+            # admin domain is LAN/tailnet-only.
             authentication.disabled = false;
           };
           logger.disk = false;
@@ -106,19 +106,12 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
-      # music.zekurio.me is public for Navidrome, so the /slskd* subtree
-      # carries its own source restriction (the Caddy module renames the
-      # generic @blocked matcher to @blocked_slskd when merging).
+      # The whole admin domain is LAN/tailnet-only, so no per-path source
+      # restriction is needed here.
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
         extraConfig = ''
           redir /slskd /slskd/
-
-          @blocked {
-            path /slskd*
-            not remote_ip 10.0.0.0/24 100.64.0.0/10 fd7a:115c:a1e0::/48 127.0.0.1 ::1
-          }
-          respond @blocked 403
 
           # slskd's packaged index keeps the same size and timestamp across
           # some upgrades, so Kestrel can reuse its metadata-based ETag even
