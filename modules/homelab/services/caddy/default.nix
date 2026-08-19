@@ -50,7 +50,8 @@
             extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
             # One public entry makes the whole domain public; a private
             # service sharing the domain must restrict its own paths in
-            # extraConfig (see the slskd module for the pattern).
+            # extraConfig with a `@blocked` matcher (renamed per service by
+            # makeMatchersUnique when merging).
             public = existing.public || hostCfg.public;
           };
         }

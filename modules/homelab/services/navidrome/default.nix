@@ -33,8 +33,7 @@
 
       services.homelab.caddy.virtualHosts."navidrome" = {
         inherit domain;
-        # Public for Subsonic clients; the /slskd* subtree sharing this domain
-        # carries its own source restriction in the slskd module.
+        # Public for Subsonic clients.
         public = true;
         # Navidrome owns the root of the music domain and keeps its own auth:
         # Subsonic clients cannot complete an OIDC flow, so no gating here.

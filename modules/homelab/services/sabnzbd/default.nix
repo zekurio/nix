@@ -6,7 +6,7 @@
   }: let
     cfg = config.services.homelab.sabnzbd;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
-    domain = "sab.${config.services.homelab.domains.schnitzelflix}";
+    domain = "admin.${config.services.homelab.domains.zekurio}";
     port = 6789;
     serviceUser = "sabnzbd";
     serviceGroup = "sabnzbd";
@@ -16,7 +16,7 @@
       enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";
       baseUrl = lib.mkOption {
         type = lib.types.str;
-        default = "http://127.0.0.1:${toString port}";
+        default = "http://127.0.0.1:${toString port}/sabnzbd";
         description = "URL other services use to reach the SABnzbd API.";
       };
     };
@@ -42,6 +42,13 @@
             password = "";
             html_login = true;
             inet_exposure = "api+web (auth needed)";
+            # Served under a path prefix on the shared admin domain; url_base
+            # prefixes every route including the API.
+            url_base = "/sabnzbd";
+            # DNS-rebinding protection: Caddy passes the original Host header
+            # through, so whitelist the vhost name (direct IP access always
+            # passes the check).
+            host_whitelist = domain;
             complete_dir = "${downloadsRoot}/complete";
             download_dir = "${downloadsRoot}/incomplete";
             dirscan_dir = "/var/lib/sabnzbd/nzb";
@@ -99,10 +106,15 @@
         "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
       ];
 
-      # LAN/tailnet-only vhost with SABnzbd's own login in front.
+      # LAN/tailnet-only vhost with SABnzbd's own login in front. url_base
+      # makes SABnzbd handle the prefix itself, so no stripping here.
       services.homelab.caddy.virtualHosts."sabnzbd" = {
         inherit domain;
-        reverseProxy = "127.0.0.1:${toString port}";
+        extraConfig = ''
+          redir /sabnzbd /sabnzbd/
+          @sabnzbd path /sabnzbd*
+          reverse_proxy @sabnzbd 127.0.0.1:${toString port}
+        '';
       };
     };
   };
