@@ -15,6 +15,7 @@
     shareFileMode = "0664";
     usenetDownloadsDir = cfg.downloadsRoot;
     torrentDownloadsDir = cfg.torrentDownloadsRoot;
+    torrentDownloadsParent = builtins.dirOf torrentDownloadsDir;
     tailnetCidr = "100.64.0.0/10";
     smbTcpPorts = [
       139
@@ -42,6 +43,7 @@
       "${usenetDownloadsDir}/complete/slskd"
       "${usenetDownloadsDir}/incomplete"
       "${usenetDownloadsDir}/incomplete/slskd"
+      torrentDownloadsParent
       torrentDownloadsDir
       "${torrentDownloadsDir}/complete"
       "${torrentDownloadsDir}/incomplete"

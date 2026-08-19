@@ -38,8 +38,11 @@
       # Moving only the interface lets its encrypted packets use Adam's normal
       # route while qBittorrent sees no non-VPN default route.
       ${pkgs.iproute2}/bin/ip link add ${wireguardInterface} type wireguard
+      ${pkgs.coreutils}/bin/ln -sfn ${wireguardConfig} \
+        /run/qbittorrent-vpn/${wireguardInterface}.conf
       ${pkgs.wireguard-tools}/bin/wg setconf ${wireguardInterface} \
-        <(${pkgs.wireguard-tools}/bin/wg-quick strip ${wireguardConfig})
+        <(${pkgs.wireguard-tools}/bin/wg-quick strip \
+          /run/qbittorrent-vpn/${wireguardInterface}.conf)
       ${pkgs.iproute2}/bin/ip link set ${wireguardInterface} netns ${namespace}
 
       addresses="$(${pkgs.gnused}/bin/sed -n \
