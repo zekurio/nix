@@ -18,6 +18,25 @@
     torrentPort = 6881;
     wireguardInterface = "mullvad-qbt";
     wireguardConfig = config.sops.secrets.mullvad_wireguard_conf.path;
+    webuiUsername = "zekurio";
+    webuiPassword = config.sops.secrets.qbittorrent_password.path;
+
+    configureWebuiAuth = pkgs.writeShellScript "qbittorrent-configure-webui-auth" ''
+      set -euo pipefail
+
+      config_file=/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+      password_hash="$(${pkgs.python3}/bin/python3 -c \
+        'import base64, hashlib, os, sys; password = open(sys.argv[1], "rb").read().rstrip(b"\r\n"); salt = os.urandom(16); digest = hashlib.pbkdf2_hmac("sha512", password, salt, 100000, 64); print(f"@ByteArray({base64.b64encode(salt).decode()}:{base64.b64encode(digest).decode()})")' \
+        ${lib.escapeShellArg webuiPassword})"
+
+      ${pkgs.gnused}/bin/sed -i \
+        -e '/^WebUI\\Username=/d' \
+        -e '/^WebUI\\Password_PBKDF2=/d' \
+        "$config_file"
+      ${pkgs.coreutils}/bin/printf '%s=%s\n%s="%s"\n' \
+        'WebUI\Username' ${lib.escapeShellArg webuiUsername} \
+        'WebUI\Password_PBKDF2' "$password_hash" >> "$config_file"
+    '';
 
     vpnSetup = pkgs.writeShellScript "qbittorrent-vpn-setup" ''
       set -euo pipefail
@@ -109,9 +128,17 @@
         }
       ];
 
-      sops.secrets.mullvad_wireguard_conf = {
-        mode = "0400";
-        restartUnits = ["qbittorrent-vpn.service"];
+      sops.secrets = {
+        mullvad_wireguard_conf = {
+          mode = "0400";
+          restartUnits = ["qbittorrent-vpn.service"];
+        };
+        qbittorrent_password = {
+          owner = "qbittorrent";
+          group = "qbittorrent";
+          mode = "0400";
+          restartUnits = ["qbittorrent.service"];
+        };
       };
 
       services.qbittorrent = {
@@ -169,9 +196,13 @@
         qbittorrent = {
           bindsTo = ["qbittorrent-vpn.service"];
           after = ["qbittorrent-vpn.service"];
-          unitConfig.RequiresMountsFor = downloadsRoot;
+          unitConfig.RequiresMountsFor = [
+            downloadsRoot
+            webuiPassword
+          ];
           serviceConfig = {
             NetworkNamespacePath = "/run/netns/${namespace}";
+            ExecStartPre = lib.mkAfter [configureWebuiAuth];
             BindReadOnlyPaths = [
               "/run/qbittorrent-vpn/resolv.conf:/etc/resolv.conf"
             ];
