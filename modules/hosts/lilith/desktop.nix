@@ -76,6 +76,7 @@
         libnotify
         mpv
         nautilus
+        plezy
         vesktop
         wl-clipboard
         xwayland-satellite
