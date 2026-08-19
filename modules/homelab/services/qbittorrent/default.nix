@@ -19,7 +19,7 @@
     wireguardInterface = "mullvad-qbt";
     wireguardConfig = config.sops.secrets.mullvad_wireguard_conf.path;
     webuiUsername = "zekurio";
-    webuiPassword = config.sops.secrets.qbittorrent_password.path;
+    webuiPassword = config.sops.secrets.admin_password.path;
 
     configureWebuiAuth = pkgs.writeShellScript "qbittorrent-configure-webui-auth" ''
       set -euo pipefail
@@ -133,12 +133,6 @@
           mode = "0400";
           restartUnits = ["qbittorrent-vpn.service"];
         };
-        qbittorrent_password = {
-          owner = "qbittorrent";
-          group = "qbittorrent";
-          mode = "0400";
-          restartUnits = ["qbittorrent.service"];
-        };
       };
 
       services.qbittorrent = {
@@ -206,7 +200,10 @@
             BindReadOnlyPaths = [
               "/run/qbittorrent-vpn/resolv.conf:/etc/resolv.conf"
             ];
-            SupplementaryGroups = [mediaShare.group];
+            SupplementaryGroups = [
+              mediaShare.group
+              config.sops.secrets.admin_password.group
+            ];
             UMask = lib.mkForce mediaShare.umask;
           };
         };
