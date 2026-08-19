@@ -23,9 +23,8 @@
         enable = true;
         settings = {
           server.urlBase = "/sonarr";
-          # App-native login; the vhost is LAN/tailnet-only, so no forward
-          # auth layer in front. Sonarr prompts to create the admin user on
-          # first visit when none exists yet.
+          # App-native login is provisioned from the shared admin password;
+          # the vhost is LAN/tailnet-only, so no forward auth layer in front.
           auth.method = "Forms";
         };
       };

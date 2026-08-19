@@ -36,10 +36,8 @@
             bandwidth_perc = 100;
             # The Arr clients remove completed entries after a successful import.
             history_retention_option = "all";
-            # Login required always once credentials exist; with both empty
-            # SABnzbd skips the prompt, so set them in the UI after deploy.
-            username = "";
-            password = "";
+            username = "zekurio";
+            password = "@admin_password@";
             html_login = true;
             inet_exposure = "api+web (auth needed)";
             # Served under a path prefix on the shared admin domain; url_base
@@ -81,10 +79,14 @@
             };
           };
         };
+        secretValues."@admin_password@" = config.sops.secrets.admin_password.path;
       };
 
       systemd.services.sabnzbd.serviceConfig = {
-        SupplementaryGroups = [mediaShare.group];
+        SupplementaryGroups = [
+          mediaShare.group
+          config.sops.secrets.admin_password.group
+        ];
         UMask = lib.mkForce mediaShare.umask;
       };
 

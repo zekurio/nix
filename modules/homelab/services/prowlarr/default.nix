@@ -16,9 +16,8 @@
         enable = true;
         settings = {
           server.urlBase = "/prowlarr";
-          # App-native login; the vhost is LAN/tailnet-only, so no forward
-          # auth layer in front. Prowlarr prompts to create the admin user on
-          # first visit when none exists yet.
+          # App-native login is provisioned from the shared admin password;
+          # the vhost is LAN/tailnet-only, so no forward auth layer in front.
           auth.method = "Forms";
         };
       };
