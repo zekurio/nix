@@ -234,10 +234,6 @@
       jellyfin.enable = true;
       inviterr.enable = true;
       navidrome.enable = true;
-      # Registers adam as a site on the ramiel Pangolin edge and applies the
-      # resource blueprint declared by the service modules.
-      newt.enable = true;
-      oauth2-proxy.enable = true;
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
@@ -247,7 +243,6 @@
       seerr.enable = true;
       slskd.enable = true;
       sonarr.enable = true;
-      vaultwarden.enable = false;
       windrose = {
         enable = false;
         maxPlayers = 4;
