@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "agent-stuff": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786612118,
-        "narHash": "sha256-VjqgUJihAODkw3kkMAgE5VP0sQrBdwpflJPX3Wti+0s=",
-        "owner": "zekurio",
-        "repo": "agent-stuff",
-        "rev": "171a4613ac90b045a7c60f3313351a2fee5ec936",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "agent-stuff",
-        "type": "github"
-      }
-    },
     "alloy": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -1003,7 +987,6 @@
     },
     "root": {
       "inputs": {
-        "agent-stuff": "agent-stuff",
         "alloy": "alloy",
         "anvil": "anvil",
         "autoaspm": "autoaspm",
