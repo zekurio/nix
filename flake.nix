@@ -90,7 +90,10 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     configarr = {
-      url = "github:raydak-labs/configarr/v1.30.0";
+      # v1.30.2 pins the recyclarr config-templates repo to the last
+      # includes/-compatible revision; upstream v8 removed them and crashed
+      # every run (raydak-labs/configarr#504).
+      url = "github:raydak-labs/configarr/v1.30.2";
       inputs.flake-parts.follows = "flake-parts";
     };
     calthing = {
