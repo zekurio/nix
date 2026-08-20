@@ -239,16 +239,16 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1783629247,
-        "narHash": "sha256-TJWyQB+YbKrfS6NT/U8w7GHhBDnXosn2MlxbJBs1Cvc=",
+        "lastModified": 1786470885,
+        "narHash": "sha256-5Eea320ePY1WsLgL6PAd/aSapYbE0NxaUGuzihXmbg4=",
         "owner": "raydak-labs",
         "repo": "configarr",
-        "rev": "f83787cf3a733fc3b2a08a984bea7afefee258ca",
+        "rev": "dc9e46d1a29b21d63011606e736004d71b8df6ab",
         "type": "github"
       },
       "original": {
         "owner": "raydak-labs",
-        "ref": "v1.30.0",
+        "ref": "v1.30.2",
         "repo": "configarr",
         "type": "github"
       }
@@ -939,11 +939,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1779536132,
-        "narHash": "sha256-q+fF42iv/geEbHfgSzy3tS0FF/EyD6XTZ98E6yxiBO8=",
+        "lastModified": 1784783405,
+        "narHash": "sha256-4IHyyLgLBdKefkljdKod4IMn023pQiDXAWJA187cmdY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3d8f0f3f72a6cd4d93d0ad13203f2ea1cb7e1456",
+        "rev": "7525d999cd850b9a488817abc89c75dc733acf17",
         "type": "github"
       },
       "original": {
