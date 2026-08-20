@@ -73,10 +73,10 @@
         RemainAfterExit = true;
       };
       script = ''
-        ${ensureDataset "tank/media" "5700G"}
-        ${ensureDataset "tank/immich" "1000G"}
+        ${ensureDataset "tank/media" "6600G"}
+        ${ensureDataset "tank/immich" "100G"}
         ${ensureDataset "tank/alloy" "100G"}
-        ${ensureDataset "tank/shares" "none"}
+        ${ensureDataset "tank/shares" "100G"}
         ${ensureUserShareDatasets}
       '';
     };
