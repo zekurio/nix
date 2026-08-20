@@ -68,11 +68,6 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
-    # Shared skills for Codex and OpenCode, consumed as a plain source tree.
-    agent-stuff = {
-      url = "github:zekurio/agent-stuff";
-      flake = false;
-    };
     wavexlr-on-linux-cfg = {
       url = "github:jmansar/wavexlr-on-linux-cfg";
       flake = false;
