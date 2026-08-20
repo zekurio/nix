@@ -39,6 +39,11 @@
         environmentFile = config.sops.templates."configarr.env".path;
         config = ''
           trashRevision: 34e6a8cc67621052a6903dcc912eb515332fb3b8
+          # Last recyclarr/config-templates commit with the legacy includes/
+          # layout configarr loads; v8 removed them on master and crashed every
+          # run (raydak-labs/configarr#504). Upstream v1.30.2 pins this same SHA
+          # by default, but its Nix package still builds v1.30.1, so pin here.
+          recyclarrRevision: 4ae377bb704fc7fd69a544ad04e91357e0b09f62
           telemetry: false
 
           # TRaSH has release-group tiers for remuxes, but no generic Radarr
