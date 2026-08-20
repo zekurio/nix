@@ -12,9 +12,13 @@
       name = "helium-catppuccin-frappe-blue";
       paths = [inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default];
       nativeBuildInputs = [pkgs.makeWrapper];
+      # VA-API video decode (Chromium 151 + Mesa 26.2 radeonsi, RX 6800)
+      # corrupts YouTube frames with shifting color blocks; fall back to
+      # software decode until a Mesa/Chromium update fixes the VCN path.
       postBuild = ''
         wrapProgram $out/bin/helium \
-          --add-flags "--load-extension=${catppuccinTheme}"
+          --add-flags "--load-extension=${catppuccinTheme}" \
+          --add-flags "--disable-accelerated-video-decode"
       '';
     };
     extensions = [
