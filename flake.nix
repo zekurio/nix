@@ -46,10 +46,12 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # This reviewed PR packages OpenAI's official Linux build. Remove the
-    # revision once the package reaches llm-agents.nix main.
-    llm-agents-chatgpt = {
-      url = "github:numtide/llm-agents.nix/c42ba4938e70b396b132860b4b77654e3beea8b5";
+    # Fast-moving agent CLIs (codex, opencode, chatgpt) and herdr, the runtime
+    # hosting their sessions. One input for all of it keeps herdr's
+    # client/server protocol identical on every host; updates arrive through
+    # the weekly flake.lock PR.
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     helium = {
