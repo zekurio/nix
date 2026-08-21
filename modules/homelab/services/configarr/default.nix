@@ -79,27 +79,30 @@
                   source: TRASH
 
               custom_formats:
+                # No client can play HDR as of now, so hard-avoid it on every
+                # profile; the DV/HDR10+ boosts are neutralized for the same
+                # reason. DoVi handling returns with the anvil rewrite.
                 - trash_ids:
                     - 505d871304820ba7106b693be6fe4a9e # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 500
+                      score: -10000
                     - name: "${animeProfile}"
-                      score: 500
+                      score: -10000
                 - trash_ids:
                     - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 1000
+                      score: 0
                     - name: "${animeProfile}"
-                      score: 1000
+                      score: 0
                 - trash_ids:
                     - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10+ Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 100
+                      score: 0
                     - name: "${animeProfile}"
-                      score: 100
+                      score: 0
                 - trash_ids:
                     - 9b27ab6498ec0f31a3353992e19434ca # DV (w/o HDR fallback)
                   assign_scores_to:
@@ -107,18 +110,27 @@
                       score: -10000
                     - name: "${animeProfile}"
                       score: -10000
-                # Trash's german-anime score set copies the german -35000 for
-                # x265, which is correct for live action (there it flags bad
-                # re-encodes of an x264 source) but wrong for anime: fansub and
-                # BD encode groups ship HEVC 10-bit as their primary format, so
-                # a penalty below the profile's min_format_score of 0 rejects
-                # most of what is actually released. Neutral 0 keeps x265
-                # eligible without preferring it over an equivalent x264 file.
+                # Of TRaSH's two mutually exclusive x265 blockers, only
+                # "x265 (HD)" is scored: penalize HEVC at HD resolutions for
+                # live action, where x264 is preferred. Anime stays neutral on
+                # both: fansub and BD encode groups ship HEVC 10-bit as their
+                # primary format, so a penalty below the profile's
+                # min_format_score of 0 would reject most of what is actually
+                # released. The explicit 0 for "x265 (no HDR/DV)" is needed
+                # because the German templates assign it -35000 in both the
+                # german and german-anime score sets.
+                - trash_ids:
+                    - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
+                  assign_scores_to:
+                    - name: "${normalProfile}"
+                      score: -35000
+                    - name: "${animeProfile}"
+                      score: 0
                 - trash_ids:
                     - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -35000
+                      score: 0
                     - name: "${animeProfile}"
                       score: 0
 
@@ -154,33 +166,35 @@
                   assign_scores_to:
                     - name: "${animeUhdProfile}"
                       score: 100
+                # HDR is hard-avoided and the boosts neutralized on all
+                # profiles; see the Sonarr block above for why.
                 - trash_ids:
                     - 493b6d1dbec3c3364c59d7607f7e3405 # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 500
+                      score: -10000
                     - name: "${animeProfile}"
-                      score: 500
+                      score: -10000
                     - name: "${animeUhdProfile}"
-                      score: 500
+                      score: -10000
                 - trash_ids:
                     - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 1000
+                      score: 0
                     - name: "${animeProfile}"
-                      score: 1000
+                      score: 0
                     - name: "${animeUhdProfile}"
-                      score: 1000
+                      score: 0
                 - trash_ids:
                     - caa37d0df9c348912df1fb1d88f9273a # HDR10+ Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 100
+                      score: 0
                     - name: "${animeProfile}"
-                      score: 100
+                      score: 0
                     - name: "${animeUhdProfile}"
-                      score: 100
+                      score: 0
                 - trash_ids:
                     - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
                   assign_scores_to:
@@ -190,15 +204,24 @@
                       score: -10000
                     - name: "${animeUhdProfile}"
                       score: -10000
-                # Neutral for anime, see the Sonarr block above. It matters
-                # twice over for the UHD clone: practically every 2160p release
-                # is HEVC, so the penalty made that profile unable to grab the
-                # resolution it exists for.
+                # Only "x265 (HD)" is penalized, on the non-anime profile;
+                # "x265 (no HDR/DV)" is explicitly neutral because the German
+                # templates otherwise assign it -35000 everywhere. See the
+                # Sonarr block above for the anime rationale.
+                - trash_ids:
+                    - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
+                  assign_scores_to:
+                    - name: "${normalProfile}"
+                      score: -35000
+                    - name: "${animeProfile}"
+                      score: 0
+                    - name: "${animeUhdProfile}"
+                      score: 0
                 - trash_ids:
                     - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -35000
+                      score: 0
                     - name: "${animeProfile}"
                       score: 0
                     - name: "${animeUhdProfile}"
