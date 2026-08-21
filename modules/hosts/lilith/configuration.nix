@@ -23,7 +23,13 @@
       resolved.enable = true;
       printing.enable = true;
       fwupd.enable = true;
-      tailscale.enable = true;
+      tailscale = {
+        enable = true;
+        # UDP 41641 inbound lets peers connect directly instead of falling
+        # back to DERP relays (matters for herdr --remote lilith on the go).
+        openFirewall = true;
+        extraUpFlags = ["--hostname=lilith"];
+      };
       mullvad-vpn.enable = true;
     };
 
