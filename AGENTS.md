@@ -94,8 +94,7 @@ service to the internet — that flag is the public allowlist, so flip it
 deliberately. A private service sharing a public domain restricts its own
 paths in `extraConfig` with a `@blocked` matcher instead (the Caddy module
 renames it per service when merging). Tailnet/LAN-only admin tooling lives
-under path prefixes on `admin.zekurio.me` (e.g. `/sonarr`); apps without base
-URL support (qBittorrent) get the prefix stripped by Caddy.
+under path prefixes on `admin.zekurio.me` (e.g. `/sonarr`).
 
 Private-name DNS is split-horizon and lives outside this repo: the LAN
 resolver points them at `10.0.0.2`, external records point at adam's Tailscale
