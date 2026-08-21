@@ -3,7 +3,7 @@
     system = pkgs.stdenv.hostPlatform.system;
   in {
     environment.systemPackages = [
-      inputs.llm-agents-chatgpt.packages.${system}.chatgpt
+      inputs.llm-agents.packages.${system}.chatgpt
     ];
   };
 }

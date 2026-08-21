@@ -102,19 +102,19 @@
     "bun2nix": {
       "inputs": {
         "flake-parts": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "flake-parts"
         ],
         "nixpkgs": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "nixpkgs"
         ],
         "systems": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "systems"
         ],
         "treefmt-nix": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "treefmt-nix"
         ]
       },
@@ -430,7 +430,7 @@
     "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "nixpkgs"
         ]
       },
@@ -682,7 +682,7 @@
         "type": "github"
       }
     },
-    "llm-agents-chatgpt": {
+    "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
         "flake-parts": "flake-parts_3",
@@ -693,17 +693,16 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1786740820,
-        "narHash": "sha256-HWcih2xvK/pw5YVq5jCkQQQ95PNR0gaw2E/xnRb7V8c=",
+        "lastModified": 1787286673,
+        "narHash": "sha256-HRmx7PnoqUNtA06P/FEyygZeUJIzbNUtx4zo9Jiiz9s=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "c42ba4938e70b396b132860b4b77654e3beea8b5",
+        "rev": "0bedd15c76b9422a649b05e44b82666196e5246f",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "c42ba4938e70b396b132860b4b77654e3beea8b5",
         "type": "github"
       }
     },
@@ -1003,7 +1002,7 @@
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
         "inviterr": "inviterr",
-        "llm-agents-chatgpt": "llm-agents-chatgpt",
+        "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nix-linux-builder": "nix-linux-builder",
@@ -1178,16 +1177,16 @@
     "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
-          "llm-agents-chatgpt",
+          "llm-agents",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1785945821,
-        "narHash": "sha256-NLSyTCW4K4ofhNBllt3omPasm6QpralXH1DBZOc91Dw=",
+        "lastModified": 1786901030,
+        "narHash": "sha256-WSFCsDSE5ffgD2MqzkM2CYjeFiKhRF/dJUN8uedb6YE=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "ae7910970dddc408fe6ab1c8e4b277bb21d72dc0",
+        "rev": "27b3b12a8e6375f28ebe122f07d230ca5459bbfa",
         "type": "github"
       },
       "original": {
