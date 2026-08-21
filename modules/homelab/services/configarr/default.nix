@@ -86,9 +86,9 @@
                     - 505d871304820ba7106b693be6fe4a9e # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -10000
+                      score: -35000
                     - name: "${animeProfile}"
-                      score: -10000
+                      score: -35000
                 - trash_ids:
                     - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
                   assign_scores_to:
@@ -172,11 +172,11 @@
                     - 493b6d1dbec3c3364c59d7607f7e3405 # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -10000
+                      score: -35000
                     - name: "${animeProfile}"
-                      score: -10000
+                      score: -35000
                     - name: "${animeUhdProfile}"
-                      score: -10000
+                      score: -35000
                 - trash_ids:
                     - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
                   assign_scores_to:
