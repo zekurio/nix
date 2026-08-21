@@ -28,7 +28,6 @@
           AddKeysToAgent = lib.mkForce "no";
           IdentityFile = lib.mkForce null;
         };
-        adam.IdentityFile = lib.mkForce null;
       };
     };
   };
