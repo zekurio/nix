@@ -113,11 +113,20 @@
             User = lib.mkDefault "git";
           };
 
+          # Bare hostnames: the LAN resolver and Tailscale MagicDNS both
+          # answer them, so the same entry works at home and on the go.
+          # Keys come from the 1Password SSH agent (lilith, sachiel) or
+          # keychain (adam), so no IdentityFile pin here.
           adam = {
-            HostName = "10.0.0.2";
+            HostName = "adam";
             User = "zekurio";
-            IdentityFile = "~/.ssh/id_ed25519";
             # Preserve Ghostty's truecolor and terminal identity over SSH.
+            SendEnv = ["COLORTERM" "TERM_PROGRAM"];
+          };
+
+          lilith = {
+            HostName = "lilith";
+            User = "zekurio";
             SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
         };
