@@ -248,7 +248,6 @@
         hostNetwork = true;
         p2pProxyAddress = "10.0.0.2";
       };
-      zellij-web.enable = true;
     };
 
     system.autoUpgrade = {
