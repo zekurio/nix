@@ -67,6 +67,9 @@
           # not secrets; the bot token lives in the env template.
           DISCORD_GUILD_ID = "418795186475237376";
           DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
+          DISCORD_INBOX_CHANNEL_ID = "1473398718127407188";
+          BLITZCRANK_DISCORD_MODEL = "openai-codex/gpt-5.6-sol:medium";
+          BLITZCRANK_DISCORD_TRIAGE_MODEL = "openai-codex/gpt-5.6-luna:medium";
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
         };
