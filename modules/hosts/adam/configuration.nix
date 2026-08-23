@@ -217,7 +217,7 @@
 
     services.homelab = {
       alloy.enable = true;
-      anvil.enable = false;
+      anvil.enable = true;
       beets.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
