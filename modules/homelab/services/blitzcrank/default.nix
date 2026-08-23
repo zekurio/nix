@@ -62,7 +62,7 @@
           SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
           JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
           ANVIL_COMMAND = "${anvilctlPackage}/bin/anvilctl";
-          ANVIL_CONTROL_SOCKET = config.services.anvil.daemon.controlSocket;
+          ANVIL_CONTROL_SOCKET = config.services.anvil.settings.daemon.control_socket or "/run/anvil/anvild.sock";
           # Automation report threads + /automation trigger. Snowflakes are
           # not secrets; the bot token lives in the env template.
           DISCORD_GUILD_ID = "418795186475237376";
