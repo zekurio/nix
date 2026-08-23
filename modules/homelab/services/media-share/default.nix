@@ -38,6 +38,9 @@
       "${usenetDownloadsDir}/complete/radarr"
       "${usenetDownloadsDir}/complete/sonarr"
       "${usenetDownloadsDir}/complete/slskd"
+      "${usenetDownloadsDir}/converted"
+      "${usenetDownloadsDir}/converted/radarr"
+      "${usenetDownloadsDir}/converted/sonarr"
       "${usenetDownloadsDir}/incomplete"
       "${usenetDownloadsDir}/incomplete/slskd"
     ];
