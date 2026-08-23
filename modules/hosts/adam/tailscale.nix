@@ -7,6 +7,7 @@
         "--hostname=adam"
       ];
       openFirewall = true;
+      useRoutingFeatures = "server";
     };
 
     networking.firewall.interfaces.tailscale0 = {
