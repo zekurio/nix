@@ -221,7 +221,6 @@
       beets.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
-      cleanTrackNames.enable = true;
       configarr.enable = true;
       costthing.enable = true;
       coolercontrol = {
