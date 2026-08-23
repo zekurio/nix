@@ -15,8 +15,6 @@
     importLog = "${stateDir}/import.log";
     scanStamp = "${stateDir}/import.scan";
     cleanupStamp = "${stateDir}/metadata-cleanup-v1";
-    slskdApi = "http://127.0.0.1:5030/slskd/api/v0/transfers/downloads";
-
     pluginNames = [
       "chroma"
       "duplicates"
@@ -173,38 +171,21 @@
       name = "beets-import-worker";
       runtimeInputs = [
         pkgs.coreutils
-        pkgs.curl
         pkgs.findutils
         pkgs.gnugrep
-        pkgs.jq
       ];
       text = ''
+        # slskd keeps active files in its incomplete tree. Remove only settled,
+        # empty directories from the completed tree.
+        find ${lib.escapeShellArg importDir} -mindepth 1 -depth -type d -empty -mmin +2 -delete
+
         if ! find ${lib.escapeShellArg importDir} -mindepth 1 -type f -print -quit | grep -q .; then
           echo "No completed Soulseek files to import."
           exit 0
         fi
 
-        transfers=$(mktemp)
         scan_boundary=$(mktemp)
-        trap 'rm -f "$transfers" "$scan_boundary"' EXIT
-        if ! curl \
-          --connect-timeout 5 \
-          --max-time 15 \
-          --fail \
-          --silent \
-          --show-error \
-          ${lib.escapeShellArg slskdApi} > "$transfers"; then
-          echo "Deferring Beets import because the slskd API is unavailable."
-          exit 0
-        fi
-
-        if jq --exit-status '
-          [.. | objects | .state? // empty | select(startswith("Completed") | not)]
-          | length > 0
-        ' "$transfers" >/dev/null; then
-          echo "Deferring Beets import while Soulseek downloads are active."
-          exit 0
-        fi
+        trap 'rm -f "$scan_boundary"' EXIT
 
         if find ${lib.escapeShellArg importDir} -type f -mmin -2 -print -quit | grep -q .; then
           echo "Deferring Beets import until the completed tree has settled."
@@ -288,10 +269,8 @@
         description = "Import completed Soulseek downloads with Beets";
         after = [
           "local-fs.target"
-          "slskd.service"
           "systemd-tmpfiles-setup.service"
         ];
-        wants = ["slskd.service"];
         requires = ["systemd-tmpfiles-setup.service"];
         unitConfig.RequiresMountsFor = "${stateDir} ${musicDir} ${importDir}";
         serviceConfig = {
@@ -312,19 +291,9 @@
         };
       };
 
-      # Path activation gives normal downloads a prompt handoff. The timer
-      # recovers changes below an already-existing directory and any event
-      # missed while the host was down. The worker independently verifies the
-      # slskd queue and a quiet filesystem before invoking Beets.
-      systemd.paths.beets-import = {
-        description = "Watch for completed Soulseek downloads";
-        wantedBy = ["multi-user.target"];
-        pathConfig = {
-          PathChanged = importDir;
-          Unit = "beets-import.service";
-        };
-      };
-
+      # A timer avoids repeated path triggers while slskd finishes a set. The
+      # worker also checks that the completed tree has been quiet for two
+      # minutes.
       systemd.timers.beets-import = {
         description = "Periodically import completed Soulseek downloads";
         wantedBy = ["timers.target"];
