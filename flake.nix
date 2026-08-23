@@ -46,9 +46,7 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Fast-moving agent CLIs (codex, opencode, chatgpt) and herdr, the runtime
-    # hosting their sessions. One input for all of it keeps herdr's
-    # client/server protocol identical on every host; updates arrive through
+    # Fast-moving agent CLIs (codex, opencode, chatgpt). Updates arrive through
     # the weekly flake.lock PR.
     llm-agents = {
       url = "github:numtide/llm-agents.nix";

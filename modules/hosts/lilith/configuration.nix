@@ -26,7 +26,7 @@
       tailscale = {
         enable = true;
         # UDP 41641 inbound lets peers connect directly instead of falling
-        # back to DERP relays (matters for herdr --remote lilith on the go).
+        # back to DERP relays.
         openFirewall = true;
         extraUpFlags = ["--hostname=lilith"];
       };
