@@ -13,38 +13,41 @@
     shareUser = config.modules.homelab.mediaShare.user;
     shareGroup = config.modules.homelab.mediaShare.group;
     shareUmask = config.modules.homelab.mediaShare.umask;
-    profileName = "audio-cleanup";
-    flowName = "download-audio-cleanup-handoff";
-    audioCleanup = {
-      languagesToKeep = [
-        "orig"
-        "deu"
-      ];
-      fallback = "keep_first";
-      unknownAsOriginal = true;
-    };
-    profileConfig = {
-      metadata = {
-        mode = "preserve";
-        trackTitles = "standardize";
-      };
-
-      video.skipEncode = true;
-
-      audio = audioCleanup;
-      validation.durationToleranceSeconds = 2;
-    };
-
-    mkDownloadLibrary = {
-      path,
-      handoffPath,
-      arr,
-      priority,
-    }: {
-      kind = "download";
-      inherit path arr priority;
-      flow = flowName;
-      profile = profileName;
+    veryslowProfile = "qsv-hevc-veryslow";
+    slowProfile = "qsv-hevc-slow";
+    qsvFfmpegArgs = [
+      "-look_ahead"
+      "1"
+      "-extbrc"
+      "1"
+      "-look_ahead_depth"
+      "40"
+      "-adaptive_i"
+      "1"
+      "-adaptive_b"
+      "1"
+      "-b_strategy"
+      "1"
+      "-bf"
+      "7"
+    ];
+    qsvAbAv1Args = [
+      "--enc"
+      "look_ahead=1"
+      "--enc"
+      "extbrc=1"
+      "--enc"
+      "look_ahead_depth=40"
+      "--enc"
+      "adaptive_i=1"
+      "--enc"
+      "adaptive_b=1"
+      "--enc"
+      "b_strategy=1"
+      "--enc"
+      "bf=7"
+    ];
+    mediaFiles = {
       include = [
         "*.mkv"
         "*.mp4"
@@ -53,28 +56,98 @@
         "**/sample*/**"
         "**/*sample*"
       ];
-      ignoreRegex = [
+      ignore_regex = [
         "(^|/)_UNPACK[^/]*(/|$)"
         "(?i)(^|/)[^/]*samples?[^/]*(/|$)"
       ];
-      download = {
-        inherit handoffPath;
-        stableFor = "5m";
-        packageMode = "auto";
-        handoffMode = "move";
-        preserveRelativePath = true;
-        cleanupSourceMedia = true;
-        pruneEmptyDirs = true;
-      };
     };
+    mkProfile = preset: {
+      metadata = {
+        mode = "preserve";
+        track_titles = "standardize";
+      };
+
+      video = {
+        codec = "hevc";
+        accelerator = "qsv";
+        inherit preset;
+        bit_depth = 10;
+        crf_min = 14;
+        crf_max = 38;
+        metric = "vmaf";
+        target = 94.5;
+        min_savings_percent = 1;
+        force_encode_on_no_fit = false;
+        ffmpeg_args = qsvFfmpegArgs;
+        ab_av1_args = qsvAbAv1Args;
+        overrides.hevc = {
+          target = 96;
+          min_savings_percent = 15;
+        };
+      };
+
+      audio = {
+        languages_to_keep = [
+          "orig"
+          "deu"
+        ];
+        fallback = "keep_first";
+        unknown_as_original = true;
+      };
+      subtitles = {
+        languages_to_keep = [
+          "orig"
+          "deu"
+        ];
+        fallback = "keep_all";
+        keep_forced = true;
+        keep_sdh = true;
+        keep_commentary = true;
+        unknown_as_original = true;
+      };
+      validation.duration_tolerance_seconds = 2;
+    };
+    mkDownloadLibrary = {
+      path,
+      handoffPath,
+      arr,
+      profile,
+      priority,
+    }:
+      mediaFiles
+      // {
+        kind = "download";
+        inherit path arr profile priority;
+        scan_interval = "5m";
+        download = {
+          handoff_path = handoffPath;
+          stable_for = "5m";
+          package_mode = "auto";
+          handoff_mode = "move";
+          preserve_relative_path = true;
+          cleanup_source_media = true;
+          prune_empty_dirs = true;
+        };
+      };
+    mkMediaLibrary = {
+      path,
+      arr,
+      profile,
+    }:
+      mediaFiles
+      // {
+        kind = "media";
+        inherit path arr profile;
+        scan_interval = "1h";
+        media.replacement_mode = "replace";
+      };
   in {
     imports = [
       inputs.anvil.nixosModules.default
     ];
 
-    options.services.homelab.anvil = {
-      enable = lib.mkEnableOption "Anvil media cleanup daemon";
-    };
+    options.services.homelab.anvil.enable =
+      lib.mkEnableOption "Anvil media encoding daemon";
 
     config = lib.mkIf cfg.enable {
       assertions = [
@@ -94,83 +167,84 @@
           package = controlPackage;
         };
 
-        daemon.scanInterval = "5m";
-        daemon.workerCount = 1;
-
-        flows.${flowName}.steps = [
-          "probe"
-          "audio-cleanup"
-          "stage"
-          # The encode block performs the remux; skipEncode above guarantees
-          # that the video stream is copied rather than transcoded.
-          "encode"
-          "validate"
-          "handoff"
-          "cleanup"
-        ];
-
-        profiles.${profileName} = profileConfig;
-
-        arrs = {
-          radarr = {
-            type = "radarr";
-            baseUrl = config.services.homelab.radarr.baseUrl;
-            apiKeyFile = config.sops.secrets.radarr_api_key.path;
-          };
-          sonarr = {
-            type = "sonarr";
-            baseUrl = config.services.homelab.sonarr.baseUrl;
-            apiKeyFile = config.sops.secrets.sonarr_api_key.path;
-          };
-        };
-
-        libraries = {
-          radarr-downloads = mkDownloadLibrary {
-            path = "${downloadsRoot}/complete/radarr";
-            handoffPath = "${downloadsRoot}/converted/radarr";
-            arr = "radarr";
-            priority = 10;
+        settings = {
+          daemon = {
+            control_socket = "/run/anvil/anvild.sock";
+            scan_interval = "1h";
+            worker_count = 1;
+            total_threads = 8;
           };
 
-          radarr-anime-downloads = mkDownloadLibrary {
-            path = "${downloadsRoot}/complete/radarr-anime";
-            handoffPath = "${downloadsRoot}/converted/radarr-anime";
-            arr = "radarr";
-            priority = 20;
+          profiles = {
+            ${veryslowProfile} = mkProfile "veryslow";
+            ${slowProfile} = mkProfile "slow";
           };
 
-          sonarr-downloads = mkDownloadLibrary {
-            path = "${downloadsRoot}/complete/sonarr";
-            handoffPath = "${downloadsRoot}/converted/sonarr";
-            arr = "sonarr";
-            priority = 10;
+          arrs = {
+            radarr = {
+              type = "radarr";
+              base_url = config.services.homelab.radarr.baseUrl;
+              api_key_file = config.sops.secrets.radarr_api_key.path;
+            };
+            sonarr = {
+              type = "sonarr";
+              base_url = config.services.homelab.sonarr.baseUrl;
+              api_key_file = config.sops.secrets.sonarr_api_key.path;
+            };
           };
 
-          sonarr-anime-downloads = mkDownloadLibrary {
-            path = "${downloadsRoot}/complete/sonarr-anime";
-            handoffPath = "${downloadsRoot}/converted/sonarr-anime";
-            arr = "sonarr";
-            priority = 20;
+          libraries = {
+            movies = mkMediaLibrary {
+              path = "/tank/media/movies";
+              arr = "radarr";
+              profile = slowProfile;
+            };
+            shows = mkMediaLibrary {
+              path = "/tank/media/shows";
+              arr = "sonarr";
+              profile = veryslowProfile;
+            };
+            anime = mkMediaLibrary {
+              path = "/tank/media/anime";
+              arr = "sonarr";
+              profile = veryslowProfile;
+            };
+
+            radarr-downloads = mkDownloadLibrary {
+              path = "${downloadsRoot}/complete/radarr";
+              handoffPath = "${downloadsRoot}/converted/radarr";
+              arr = "radarr";
+              profile = slowProfile;
+              priority = 10;
+            };
+            sonarr-downloads = mkDownloadLibrary {
+              path = "${downloadsRoot}/complete/sonarr";
+              handoffPath = "${downloadsRoot}/converted/sonarr";
+              arr = "sonarr";
+              profile = veryslowProfile;
+              priority = 10;
+            };
           };
         };
 
         service.extraServiceConfig = {
+          SupplementaryGroups = [
+            shareGroup
+            "render"
+            "video"
+          ];
           UMask = shareUmask;
           WorkingDirectory = "/var/lib/anvil/tmp";
         };
       };
 
-      systemd.services.anvil.environment = {
-        TEMP = "/var/lib/anvil/tmp";
-        TMP = "/var/lib/anvil/tmp";
-        TMPDIR = "/var/lib/anvil/tmp";
-      };
+      systemd.services.anvil.environment.LIBVA_DRIVER_NAME = "iHD";
       systemd.services.anvil.restartTriggers = [
         config.environment.etc."anvil/anvil.toml".source
       ];
 
-      # Radarr/Sonarr issue one global API key each, so these are shared with
-      # calthing and configarr rather than scoped per consumer.
+      # Radarr and Sonarr use one global API key each. Other services share
+      # these files.
       sops.secrets = {
         radarr_api_key = {
           owner = shareUser;
