@@ -61,7 +61,7 @@
         "(?i)(^|/)[^/]*samples?[^/]*(/|$)"
       ];
     };
-    mkProfile = preset: {
+    mkProfile = preset: samples: {
       metadata = {
         mode = "preserve";
         track_titles = "standardize";
@@ -74,6 +74,7 @@
         bit_depth = 10;
         crf_min = 14;
         crf_max = 38;
+        inherit samples;
         metric = "vmaf";
         target = 94.5;
         min_savings_percent = 1;
@@ -176,8 +177,8 @@
           };
 
           profiles = {
-            ${veryslowProfile} = mkProfile "veryslow";
-            ${slowProfile} = mkProfile "slow";
+            ${veryslowProfile} = mkProfile "veryslow" 6;
+            ${slowProfile} = mkProfile "slow" 12;
           };
 
           arrs = {
