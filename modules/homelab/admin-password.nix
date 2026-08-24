@@ -97,6 +97,7 @@
       mode = "0440";
       restartUnits = [
         "prowlarr.service"
+        "qbittorrent.service"
         "radarr.service"
         "sabnzbd.service"
         "slskd.service"
