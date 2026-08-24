@@ -14,8 +14,6 @@
     shareDirMode = "2775";
     shareFileMode = "0664";
     usenetDownloadsDir = cfg.downloadsRoot;
-    torrentDownloadsDir = cfg.torrentDownloadsRoot;
-    torrentDownloadsParent = builtins.dirOf torrentDownloadsDir;
     tailnetCidr = "100.64.0.0/10";
     smbTcpPorts = [
       139
@@ -45,13 +43,6 @@
       "${usenetDownloadsDir}/converted/sonarr"
       "${usenetDownloadsDir}/incomplete"
       "${usenetDownloadsDir}/incomplete/slskd"
-      torrentDownloadsParent
-      torrentDownloadsDir
-      "${torrentDownloadsDir}/complete"
-      # qBittorrent keeps category paths as runtime state, so create them here.
-      "${torrentDownloadsDir}/complete/radarr"
-      "${torrentDownloadsDir}/complete/sonarr"
-      "${torrentDownloadsDir}/incomplete"
     ];
     sharedDirs = mediaDirs;
 
@@ -179,8 +170,6 @@
       activeDownloadPrune=(
         -path ${lib.escapeShellArg "${usenetDownloadsDir}/incomplete/*"}
         -o
-        -path ${lib.escapeShellArg "${torrentDownloadsDir}/incomplete/*"}
-        -o
         -name '_UNPACK_*'
       )
 
@@ -264,12 +253,6 @@
         description = "Root directory (dedicated disk) for the shared download and import tree used by the usenet and soulseek automation.";
       };
 
-      torrentDownloadsRoot = lib.mkOption {
-        type = lib.types.str;
-        default = "/tank/media/downloads/torrents";
-        description = "Torrent download tree inside the media dataset so imports can use hardlinks.";
-      };
-
       samba.enable = lib.mkEnableOption "SMB shares for homelab files and media";
 
       samba.interfaces = lib.mkOption {
@@ -344,7 +327,7 @@
             ];
           };
         }
-        (lib.genAttrs ["jellyfin" "navidrome" "qbittorrent" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
+        (lib.genAttrs ["jellyfin" "navidrome" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
           extraGroups = lib.mkAfter [shareGroup];
         }))
         (lib.genAttrs cfg.collaborators (_: {
