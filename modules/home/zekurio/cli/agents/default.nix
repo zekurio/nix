@@ -8,7 +8,7 @@
     # update PR, git revert) and a host rebuild, never imperatively.
     home.packages = [
       llmAgents.codex
-      llmAgents.opencode
+      llmAgents.pi
     ];
   };
 }

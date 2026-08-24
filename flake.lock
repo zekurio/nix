@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "agent-stuff": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787572099,
+        "narHash": "sha256-UFPQa4rcOwh6l9c7jcOZ347LrcMn3AiF+aZpkTz7Zks=",
+        "owner": "zekurio",
+        "repo": "agent-stuff",
+        "rev": "55168df313d6d1207d8a941cfec451b1dbabd9c2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "agent-stuff",
+        "type": "github"
+      }
+    },
     "alloy": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -986,6 +1006,7 @@
     },
     "root": {
       "inputs": {
+        "agent-stuff": "agent-stuff",
         "alloy": "alloy",
         "anvil": "anvil",
         "autoaspm": "autoaspm",
