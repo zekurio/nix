@@ -25,10 +25,6 @@
 
       users.${username} = {
         shell = pkgs.fish;
-        # Keeps the user's systemd instance (and XDG_RUNTIME_DIR) alive after
-        # the last SSH session ends, so a detached zellij session stays
-        # reattachable instead of dying with the runtime dir.
-        linger = true;
         uid = 1000;
         isNormalUser = true;
         # A yescrypt hash of a strong password; committing it is an accepted
