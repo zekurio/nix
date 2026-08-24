@@ -46,10 +46,15 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Fast-moving agent CLIs (codex, opencode, chatgpt). Updates arrive through
+    # Fast-moving agent CLIs (codex, pi, chatgpt). Updates arrive through
     # the weekly flake.lock PR.
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    # Pi extensions, skills, themes, and their Home Manager integration.
+    agent-stuff = {
+      url = "github:zekurio/agent-stuff";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     helium = {
