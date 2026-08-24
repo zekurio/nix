@@ -72,8 +72,8 @@
         accelerator = "qsv";
         inherit preset;
         bit_depth = 10;
-        crf_min = 14;
-        crf_max = 38;
+        crf_min = 8;
+        crf_max = 28;
         inherit samples;
         metric = "vmaf";
         target = 94.5;
