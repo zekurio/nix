@@ -22,7 +22,8 @@
       "fetchart"
       "lastgenre"
       "lyrics"
-      "musicbrainz"
+      "mbpseudo"
+      "mbsync"
       "scrub"
       "zero"
     ];
@@ -81,13 +82,40 @@
         # Accept that moderate distance unattended; Beets' default max_rec
         # still prevents missing or unmatched tracks from becoming strong.
         strong_rec_thresh = 0.35;
+
+        # Prefer western digital releases when several official releases are
+        # otherwise equivalent. mbpseudo still handles translated tracklists
+        # linked to an exact non-Latin release ID.
+        preferred = {
+          media = [
+            "Digital Media"
+            "CD"
+            "Vinyl"
+          ];
+          countries = [
+            "XW"
+            "US"
+            "GB"
+            "DE"
+            "JP"
+            "XE"
+          ];
+        };
       };
 
-      musicbrainz.genres = true;
+      # Use Latin-script MusicBrainz pseudo-releases (translated tracklists)
+      # while retaining release details from the linked official release.
+      mbpseudo = {
+        genres = true;
+        scripts = ["Latn"];
+      };
 
       fetchart = {
         auto = true;
-        cautious = false;
+        # Only accept explicitly named local images as the fallback. Loose
+        # release-group and text searches regularly selected another edition
+        # or an unrelated release.
+        cautious = true;
         cover_format = "JPEG";
         # Cover Art Archive scans are often a few pixels off-square. Beets'
         # strict ratio check rejected otherwise valid release artwork.
@@ -95,10 +123,9 @@
         maxwidth = 1400;
         sources = [
           {coverart = "release";}
-          {coverart = "releasegroup";}
-          "itunes"
           "filesystem"
         ];
+        store_source = true;
       };
 
       embedart = {
@@ -119,9 +146,11 @@
       lyrics = {
         auto = true;
         fallback = "";
-        force = false;
+        # Replace downloader-provided lyrics instead of preserving malformed
+        # app-specific tags, and write plain lyrics for Feishin.
+        force = true;
         sources = ["lrclib"];
-        synced = true;
+        synced = false;
       };
 
       # Scrub first removes every tag that Beets does not manage. Zero then
