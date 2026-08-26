@@ -81,7 +81,11 @@
         force_encode_on_no_fit = true;
         ffmpeg_args = qsvFfmpegArgs;
         ab_av1_args = qsvAbAv1Args;
-        overrides.hevc.target = 98;
+        overrides.hevc = {
+          target = 98;
+          min_savings_percent = 10;
+          force_encode_on_no_fit = false;
+        };
       };
 
       audio = {
