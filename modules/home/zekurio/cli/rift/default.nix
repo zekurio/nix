@@ -4,7 +4,7 @@
     pkgs,
     ...
   }:
-    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (let
+    lib.mkIf (pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.hostPlatform.system == "x86_64-linux") (let
       rift = pkgs.callPackage ./_package.nix {};
     in {
       home.packages = [

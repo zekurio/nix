@@ -92,12 +92,27 @@ reboot
 
 #### Lilith: dual boot and Secure Boot
 
-Lilith's disko layout owns the complete Crucial NVMe at
-`nvme-CT1000P3PSSD8_2322E6DD1319_1`; Windows is expected to remain on its own
+Lilith's disko layout owns the complete Samsung NVMe at
+`nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0T205473J_1`; Windows remains on the Crucial
 drive. Verify that by-id path before running disko, because the command above is
-destructive. Limine returns to the firmware's existing `Windows Boot Manager`
-entry rather than directly chainloading it, which preserves Windows' expected
-BitLocker PCR measurements.
+destructive.
+
+The root partition uses btrfs with separate `@`, `@home`, `@nix`, and `@swap`
+subvolumes. The last one contains a 16 GiB swapfile and stays outside filesystem
+snapshots. This layout gives repositories under `/home` copy-on-write clones for
+tools such as rift.
+
+An existing ext4 installation must be reinstalled or migrated from external
+media before activating this configuration. A normal `nixos-rebuild` does not
+convert the filesystem. Lilith's Samsung EFI partition also contains Windows'
+bootloader, so do not run the generic destructive disko command during that
+migration. Preserve the EFI partition and back up its `EFI/Microsoft` directory.
+Reclaiming the old swap partition for btrfs requires recreating only the old swap
+and root partitions as one root partition.
+
+Limine returns to the firmware's existing `Windows Boot Manager` entry rather
+than directly chainloading it, which preserves Windows' expected BitLocker PCR
+measurements.
 
 The Limine module generates signing keys but deliberately does not enroll them.
 Install and test both operating systems with firmware Secure Boot disabled

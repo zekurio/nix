@@ -76,15 +76,12 @@
         crf_max = 28;
         inherit samples;
         metric = "vmaf";
-        target = 94.5;
-        min_savings_percent = 1;
-        force_encode_on_no_fit = false;
+        target = 96;
+        min_savings_percent = 0;
+        force_encode_on_no_fit = true;
         ffmpeg_args = qsvFfmpegArgs;
         ab_av1_args = qsvAbAv1Args;
-        overrides.hevc = {
-          target = 96;
-          min_savings_percent = 15;
-        };
+        overrides.hevc.target = 98;
       };
 
       audio = {
@@ -172,13 +169,13 @@
           daemon = {
             control_socket = "/run/anvil/anvild.sock";
             scan_interval = "1h";
-            worker_count = 1;
-            total_threads = 8;
+            worker_count = 2;
+            total_threads = 12;
           };
 
           profiles = {
-            ${veryslowProfile} = mkProfile "veryslow" 6;
-            ${slowProfile} = mkProfile "slow" 12;
+            ${veryslowProfile} = mkProfile "veryslow" 10;
+            ${slowProfile} = mkProfile "slow" 14;
           };
 
           arrs = {

@@ -78,7 +78,7 @@
             window-padding-y = 8;
             background-blur = true;
             background-opacity = 0.96;
-            font-family = "FiraCode Nerd Font Mono";
+            font-family = "FiraCode Nerd Font";
             font-size = 14;
             term = "xterm-256color";
             window-inherit-font-size = false;

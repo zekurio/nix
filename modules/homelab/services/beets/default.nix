@@ -15,6 +15,8 @@
     importLog = "${stateDir}/import.log";
     scanStamp = "${stateDir}/import.scan";
     cleanupStamp = "${stateDir}/metadata-cleanup-v1";
+    libraryRefreshDir = "${stateDir}/library-refresh-mbpseudo-art-lyrics-v1";
+    libraryRefreshComplete = "${libraryRefreshDir}/complete";
     pluginNames = [
       "chroma"
       "duplicates"
@@ -196,6 +198,51 @@
       '';
     };
 
+    beetsLibraryRefresh = pkgs.writeShellApplication {
+      name = "beets-library-refresh";
+      runtimeInputs = [
+        beetsPackage
+        pkgs.coreutils
+        pkgs.util-linux
+      ];
+      text = ''
+        umask ${mediaShare.umask}
+        export BEETSDIR=${lib.escapeShellArg stateDir}
+        export HOME=${lib.escapeShellArg stateDir}
+        export XDG_CACHE_HOME=${lib.escapeShellArg "${stateDir}/.cache"}
+
+        refresh_dir=${lib.escapeShellArg libraryRefreshDir}
+        mkdir -p "$refresh_dir"
+
+        # Hold one lock across every phase so an import cannot observe a
+        # partially refreshed library. Calling beetInternal here would try to
+        # acquire the same lock recursively and deadlock.
+        exec 9>${lib.escapeShellArg lockFile}
+        flock -x 9
+
+        run_phase() {
+          phase="$1"
+          shift
+          if [ -e "$refresh_dir/$phase" ]; then
+            echo "Skipping completed Beets library refresh phase: $phase"
+            return
+          fi
+
+          ${lib.getExe beetsPackage} -c ${lib.escapeShellArg beetsConfig} "$@"
+          touch "$refresh_dir/$phase"
+        }
+
+        # Apply the new naming policy before looking up artwork and lyrics.
+        # Phase stamps allow a failed or interrupted refresh to resume without
+        # repeating successful external API requests.
+        run_phase mbsync mbsync -m
+        run_phase fetchart fetchart -f
+        run_phase embedart embedart -y
+        run_phase lyrics lyrics -f
+        touch ${lib.escapeShellArg libraryRefreshComplete}
+      '';
+    };
+
     beetsImportWorker = pkgs.writeShellApplication {
       name = "beets-import-worker";
       runtimeInputs = [
@@ -293,6 +340,55 @@
           find ${lib.escapeShellArg stateDir} -type f -exec chmod 0664 {} +
         fi
       '';
+
+      # Existing files predate the Latin-name, strict-artwork, and plain-lyrics
+      # policy. Refresh every library item once; future imports already apply
+      # the policy automatically. Bump the versioned directory for another
+      # intentional full-library migration.
+      systemd.services.beets-library-refresh = {
+        description = "Refresh the Beets library metadata, artwork, and lyrics";
+        after = [
+          "local-fs.target"
+          "network-online.target"
+          "systemd-tmpfiles-setup.service"
+        ];
+        before = ["beets-import.service"];
+        wants = ["network-online.target"];
+        requires = ["systemd-tmpfiles-setup.service"];
+        restartIfChanged = false;
+        unitConfig = {
+          ConditionPathExists = "!${libraryRefreshComplete}";
+          RequiresMountsFor = "${stateDir} ${musicDir}";
+        };
+        serviceConfig = {
+          Type = "oneshot";
+          User = serviceUser;
+          Group = mediaShare.group;
+          UMask = lib.mkForce mediaShare.umask;
+          ExecStart = lib.getExe beetsLibraryRefresh;
+          TimeoutStartSec = "infinity";
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProtectHome = true;
+          ProtectSystem = "strict";
+          ReadWritePaths = [
+            stateDir
+            musicDir
+          ];
+        };
+      };
+
+      # Delay the potentially long migration so switching configurations does
+      # not wait for every MusicBrainz and LRCLIB request to finish.
+      systemd.timers.beets-library-refresh = {
+        description = "Run the versioned Beets library refresh";
+        wantedBy = ["timers.target"];
+        timerConfig = {
+          OnActiveSec = "5m";
+          AccuracySec = "30s";
+          Unit = "beets-library-refresh.service";
+        };
+      };
 
       systemd.services.beets-import = {
         description = "Import completed Soulseek downloads with Beets";
