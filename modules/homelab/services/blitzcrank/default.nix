@@ -35,6 +35,7 @@
         model = "openai-codex/gpt-5.6-sol:high";
         automationModel = "openai-codex/gpt-5.6-luna:max";
         language = "German";
+        webProvider = "firecrawl";
 
         # Directories blitzcrank may inspect with ffprobe, and nothing else.
         # Include SABnzbd's completed tree and the imported libraries. Music and
@@ -92,6 +93,7 @@
           JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
           BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
           DISCORD_BOT_TOKEN=${config.sops.placeholder.discord_bot_token}
+          FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
         '';
         mode = "0400";
         # Rendering a changed template does not touch the unit, so without this
@@ -107,6 +109,7 @@
         jellyfin_api_key = {};
         blitzcrank_webhook_secret = {};
         discord_bot_token = {};
+        firecrawl_api_key = {};
       };
     };
   };
