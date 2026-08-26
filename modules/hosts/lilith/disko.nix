@@ -2,8 +2,8 @@
   flake.modules.nixos.lilith = {
     imports = [inputs.disko.nixosModules.disko];
 
-    # NixOS owns the Samsung NVMe. The Crucial NVMe stays empty for Windows.
-    # The serial-based paths prevent disk order changes from selecting a USB disk.
+    # NixOS owns the Samsung NVMe. Disko must not know about the Crucial Windows
+    # drive, since destroy mode wipes every disk declared here.
     disko.devices.disk = {
       system = {
         type = "disk";
@@ -25,34 +25,53 @@
               };
             };
 
-            swap = {
-              size = "16G";
-              content = {
-                type = "swap";
-                discardPolicy = "both";
-              };
-            };
-
             root = {
               size = "100%";
               content = {
-                type = "filesystem";
-                format = "ext4";
-                mountpoint = "/";
+                type = "btrfs";
+                extraArgs = [
+                  "-f"
+                  "-L"
+                  "nixos"
+                ];
+                subvolumes = let
+                  mountOptions = [
+                    "compress=zstd:1"
+                    "discard=async"
+                    "noatime"
+                  ];
+                in {
+                  "@" = {
+                    mountpoint = "/";
+                    inherit mountOptions;
+                  };
+                  "@home" = {
+                    mountpoint = "/home";
+                    inherit mountOptions;
+                  };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    inherit mountOptions;
+                  };
+                  # Keep swap outside snapshotted subvolumes. Disko disables
+                  # copy-on-write for the file before allocating it.
+                  "@swap" = {
+                    mountpoint = "/swap";
+                    mountOptions = ["noatime"];
+                    swap.swapfile.size = "16G";
+                  };
+                };
               };
             };
           };
         };
       };
+    };
 
-      windows = {
-        type = "disk";
-        device = "/dev/disk/by-id/nvme-CT1000P3PSSD8_2322E6DD1319_1";
-        content = {
-          type = "gpt";
-          partitions = {};
-        };
-      };
+    services.btrfs.autoScrub = {
+      enable = true;
+      interval = "monthly";
+      fileSystems = ["/"];
     };
   };
 }
