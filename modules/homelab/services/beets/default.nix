@@ -15,7 +15,7 @@
     importLog = "${stateDir}/import.log";
     scanStamp = "${stateDir}/import.scan";
     cleanupStamp = "${stateDir}/metadata-cleanup-v1";
-    libraryRefreshDir = "${stateDir}/library-refresh-mbpseudo-art-lyrics-v1";
+    libraryRefreshDir = "${stateDir}/library-refresh-mbpseudo-square-art-lyrics-v2";
     libraryRefreshComplete = "${libraryRefreshDir}/complete";
     pluginNames = [
       "chroma"
@@ -40,6 +40,18 @@
       text = ''
         exec ${lib.getExe (pkgs.python3.withPackages (pythonPackages: [pythonPackages.mutagen]))} \
           ${./clean-music-metadata.py} "$@"
+      '';
+    };
+
+    normalizeMusicArtwork = pkgs.writeShellApplication {
+      name = "normalize-music-artwork";
+      text = ''
+        exec ${lib.getExe (pkgs.python3.withPackages (pythonPackages: [
+          beetsPackage
+          pythonPackages.pillow
+        ]))} ${./normalize-music-artwork.py} \
+          --config ${lib.escapeShellArg beetsConfig} \
+          --max-deviation 0.01
       '';
     };
 
@@ -119,12 +131,14 @@
         # or an unrelated release.
         cautious = true;
         cover_format = "JPEG";
-        # Cover Art Archive scans are often a few pixels off-square. Beets'
-        # strict ratio check rejected otherwise valid release artwork.
-        enforce_ratio = false;
+        # Permit minor scan misalignment while rejecting booklets, banners,
+        # and back covers that clients would otherwise display uncropped.
+        enforce_ratio = "1%";
         maxwidth = 1400;
         sources = [
           {coverart = "release";}
+          "itunes"
+          {coverart = "releasegroup";}
           "filesystem"
         ];
         store_source = true;
@@ -132,6 +146,9 @@
 
       embedart = {
         auto = true;
+        # Source files often contain unrelated downloader artwork. Remove it
+        # before fetchart/embedart install the validated album cover.
+        clearart_on_import = true;
         ifempty = false;
         maxwidth = 1400;
         remove_art_file = false;
@@ -236,7 +253,16 @@
         # Phase stamps allow a failed or interrupted refresh to resume without
         # repeating successful external API requests.
         run_phase mbsync mbsync -m
+
+        if [ ! -e "$refresh_dir/normalize-artwork" ]; then
+          ${lib.getExe normalizeMusicArtwork}
+          touch "$refresh_dir/normalize-artwork"
+        fi
+
         run_phase fetchart fetchart -f
+        # Remove every downloader embed, then repopulate tracks only from the
+        # validated sidecar selected by normalize-artwork/fetchart.
+        run_phase clearart clearart -y
         run_phase embedart embedart -y
         run_phase lyrics lyrics -f
         touch ${lib.escapeShellArg libraryRefreshComplete}
@@ -341,7 +367,7 @@
         fi
       '';
 
-      # Existing files predate the Latin-name, strict-artwork, and plain-lyrics
+      # Existing files predate the Latin-name, square-artwork, and plain-lyrics
       # policy. Refresh every library item once; future imports already apply
       # the policy automatically. Bump the versioned directory for another
       # intentional full-library migration.
