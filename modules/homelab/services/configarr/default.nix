@@ -79,30 +79,28 @@
                   source: TRASH
 
               custom_formats:
-                # No client can play HDR as of now, so hard-avoid it on every
-                # profile; the DV/HDR10+ boosts are neutralized for the same
-                # reason. DoVi handling returns with the anvil rewrite.
+                # Use TRaSH's recommended HDR scores on every profile.
                 - trash_ids:
                     - 505d871304820ba7106b693be6fe4a9e # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -35000
+                      score: 500
                     - name: "${animeProfile}"
-                      score: -35000
+                      score: 500
                 - trash_ids:
                     - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 0
+                      score: 1000
                     - name: "${animeProfile}"
-                      score: 0
+                      score: 1000
                 - trash_ids:
                     - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10+ Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 0
+                      score: 100
                     - name: "${animeProfile}"
-                      score: 0
+                      score: 100
                 - trash_ids:
                     - 9b27ab6498ec0f31a3353992e19434ca # DV (w/o HDR fallback)
                   assign_scores_to:
@@ -166,35 +164,34 @@
                   assign_scores_to:
                     - name: "${animeUhdProfile}"
                       score: 100
-                # HDR is hard-avoided and the boosts neutralized on all
-                # profiles; see the Sonarr block above for why.
+                # Use TRaSH's recommended HDR scores on every profile.
                 - trash_ids:
                     - 493b6d1dbec3c3364c59d7607f7e3405 # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: -35000
+                      score: 500
                     - name: "${animeProfile}"
-                      score: -35000
+                      score: 500
                     - name: "${animeUhdProfile}"
-                      score: -35000
+                      score: 500
                 - trash_ids:
                     - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 0
+                      score: 1000
                     - name: "${animeProfile}"
-                      score: 0
+                      score: 1000
                     - name: "${animeUhdProfile}"
-                      score: 0
+                      score: 1000
                 - trash_ids:
                     - caa37d0df9c348912df1fb1d88f9273a # HDR10+ Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
-                      score: 0
+                      score: 100
                     - name: "${animeProfile}"
-                      score: 0
+                      score: 100
                     - name: "${animeUhdProfile}"
-                      score: 0
+                      score: 100
                 - trash_ids:
                     - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
                   assign_scores_to:
