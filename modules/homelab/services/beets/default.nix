@@ -17,11 +17,13 @@
     cleanupStamp = "${stateDir}/metadata-cleanup-v1";
     libraryRefreshDir = "${stateDir}/library-refresh-mbpseudo-square-art-lyrics-v2";
     libraryRefreshComplete = "${libraryRefreshDir}/complete";
+    libraryLayoutStamp = "${stateDir}/music-layout-disc-directories-v1";
     pluginNames = [
       "chroma"
       "duplicates"
       "embedart"
       "fetchart"
+      "inline"
       "lastgenre"
       "lyrics"
       "mbpseudo"
@@ -79,10 +81,13 @@
         write = true;
       };
 
+      # Keep multi-disc releases together as one album, but put each medium in
+      # its own directory. Continuous release-wide numbering remains unchanged.
+      item_fields.multidisc = "1 if disctotal > 1 else 0";
       paths = {
-        default = "$albumartist/$album%aunique{}/$track - $title";
+        default = "$albumartist/$album%aunique{}/%if{$multidisc,Disc $disc/}$track - $title";
         singleton = "Singles/$artist/$title";
-        comp = "Compilations/$album%aunique{}/$track - $title";
+        comp = "Compilations/$album%aunique{}/%if{$multidisc,Disc $disc/}$track - $title";
       };
 
       match = {
@@ -269,6 +274,28 @@
       '';
     };
 
+    beetsLibraryLayout = pkgs.writeShellApplication {
+      name = "beets-library-layout";
+      runtimeInputs = [
+        beetsPackage
+        pkgs.coreutils
+        pkgs.util-linux
+      ];
+      text = ''
+        umask ${mediaShare.umask}
+        export BEETSDIR=${lib.escapeShellArg stateDir}
+        export HOME=${lib.escapeShellArg stateDir}
+        export XDG_CACHE_HOME=${lib.escapeShellArg "${stateDir}/.cache"}
+
+        exec 9>${lib.escapeShellArg lockFile}
+        flock -x 9
+
+        ${lib.getExe beetsPackage} -c ${lib.escapeShellArg beetsConfig} \
+          move "disctotal:2.."
+        touch ${lib.escapeShellArg libraryLayoutStamp}
+      '';
+    };
+
     beetsImportWorker = pkgs.writeShellApplication {
       name = "beets-import-worker";
       runtimeInputs = [
@@ -416,13 +443,50 @@
         };
       };
 
-      systemd.services.beets-import = {
-        description = "Import completed Soulseek downloads with Beets";
+      # Move existing multi-disc albums once; future imports use the same path
+      # template immediately.
+      systemd.services.beets-library-layout = {
+        description = "Organize multi-disc Beets albums into disc directories";
         after = [
           "local-fs.target"
           "systemd-tmpfiles-setup.service"
         ];
+        before = ["beets-import.service"];
         requires = ["systemd-tmpfiles-setup.service"];
+        restartIfChanged = false;
+        unitConfig = {
+          ConditionPathExists = "!${libraryLayoutStamp}";
+          RequiresMountsFor = "${stateDir} ${musicDir}";
+        };
+        serviceConfig = {
+          Type = "oneshot";
+          User = serviceUser;
+          Group = mediaShare.group;
+          UMask = lib.mkForce mediaShare.umask;
+          ExecStart = lib.getExe beetsLibraryLayout;
+          TimeoutStartSec = "infinity";
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProtectHome = true;
+          ProtectSystem = "strict";
+          ReadWritePaths = [
+            stateDir
+            musicDir
+          ];
+        };
+      };
+
+      systemd.services.beets-import = {
+        description = "Import completed Soulseek downloads with Beets";
+        after = [
+          "beets-library-layout.service"
+          "local-fs.target"
+          "systemd-tmpfiles-setup.service"
+        ];
+        requires = [
+          "beets-library-layout.service"
+          "systemd-tmpfiles-setup.service"
+        ];
         unitConfig.RequiresMountsFor = "${stateDir} ${musicDir} ${importDir}";
         serviceConfig = {
           Type = "oneshot";

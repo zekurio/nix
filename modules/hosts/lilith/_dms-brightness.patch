@@ -1,0 +1,11 @@
+diff --git a/quickshell/Services/DisplayService.qml b/quickshell/Services/DisplayService.qml
+--- a/quickshell/Services/DisplayService.qml
++++ b/quickshell/Services/DisplayService.qml
+@@ -225 +225,6 @@ Singleton {
+-        if (devices.length > 0 && !currentDevice) {
++        // Sysfs initializes before DDC. Do not leave an external-monitor
++        // desktop stuck on the first LED device while DDC is still probing.
++        const currentDeviceInfo = devices.find(d => d.id === currentDevice);
++        const currentIsUnsavedLed = currentDeviceInfo?.class === "leds" && SessionData.lastBrightnessDevice !== currentDevice;
++
++        if (devices.length > 0 && (!currentDevice || currentIsUnsavedLed)) {
