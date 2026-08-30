@@ -94,6 +94,7 @@
 
       gtk = {
         enable = true;
+        colorScheme = "dark";
         theme = {
           package = catppuccinGtk;
           name = "catppuccin-frappe-blue-standard";
@@ -110,6 +111,10 @@
         enable = true;
         platformTheme.name = "gtk3";
       };
+
+      # The GNOME portal reads this key for the cross-toolkit appearance API.
+      # Without it, GTK 4, Qt, Electron, and browsers receive "no preference".
+      dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
 
       home.pointerCursor = {
         enable = true;
@@ -201,6 +206,12 @@
                 background-effect {
                     blur true
                 }
+            }
+
+            window-rule {
+                match app-id=r#"^helium$"#
+                match app-id=r#"^(com\.mitchellh\.ghostty|ghostty)$"#
+                default-column-width { proportion 1.0; }
             }
 
             window-rule {

@@ -1,6 +1,16 @@
 {inputs, ...}: {
   flake.modules.nixos.lilith = {pkgs, ...}: let
     system = pkgs.stdenv.hostPlatform.system;
+    dmsPackage = pkgs.dms-shell.overrideAttrs (old: {
+      # nixpkgs builds from the core/ subdirectory, while this patch fixes QML
+      # one level above it.
+      postPatch =
+        (old.postPatch or "")
+        + ''
+          chmod u+w ../quickshell/Services ../quickshell/Services/DisplayService.qml
+          patch -d .. -p1 < ${./_dms-brightness.patch}
+        '';
+    });
   in {
     programs = {
       niri.enable = true;
@@ -9,6 +19,7 @@
       # NixOS module rather than adding a second DMS flake/package graph.
       dms-shell = {
         enable = true;
+        package = dmsPackage;
         systemd = {
           enable = true;
           target = "niri.service";
