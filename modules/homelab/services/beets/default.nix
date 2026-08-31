@@ -10,7 +10,13 @@
     serviceUser = "beets";
     stateDir = "/var/lib/beets";
     musicDir = mediaShare.musicDir;
-    importDir = "${mediaShare.downloadsRoot}/complete/slskd";
+    soulseekImportDir = "${mediaShare.downloadsRoot}/complete/slskd";
+    copypartyImportDir = "${mediaShare.downloadsRoot}/complete/copyparty";
+    importDirs = [
+      soulseekImportDir
+      copypartyImportDir
+    ];
+    importDirsShell = lib.concatStringsSep " " (map lib.escapeShellArg importDirs);
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
     scanStamp = "${stateDir}/import.scan";
@@ -304,20 +310,31 @@
         pkgs.gnugrep
       ];
       text = ''
-        # slskd keeps active files in its incomplete tree. Remove only settled,
-        # empty directories from the completed tree.
-        find ${lib.escapeShellArg importDir} -mindepth 1 -depth -type d -empty -mmin +2 -delete
+        import_dirs=(${importDirsShell})
 
-        if ! find ${lib.escapeShellArg importDir} -mindepth 1 -type f -print -quit | grep -q .; then
-          echo "No completed Soulseek files to import."
+        # Downloaders keep active files elsewhere or under a .PARTIAL name.
+        # Remove only settled, empty directories from completed trees.
+        for import_dir in "''${import_dirs[@]}"; do
+          find "$import_dir" -mindepth 1 -depth -type d -empty -mmin +2 -delete
+        done
+
+        if ! find "''${import_dirs[@]}" -mindepth 1 -type f ! -name '*.PARTIAL' -print -quit | grep -q .; then
+          echo "No completed music files to import."
           exit 0
         fi
 
         scan_boundary=$(mktemp)
         trap 'rm -f "$scan_boundary"' EXIT
 
-        if find ${lib.escapeShellArg importDir} -type f -mmin -2 -print -quit | grep -q .; then
-          echo "Deferring Beets import until the completed tree has settled."
+        # Copyparty atomically renames completed uploads, but leaves resumable
+        # .PARTIAL files in place. Never hand a set to Beets while one remains.
+        if find ${lib.escapeShellArg copypartyImportDir} -type f -name '*.PARTIAL' -print -quit | grep -q .; then
+          echo "Deferring Beets import while a Copyparty upload is incomplete."
+          exit 0
+        fi
+
+        if find "''${import_dirs[@]}" -type f -mmin -2 -print -quit | grep -q .; then
+          echo "Deferring Beets import until the completed trees have settled."
           exit 0
         fi
 
@@ -327,17 +344,19 @@
         # Beets' path-only incremental check for this bounded import.
         candidates=()
         shopt -s dotglob nullglob
-        for path in ${lib.escapeShellArg importDir}/*; do
-          if [ ! -e ${lib.escapeShellArg cleanupStamp} ] \
-            || [ ! -e ${lib.escapeShellArg scanStamp} ] \
-            || [ "$path" -nt ${lib.escapeShellArg scanStamp} ] \
-            || find "$path" -type f -newer ${lib.escapeShellArg scanStamp} -print -quit | grep -q .; then
-            candidates+=("$path")
-          fi
+        for import_dir in "''${import_dirs[@]}"; do
+          for path in "$import_dir"/*; do
+            if [ ! -e ${lib.escapeShellArg cleanupStamp} ] \
+              || [ ! -e ${lib.escapeShellArg scanStamp} ] \
+              || [ "$path" -nt ${lib.escapeShellArg scanStamp} ] \
+              || find "$path" -type f -newer ${lib.escapeShellArg scanStamp} -print -quit | grep -q .; then
+              candidates+=("$path")
+            fi
+          done
         done
 
         if [ "''${#candidates[@]}" -eq 0 ]; then
-          echo "No new or changed completed Soulseek paths to import."
+          echo "No new or changed completed music paths to import."
           exit 0
         fi
 
@@ -477,7 +496,7 @@
       };
 
       systemd.services.beets-import = {
-        description = "Import completed Soulseek downloads with Beets";
+        description = "Import completed music downloads with Beets";
         after = [
           "beets-library-layout.service"
           "local-fs.target"
@@ -487,7 +506,7 @@
           "beets-library-layout.service"
           "systemd-tmpfiles-setup.service"
         ];
-        unitConfig.RequiresMountsFor = "${stateDir} ${musicDir} ${importDir}";
+        unitConfig.RequiresMountsFor = "${stateDir} ${musicDir} ${lib.concatStringsSep " " importDirs}";
         serviceConfig = {
           Type = "oneshot";
           User = serviceUser;
@@ -498,11 +517,12 @@
           PrivateTmp = true;
           ProtectHome = true;
           ProtectSystem = "strict";
-          ReadWritePaths = [
-            stateDir
-            musicDir
-            importDir
-          ];
+          ReadWritePaths =
+            [
+              stateDir
+              musicDir
+            ]
+            ++ importDirs;
         };
       };
 
@@ -510,7 +530,7 @@
       # worker also checks that the completed tree has been quiet for two
       # minutes.
       systemd.timers.beets-import = {
-        description = "Periodically import completed Soulseek downloads";
+        description = "Periodically import completed music downloads";
         wantedBy = ["timers.target"];
         timerConfig = {
           OnBootSec = "5m";
