@@ -6,8 +6,11 @@
       extraUpFlags = [
         "--hostname=adam"
       ];
+      # Clear the persisted exit-node advertisement as well as disabling the
+      # forwarding support that was only needed while Adam provided it.
+      extraSetFlags = ["--advertise-exit-node=false"];
       openFirewall = true;
-      useRoutingFeatures = "server";
+      useRoutingFeatures = "none";
     };
 
     networking.firewall.interfaces.tailscale0 = {
