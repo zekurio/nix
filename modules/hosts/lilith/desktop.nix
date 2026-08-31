@@ -2,13 +2,14 @@
   flake.modules.nixos.lilith = {pkgs, ...}: let
     system = pkgs.stdenv.hostPlatform.system;
     dmsPackage = pkgs.dms-shell.overrideAttrs (old: {
-      # nixpkgs builds from the core/ subdirectory, while this patch fixes QML
-      # one level above it.
-      postPatch =
-        (old.postPatch or "")
+      # nixpkgs copies QML directly from the immutable source in postInstall,
+      # so patch the installed tree rather than the package's core sourceRoot.
+      postInstall =
+        (old.postInstall or "")
         + ''
-          chmod u+w ../quickshell/Services ../quickshell/Services/DisplayService.qml
-          patch -d .. -p1 < ${./_dms-brightness.patch}
+          chmod u+w $out/share/quickshell/dms/Services \
+            $out/share/quickshell/dms/Services/DisplayService.qml
+          patch -d $out/share/quickshell/dms -p2 < ${./_dms-brightness.patch}
         '';
     });
   in {
