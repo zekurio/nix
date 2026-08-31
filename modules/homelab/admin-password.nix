@@ -96,6 +96,7 @@
       group = adminGroup;
       mode = "0440";
       restartUnits = [
+        "copyparty.service"
         "prowlarr.service"
         "radarr.service"
         "sabnzbd.service"
