@@ -12,9 +12,6 @@
       name = "helium-catppuccin-frappe-blue";
       paths = [heliumPackage];
       nativeBuildInputs = [pkgs.makeWrapper];
-      # VA-API video decode (Chromium 151 + Mesa 26.2 radeonsi, RX 6800)
-      # corrupts YouTube frames with shifting color blocks; fall back to
-      # software decode until a Mesa/Chromium update fixes the VCN path.
       postBuild = ''
         # The upstream Nix wrapper adds --disable-background-networking,
         # which prevents Chromium's extension updater from installing both
@@ -26,8 +23,7 @@
           --replace-fail " --disable-background-networking" ""
 
         wrapProgram $out/bin/helium \
-          --add-flags "--load-extension=${catppuccinTheme}" \
-          --add-flags "--disable-accelerated-video-decode"
+          --add-flags "--load-extension=${catppuccinTheme}"
       '';
     };
   in {

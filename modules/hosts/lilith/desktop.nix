@@ -1,6 +1,5 @@
-{inputs, ...}: {
+{...}: {
   flake.modules.nixos.lilith = {pkgs, ...}: let
-    system = pkgs.stdenv.hostPlatform.system;
     dmsPackage = pkgs.dms-shell.overrideAttrs (old: {
       # nixpkgs copies QML directly from the immutable source in postInstall,
       # so patch the installed tree rather than the package's core sourceRoot.
@@ -92,7 +91,7 @@
         vesktop
         wl-clipboard
         xwayland-satellite
-        inputs.zed.packages.${system}.default
+        zed-editor
       ];
     };
 

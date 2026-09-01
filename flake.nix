@@ -10,7 +10,6 @@
       "https://nixpkgs.cachix.org"
       "https://nix-community.cachix.org"
       "https://nyx-cache.chaotic.cx/"
-      "https://zed.cachix.org"
       "https://zekurio.cachix.org"
     ];
     extra-trusted-public-keys = [
@@ -20,7 +19,6 @@
       "nixpkgs.cachix.org-1:q91R6hxbwFvDqTSDKwDAV4T5PxqXGxswD8vhONFMeOE="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
-      "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
       "zekurio.cachix.org-1:mv0mACvSLZtBkXXh5YDPPXmFBJ/eO+VkSzep6LJZrAg="
     ];
     download-buffer-size = 1073741824;
@@ -64,9 +62,6 @@
     # Chaotic supplies cached CachyOS kernels and current Proton builds. Keep
     # its own nixpkgs pin: matching that pin is what makes its cache usable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    # Upstream only publishes its moving nightly tag to zed.cachix.org; using
-    # main here would compile Zed and its Rust dependency graph locally.
-    zed.url = "github:zed-industries/zed/nightly";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
