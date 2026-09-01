@@ -120,7 +120,7 @@
           adam = {
             HostName = "adam";
             User = "zekurio";
-            # Preserve Ghostty's truecolor and terminal identity over SSH.
+            # Preserve terminal truecolor and identity over SSH.
             SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
 

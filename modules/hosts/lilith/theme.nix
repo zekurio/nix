@@ -130,8 +130,6 @@
         gtk.icon.enable = true;
       };
 
-      programs.ghostty.settings.font-size = lib.mkForce 11.5;
-
       xdg = {
         configFile = {
           "DankMaterialShell/themes/catppuccin-frappe-blue.json".source = dmsTheme;
@@ -191,7 +189,7 @@
             include "input.kdl"
 
             binds {
-                Mod+Return hotkey-overlay-title="Fallback Terminal" { spawn "ghostty"; }
+                Mod+Return hotkey-overlay-title="Fallback Terminal" { spawn "kitty"; }
                 Mod+F1 hotkey-overlay-title="DMS Keybind Cheatsheet" {
                     spawn "dms" "ipc" "call" "keybinds" "toggle" "niri";
                 }
@@ -210,7 +208,7 @@
 
             window-rule {
                 match app-id=r#"^helium$"#
-                match app-id=r#"^(com\.mitchellh\.ghostty|ghostty)$"#
+                match app-id=r#"^kitty$"#
                 default-column-width { proportion 1.0; }
             }
 
@@ -303,7 +301,7 @@
       # be saved. Theme, color, and cursor fragments remain immutable.
       home.activation.seedDms = lib.hm.dag.entryAfter ["writeBoundary"] ''
         export XDG_CONFIG_HOME="${config.xdg.configHome}"
-        export PATH="${lib.makeBinPath [pkgs.ghostty pkgs.niri pkgs.sudo]}:$PATH"
+        export PATH="${lib.makeBinPath [pkgs.kitty pkgs.niri pkgs.sudo]}:$PATH"
 
         settings="$XDG_CONFIG_HOME/DankMaterialShell/settings.json"
         $DRY_RUN_CMD mkdir -p "$(dirname "$settings")"
