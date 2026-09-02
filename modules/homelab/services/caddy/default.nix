@@ -11,7 +11,7 @@
 
     # Source ranges allowed to reach private virtual hosts: the home LAN and
     # the Tailscale tailnet (v4 and v6), plus loopback for local tooling and
-    # health checks. Everything else gets a 403 before routing happens.
+    # health checks. Everything else gets a 404 before routing happens.
     privateRanges = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
     privateRangesStr = lib.concatStringsSep " " privateRanges;
 
@@ -88,7 +88,7 @@
                 description = ''
                   Serve this domain to the internet. Private by default:
                   without this flag the domain answers only the LAN and
-                  tailnet source ranges, everything else gets a 403.
+                  tailnet source ranges, everything else gets a 404.
                 '';
               };
             };
@@ -126,7 +126,7 @@
               }
               ${lib.optionalString (!hostCfg.public) ''
                 @not_local not remote_ip ${privateRangesStr}
-                respond @not_local 403
+                respond @not_local 404
               ''}
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
               ${lib.optionalString (

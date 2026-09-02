@@ -89,17 +89,19 @@ by Caddy on `adam` over the home connection.
 
 Vhosts are **private by default**: Caddy answers them only from the LAN
 (`10.0.0.0/24`) and the tailnet (`100.64.0.0/10`, `fd7a:115c:a1e0::/48`),
-returning 403 to anything else. Set `public = true` on the vhost to expose a
+returning 404 to anything else. Set `public = true` on the vhost to expose a
 service to the internet — that flag is the public allowlist, so flip it
 deliberately. A private service sharing a public domain restricts its own
 paths in `extraConfig` with a `@blocked` matcher instead (the Caddy module
 renames it per service when merging). Tailnet/LAN-only admin tooling lives
 under path prefixes on `admin.zekurio.me` (e.g. `/sonarr`).
 
-Private-name DNS is split-horizon and lives outside this repo: the LAN
-resolver points them at `10.0.0.2`, external records point at adam's Tailscale
-address, and public names use Cloudflare DDNS to the home WAN address. The
-router forwards only 443/tcp (plus optional 80/tcp and 443/udp) and 50300/tcp
+Private-name DNS is split-horizon and lives outside this repo: AdGuard Home
+on the Flint router points names at `10.0.0.2` for both LAN and tailnet clients.
+Tailscale uses Flint's tailnet address as its global resolver and reaches Adam
+through Flint's `10.0.0.0/24` subnet route. Public names use Cloudflare DDNS to
+the home WAN address. The router forwards only 443/tcp (plus optional 80/tcp
+and 443/udp) and 50300/tcp
 for Soulseek; backend ports stay closed — public traffic goes through Caddy,
 never an app's native listener.
 
