@@ -222,7 +222,6 @@
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
-      copyparty.enable = true;
       costthing.enable = true;
       droppedneedle.enable = true;
       coolercontrol = {
