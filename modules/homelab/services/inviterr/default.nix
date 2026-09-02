@@ -35,15 +35,14 @@
         inherit port;
         dataDir = "/var/lib/inviterr";
         logLevel = "info";
+        inherit jellyfinDataDir;
+        jellyfinUser = config.services.jellyfin.user;
+        jellyfinGroup = config.services.jellyfin.group;
       };
 
       systemd.services.inviterr = {
         after = ["jellyfin.service"];
         unitConfig.RequiresMountsFor = [jellyfinDataDir];
-        serviceConfig = {
-          ReadOnlyPaths = [jellyfinDataDir];
-          SupplementaryGroups = ["jellyfin"];
-        };
       };
 
       services.homelab.caddy.virtualHosts."inviterr" = {
