@@ -85,10 +85,6 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    droppedneedle = {
-      url = "github:zekurio/droppedneedle-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     blitzcrank = {
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

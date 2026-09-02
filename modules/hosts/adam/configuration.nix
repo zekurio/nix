@@ -224,7 +224,6 @@
       configarr.enable = true;
       copyparty.enable = true;
       costthing.enable = true;
-      droppedneedle.enable = false;
       coolercontrol = {
         enable = true;
         listenAddress = "0.0.0.0";
