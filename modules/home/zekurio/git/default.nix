@@ -113,17 +113,18 @@
             User = lib.mkDefault "git";
           };
 
-          # Bare hostnames: the LAN resolver and Tailscale MagicDNS both
-          # answer them, so the same entry works at home and on the go.
-          # Keys come from the 1Password SSH agent (lilith, sachiel) or
-          # keychain (adam), so no IdentityFile pin here.
-          adam = {
-            HostName = "adam";
+          # AdGuard on Flint resolves this to Adam's LAN address. Away from
+          # home, Flint's advertised subnet route carries that address over
+          # Tailscale. HostKeyAlias keeps one known-host identity.
+          "adam adam.zekurio.me" = {
+            HostName = "adam.zekurio.me";
+            HostKeyAlias = "adam";
             User = "zekurio";
             # Preserve terminal truecolor and identity over SSH.
             SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
 
+          # MagicDNS resolves this while connected to the tailnet.
           lilith = {
             HostName = "lilith";
             User = "zekurio";
