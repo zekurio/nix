@@ -59,6 +59,14 @@
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # Upstream has not merged its Nix packaging yet. This temporary fork tracks
+    # current Jellium and includes the merged Niri window fix.
+    jellium-desktop = {
+      url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # Chaotic supplies cached CachyOS kernels and current Proton builds. Keep
     # its own nixpkgs pin: matching that pin is what makes its cache usable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
