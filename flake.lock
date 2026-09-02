@@ -390,6 +390,43 @@
         "type": "github"
       }
     },
+    "droppedneedle": {
+      "inputs": {
+        "droppedneedle-src": "droppedneedle-src",
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788353797,
+        "narHash": "sha256-+2bfgWYDPc77IJqwUKLJyojH0Jwkf0tG2YYfnSYNIgM=",
+        "owner": "zekurio",
+        "repo": "droppedneedle-nix",
+        "rev": "7df5b37d47a34f1e1d8c320586d2671b8d50188e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "droppedneedle-nix",
+        "type": "github"
+      }
+    },
+    "droppedneedle-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788301154,
+        "narHash": "sha256-rzdkvAmRQBPx8NnM4fnl0BEibGrjSNvC22ZhxUJqzIo=",
+        "owner": "DroppedNeedle",
+        "repo": "DroppedNeedle",
+        "rev": "9f4a37d81789d84dfe4ef6fb54bac89f9caee986",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DroppedNeedle",
+        "repo": "DroppedNeedle",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -1030,6 +1067,7 @@
         "costthing": "costthing",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
+        "droppedneedle": "droppedneedle",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
         "home-manager": "home-manager_2",

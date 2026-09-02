@@ -67,10 +67,10 @@
               "\\.ini$"
             ];
             # Without a retention interval slskd only indexes shares at
-            # startup. Beets imports into this tree continuously, so the index
-            # goes stale and we end up advertising far less than we hold — and
-            # Soulseek peers withhold search results from users who share
-            # nothing, which silently breaks acquisition.
+            # startup. DroppedNeedle imports into this tree continuously, so
+            # the index would otherwise go stale and advertise less than we
+            # hold. Soulseek peers can withhold search results from users who
+            # share nothing, which silently breaks acquisition.
             cache.retention = 360;
           };
           soulseek = {
@@ -90,10 +90,24 @@
         };
       };
 
-      sops.secrets.slskd_env = {
-        owner = "slskd";
-        group = "slskd";
-        mode = "0400";
+      sops = {
+        secrets = {
+          slskd_env = {
+            owner = "slskd";
+            group = "slskd";
+            mode = "0400";
+          };
+          slskd_api_key = {};
+        };
+        templates."slskd-api.env" = {
+          content = ''
+            SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
+          '';
+          owner = "slskd";
+          group = "slskd";
+          mode = "0400";
+          restartUnits = ["slskd.service"];
+        };
       };
 
       systemd.tmpfiles.rules = [
@@ -101,6 +115,7 @@
       ];
 
       systemd.services.slskd.serviceConfig = {
+        EnvironmentFile = lib.mkAfter [config.sops.templates."slskd-api.env".path];
         SupplementaryGroups = [mediaShare.group];
         UMask = lib.mkForce mediaShare.umask;
       };
