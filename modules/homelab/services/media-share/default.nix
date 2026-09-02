@@ -36,6 +36,7 @@
       usenetDownloadsDir
       "${usenetDownloadsDir}/complete"
       "${usenetDownloadsDir}/complete/manual"
+      "${usenetDownloadsDir}/complete/copyparty"
       "${usenetDownloadsDir}/complete/radarr"
       "${usenetDownloadsDir}/complete/sonarr"
       "${usenetDownloadsDir}/complete/slskd"
@@ -328,7 +329,7 @@
             ];
           };
         }
-        (lib.genAttrs ["droppedneedle" "jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
+        (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
           extraGroups = lib.mkAfter [shareGroup];
         }))
         (lib.genAttrs cfg.collaborators (_: {

@@ -11,7 +11,11 @@
     stateDir = "/var/lib/beets";
     musicDir = mediaShare.musicDir;
     soulseekImportDir = "${mediaShare.downloadsRoot}/complete/slskd";
-    importDirs = [soulseekImportDir];
+    copypartyImportDir = "${mediaShare.downloadsRoot}/complete/copyparty";
+    importDirs = [
+      soulseekImportDir
+      copypartyImportDir
+    ];
     importDirsShell = lib.concatStringsSep " " (map lib.escapeShellArg importDirs);
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
@@ -308,8 +312,8 @@
       text = ''
         import_dirs=(${importDirsShell})
 
-        # slskd keeps active files outside the completed tree. Remove only
-        # settled, empty directories from that tree.
+        # Downloaders keep active files elsewhere or under a .PARTIAL name.
+        # Remove only settled, empty directories from completed trees.
         for import_dir in "''${import_dirs[@]}"; do
           find "$import_dir" -mindepth 1 -depth -type d -empty -mmin +2 -delete
         done
@@ -321,6 +325,13 @@
 
         scan_boundary=$(mktemp)
         trap 'rm -f "$scan_boundary"' EXIT
+
+        # Copyparty atomically renames completed uploads, but leaves resumable
+        # .PARTIAL files in place. Never hand a set to Beets while one remains.
+        if find ${lib.escapeShellArg copypartyImportDir} -type f -name '*.PARTIAL' -print -quit | grep -q .; then
+          echo "Deferring Beets import while a Copyparty upload is incomplete."
+          exit 0
+        fi
 
         if find "''${import_dirs[@]}" -type f -mmin -2 -print -quit | grep -q .; then
           echo "Deferring Beets import until the completed trees have settled."
