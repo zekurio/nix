@@ -35,7 +35,6 @@
       usenetDownloadsDir
       "${usenetDownloadsDir}/complete"
       "${usenetDownloadsDir}/complete/manual"
-      "${usenetDownloadsDir}/complete/copyparty"
       "${usenetDownloadsDir}/complete/radarr"
       "${usenetDownloadsDir}/complete/sonarr"
       "${usenetDownloadsDir}/complete/slskd"
