@@ -405,13 +405,18 @@
       # Earlier versions ran Beets as the shared media account. Normalize the
       # existing database and caches so the dedicated user can take ownership
       # without relying on whatever modes SQLite happened to create.
-      system.activationScripts.beets-state-dir-permissions.text = ''
-        if [ -d ${lib.escapeShellArg stateDir} ]; then
-          chown -R ${lib.escapeShellArg serviceUser}:${lib.escapeShellArg mediaShare.group} ${lib.escapeShellArg stateDir}
-          find ${lib.escapeShellArg stateDir} -type d -exec chmod 2775 {} +
-          find ${lib.escapeShellArg stateDir} -type f -exec chmod 0664 {} +
-        fi
-      '';
+      system.activationScripts.beets-state-dir-permissions = {
+        # User and group creation must finish before a previously disabled
+        # Beets service can reclaim its retained state directory.
+        deps = ["groups"];
+        text = ''
+          if [ -d ${lib.escapeShellArg stateDir} ]; then
+            chown -R ${lib.escapeShellArg serviceUser}:${lib.escapeShellArg mediaShare.group} ${lib.escapeShellArg stateDir}
+            find ${lib.escapeShellArg stateDir} -type d -exec chmod 2775 {} +
+            find ${lib.escapeShellArg stateDir} -type f -exec chmod 0664 {} +
+          fi
+        '';
+      };
 
       # Existing files predate the Latin-name, square-artwork, and plain-lyrics
       # policy. Refresh every library item once; future imports already apply
