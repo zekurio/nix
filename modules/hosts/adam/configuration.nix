@@ -218,12 +218,11 @@
     services.homelab = {
       alloy.enable = true;
       anvil.enable = true;
-      beets.enable = false;
+      beets.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
       costthing.enable = true;
-      droppedneedle.enable = true;
       coolercontrol = {
         enable = true;
         listenAddress = "0.0.0.0";
@@ -233,6 +232,7 @@
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
+      navidrome.enable = true;
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
