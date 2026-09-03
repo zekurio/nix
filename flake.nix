@@ -44,7 +44,7 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Fast-moving agent CLIs (codex, pi, chatgpt). Updates arrive through
+    # Fast-moving agent CLIs (Codex and Pi). Updates arrive through
     # the weekly flake.lock PR.
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
