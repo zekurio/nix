@@ -218,7 +218,7 @@
     services.homelab = {
       alloy.enable = true;
       anvil.enable = true;
-      beets.enable = true;
+      beets.enable = false;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
@@ -232,7 +232,7 @@
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
-      navidrome.enable = true;
+      droppedneedle.enable = true;
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;

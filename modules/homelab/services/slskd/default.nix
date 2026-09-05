@@ -67,7 +67,7 @@
               "\\.ini$"
             ];
             # Without a retention interval slskd only indexes shares at
-            # startup. Beets imports into this tree continuously, so
+            # startup. DroppedNeedle imports into this tree continuously, so
             # the index would otherwise go stale and advertise less than we
             # hold. Soulseek peers can withhold search results from users who
             # share nothing, which silently breaks acquisition.
