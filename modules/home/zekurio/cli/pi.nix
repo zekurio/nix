@@ -25,45 +25,6 @@
     programs.pi-coding-agent = {
       enable = true;
       package = pi;
-      models.providers.openai-codex.models = [
-        {
-          id = "gpt-5.6-sol-1m";
-          name = "GPT-5.6 Sol (1M)";
-          api = "openai-codex-responses";
-          reasoning = true;
-          input = [
-            "text"
-            "image"
-          ];
-          cost = {
-            input = 5;
-            output = 30;
-            cacheRead = 0.5;
-            cacheWrite = 6.25;
-            tiers = [
-              {
-                inputTokensAbove = 272000;
-                input = 10;
-                output = 45;
-                cacheRead = 1;
-                cacheWrite = 12.5;
-              }
-            ];
-          };
-          contextWindow = 1050000;
-          maxTokens = 128000;
-          thinkingLevelMap = {
-            minimal = "low";
-            xhigh = "xhigh";
-            max = "max";
-          };
-          compat = {
-            supportsOpenAIGrammarTools = true;
-            supportsAdditionalTools = true;
-            supportsToolSearch = true;
-          };
-        }
-      ];
     };
   };
 }
