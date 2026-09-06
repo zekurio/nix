@@ -435,6 +435,16 @@
               "browseable" = "yes";
               "guest ok" = "no";
             };
+            downloads = {
+              path = cfg.downloadsRoot;
+              "valid users" = lib.concatStringsSep " " cfg.collaborators;
+              "force group" = shareGroup;
+              "create mask" = shareFileMode;
+              "directory mask" = shareDirMode;
+              "read only" = "no";
+              "browseable" = "yes";
+              "guest ok" = "no";
+            };
           }
           // userShareSambaSettings;
       };
