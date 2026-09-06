@@ -28,11 +28,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788535582,
-        "narHash": "sha256-Qj0i7aAq1YWNTJy6WWSS1Zv54VEfbJ3dUZ7t8xsOmEc=",
+        "lastModified": 1788625136,
+        "narHash": "sha256-/wV95TYABOP9U8pUsOi+v6VPJU8UxWdUKN7plhujRXo=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "4e546260b0726575b3cbc2e83e2ad2064c3a3470",
+        "rev": "365346cdb65322a3406bd29d6e5b77aa04e4a371",
         "type": "github"
       },
       "original": {
@@ -49,11 +49,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788353847,
-        "narHash": "sha256-rj+KflWH349RvX3msp68P/8Gc3EprAElyoTdaZjr+Ho=",
+        "lastModified": 1788602327,
+        "narHash": "sha256-1xlARtEXdJg/Xh/kJaPTGCkIGoM+yjWw88rUZEbB380=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "f75f0b8f7566c0ac9f414e39fbd1615d7c831cd0",
+        "rev": "92c6c5d2443580c1b15d30fbd4873d4305a2183f",
         "type": "github"
       },
       "original": {
@@ -89,11 +89,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787850472,
-        "narHash": "sha256-/v8S4mhKgXOisO5pDG9Ympd06qhn0hgpgFbmciOp2aw=",
+        "lastModified": 1788615099,
+        "narHash": "sha256-jt1BBVsKt8apjY7oBoBQDCF7Xc36wSk27oeCoTJMuDU=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "c05a688cc5434486fe1d2df5be315916e3bf22cd",
+        "rev": "e134cdf7f2db6b7ba397f00d8141be16731a9a68",
         "type": "github"
       },
       "original": {
@@ -237,11 +237,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1788546071,
-        "narHash": "sha256-aZmEB59opj+uap8lDRIpnQo/qaZ0XKmOWwerlIZqCrA=",
+        "lastModified": 1788590915,
+        "narHash": "sha256-WebRze7ZsbMR+dHVvBTXkYCmeh7Wi9KUEFwTHK+ZxKg=",
         "owner": "chaotic-cx",
         "repo": "nyx",
-        "rev": "8970febe7a43f05366143f0ef75fd12b6c5d6baa",
+        "rev": "078974cf248e2634a25ecf414b77a393f6830d9b",
         "type": "github"
       },
       "original": {
@@ -387,43 +387,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
-        "type": "github"
-      }
-    },
-    "droppedneedle": {
-      "inputs": {
-        "droppedneedle-src": "droppedneedle-src",
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788632545,
-        "narHash": "sha256-E/oN9OtXLU5rqDi1RVSO9j2x+G+Z8/zN/m9N/dGuBl8=",
-        "owner": "zekurio",
-        "repo": "droppedneedle-nix",
-        "rev": "5eeee975df865cd63136bf006946addbbc958671",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "droppedneedle-nix",
-        "type": "github"
-      }
-    },
-    "droppedneedle-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788572619,
-        "narHash": "sha256-Iovi2msVdE/argo4zhY2JQcAgqwfiaQr2BuHC9AKdYM=",
-        "owner": "DroppedNeedle",
-        "repo": "DroppedNeedle",
-        "rev": "2a121f2a2d5c40855ff113a0165533fc43e6a231",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DroppedNeedle",
-        "repo": "DroppedNeedle",
         "type": "github"
       }
     },
@@ -632,11 +595,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1788494001,
-        "narHash": "sha256-YHzLTdDt+IOT6oHQUKFnyF3ltQqiWU6XcCGl8ppKfDk=",
+        "lastModified": 1788688728,
+        "narHash": "sha256-d/VsPqEbo+Dwa1OkSP1M/piIWWN3rBHAVEuPjF55KOU=",
         "owner": "schembriaiden",
         "repo": "helium-browser-nix-flake",
-        "rev": "3cd699ebc6e20380c96490b01f46c709cfc99b7a",
+        "rev": "9d5a2477fcc86e78abef68ab1b7928a20e664c4b",
         "type": "github"
       },
       "original": {
@@ -673,11 +636,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788487777,
-        "narHash": "sha256-Ro/e1N4ZR8/XaFF+sF9SgfPK79HM5YNEppzFj8p+0Ak=",
+        "lastModified": 1788651960,
+        "narHash": "sha256-v9wJd32eZ2bvhBzVOd7TIjLQd011P7nwOhjKtWlci5I=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "693e8ce0fb240a73c116a03cfd7b19269c87af88",
+        "rev": "2c0350c759688177331b8f5242311fae8877bdb3",
         "type": "github"
       },
       "original": {
@@ -724,11 +687,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788297833,
-        "narHash": "sha256-48iHfB8To8bVxqrDM0HLooUyryyEKrhe3GEtoeXwSnE=",
+        "lastModified": 1788620919,
+        "narHash": "sha256-VapBHXJlWxcuLL6tmB9SlYb1awNJ2BEz0HJDt9023T4=",
         "owner": "zekurio",
         "repo": "inviterr",
-        "rev": "f7df1b57c5f8e35bbe7755a520ed5e6293482981",
+        "rev": "3884478054b48510233ba7c4b8a5956034fe5654",
         "type": "github"
       },
       "original": {
@@ -777,11 +740,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1788513921,
-        "narHash": "sha256-EcfAKzcETRKOhUKjmoLp4gk0bKtkKNaz2y5Kba2cUQk=",
+        "lastModified": 1788684345,
+        "narHash": "sha256-+3tYyzbgr5LdaqPDQ9tHM1JuXx7DVQqZH8MeQ7ooStI=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "f9a83fd4942a37f2e2c7a07a4d508dbaaee968f8",
+        "rev": "76e610601903fd31e82b996b28a49c6d1adb559c",
         "type": "github"
       },
       "original": {
@@ -991,11 +954,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1788404924,
-        "narHash": "sha256-lhEhY8X5EgkQ/eg6IFz4cc8jRuSYSvnxx1al7d1dvZ0=",
+        "lastModified": 1788614874,
+        "narHash": "sha256-7QYjT2vHLuX9Z1pdxHXDKCbh1CR3D/2rywB9Tx0MPRg=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0968519e14f7aa7d3e9b389682bd74d2b51c8ce8",
+        "rev": "c043004d1c6985732bcc1cbc5a9c9aecbbb4e0f0",
         "type": "github"
       },
       "original": {
@@ -1067,7 +1030,6 @@
         "costthing": "costthing",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
-        "droppedneedle": "droppedneedle",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
         "home-manager": "home-manager_2",
