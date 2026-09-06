@@ -222,6 +222,7 @@
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
+      copyparty.enable = true;
       costthing.enable = true;
       coolercontrol = {
         enable = true;

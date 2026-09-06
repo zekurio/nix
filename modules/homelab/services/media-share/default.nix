@@ -97,6 +97,17 @@
         find "$library" -type f -exec setfacl \
           -m u::rw-,g::---,o::---,m::r--,u:immich:r-- {} +
       done
+
+      ${lib.optionalString config.services.homelab.copyparty.enable (lib.concatStringsSep "\n" (lib.mapAttrsToList (_: share: ''
+          # Copyparty and the owner both need access to uploads created by the
+          # other. Keep the owning group and other users out of private shares.
+          find ${lib.escapeShellArg share.path} -type d -exec setfacl \
+            -m u:${share.owner}:rwx,u:copyparty:rwx,m::rwx \
+            -m d:u::rwx,d:u:${share.owner}:rwx,d:u:copyparty:rwx,d:g::---,d:m::rwx,d:o::--- {} +
+          find ${lib.escapeShellArg share.path} -type f -exec setfacl \
+            -m u:${share.owner}:rw-,u:copyparty:rw-,m::rw- {} +
+        '')
+        cfg.userShares))}
     '';
 
     userShareOptions = {name, ...}: {
@@ -339,7 +350,7 @@
       systemd.tmpfiles.rules = directoryRules ++ aclRules ++ userShareDirectoryRules ++ userLibraryDirectoryRules;
 
       systemd.services.mediaShare-user-library-acl = lib.mkIf (cfg.userShares != {}) {
-        description = "Grant Immich read access to per-user external-library trees";
+        description = "Set service access to private shares and Immich libraries";
         wantedBy = ["multi-user.target"];
         before = ["immich-server.service"];
         after = [
