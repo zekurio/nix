@@ -11,7 +11,9 @@
     stateDir = "/var/lib/beets";
     musicDir = mediaShare.musicDir;
     soulseekImportDir = "${mediaShare.downloadsRoot}/complete/slskd";
-    importDirs = [soulseekImportDir];
+    importDirs =
+      [soulseekImportDir]
+      ++ lib.optional config.services.homelab.copyparty.enable "${mediaShare.downloadsRoot}/complete/copyparty";
     importDirsShell = lib.concatStringsSep " " (map lib.escapeShellArg importDirs);
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
@@ -30,6 +32,8 @@
       "lyrics"
       "mbpseudo"
       "mbsync"
+      # An explicit plugin list replaces Beets' default metadata provider.
+      "musicbrainz"
       "scrub"
       "zero"
     ];
@@ -311,16 +315,23 @@
         # slskd keeps active files outside the completed tree. Remove only
         # settled, empty directories from that tree.
         for import_dir in "''${import_dirs[@]}"; do
-          find "$import_dir" -mindepth 1 -depth -type d -empty -mmin +2 -delete
+          find "$import_dir" -name '.hist' -prune -o -mindepth 1 -type d -empty -mmin +2 -exec rmdir -- {} +
         done
 
-        if ! find "''${import_dirs[@]}" -mindepth 1 -type f ! -name '*.PARTIAL' -print -quit | grep -q .; then
+        if ! find "''${import_dirs[@]}" -name '.hist' -prune -o -mindepth 1 -type f ! -name '*.PARTIAL' -print -quit | grep -q .; then
           echo "No completed music files to import."
           exit 0
         fi
 
         scan_boundary=$(mktemp)
         trap 'rm -f "$scan_boundary"' EXIT
+
+        # Copyparty keeps resumable uploads as .PARTIAL files in the inbox.
+        # Wait for completion before cleaning tags or importing any album.
+        if find "''${import_dirs[@]}" -name '*.PARTIAL' -print -quit | grep -q .; then
+          echo "Deferring Beets import until resumable uploads finish."
+          exit 0
+        fi
 
         if find "''${import_dirs[@]}" -type f -mmin -2 -print -quit | grep -q .; then
           echo "Deferring Beets import until the completed trees have settled."
@@ -335,6 +346,7 @@
         shopt -s dotglob nullglob
         for import_dir in "''${import_dirs[@]}"; do
           for path in "$import_dir"/*; do
+            [ "$(basename "$path")" != .hist ] || continue
             if [ ! -e ${lib.escapeShellArg cleanupStamp} ] \
               || [ ! -e ${lib.escapeShellArg scanStamp} ] \
               || [ "$path" -nt ${lib.escapeShellArg scanStamp} ] \
