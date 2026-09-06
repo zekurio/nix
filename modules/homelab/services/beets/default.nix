@@ -30,18 +30,29 @@
       "inline"
       "lastgenre"
       "lyrics"
+      # mbpseudo includes the MusicBrainz provider; enabling both makes Beets fail.
       "mbpseudo"
       "mbsync"
-      # An explicit plugin list replaces Beets' default metadata provider.
-      "musicbrainz"
       "scrub"
       "zero"
     ];
 
-    beetsPackage = pkgs.python3Packages.beets.override {
-      disableAllPlugins = true;
-      pluginOverrides = lib.genAttrs pluginNames (_: {enable = true;});
-    };
+    beetsPackage =
+      (pkgs.python3Packages.beets.override {
+        disableAllPlugins = true;
+        pluginOverrides = lib.genAttrs pluginNames (_: {enable = true;});
+      }).overrideAttrs (old: {
+        # mbpseudo saves MusicBrainz IDs under a different provider name in 2.13.1.
+        # Resolve saved MusicBrainz records through it without changing candidate
+        # source names, which mbpseudo uses when selecting translated releases.
+        postPatch =
+          (old.postPatch or "")
+          + ''
+            substituteInPlace beets/metadata_plugins.py \
+              --replace-fail 'if p.data_source.lower() == name)' \
+                'if p.data_source.lower() == name or (name == "musicbrainz" and p.name == "mbpseudo"))'
+          '';
+      });
 
     cleanMusicMetadata = pkgs.writeShellApplication {
       name = "clean-music-metadata";
@@ -395,6 +406,24 @@
       };
 
       environment.systemPackages = [beetMusic];
+
+      system.checks = [
+        (pkgs.runCommand "beets-provider-check" {
+            nativeBuildInputs = [(pkgs.python3.withPackages (_: [beetsPackage]))];
+          } ''
+            export HOME="$TMPDIR"
+            python - <<'PY'
+            import yaml
+            from beets import config, metadata_plugins, plugins
+            config.set(yaml.safe_load(open("${beetsConfig}")))
+            plugins.load_plugins()
+            provider = metadata_plugins.get_metadata_source("MusicBrainz")
+            assert provider is not None, "MusicBrainz records must resolve through mbpseudo"
+            assert provider.name == "mbpseudo", provider.name
+            PY
+            touch "$out"
+          '')
+      ];
 
       systemd.tmpfiles.rules = [
         "d ${stateDir} 2775 ${serviceUser} ${mediaShare.group} -"
