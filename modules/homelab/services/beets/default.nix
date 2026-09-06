@@ -33,6 +33,7 @@
       # mbpseudo includes the MusicBrainz provider; enabling both makes Beets fail.
       "mbpseudo"
       "mbsync"
+      "permissions"
       "scrub"
       "zero"
     ];
@@ -174,6 +175,12 @@
         ifempty = false;
         maxwidth = 1400;
         remove_art_file = false;
+      };
+
+      # Resized artwork can retain tempfile mode 0600, hiding it from Navidrome.
+      permissions = {
+        file = "664";
+        dir = "2775";
       };
 
       lastgenre = {
@@ -413,6 +420,9 @@
           } ''
             export HOME="$TMPDIR"
             python - <<'PY'
+            import os
+            import tempfile
+            from types import SimpleNamespace
             import yaml
             from beets import config, metadata_plugins, plugins
             config.set(yaml.safe_load(open("${beetsConfig}")))
@@ -420,6 +430,10 @@
             provider = metadata_plugins.get_metadata_source("MusicBrainz")
             assert provider is not None, "MusicBrainz records must resolve through mbpseudo"
             assert provider.name == "mbpseudo", provider.name
+            with tempfile.NamedTemporaryFile() as art:
+                permissions = next(p for p in plugins.find_plugins() if p.name == "permissions")
+                permissions.fix_art(SimpleNamespace(artpath=os.fsencode(art.name)))
+                assert os.stat(art.name).st_mode & 0o777 == 0o664
             PY
             touch "$out"
           '')
