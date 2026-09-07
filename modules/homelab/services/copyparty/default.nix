@@ -10,7 +10,8 @@
     shares = mediaShare.userShares;
     owners = lib.unique (map (share: share.owner) (lib.attrValues shares));
     uploadDir = "${mediaShare.downloadsRoot}/complete/copyparty";
-    domain = "drop.${config.services.homelab.domains.zekurio}";
+    mediaDir = "/tank/media";
+    domain = "files.${config.services.homelab.domains.zekurio}";
     port = 3923;
   in {
     options.services.homelab.copyparty.enable = lib.mkEnableOption "Copyparty private shares and music upload inbox";
@@ -20,6 +21,10 @@
         {
           assertion = mediaShare.enable && shares != {};
           message = "Copyparty requires configured media-share user shares.";
+        }
+        {
+          assertion = builtins.elem "zekurio" owners;
+          message = "Copyparty requires a zekurio account for the media volume.";
         }
       ];
 
@@ -47,7 +52,7 @@
             rproxy: 1
             xff-src: 127.0.0.0/8,::1/128
             site: https://${domain}/
-            name: Files and music drop
+            name: Files and media
             hist: /var/cache/copyparty
             dotpart
             xdev
@@ -68,6 +73,16 @@
                   chmod_f: 660
             '')
             shares)}
+
+          [/media]
+            ${mediaDir}
+            accs:
+              rwmd: zekurio
+            flags:
+              e2d
+              d2t
+              chmod_d: 2775
+              chmod_f: 664
 
           [/music-drop]
             ${uploadDir}
@@ -91,7 +106,7 @@
         wantedBy = ["multi-user.target"];
         after = ["systemd-tmpfiles-setup.service" "mediaShare-user-library-acl.service"];
         requires = ["mediaShare-user-library-acl.service"];
-        unitConfig.RequiresMountsFor = [uploadDir] ++ map (share: share.path) (lib.attrValues shares);
+        unitConfig.RequiresMountsFor = [uploadDir mediaDir] ++ map (share: share.path) (lib.attrValues shares);
         environment = {
           HOME = "/var/lib/copyparty";
           XDG_CONFIG_HOME = "/var/lib/copyparty";
@@ -111,7 +126,7 @@
           PrivateTmp = true;
           ProtectHome = true;
           ProtectSystem = "strict";
-          ReadWritePaths = [uploadDir] ++ map (share: share.path) (lib.attrValues shares);
+          ReadWritePaths = [uploadDir mediaDir] ++ map (share: share.path) (lib.attrValues shares);
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;
