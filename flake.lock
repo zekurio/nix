@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788454151,
-        "narHash": "sha256-EcZdYPUdUIzkl8z10gswY57ZzvRV1T+/NRry0Y0eIsg=",
+        "lastModified": 1788867187,
+        "narHash": "sha256-AznJ8JgIHb/q+wAvQ6O48P5tX4w8gB8d9q6o8xe7mXo=",
         "owner": "zekurio",
         "repo": "agent-stuff",
-        "rev": "9fcace9aa60f1177b9cc470bf21e1dc10a7e0887",
+        "rev": "f68664fd0acdeb4944ed4fda1bc48765787a7c34",
         "type": "github"
       },
       "original": {
@@ -89,11 +89,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788615099,
-        "narHash": "sha256-jt1BBVsKt8apjY7oBoBQDCF7Xc36wSk27oeCoTJMuDU=",
+        "lastModified": 1788866481,
+        "narHash": "sha256-pl7uhFwdomH9TjEjtR8xCvXyLJ0IkPXRLnXbzxEUGnU=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "e134cdf7f2db6b7ba397f00d8141be16731a9a68",
+        "rev": "7c65fdfcbdaef48983e55097f80b5490a258dd3f",
         "type": "github"
       },
       "original": {
