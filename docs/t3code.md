@@ -23,32 +23,36 @@ so `/adam` and `/lilith` prefixes do not work.
 
 ## First use
 
-The `t3code` account owns each environment. Its home is `/var/lib/t3code` and
-projects belong in `/var/lib/t3code/projects`. It has SSH access with the
-repo's pinned keys, but no sudo rights. Provider credentials are separate from
-the `zekurio` account. Shared agent skills are available under `.agents/skills`.
+Each backend runs as `zekurio`, with the same home, file permissions, and sudo
+access as a normal SSH session. Projects can use `~/Git`. T3 state lives in
+`~/.t3`. Agents use the account's Git config, Codex login, and shared skills.
+The service includes the user's package paths. On Lilith it uses the configured
+1Password SSH agent socket, which requires 1Password to be available.
+
+An SSH agent forwarded from Sachiel belongs to that SSH session. The T3 service
+does not inherit it. On Adam, outbound SSH uses the account's local SSH keys
+unless a separate persistent agent is configured.
 
 Sign in to Codex on each host:
 
 ```sh
-ssh -t t3code@adam 'codex login --device-auth'
-ssh -t t3code@lilith 'codex login --device-auth'
+ssh -t adam 'codex login --device-auth'
+ssh -t lilith 'codex login --device-auth'
 ```
 
 Generate a short-lived pairing token on the host:
 
 ```sh
-ssh t3code@adam 't3 pair'
-ssh t3code@lilith 't3 pair'
+ssh adam 't3 pair'
+ssh lilith 't3 pair'
 ```
 
 In the Mac app, open Settings > Connections > Add environment. Enter the
 private HTTPS endpoint and its token. The CLI may print a loopback or tailnet
 URL; use the Caddy endpoint from the table instead. Keep tokens out of Git.
 
-Clone projects as `t3code`. Authenticate Git for that account when a project
-needs private repository access. Adam's system rebuilds still use the GitHub
-flake, not these development checkouts.
+Clone projects as `zekurio`. Adam's system rebuilds still use the GitHub flake,
+not development checkouts.
 
 ## Service and previews
 
@@ -60,9 +64,8 @@ ssh adam 'systemctl status t3code'
 ssh adam 'sudo journalctl -u t3code --since "10 minutes ago"'
 ```
 
-The service can write to its own home and private temporary directory. It
-cannot access `/home`, `/tank`, or `/mnt/downloads`. Build project dependencies
-with Nix development shells inside the project.
+Agents have the same access to home directories, shares, and mounted files as
+`zekurio`. Use Nix development shells for project dependencies.
 
 Web previews use separate SSH tunnels. Bind the dev server to loopback on its
 host. For example, run one of these commands on the Mac:
