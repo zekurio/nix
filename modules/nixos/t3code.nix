@@ -1,19 +1,9 @@
 {inputs, ...}: let
-  packageFor = system: let
-    agents = inputs.llm-agents.packages.${system};
-  in
-    agents.t3code.override {providerPackages = [agents.codex];};
+  packageFor = pkgs:
+    pkgs.callPackage ./_t3code.nix {
+      agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+    };
 in {
-  flake.modules.homeManager.zekurio = {
-    lib,
-    pkgs,
-    ...
-  }: {
-    home.packages = lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-      (packageFor pkgs.stdenv.hostPlatform.system).desktop
-    ];
-  };
-
   flake.modules.nixos.base = {
     config,
     lib,
@@ -21,7 +11,7 @@ in {
     ...
   }: let
     cfg = config.modules.t3code;
-    package = packageFor pkgs.stdenv.hostPlatform.system;
+    package = packageFor pkgs;
     home = "/var/lib/t3code";
   in {
     options.modules.t3code = {
