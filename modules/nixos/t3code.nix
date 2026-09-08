@@ -1,9 +1,4 @@
-{inputs, ...}: let
-  packageFor = pkgs:
-    pkgs.callPackage ./_t3code.nix {
-      agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-    };
-in {
+{inputs, ...}: {
   flake.modules.nixos.base = {
     config,
     lib,
@@ -11,7 +6,8 @@ in {
     ...
   }: let
     cfg = config.modules.t3code;
-    package = packageFor pkgs;
+    package = inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system}.t3-code-nightly;
+    codex = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
     home = "/var/lib/t3code";
   in {
     options.modules.t3code = {
@@ -41,7 +37,7 @@ in {
         homeMode = "0700";
         shell = pkgs.fish;
         openssh.authorizedKeys.keys = config.modules.ssh.authorizedKeys;
-        packages = [package inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex];
+        packages = [package codex];
       };
 
       systemd.tmpfiles.rules = [
@@ -58,6 +54,7 @@ in {
         path = with pkgs;
           [
             package
+            codex
             bash
             coreutils
             curl

@@ -50,6 +50,10 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    t3code = {
+      url = "github:omarcresp/t3code-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # Shared agent skills.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";
