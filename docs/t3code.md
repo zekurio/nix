@@ -1,8 +1,13 @@
 # T3 Code remote environments
 
-The Mac app and both Linux backends use the T3 package pinned by `llm-agents`.
-Update them through `flake.lock` and rebuild each host. Do not use T3's service
-installer or app updater for these Nix-managed installations.
+Sachiel installs the official desktop app with the `t3-code` Homebrew cask.
+Open `/Applications/T3 Code (Alpha).app`. The old Home Manager app is removed
+on the next Mac rebuild. The desktop app can use its own updater when a release
+reaches T3 before Homebrew.
+
+Both Linux backends use Nix. The local `_t3code.nix` override pins version
+0.0.40 until `llm-agents` catches up. Update that pin and rebuild the hosts when
+updating the desktop app. Do not use T3's service installer or updater on Linux.
 
 | Environment | Private endpoint | Backend |
 | --- | --- | --- |
@@ -13,7 +18,7 @@ AdGuard must resolve both names to `10.0.0.2`. Caddy accepts only LAN and
 tailnet clients. Lilith accepts backend connections only from Adam's Tailscale
 IPv4 address. Both T3 environments still require device pairing.
 
-Use separate hostnames. T3 0.0.38 replaces URL paths when it builds API URLs,
+Use separate hostnames. T3 replaces URL paths when it builds API URLs,
 so `/adam` and `/lilith` prefixes do not work.
 
 ## First use
