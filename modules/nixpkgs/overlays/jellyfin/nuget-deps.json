@@ -26,8 +26,8 @@
   },
   {
     "pname": "BitFaster.Caching",
-    "version": "2.6.0",
-    "hash": "sha256-cF3SDKbopdWPiZ7Wrx5Uh7PXxohUoVPAVCkmjeBwPPw="
+    "version": "2.6.1",
+    "hash": "sha256-1dTpRkBrNvJiNsbxQLxp3lWKqFTxfm2tMqKLu2djeiA="
   },
   {
     "pname": "BlurHashSharp",
