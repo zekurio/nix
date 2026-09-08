@@ -1,13 +1,13 @@
 # T3 Code remote environments
 
-Sachiel installs the official desktop app with the `t3-code` Homebrew cask.
-Open `/Applications/T3 Code (Alpha).app`. The old Home Manager app is removed
-on the next Mac rebuild. The desktop app can use its own updater when a release
-reaches T3 before Homebrew.
+Sachiel installs the official desktop app with the `t3-code@nightly` Homebrew
+cask. Open `/Applications/T3 Code (Nightly).app`. The app uses its own updater.
 
-Both Linux backends use Nix. The local `_t3code.nix` override pins version
-0.0.40 until `llm-agents` catches up. Update that pin and rebuild the hosts when
-updating the desktop app. Do not use T3's service installer or updater on Linux.
+Both Linux backends use the `t3-code-nightly` package from
+[omarcresp/t3code-flake](https://github.com/omarcresp/t3code-flake).
+It packages official release binaries. `flake.lock` pins the version.
+Run `nix flake update t3code` and rebuild the hosts to update it.
+Do not use T3's service installer or updater on Linux.
 
 | Environment | Private endpoint | Backend |
 | --- | --- | --- |
