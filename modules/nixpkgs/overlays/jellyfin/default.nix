@@ -1,20 +1,20 @@
 let
   overlay = final: previous: let
-    jellyfinVersion = "12.0-rc7";
+    jellyfinVersion = "12.0";
     jellyfinFfmpegVersion = "8.1.2-3";
 
     jellyfinSrc = final.fetchFromGitHub {
       owner = "jellyfin";
       repo = "jellyfin";
       tag = "v${jellyfinVersion}";
-      hash = "sha256-HSFBJyoAP+/GIPuVhLJIUoUEAYteTqUhJmp0RuT16QM=";
+      hash = "sha256-z40crHV4vH27vDQBFcM58tQ5JW8wtIW3w981Rpp5h1E=";
     };
 
     jellyfinWebSrc = final.fetchFromGitHub {
       owner = "jellyfin";
       repo = "jellyfin-web";
       tag = "v${jellyfinVersion}";
-      hash = "sha256-O8VRaTnXKBuHPYZv9w0GPwgCqPa1Ej6wd/Lg3TacJ78=";
+      hash = "sha256-LwFjfG+OLgQDP7GqD4/wQhmym4N5QWe/qITQN+hxHh8=";
     };
 
     jellyfinWebPostPatch = ''
