@@ -10,8 +10,8 @@
       enable = lib.mkEnableOption "private T3 Code environments through Caddy";
       lilithBackend = lib.mkOption {
         type = lib.types.str;
-        default = "lilith.tail8968fc.ts.net:3773";
-        description = "Lilith's T3 Code backend on the tailnet.";
+        default = "10.0.0.3:3773";
+        description = "Lilith's T3 Code backend on the LAN.";
       };
     };
 

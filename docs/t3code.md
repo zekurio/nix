@@ -12,11 +12,13 @@ Do not use T3's service installer or updater on Linux.
 | Environment | Private endpoint | Backend |
 | --- | --- | --- |
 | Adam | `https://adam.zekurio.me` | Adam's loopback port 3773 |
-| Lilith | `https://lilith.zekurio.me` | Lilith's Tailscale port 3773 |
+| Lilith | `https://lilith.zekurio.me` | Lilith's LAN address `10.0.0.3:3773` |
 
 AdGuard must resolve both names to `10.0.0.2`. Caddy accepts only LAN and
-tailnet clients. Lilith accepts backend connections only from Adam's Tailscale
-IPv4 address. Both T3 environments still require device pairing.
+tailnet clients. Lilith accepts backend connections only from Adam's LAN
+address, `10.0.0.2`. Reserve `10.0.0.3` for Lilith in the router's DHCP settings.
+Tailscale is not required between the backends. Both T3 environments still
+require device pairing.
 
 Use separate hostnames. T3 replaces URL paths when it builds API URLs,
 so `/adam` and `/lilith` prefixes do not work.
@@ -48,7 +50,7 @@ ssh lilith 't3 pair'
 ```
 
 In the Mac app, open Settings > Connections > Add environment. Enter the
-private HTTPS endpoint and its token. The CLI may print a loopback or tailnet
+private HTTPS endpoint and its token. The CLI may print a loopback or LAN
 URL; use the Caddy endpoint from the table instead. Keep tokens out of Git.
 
 Clone projects as `zekurio`. Adam's system rebuilds still use the GitHub flake,

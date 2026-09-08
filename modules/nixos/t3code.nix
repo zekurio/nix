@@ -14,11 +14,15 @@
   in {
     options.modules.t3code = {
       enable = lib.mkEnableOption "a persistent T3 Code environment";
-      tailnet = lib.mkEnableOption "listen on the Tailscale IPv4 address";
+      listenHost = lib.mkOption {
+        type = lib.types.str;
+        default = "127.0.0.1";
+        description = "IPv4 address on which to listen.";
+      };
       proxyAddress = lib.mkOption {
         type = lib.types.str;
-        default = "100.77.212.45";
-        description = "Tailscale IPv4 address of the Caddy host allowed to connect.";
+        default = "10.0.0.2";
+        description = "LAN IPv4 address of the Caddy host allowed to connect.";
       };
       port = lib.mkOption {
         type = lib.types.port;
@@ -38,29 +42,27 @@
         description = "T3 Code remote environment";
         wantedBy = ["multi-user.target"];
         wants = ["network-online.target"];
-        after = ["network-online.target"] ++ lib.optional cfg.tailnet "tailscaled.service";
-        path = with pkgs;
-          [
-            package
-            codex
-            bash
-            coreutils
-            curl
-            findutils
-            git
-            gnugrep
-            gnused
-            gnutar
-            gzip
-            nodejs_24
-            openssh
-            procps
-            python3
-            ripgrep
-            unzip
-            config.nix.package
-          ]
-          ++ lib.optional cfg.tailnet pkgs.tailscale;
+        after = ["network-online.target"];
+        path = with pkgs; [
+          package
+          codex
+          bash
+          coreutils
+          curl
+          findutils
+          git
+          gnugrep
+          gnused
+          gnutar
+          gzip
+          nodejs_24
+          openssh
+          procps
+          python3
+          ripgrep
+          unzip
+          config.nix.package
+        ];
         environment =
           lib.optionalAttrs (sessionVariables ? SSH_AUTH_SOCK) {
             inherit (sessionVariables) SSH_AUTH_SOCK;
@@ -74,18 +76,7 @@
         script = ''
           # System services do not inherit the user's login PATH.
           export PATH="/run/wrappers/bin:${home}/.local/bin:${home}/.nix-profile/bin:/etc/profiles/per-user/zekurio/bin:/run/current-system/sw/bin:$PATH"
-          ${
-            if cfg.tailnet
-            then ''
-              # Wait for a tailnet address instead of binding a public interface.
-              listen_host="$(tailscale ip -4)"
-              test -n "$listen_host"
-            ''
-            else ''
-              listen_host=127.0.0.1
-            ''
-          }
-          exec t3 serve --host "$listen_host" --port ${toString cfg.port}
+          exec t3 serve --host ${lib.escapeShellArg cfg.listenHost} --port ${toString cfg.port}
         '';
         serviceConfig = {
           User = "zekurio";
@@ -99,20 +90,19 @@
 
       # Tailscale accepts traffic before nixos-fw. A separate input hook must
       # reject other clients before that accept rule runs.
-      networking.firewall = lib.mkIf cfg.tailnet {
+      networking.firewall = lib.mkIf (cfg.listenHost != "127.0.0.1") {
         extraCommands = ''
           ${lib.getExe pkgs.nftables} -f - <<'EOF'
           add table inet t3code
           flush table inet t3code
           add chain inet t3code input { type filter hook input priority -10; policy accept; }
-          add rule inet t3code input iifname != { "lo", "tailscale0" } tcp dport ${toString cfg.port} drop
-          add rule inet t3code input iifname "tailscale0" ip saddr != ${cfg.proxyAddress} tcp dport ${toString cfg.port} drop
+          add rule inet t3code input iifname != "lo" ip saddr != ${cfg.proxyAddress} tcp dport ${toString cfg.port} drop
           EOF
-          iptables -A nixos-fw -i tailscale0 -s ${lib.escapeShellArg cfg.proxyAddress} -p tcp --dport ${toString cfg.port} -j nixos-fw-accept
+          iptables -A nixos-fw -s ${lib.escapeShellArg cfg.proxyAddress} -p tcp --dport ${toString cfg.port} -j nixos-fw-accept
         '';
         extraStopCommands = ''
           ${lib.getExe pkgs.nftables} delete table inet t3code 2>/dev/null || true
-          iptables -D nixos-fw -i tailscale0 -s ${lib.escapeShellArg cfg.proxyAddress} -p tcp --dport ${toString cfg.port} -j nixos-fw-accept 2>/dev/null || true
+          iptables -D nixos-fw -s ${lib.escapeShellArg cfg.proxyAddress} -p tcp --dport ${toString cfg.port} -j nixos-fw-accept 2>/dev/null || true
         '';
       };
     };
