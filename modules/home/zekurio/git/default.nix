@@ -13,10 +13,16 @@
       lilithSigningKey
       sachielSigningKey
     ];
+    # Apps may inherit a different agent from the desktop session.
+    signingAgentSocket = config.home.sessionVariables.SSH_AUTH_SOCK or null;
+    signingAgentEnvironment = lib.optionalString (signingAgentSocket != null) ''
+      export SSH_AUTH_SOCK=${lib.escapeShellArg signingAgentSocket}
+    '';
     gitSshSigningKeyCommand = pkgs.writeShellApplication {
       name = "git-ssh-signing-key";
       runtimeInputs = [pkgs.openssh];
       text = ''
+        ${signingAgentEnvironment}
         agent_keys="$(ssh-add -L 2>/dev/null || true)"
 
         case "$agent_keys" in
@@ -33,7 +39,13 @@
         esac
       '';
     };
-    sshSigningProgram = "${pkgs.openssh}/bin/ssh-keygen";
+    sshSigningProgram = pkgs.writeShellApplication {
+      name = "git-ssh-sign";
+      text = ''
+        ${signingAgentEnvironment}
+        exec ${pkgs.openssh}/bin/ssh-keygen "$@"
+      '';
+    };
   in {
     config = {
       home.file.".config/git/allowed_signers".text =
@@ -57,7 +69,7 @@
           gpg.format = "ssh";
           gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.config/git/allowed_signers";
           gpg.ssh.defaultKeyCommand = "${gitSshSigningKeyCommand}/bin/git-ssh-signing-key";
-          "gpg \"ssh\"".program = sshSigningProgram;
+          "gpg \"ssh\"".program = "${sshSigningProgram}/bin/git-ssh-sign";
         };
       };
 
