@@ -8,7 +8,9 @@
     cfg = config.modules.t3code;
     package = inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system}.t3-code-nightly;
     codex = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
-    home = "/var/lib/t3code";
+    user = config.users.users.zekurio;
+    home = user.home;
+    sessionVariables = config.home-manager.users.zekurio.home.sessionVariables;
   in {
     options.modules.t3code = {
       enable = lib.mkEnableOption "a persistent T3 Code environment";
@@ -26,24 +28,10 @@
     };
 
     config = lib.mkIf cfg.enable {
-      # Agents have their own home and credentials, without the owner's sudo
-      # rights or access to private shares. SSH also permits provider login.
-      users.groups.t3code = {};
-      users.users.t3code = {
-        isNormalUser = true;
-        group = "t3code";
-        inherit home;
-        createHome = true;
-        homeMode = "0700";
-        shell = pkgs.fish;
-        openssh.authorizedKeys.keys = config.modules.ssh.authorizedKeys;
-        packages = [package codex];
-      };
+      users.users.zekurio.packages = [package];
 
       systemd.tmpfiles.rules = [
-        "d ${home}/projects 0700 t3code t3code -"
-        "d ${home}/.agents 0700 t3code t3code -"
-        "L+ ${home}/.agents/skills - - - - ${inputs.agent-stuff}/skills"
+        "d ${home}/Git 0755 zekurio ${user.group} -"
       ];
 
       systemd.services.t3code = {
@@ -73,13 +61,19 @@
             config.nix.package
           ]
           ++ lib.optional cfg.tailnet pkgs.tailscale;
-        environment = {
-          HOME = home;
-          T3CODE_HOME = "${home}/.t3";
-          T3CODE_NO_BROWSER = "true";
-          T3CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD = "false";
-        };
+        environment =
+          lib.optionalAttrs (sessionVariables ? SSH_AUTH_SOCK) {
+            inherit (sessionVariables) SSH_AUTH_SOCK;
+          }
+          // {
+            HOME = home;
+            T3CODE_HOME = "${home}/.t3";
+            T3CODE_NO_BROWSER = "true";
+            T3CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD = "false";
+          };
         script = ''
+          # System services do not inherit the user's login PATH.
+          export PATH="/run/wrappers/bin:${home}/.local/bin:${home}/.nix-profile/bin:/etc/profiles/per-user/zekurio/bin:/run/current-system/sw/bin:$PATH"
           ${
             if cfg.tailnet
             then ''
@@ -94,18 +88,12 @@
           exec t3 serve --host "$listen_host" --port ${toString cfg.port}
         '';
         serviceConfig = {
-          User = "t3code";
-          Group = "t3code";
-          WorkingDirectory = "${home}/projects";
+          User = "zekurio";
+          Group = user.group;
+          WorkingDirectory = "${home}/Git";
           Restart = "on-failure";
           RestartSec = 5;
           UMask = "0077";
-          NoNewPrivileges = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [home];
-          InaccessiblePaths = ["-/tank" "-/mnt/downloads"];
-          PrivateTmp = true;
         };
       };
 
