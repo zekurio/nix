@@ -216,6 +216,7 @@
     services.autoaspm.enable = true;
 
     services.homelab = {
+      t3code.enable = true;
       alloy.enable = true;
       anvil.enable = true;
       beets.enable = true;
