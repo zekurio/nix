@@ -11,8 +11,8 @@ Do not use T3's service installer or updater on Linux.
 
 | Environment | Private endpoint | Backend |
 | --- | --- | --- |
-| Adam | `https://t3.zekurio.me` | Adam's loopback port 3773 |
-| Lilith | `https://t3-lilith.zekurio.me` | Lilith's Tailscale port 3773 |
+| Adam | `https://adam.zekurio.me` | Adam's loopback port 3773 |
+| Lilith | `https://lilith.zekurio.me` | Lilith's Tailscale port 3773 |
 
 AdGuard must resolve both names to `10.0.0.2`. Caddy accepts only LAN and
 tailnet clients. Lilith accepts backend connections only from Adam's Tailscale
