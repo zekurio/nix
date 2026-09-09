@@ -225,12 +225,7 @@
       configarr.enable = true;
       copyparty.enable = true;
       costthing.enable = true;
-      coolercontrol = {
-        enable = true;
-        listenAddress = "0.0.0.0";
-        listenAddress6 = "::";
-        allowedInterfaces = ["enp42s0"];
-      };
+      coolercontrol.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
