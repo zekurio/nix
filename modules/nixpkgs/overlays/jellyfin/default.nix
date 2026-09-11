@@ -89,7 +89,7 @@ let
         };
       });
 
-    jellyfin-web = (previous.jellyfin-web.override {nodejs_22 = final.nodejs_24;}).overrideAttrs (_finalAttrs: previousAttrs: {
+    jellyfin-web = previous.jellyfin-web.overrideAttrs (_finalAttrs: previousAttrs: {
       version = jellyfinVersion;
       src = jellyfinWebSrc;
       nodejs = final.nodejs_24;
