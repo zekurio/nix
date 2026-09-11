@@ -81,7 +81,8 @@
             flags:
               e2d
               d2t
-              chmod_d: 2775
+              # Inherit setgid from the parent; explicitly setting it is blocked by RestrictSUIDSGID.
+              chmod_d: 775
               chmod_f: 664
 
           [/music-drop]
