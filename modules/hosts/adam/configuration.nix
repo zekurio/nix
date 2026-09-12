@@ -219,10 +219,10 @@
       t3code.enable = true;
       alloy.enable = true;
       anvil.enable = true;
-      beets.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
+      lidarr.enable = true;
       copyparty.enable = true;
       costthing.enable = true;
       coolercontrol.enable = true;
