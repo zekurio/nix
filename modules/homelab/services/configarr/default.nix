@@ -11,13 +11,62 @@
     animeProfile = "[German] Anime HD Bluray + WEB";
     animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
     animeRemuxScore = 5000;
+    lidarrConfig = lib.optionalString config.services.homelab.lidarr.enable ''
+      lidarrEnabled: true
+      lidarr:
+        lidarr:
+          base_url: ${config.services.homelab.lidarr.baseUrl}
+          api_key: !env LIDARR_API_KEY
+          include:
+            - template: lidarr
+          # Configarr 1.30.1 ignores download_clients inside included templates.
+          download_clients:
+            update_password: true
+            data:
+              - name: SABnzbd
+                type: Sabnzbd
+                enable: true
+                priority: 1
+                remove_completed_downloads: true
+                fields:
+                  host: 127.0.0.1
+                  port: 6789
+                  urlBase: /sabnzbd
+                  apiKey: !env SABNZBD_API_KEY
+                  musicCategory: lidarr
+              - name: Soulseek
+                type: SlskdClient
+                enable: true
+                priority: 50
+                remove_completed_downloads: true
+                fields:
+                  baseUrl: http://127.0.0.1:5030/slskd
+                  apiKey: !env SLSKD_API_KEY
+                  # Pick up manual Soulseek downloads as Beets previously did.
+                  inclusive: true
+                  timeout: 1
+                  retryAttempts: 2
+                  cleanStaleDirectories: false
+          root_folders:
+            - path: ${config.modules.homelab.mediaShare.musicDir}
+              name: Music
+              quality_profile: Lossless + HQ Lossy
+              metadata_profile: Music
+              monitor: existing
+              monitor_new_album: none
+    '';
+    lidarrEnvironment = lib.optionalString config.services.homelab.lidarr.enable ''
+      LIDARR_API_KEY=${config.sops.placeholder.lidarr_api_key}
+      SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
+      SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
+    '';
   in {
     imports = [
       inputs.configarr.nixosModules.default
     ];
 
     options.services.homelab.configarr = {
-      enable = lib.mkEnableOption "Configarr synchronization for Sonarr and Radarr";
+      enable = lib.mkEnableOption "Configarr synchronization for Sonarr, Radarr and Lidarr";
     };
 
     config = lib.mkIf cfg.enable {
@@ -45,6 +94,8 @@
           # by default, but its Nix package still builds v1.30.1, so pin here.
           recyclarrRevision: 4ae377bb704fc7fd69a544ad04e91357e0b09f62
           telemetry: false
+          localConfigTemplatesPath: ${./templates}
+          ${lidarrConfig}
 
           # TRaSH has release-group tiers for remuxes, but no generic Radarr
           # format for the remux quality modifier. Keep the anime qualities
@@ -260,6 +311,7 @@
           RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
           STOP_ON_ERROR=true
           TZ=${config.time.timeZone}
+          ${lidarrEnvironment}
         '';
         inherit (config.services.configarr) group;
         owner = config.services.configarr.user;
@@ -272,10 +324,12 @@
       };
 
       systemd.services.configarr = {
-        after = [
-          "radarr.service"
-          "sonarr.service"
-        ];
+        wantedBy = lib.optional config.services.homelab.lidarr.enable "multi-user.target";
+        # The plugin and indexer must exist before Configarr loads their schemas.
+        after =
+          ["radarr.service" "sonarr.service"]
+          ++ lib.optional config.services.homelab.lidarr.enable "lidarr-integrations.service";
+        requires = lib.optional config.services.homelab.lidarr.enable "lidarr-integrations.service";
         wants = [
           "radarr.service"
           "sonarr.service"

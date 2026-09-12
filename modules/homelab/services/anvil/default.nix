@@ -31,22 +31,6 @@
       "-bf"
       "7"
     ];
-    qsvAbAv1Args = [
-      "--enc"
-      "look_ahead=1"
-      "--enc"
-      "extbrc=1"
-      "--enc"
-      "look_ahead_depth=40"
-      "--enc"
-      "adaptive_i=1"
-      "--enc"
-      "adaptive_b=1"
-      "--enc"
-      "b_strategy=1"
-      "--enc"
-      "bf=7"
-    ];
     mediaFiles = {
       include = [
         "*.mkv"
@@ -80,7 +64,6 @@
         min_savings_percent = 0;
         force_encode_on_no_fit = true;
         ffmpeg_args = qsvFfmpegArgs;
-        ab_av1_args = qsvAbAv1Args;
         overrides.hevc = {
           target = 98;
           min_savings_percent = 10;
