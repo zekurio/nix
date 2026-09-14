@@ -6,8 +6,7 @@
   }: let
     llmAgents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
     skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
-    # Codex reads ~/.agents/skills, Claude Code reads ~/.claude/skills, and
-    # OpenCode reads both.
+    # Claude Code reads ~/.claude/skills, and OpenCode reads both directories.
     skillDirs = [".agents/skills" ".claude/skills"];
     linkSkills = dir:
       lib.mapAttrs' (name: _:
@@ -16,13 +15,12 @@
         })
       skills;
   in {
-    # Claude Code, Codex and OpenCode come from llm-agents.nix, pinned in flake.lock
+    # Claude Code and OpenCode come from llm-agents.nix, pinned in flake.lock
     # and identical on every host. Upgrades and rollbacks happen through the
     # lock (weekly update PR, git revert) and a host rebuild, never
     # imperatively.
     home.packages = [
       llmAgents.claude-code
-      llmAgents.codex
       llmAgents.opencode
     ];
 
