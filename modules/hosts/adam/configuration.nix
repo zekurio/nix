@@ -219,6 +219,7 @@
       alloy.enable = true;
       anvil.enable = true;
       calthing.enable = true;
+      cliproxyapi.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
       lidarr.enable = true;
