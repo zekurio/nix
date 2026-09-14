@@ -44,14 +44,10 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Claude Code, Codex and OpenCode; updates arrive through the weekly flake.lock PR.
+    # Claude Code and OpenCode; updates arrive through the weekly flake.lock PR.
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
-    # against that pin, and Codex is a long Rust build otherwise.
+    # against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
-    t3code = {
-      url = "github:omarcresp/t3code-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Shared agent skills.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";

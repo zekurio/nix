@@ -18,7 +18,6 @@
           la = "eza -la";
           lt = "eza --tree";
           cat = "bat";
-          codex = "codex --dangerously-bypass-approvals-and-sandbox";
         };
       };
 
