@@ -1,5 +1,5 @@
 {
-  flake.modules.homeManager.zekurio = {...}: {
+  flake.modules.homeManager.zekurio = {
     programs = {
       atuin = {
         enable = true;

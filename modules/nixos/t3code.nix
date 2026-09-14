@@ -7,7 +7,7 @@
   }: let
     cfg = config.modules.t3code;
     package = inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system}.t3-code-nightly;
-    codex = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
+    llmAgents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
     user = config.users.users.zekurio;
     home = user.home;
     sessionVariables = config.home-manager.users.zekurio.home.sessionVariables;
@@ -45,7 +45,9 @@
         after = ["network-online.target"];
         path = with pkgs; [
           package
-          codex
+          llmAgents.claude-code
+          llmAgents.codex
+          llmAgents.opencode
           bash
           coreutils
           curl
