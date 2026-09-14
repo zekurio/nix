@@ -1,5 +1,5 @@
-{...}: {
-  flake.modules.darwin.sachiel = {...}: let
+{
+  flake.modules.darwin.sachiel = let
     username = "zekurio";
   in {
     home-manager.users.${username} = {

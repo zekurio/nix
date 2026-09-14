@@ -1,4 +1,4 @@
-{...}: {
+{
   flake.modules.nixos.lilith = {pkgs, ...}: let
     kittyLauncher = pkgs.writeShellApplication {
       name = "kitty-launcher";

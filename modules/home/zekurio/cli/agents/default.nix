@@ -3,15 +3,39 @@
     lib,
     pkgs,
     ...
-  }: {
-    # Codex comes from llm-agents.nix, pinned in flake.lock and identical
-    # on every host. Upgrades and rollbacks happen through the lock (weekly
-    # update PR, git revert) and a host rebuild, never imperatively.
-    home.file = lib.mapAttrs' (name: _:
-      lib.nameValuePair ".agents/skills/${name}" {
-        source = "${inputs.agent-stuff}/skills/${name}";
-      }) (lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills"));
+  }: let
+    llmAgents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+    skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
+    # Codex reads ~/.agents/skills, Claude Code reads ~/.claude/skills, and
+    # OpenCode reads both.
+    skillDirs = [".agents/skills" ".claude/skills"];
+    linkSkills = dir:
+      lib.mapAttrs' (name: _:
+        lib.nameValuePair "${dir}/${name}" {
+          source = "${inputs.agent-stuff}/skills/${name}";
+        })
+      skills;
+  in {
+    # Claude Code, Codex and OpenCode come from llm-agents.nix, pinned in flake.lock
+    # and identical on every host. Upgrades and rollbacks happen through the
+    # lock (weekly update PR, git revert) and a host rebuild, never
+    # imperatively.
+    home.packages = [
+      llmAgents.claude-code
+      llmAgents.codex
+      llmAgents.opencode
+    ];
 
-    home.packages = [inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex];
+    home.file = lib.mkMerge (map linkSkills skillDirs);
+
+    # Claude Code writes to ~/.claude/settings.json itself (/model, /config),
+    # so merge our keys in instead of owning the file as a read-only symlink.
+    home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      f="$HOME/.claude/settings.json"
+      run mkdir -p "$(dirname "$f")"
+      [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
+      tmp=$(mktemp)
+      ${lib.getExe pkgs.jq} '. * {attribution: {commit: "", pr: ""}}' "$f" > "$tmp" && run mv "$tmp" "$f"
+    '';
   };
 }

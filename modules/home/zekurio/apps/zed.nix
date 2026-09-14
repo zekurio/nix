@@ -1,5 +1,5 @@
 {
-  flake.modules.homeManager.zekurio = {...}: {
+  flake.modules.homeManager.zekurio = {
     # Config/theme only; the binary comes from the host. Flavor and accent
     # cascade from the global Catppuccin settings.
     programs.zed-editor = {

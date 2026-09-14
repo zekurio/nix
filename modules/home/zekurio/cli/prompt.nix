@@ -1,13 +1,8 @@
 {
   flake.modules.homeManager.zekurio = {
-    lib,
-    pkgs,
-    ...
-  }: {
     programs.starship = {
       enable = true;
       enableFishIntegration = true;
-      package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (pkgs.callPackage ./_starship-darwin.nix {});
       settings = {
         palette = "catppuccin_frappe";
         palettes.catppuccin_frappe = {
