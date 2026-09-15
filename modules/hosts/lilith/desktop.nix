@@ -2,14 +2,14 @@
   flake.modules.nixos.lilith = {pkgs, ...}: let
     system = pkgs.stdenv.hostPlatform.system;
     dmsPackage = pkgs.dms-shell.overrideAttrs (old: {
-      # nixpkgs copies QML directly from the immutable source in postInstall,
-      # so patch the installed tree rather than the package's core sourceRoot.
-      postInstall =
-        (old.postInstall or "")
+      # DMS 1.6.1 embeds the shell into the Go binary: the package's preBuild
+      # runs `make sync-shell` to copy ../quickshell into core's embed dir, so
+      # the QML must be patched before that, not in postInstall.
+      postPatch =
+        (old.postPatch or "")
         + ''
-          chmod u+w $out/share/quickshell/dms/Services \
-            $out/share/quickshell/dms/Services/DisplayService.qml
-          patch -d $out/share/quickshell/dms -p2 < ${./_dms-brightness.patch}
+          chmod -R u+w ../quickshell
+          patch -p1 -d .. < ${./_dms-brightness.patch}
         '';
     });
   in {
