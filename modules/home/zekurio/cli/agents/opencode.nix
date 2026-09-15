@@ -1,9 +1,8 @@
 {
   flake.modules.homeManager.zekurio = {...}: let
-    # CLIProxyAPI runs on adam behind the private Caddy vhost
-    # `cpa.zekurio.me` (LAN + tailnet only). The API key is not part of this
-    # config: it lives in ~/.local/share/opencode/auth.json, written once by
-    # `/connect` (or `opencode auth login`).
+    # Models come from OpenCode Go, the built-in `opencode-go` provider. Its
+    # credentials are not part of this config: they live in
+    # ~/.local/share/opencode/auth.json, written once by `opencode auth login`.
     settings = {
       "$schema" = "https://opencode.ai/config.json";
 
@@ -20,21 +19,15 @@
         };
       };
 
-      provider.cliproxyapi = {
-        npm = "@ai-sdk/openai-compatible";
-        name = "CLIProxyAPI";
-        options.baseURL = "https://cpa.zekurio.me/v1";
-        # IDs must match `GET /v1/models` on the proxy.
-        models = let
-          model = name: {
-            inherit name;
-            reasoning = true;
-          };
-        in {
-          "claude-fable-5-1" = model "Claude Fable 5.1";
-          "claude-opus-5" = model "Claude Opus 5";
-          "claude-sonnet-5" = model "Claude Sonnet 5";
-        };
+      # Subagents inherit the caller's model unless pinned. Search and
+      # research work does not need a frontier model, so route the built-in
+      # subagents to a cheap fast one; only `model` is overridden, the
+      # built-in prompts and permissions stay as shipped.
+      agent = let
+        cheap = "opencode-go/deepseek-v4.1-flash";
+      in {
+        general.model = cheap;
+        explore.model = cheap;
       };
     };
   in {
