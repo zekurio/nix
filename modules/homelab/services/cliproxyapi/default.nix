@@ -1,7 +1,8 @@
-{
+{inputs, ...}: {
   flake.modules.nixos.homelab = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     cfg = config.services.homelab.cliproxyapi;
@@ -15,6 +16,7 @@
     config = lib.mkIf cfg.enable {
       services.cliproxyapi = {
         enable = true;
+        package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.cli-proxy-api;
         settings = {
           host = "127.0.0.1";
           inherit port;
