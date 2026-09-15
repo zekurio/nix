@@ -1056,6 +1056,7 @@
         "nix-linux-builder": "nix-linux-builder",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
+        "t3code": "t3code",
         "ucodenix": "ucodenix",
         "wavexlr-on-linux-cfg": "wavexlr-on-linux-cfg"
       }
@@ -1174,6 +1175,26 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "t3code": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789383478,
+        "narHash": "sha256-9CvhrBZ+t3jrGs5ZpidgcW5BOleYd4k/IbUBbj0bzJI=",
+        "owner": "omarcresp",
+        "repo": "t3code-flake",
+        "rev": "4c109b4e4f3ec883d9234a7fdd8fd24ed508dc63",
+        "type": "github"
+      },
+      "original": {
+        "owner": "omarcresp",
+        "repo": "t3code-flake",
         "type": "github"
       }
     },
