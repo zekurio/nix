@@ -216,10 +216,10 @@
     services.autoaspm.enable = true;
 
     services.homelab = {
+      t3code.enable = true;
       alloy.enable = true;
       anvil.enable = true;
       calthing.enable = true;
-      cliproxyapi.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
       lidarr.enable = true;
