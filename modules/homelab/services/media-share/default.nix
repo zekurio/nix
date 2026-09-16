@@ -49,12 +49,22 @@
 
     # Create root dirs as setgid + group-writable
     directoryRules = map (dir: "d ${dir} ${shareDirMode} ${shareUser} ${shareGroup} -") sharedDirs;
-    userShareDirectoryRules = lib.mapAttrsToList (_: share: "d ${builtins.toJSON share.path} 0700 ${share.owner} ${share.group} -") cfg.userShares;
-    userLibraryDirectoryRules =
-      lib.mapAttrsToList (
-        _: share: "d ${builtins.toJSON share.libraryPath} 0700 ${share.owner} ${share.group} -"
-      )
-      cfg.userShares;
+    # POSIX ACLs make the group mode bits the mask, so the tmpfiles `d` chmod
+    # to 0700 collapses the mask to --- and silently revokes the named ACLs on
+    # these private roots. Re-open the mask in the rule right after each `d`;
+    # systemd-tmpfiles applies rules in order.
+    userShareDirectoryRules = lib.flatten (lib.mapAttrsToList (_: share: [
+        "d ${builtins.toJSON share.path} 0700 ${share.owner} ${share.group} -"
+        "a+ ${builtins.toJSON share.path} - - - - m::rwx"
+      ])
+      cfg.userShares);
+    userLibraryDirectoryRules = lib.flatten (
+      lib.mapAttrsToList (_: share: [
+        "d ${builtins.toJSON share.libraryPath} 0700 ${share.owner} ${share.group} -"
+        "a+ ${builtins.toJSON share.libraryPath} - - - - m::rwx"
+      ])
+      cfg.userShares
+    );
     userShareSambaSettings = lib.listToAttrs (
       lib.mapAttrsToList (_: share: {
         name = share.name;
