@@ -146,7 +146,11 @@
       firewall.enable = true;
       hostId = "eab7e93e";
       hosts = {
-        "127.0.0.1" = ["auth.${config.services.homelab.domains.zekurio}"];
+        # The auth name must resolve to adam's LAN address, not loopback:
+        # systemd-resolved hands /etc/hosts entries to containers, where
+        # 127.0.0.1 is the container itself, and Fluxer's SSO validation
+        # rejects loopback issuers outright.
+        "10.0.0.2" = ["auth.${config.services.homelab.domains.zekurio}"];
       };
       useNetworkd = true;
     };
