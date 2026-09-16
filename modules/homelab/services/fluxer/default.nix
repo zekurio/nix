@@ -76,6 +76,9 @@
           LIVEKIT_API_KEY=fluxer
           COMPOSE_FILE=docker-compose.yml:docker-compose.proxy.yml
           FLUXER_EDGE_BIND=127.0.0.1:${toString edgePort}
+          # The SSO issuer resolves to adam's LAN address, which the API
+          # refuses unless private addresses are explicitly allowed.
+          FLUXER_SSO_ALLOW_PRIVATE_ADDRESSES=true
           POSTGRES_PASSWORD=${config.sops.placeholder.fluxer_postgres_password}
           MEILI_MASTER_KEY=${config.sops.placeholder.fluxer_meili_master_key}
           FLUXER_S3_SECRET_KEY=${config.sops.placeholder.fluxer_s3_secret_key}
