@@ -235,6 +235,7 @@
       copyparty.enable = true;
       costthing.enable = true;
       coolercontrol.enable = true;
+      fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
