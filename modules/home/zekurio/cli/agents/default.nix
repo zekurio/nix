@@ -15,12 +15,13 @@
         })
       skills;
   in {
-    # Claude Code and OpenCode come from llm-agents.nix, pinned in flake.lock
-    # and identical on every host. Upgrades and rollbacks happen through the
-    # lock (weekly update PR, git revert) and a host rebuild, never
+    # Claude Code, Codex, and OpenCode come from llm-agents.nix, pinned in
+    # flake.lock and identical on every host. Upgrades and rollbacks happen
+    # through the lock (weekly update PR, git revert) and a host rebuild, never
     # imperatively.
     home.packages = [
       llmAgents.claude-code
+      llmAgents.codex
       llmAgents.opencode
     ];
 
