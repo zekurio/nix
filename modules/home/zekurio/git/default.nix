@@ -6,11 +6,9 @@
     ...
   }: let
     adamSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOkmYfqv/9dCuR6yLGxao2VqR/gILe8ctZMijsaZ9AH";
-    lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
     sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
     signingKeys = [
       adamSigningKey
-      lilithSigningKey
       sachielSigningKey
     ];
     # Apps may inherit a different agent from the desktop session.
@@ -133,13 +131,6 @@
             HostKeyAlias = "adam";
             User = "zekurio";
             # Preserve terminal truecolor and identity over SSH.
-            SendEnv = ["COLORTERM" "TERM_PROGRAM"];
-          };
-
-          # MagicDNS resolves this while connected to the tailnet.
-          lilith = {
-            HostName = "lilith";
-            User = "zekurio";
             SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
         };

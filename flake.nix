@@ -9,7 +9,6 @@
       "https://cachix.cachix.org"
       "https://nixpkgs.cachix.org"
       "https://nix-community.cachix.org"
-      "https://nyx-cache.chaotic.cx/"
       "https://zekurio.cachix.org"
     ];
     extra-trusted-public-keys = [
@@ -18,7 +17,6 @@
       "cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
       "nixpkgs.cachix.org-1:q91R6hxbwFvDqTSDKwDAV4T5PxqXGxswD8vhONFMeOE="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
       "zekurio.cachix.org-1:mv0mACvSLZtBkXXh5YDPPXmFBJ/eO+VkSzep6LJZrAg="
     ];
     download-buffer-size = 1073741824;
@@ -48,40 +46,17 @@
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
     # against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
-    t3code = {
-      url = "github:omarcresp/t3code-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Shared agent skills.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    helium = {
-      url = "github:schembriaiden/helium-browser-nix-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    # Upstream has not merged its Nix packaging yet. This temporary fork tracks
-    # current Jellium and includes the merged Niri window fix.
-    jellium-desktop = {
-      url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    # Chaotic supplies cached CachyOS kernels and current Proton builds. Keep
-    # its own nixpkgs pin: matching that pin is what makes its cache usable.
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
-    wavexlr-on-linux-cfg = {
-      url = "github:jmansar/wavexlr-on-linux-cfg";
-      flake = false;
-    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";

@@ -1,7 +1,7 @@
 # nix
 
-Nix configurations for my NixOS hosts and my Mac: a homelab server, a gaming
-desktop, and a laptop, plus the Home Manager profile they share.
+Nix configurations for my NixOS server and my Mac: a homelab server and a
+laptop, plus the Home Manager profile they share.
 
 Built with [flake-parts](https://flake.parts) in a dendritic layout — every file
 under `modules/` is a flake-parts module discovered by
@@ -13,7 +13,6 @@ inputs, systems, and the formatter.
 | Host | Type | Channel | Description |
 |------|------|---------|-------------|
 | `adam` | NixOS | unstable | Homelab server: media, photos, documents, behind Caddy; public services on 443, management UIs LAN/tailnet-only |
-| `lilith` | NixOS | unstable | Ryzen/Radeon desktop: niri, DankMaterialShell, gaming |
 | `sachiel` | nix-darwin | unstable | MacBook Air |
 
 ### Layout
@@ -39,11 +38,10 @@ pushed to `main` first. It also auto-upgrades from `main` on a weekly timer.
 ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'
 ```
 
-`lilith` and `sachiel` build from their local checkouts. `path:` keeps the root
-activation step from treating the Git working tree as root-owned:
+`sachiel` builds from its local checkout. `path:` keeps the root activation
+step from treating the Git working tree as root-owned:
 
 ```bash
-sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
@@ -89,45 +87,6 @@ nixos-install --root /mnt --no-root-passwd --flake "github:zekurio/nix#${HOST}"
 umount -Rl /mnt
 reboot
 ```
-
-#### Lilith: dual boot and Secure Boot
-
-Lilith's disko layout owns the complete Samsung NVMe at
-`nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0T205473J_1`; Windows remains on the Crucial
-drive. Verify that by-id path before running disko, because the command above is
-destructive.
-
-The root partition uses btrfs with separate `@`, `@home`, `@nix`, and `@swap`
-subvolumes. The last one contains a 16 GiB swapfile and stays outside filesystem
-snapshots. This layout gives repositories under `/home` copy-on-write clones for
-tools such as rift.
-
-An existing ext4 installation must be reinstalled or migrated from external
-media before activating this configuration. A normal `nixos-rebuild` does not
-convert the filesystem. Lilith's Samsung EFI partition also contains Windows'
-bootloader, so do not run the generic destructive disko command during that
-migration. Preserve the EFI partition and back up its `EFI/Microsoft` directory.
-Reclaiming the old swap partition for btrfs requires recreating only the old swap
-and root partitions as one root partition.
-
-Limine returns to the firmware's existing `Windows Boot Manager` entry rather
-than directly chainloading it, which preserves Windows' expected BitLocker PCR
-measurements.
-
-The Limine module generates signing keys but deliberately does not enroll them.
-Install and test both operating systems with firmware Secure Boot disabled
-first. Back up the BitLocker recovery key, put the firmware into Setup/Custom
-Mode, boot Lilith again, inspect the keys, then retain the firmware/OEM and
-Microsoft certificates while enrolling:
-
-```bash
-sudo sbctl status
-sudo sbctl enroll-keys --microsoft --firmware-builtin
-```
-
-Current `sbctl` carries both the Microsoft 2011 and 2023 certificate generations.
-Only enable firmware Secure Boot after that command succeeds. Keep
-`/var/lib/sbctl` backed up; future Limine updates need its private signing keys.
 
 ### Secrets
 
