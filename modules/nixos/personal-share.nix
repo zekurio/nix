@@ -1,7 +1,5 @@
 {...}: let
   sharePath = "/tank/shares/zekurio";
-  clientPath = "/home/zekurio/Share";
-  serverAddress = "10.0.0.2";
   lanCidr = "10.0.0.0/24";
 in {
   flake.modules.nixos = {
@@ -23,26 +21,6 @@ in {
       '';
 
       networking.firewall.interfaces.enp42s0.allowedTCPPorts = [2049];
-    };
-
-    lilith = {lib, ...}: {
-      # Keep the network share visible at a stable, top-level home directory
-      # without delaying boot when adam is unavailable.
-      fileSystems.${clientPath} = {
-        # The router does not publish adam in DNS, but its LAN address is fixed.
-        device = "${serverAddress}:${lib.removePrefix "/tank" sharePath}";
-        fsType = "nfs";
-        options = [
-          "nfsvers=4.2"
-          "rw"
-          "_netdev"
-          "noauto"
-          "nofail"
-          "x-systemd.automount"
-          "x-systemd.idle-timeout=10min"
-          "x-systemd.mount-timeout=10s"
-        ];
-      };
     };
   };
 }
