@@ -22,15 +22,31 @@
         inherit hash;
       };
 
+    # SeaweedFS (attachments, avatars, generated downloads) keeps its data in
+    # a named volume otherwise. Rebinding that volume to a tank dataset keeps
+    # uploads off the root SSD and under sanoid. Compose reuses an existing
+    # volume instead of applying new driver options, so first deploy must
+    # remove fluxer_seaweedfs-data once (it is empty on a fresh stack).
+    storageFile = pkgs.writeText "docker-compose.storage.yml" ''
+      volumes:
+        seaweedfs-data:
+          driver: local
+          driver_opts:
+            type: none
+            o: bind
+            device: /tank/fluxer/seaweedfs
+    '';
+
     composeFiles = [
       (stackFile "docker-compose.yml" "sha256-7XUZNwsyFt6CeHpZWtWnuOoSOyfJ/g+xFgFKISA11mQ=")
       # The proxy overlay makes the edge serve plain HTTP on FLUXER_EDGE_BIND
       # instead of binding 80/443, which the homelab Caddy already owns.
       (stackFile "docker-compose.proxy.yml" "sha256-RSmFjPBPF7bFBQTWEHsoTVP3AZZlf4OoULqxpnA+YmQ=")
+      storageFile
     ];
     caddyfile = stackFile "Caddyfile" "sha256-6asaetmSERcvaM+icovuuG3U7SIGNcq1+EYbsrScsCM=";
 
-    compose = "${lib.getExe pkgs.docker-compose} -f docker-compose.yml -f docker-compose.proxy.yml";
+    compose = "${lib.getExe pkgs.docker-compose} -f docker-compose.yml -f docker-compose.proxy.yml -f docker-compose.storage.yml";
   in {
     options.services.homelab.fluxer = {
       enable = lib.mkEnableOption "Fluxer chat stack (Compose) with Caddy integration";
@@ -74,7 +90,7 @@
           FLUXER_IMAGE_TAG=${imageTag}
           FLUXER_S3_ACCESS_KEY=fluxer
           LIVEKIT_API_KEY=fluxer
-          COMPOSE_FILE=docker-compose.yml:docker-compose.proxy.yml
+          COMPOSE_FILE=docker-compose.yml:docker-compose.proxy.yml:docker-compose.storage.yml
           FLUXER_EDGE_BIND=127.0.0.1:${toString edgePort}
           # The SSO issuer resolves to adam's LAN address, which the API
           # refuses unless private addresses are explicitly allowed.
@@ -103,6 +119,7 @@
         wants = ["network-online.target"];
         after = ["network-online.target" "podman.socket"];
         requires = ["podman.socket"];
+        unitConfig.RequiresMountsFor = "/tank/fluxer/seaweedfs";
         environment.DOCKER_HOST = "unix:///var/run/docker.sock";
         serviceConfig = {
           Type = "oneshot";

@@ -49,6 +49,7 @@
       };
       datasets = {
         "tank/immich".useTemplate = ["precious"];
+        "tank/fluxer".useTemplate = ["precious"];
         "tank/shares" = {
           useTemplate = ["precious"];
           # Cover current and future per-user share datasets.
@@ -66,7 +67,10 @@
     systemd.services.tank-datasets = {
       description = "Ensure tank ZFS datasets and quotas";
       wantedBy = ["multi-user.target"];
-      before = ["mediaShare-user-library-acl.service"];
+      before = [
+        "mediaShare-user-library-acl.service"
+        "fluxer.service"
+      ];
       after = ["zfs-import.target"];
       serviceConfig = {
         Type = "oneshot";
@@ -75,9 +79,16 @@
       script = ''
         ${ensureDataset "tank/media" "6600G"}
         ${ensureDataset "tank/immich" "100G"}
+        ${ensureDataset "tank/fluxer" "100G"}
         ${ensureDataset "tank/alloy" "100G"}
         ${ensureDataset "tank/shares" "100G"}
         ${ensureUserShareDatasets}
+
+        # Fluxer's SeaweedFS container bind-mounts this directory (see the
+        # storage override in the fluxer module). Rootful podman runs the
+        # container as root, so root:root 0700 is sufficient.
+        ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
+        ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
       '';
     };
 
