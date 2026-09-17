@@ -6,9 +6,13 @@
     ...
   }: let
     adamSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOkmYfqv/9dCuR6yLGxao2VqR/gILe8ctZMijsaZ9AH";
+    # Host retired; the private key is still in 1Password and past signatures
+    # from lilith must keep verifying, so the public key stays allowed.
+    lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
     sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
     signingKeys = [
       adamSigningKey
+      lilithSigningKey
       sachielSigningKey
     ];
     # Apps may inherit a different agent from the desktop session.
