@@ -1,5 +1,6 @@
 {
   flake.modules.homeManager.zekurio = {
+    config,
     lib,
     pkgs,
     ...
@@ -23,10 +24,14 @@
           term = "xterm-256color";
           window-inherit-font-size = false;
           macos-titlebar-style = "transparent";
+          theme = "light:catppuccin-latte,dark:catppuccin-frappe";
         };
       };
 
-      catppuccin.ghostty.enable = true;
+      xdg.configFile = {
+        "ghostty/themes/catppuccin-latte".source = "${config.catppuccin.sources.ghostty}/catppuccin-latte.conf";
+        "ghostty/themes/catppuccin-frappe".source = "${config.catppuccin.sources.ghostty}/catppuccin-frappe.conf";
+      };
     };
   };
 }
