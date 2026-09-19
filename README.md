@@ -35,8 +35,21 @@ secrets/                sops-encrypted, one file per host
 pushed to `main` first. It also auto-upgrades from `main` on a weekly timer.
 
 ```bash
-ssh adam 'nixos-rebuild switch --flake github:zekurio/nix#adam --sudo'
+ssh adam 'sudo systemctl start nixos-upgrade.service'
 ```
+
+Once the build-safety configuration is deployed, use this same service for
+manual and scheduled upgrades. Concurrent starts share one running upgrade;
+evaluation and daemon builds share a 3 GiB soft RAM limit, 4 GiB hard RAM
+limit, 4 GiB swap limit, and two CPUs. Builds run one derivation at a time
+with two workers, using disk for temporary files. The existing 16 GiB ext4
+swapfile stays intact. Oversized builds can fail and should be built elsewhere
+and cached, rather than raising these limits on production.
+
+Follow progress with `journalctl -fu nixos-upgrade.service`. Automatic reboots
+are disabled; schedule kernel reboots separately. Direct `nixos-rebuild`
+commands bypass the upgrade serialization and evaluation limits, and root
+builds using the local store also bypass the daemon limits.
 
 `sachiel` builds from its local checkout. `path:` keeps the root activation
 step from treating the Git working tree as root-owned:
