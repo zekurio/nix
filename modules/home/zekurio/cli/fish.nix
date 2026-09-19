@@ -20,12 +20,15 @@
 
           ${lib.optionalString isDarwin ''
             function __sync_macos_theme --on-event fish_prompt
+              set -l theme
+              set -l starship_config
+
               if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
-                set -l theme catppuccin-frappe
-                set -l starship_config "$HOME/.config/starship.toml"
+                set theme catppuccin-frappe
+                set starship_config "$HOME/.config/starship.toml"
               else
-                set -l theme catppuccin-latte
-                set -l starship_config "$HOME/.config/starship-latte.toml"
+                set theme catppuccin-latte
+                set starship_config "$HOME/.config/starship-latte.toml"
               end
 
               if test "$STARSHIP_CONFIG" != "$starship_config"
