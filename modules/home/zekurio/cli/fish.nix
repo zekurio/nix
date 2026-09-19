@@ -17,6 +17,8 @@
         enable = true;
         interactiveShellInit = ''
           set fish_greeting
+          # Each shell must apply its colors, even if it inherits STARSHIP_CONFIG.
+          set -g __fish_terminal_flavor ""
 
           function __apply_terminal_theme
             set -l flavor
@@ -34,8 +36,9 @@
               set starship_config "$HOME/.config/starship.toml"
             end
 
-            if test "$STARSHIP_CONFIG" != "$starship_config"
+            if test "$__fish_terminal_flavor" != "$flavor"
               fish_config theme choose "catppuccin-$flavor"
+              and set -g __fish_terminal_flavor "$flavor"
             end
 
             set -gx BAT_THEME "$bat_theme"
