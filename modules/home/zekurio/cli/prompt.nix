@@ -170,8 +170,8 @@
       };
     };
 
-    # Fish selects this full config when macOS uses its light appearance.
-    xdg.configFile."starship-latte.toml" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    # Fish selects this config when the local terminal uses a light theme.
+    xdg.configFile."starship-latte.toml" = {
       source = (pkgs.formats.toml {}).generate "starship-latte.toml" (
         config.programs.starship.settings // {palette = "catppuccin_latte";}
       );
