@@ -186,13 +186,6 @@
       };
     };
 
-    swapDevices = [
-      {
-        device = "/var/lib/swapfile";
-        size = 16 * 1024;
-      }
-    ];
-
     # SOPS secrets configuration. The age key is hand-placed during bootstrap
     # (see README) and deliberately not generated on the host.
     sops = {
@@ -264,7 +257,6 @@
       flake = "github:zekurio/nix#adam";
       dates = "Sun *-*-* 03:00:00";
       randomizedDelaySec = "45min";
-      allowReboot = true;
     };
 
     # DO NOT TOUCH THIS

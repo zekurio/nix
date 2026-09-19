@@ -28,22 +28,9 @@
     auto-optimise-store = true;
     inherit substituters;
   };
-
-  # Build concurrency for NixOS hosts (i.e. adam: 12 cores, 16 GB RAM, full
-  # production load). 2026-09-18: an uncapped rebuild (max-jobs 12, cores 0)
-  # ran 12x cc1plus (V8) plus 12x pytest-xdist (paperless checkPhase) in
-  # parallel, exhausted RAM and the entire 16 GB swapfile, and OOM-killed the
-  # box into a hard reset. Worst case is now ~2 derivations x 4 workers.
-  # For an exceptionally big update, override once via
-  # NIX_CONFIG='max-jobs = 1' instead of raising these.
-  nixosConcurrency = {
-    max-jobs = 2;
-    cores = 4;
-  };
 in {
   flake.modules.nixos.base.nix.settings =
     common
-    // nixosConcurrency
     // {
       inherit trusted-public-keys;
     };
