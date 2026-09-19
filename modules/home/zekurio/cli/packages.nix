@@ -2,7 +2,6 @@
   flake.modules.homeManager.zekurio = {pkgs, ...}: {
     home.packages = with pkgs; [
       age
-      bitwarden-cli
       devenv
       envsubst
       gh
