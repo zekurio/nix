@@ -83,7 +83,11 @@
 
       services.configarr = {
         enable = true;
-        package = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        package = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+          pnpmDeps = old.pnpmDeps.overrideAttrs {
+            outputHash = "sha256-auz4JyfHJAOF+baLfV391HgBTua4AJFfX4CtTPh+0Sw=";
+          };
+        });
         schedule = "*-*-* 05:00:00";
         environmentFile = config.sops.templates."configarr.env".path;
         config = ''
