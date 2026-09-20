@@ -48,6 +48,7 @@
         };
       };
       datasets = {
+        "tank/forgejo".useTemplate = ["precious"];
         "tank/immich".useTemplate = ["precious"];
         "tank/fluxer".useTemplate = ["precious"];
         "tank/shares" = {
@@ -68,6 +69,7 @@
       description = "Ensure tank ZFS datasets and quotas";
       wantedBy = ["multi-user.target"];
       before = [
+        "forgejo.service"
         "mediaShare-user-library-acl.service"
         "fluxer-storage.service"
       ];
@@ -78,11 +80,18 @@
       };
       script = ''
         ${ensureDataset "tank/media" "6600G"}
+        ${ensureDataset "tank/forgejo" "100G"}
         ${ensureDataset "tank/immich" "100G"}
         ${ensureDataset "tank/fluxer" "100G"}
         ${ensureDataset "tank/alloy" "100G"}
         ${ensureDataset "tank/shares" "100G"}
         ${ensureUserShareDatasets}
+
+        # Forgejo keeps the repositories and LFS objects on the snapshotted
+        # dataset. Its SQLite database and generated config stay in /var/lib.
+        ${pkgs.coreutils}/bin/mkdir -p /tank/forgejo/repos /tank/forgejo/lfs
+        ${pkgs.coreutils}/bin/chown forgejo:forgejo /tank/forgejo /tank/forgejo/repos /tank/forgejo/lfs
+        ${pkgs.coreutils}/bin/chmod 0750 /tank/forgejo /tank/forgejo/repos /tank/forgejo/lfs
 
         # Fluxer's SeaweedFS container bind-mounts this directory (see the
         # storage module). Rootful podman runs the
@@ -90,6 +99,11 @@
         ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
         ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
       '';
+    };
+
+    systemd.services.forgejo = lib.mkIf config.services.homelab.forgejo.enable {
+      requires = ["tank-datasets.service"];
+      after = ["tank-datasets.service"];
     };
 
     # Dataset reconciliation reapplies the private 0700 modes, which collapses
