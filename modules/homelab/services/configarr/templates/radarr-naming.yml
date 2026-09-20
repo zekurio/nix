@@ -1,5 +1,5 @@
 # Keep source quality, Proper/Repack, group and edition for later imports.
-# IDs can confuse Kyoo's parser. Codec details can be read from the file.
+# Codec details can be read from the file.
 media_naming_api:
   renameMovies: true
   replaceIllegalCharacters: true
