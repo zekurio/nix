@@ -65,3 +65,15 @@ To update Kyoo, change `version` in `default.nix` and check the new release's
 service settings. PostgreSQL and Traefik have separate image tags in their
 own modules. The database health check delays its clients until PostgreSQL
 accepts TCP connections.
+
+## File matching
+
+The scanner uses `[tmdbid-N]` movie folders and `[tvdbid-N]` series folders
+as the source of identity. It keeps explicit `SxxEyy` episode numbers.
+These files bypass anime title matching and cached alias links. This prevents
+anime movies from becoming TV episodes and prevents season renumbering.
+Files without these folder IDs keep upstream matching behavior.
+
+The patches in `identification.nix` target the pinned 5.2.1 scanner. Update
+and test them when changing the scanner image. Existing incorrect links need
+an explicit repair; the patch does not reset the library or watch history.
