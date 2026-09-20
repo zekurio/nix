@@ -1,0 +1,11 @@
+--- a/themoviedatabase.py
++++ b/themoviedatabase.py
+@@ -771,4 +771,7 @@
+ 		notext = next((x for x in images if x["iso_639_1"] == None), None)
+ 		if notext:
+ 			return self._image_path + notext["file_path"]
+-		return None
++		english = next((x for x in images if x["iso_639_1"] == "en"), None)
++		if english:
++			return self._image_path + english["file_path"]
++		return self._image_path + images[0]["file_path"] if images else None
