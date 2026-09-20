@@ -84,6 +84,12 @@
       services.homelab.caddy.virtualHosts.kyoo = {
         inherit domain;
         reverseProxy = "127.0.0.1:8901";
+        extraConfig = ''
+          # Kyoo hides collection members even when the client filters to movies.
+          # Keep each movie and series visible in browse results.
+          @browse path /api/shows
+          uri @browse query ignoreInCollection false
+        '';
       };
     };
   };
