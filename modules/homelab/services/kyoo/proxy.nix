@@ -74,6 +74,9 @@
         cmd = [
           "--providers.file.filename=/etc/traefik/routes.yaml"
           "--entryPoints.web.address=:8901"
+          # Caddy reaches the published port through the Podman gateway.
+          # Preserve HTTPS in the API's pagination links.
+          "--entryPoints.web.forwardedHeaders.trustedIPs=10.89.1.1/32"
           "--accesslog=true"
           "--accesslog.fields.queryparameters.defaultmode=drop"
         ];

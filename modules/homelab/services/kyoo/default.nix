@@ -57,7 +57,7 @@
             };
             # Keep the network across stops. Each container owns its lifecycle.
             script = ''
-              podman network exists kyoo || podman network create kyoo
+              podman network exists kyoo || podman network create --subnet 10.89.1.0/24 --gateway 10.89.1.1 kyoo
             '';
           };
         };
