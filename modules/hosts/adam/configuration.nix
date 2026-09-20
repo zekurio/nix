@@ -234,6 +234,7 @@
       fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
+      kyoo.enable = true;
       inviterr.enable = true;
       navidrome.enable = true;
       paperless-ngx.enable = true;

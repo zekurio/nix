@@ -69,7 +69,7 @@
       wantedBy = ["multi-user.target"];
       before = [
         "mediaShare-user-library-acl.service"
-        "fluxer.service"
+        "fluxer-storage.service"
       ];
       after = ["zfs-import.target"];
       serviceConfig = {
@@ -85,7 +85,7 @@
         ${ensureUserShareDatasets}
 
         # Fluxer's SeaweedFS container bind-mounts this directory (see the
-        # storage override in the fluxer module). Rootful podman runs the
+        # storage module). Rootful podman runs the
         # container as root, so root:root 0700 is sufficient.
         ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
         ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
