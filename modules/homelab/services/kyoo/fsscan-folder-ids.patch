@@ -1,0 +1,13 @@
+--- a/fsscan.py
++++ b/fsscan.py
+@@ -144,6 +144,10 @@
+ 
+ 	def _match(self, video: Video) -> Video:
+ 		video.for_ = []
++		# Resolve explicit IDs through the provider. Cached aliases and secondary
++		# IDs can otherwise link movies to episodes or to several entries.
++		if video.guess.from_ == "arr-folder-id":
++			return video
+ 
+ 		year_info = (
+ 			self._info.guesses[video.guess.title]

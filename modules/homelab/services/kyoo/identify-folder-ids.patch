@@ -1,0 +1,23 @@
+--- a/identify.py
++++ b/identify.py
+@@ -7,6 +7,7 @@
+ from ..models.videos import Guess, Video
+ from .anilist import get_anilist_data, identify_anilist
+ from .guess.guess import guessit
++from .folder_ids import folder_guess
+ 
+ logger = getLogger(__name__)
+ 
+@@ -68,7 +69,11 @@
+ 		},
+ 	)
+ 
+-	for step in pipeline:
++	explicit = folder_guess(path)
++	if explicit is not None:
++		guess = Guess(**explicit, raw=guess.raw, history=[guess])
++
++	for step in ([] if explicit is not None else pipeline):
+ 		try:
+ 			guess = await step(path, guess)
+ 		except Exception as e:
