@@ -6,11 +6,12 @@
     ...
   }: let
     cfg = config.services.homelab.forgejo;
-    dataDir = "/tank/forgejo";
+    dataDir = config.services.forgejo.stateDir;
     domain = "git.${config.services.homelab.domains.zekurio}";
     port = 3000;
     forgejo = lib.getExe config.services.forgejo.package;
     pocketIdDiscoveryUrl = "https://auth.${config.services.homelab.domains.zekurio}/.well-known/openid-configuration";
+    pocketIdIconUrl = "https://auth.${config.services.homelab.domains.zekurio}/api/application-images/favicon";
   in {
     options.services.homelab.forgejo.enable =
       lib.mkEnableOption "Forgejo software forge with Caddy and Pocket ID integration";
@@ -42,7 +43,11 @@
             HTTP_PORT = port;
             SSH_DOMAIN = domain;
           };
-          service.ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
+          service = {
+            ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
+            ENABLE_INTERNAL_SIGNIN = false;
+            ENABLE_BASIC_AUTHENTICATION = false;
+          };
           oauth2_client = {
             ENABLE_AUTO_REGISTRATION = true;
             UPDATE_AVATAR = true;
@@ -97,7 +102,7 @@
           fi
 
           auth_id="$(${forgejo} admin auth list --vertical-bars | ${pkgs.gawk}/bin/awk -F '|' '
-            $2 ~ /^[[:space:]]*PocketID[[:space:]]*$/ {
+            $2 ~ /^[[:space:]]*Pocket ?ID[[:space:]]*$/ {
               gsub(/[[:space:]]/, "", $1)
               print $1
               exit
@@ -105,11 +110,12 @@
           ')"
 
           common_args=(
-            --name PocketID
+            --name "Pocket ID"
             --provider openidConnect
             --key "$FORGEJO_OIDC_CLIENT_ID"
             --secret "$FORGEJO_OIDC_CLIENT_SECRET"
             --auto-discover-url ${lib.escapeShellArg pocketIdDiscoveryUrl}
+            --icon-url ${lib.escapeShellArg pocketIdIconUrl}
             --skip-local-2fa
             --scopes openid
             --scopes email
