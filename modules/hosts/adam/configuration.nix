@@ -232,6 +232,7 @@
       costthing.enable = true;
       coolercontrol.enable = true;
       fluxer.enable = true;
+      forgejo.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
