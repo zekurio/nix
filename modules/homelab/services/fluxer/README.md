@@ -6,7 +6,7 @@ match the previously pinned
 Compose is no longer used.
 
 Each module configures one service or a router and its shard. `environment.nix`
-holds the shared app settings and encrypted credentials. `default.nix` sets
+holds the shared app settings. `secrets.nix` prepares the secret files. `default.nix` sets
 up the network and `fluxer.target`. The container names start with `fluxer-`.
 Network aliases keep upstream names such as `api`, `postgres`, and `nats`.
 
@@ -67,3 +67,19 @@ After deployment:
 Change `services.homelab.fluxer.imageTag` to update the Fluxer app images.
 Dependency images have separate tags in their modules. Check upstream changes
 before updating either set. This conversion keeps the existing image tags.
+
+## Secrets
+
+Edit `fluxer_env` with `sops secrets/adam.yaml`. It contains one unquoted
+`NAME=value` line per credential. Keep values on one line. Do not add shell
+quotes or variable references.
+
+`fluxer-secrets.service` reads this secret and writes mode-0600 env files into
+`/run/fluxer-env`, a root-only directory. `secret-files.json` maps the source
+keys to the variable names each service expects. The application containers
+keep the shared env settings from the pinned upstream stack. PostgreSQL,
+Meilisearch, LiveKit, and storage setup receive separate files.
+
+A secret change restarts the renderer and its consumers. A missing key stops
+rendering before any output file changes. Secret values never enter the Nix
+store. The migration to `fluxer_env` preserves all existing credentials.

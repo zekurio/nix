@@ -42,6 +42,25 @@ Use `systemctl status podman-kyoo-api` or `journalctl -u podman-kyoo-api`
 to inspect one service. Replace `api` with `auth`, `front`, `scanner`,
 `transcoder`, `postgres`, or `proxy` for another service.
 
+## Pocket ID login
+
+The auth container uses the Pocket ID client configured in `auth.nix`.
+Set the client's callback URL to
+`https://stream.zekurio.me/auth/oidc/logged/pocketid`.
+
+Before deployment, run `sops secrets/adam.yaml` and add this key, replacing
+the placeholder with the client secret:
+
+```yaml
+kyoo_oidc_env: |
+  OIDC_POCKETID_SECRET=YOUR_CLIENT_SECRET
+```
+
+After deployment, sign in with the existing Kyoo admin account. Open
+Settings, then OIDC, and link Pocket ID. This keeps that account's admin
+rights and watch history. The secret file is required for the auth container
+to start. A secret change restarts only that container.
+
 To update Kyoo, change `version` in `default.nix` and check the new release's
 service settings. PostgreSQL and Traefik have separate image tags in their
 own modules. The database health check delays its clients until PostgreSQL
