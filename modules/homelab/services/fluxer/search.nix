@@ -8,14 +8,6 @@
   in {
     config = lib.mkIf cfg.enable {
       systemd.tmpfiles.rules = ["d /var/lib/fluxer/meilisearch 0750 root root -"];
-      sops.templates."fluxer-meilisearch.env" = {
-        content = ''
-          MEILI_MASTER_KEY=${config.sops.placeholder.fluxer_meili_master_key}
-        '';
-        restartUnits = [
-          "podman-fluxer-meilisearch.service"
-        ];
-      };
       virtualisation.oci-containers.containers.fluxer-meilisearch = {
         image = "docker.io/getmeili/meilisearch:v1.12";
         environment = {
@@ -23,7 +15,7 @@
           MEILI_MAX_INDEXING_MEMORY = "384mb";
           MEILI_NO_ANALYTICS = "true";
         };
-        environmentFiles = [config.sops.templates."fluxer-meilisearch.env".path];
+        environmentFiles = ["/run/fluxer-env/fluxer-meilisearch.env"];
         volumes = ["/var/lib/fluxer/meilisearch:/meili_data"];
         podman.sdnotify = "healthy";
         extraOptions = [

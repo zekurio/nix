@@ -8,57 +8,6 @@
     domain = "chat.${config.services.homelab.domains.zekurio}";
   in {
     config = lib.mkIf cfg.enable {
-      sops.secrets = {
-        fluxer_admin_oauth_client_secret = {};
-        fluxer_admin_secret_key_base = {};
-        fluxer_connection_initiation_secret = {};
-        fluxer_erlang_cookie = {};
-        fluxer_gateway_rpc_auth_token = {};
-        fluxer_livekit_api_secret = {};
-        fluxer_media_proxy_secret_key = {};
-        fluxer_media_proxy_upload_relay_secret_base64 = {};
-        fluxer_meili_master_key = {};
-        fluxer_postgres_password = {};
-        fluxer_s3_secret_key = {};
-        fluxer_sudo_mode_secret = {};
-        fluxer_vapid_private_key = {};
-        fluxer_vapid_public_key = {};
-      };
-      sops.templates."fluxer-common.env" = {
-        content = ''
-          AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.fluxer_s3_secret_key}
-          FLUXER_ADMIN_OAUTH_CLIENT_SECRET=${config.sops.placeholder.fluxer_admin_oauth_client_secret}
-          FLUXER_ADMIN_SECRET_KEY_BASE=${config.sops.placeholder.fluxer_admin_secret_key_base}
-          FLUXER_CONNECTION_INITIATION_SECRET=${config.sops.placeholder.fluxer_connection_initiation_secret}
-          FLUXER_GATEWAY_RPC_AUTH_TOKEN=${config.sops.placeholder.fluxer_gateway_rpc_auth_token}
-          FLUXER_LIVEKIT_API_SECRET=${config.sops.placeholder.fluxer_livekit_api_secret}
-          FLUXER_MEDIA_PROXY_SECRET_KEY=${config.sops.placeholder.fluxer_media_proxy_secret_key}
-          FLUXER_MEDIA_PROXY_UPLOAD_RELAY_SECRET_BASE64=${config.sops.placeholder.fluxer_media_proxy_upload_relay_secret_base64}
-          FLUXER_POSTGRES_PASSWORD=${config.sops.placeholder.fluxer_postgres_password}
-          FLUXER_S3_SECRET_ACCESS_KEY=${config.sops.placeholder.fluxer_s3_secret_key}
-          FLUXER_SEARCH_API_KEY=${config.sops.placeholder.fluxer_meili_master_key}
-          FLUXER_SUDO_MODE_SECRET=${config.sops.placeholder.fluxer_sudo_mode_secret}
-          FLUXER_VAPID_PRIVATE_KEY=${config.sops.placeholder.fluxer_vapid_private_key}
-          FLUXER_VAPID_PUBLIC_KEY=${config.sops.placeholder.fluxer_vapid_public_key}
-        '';
-        restartUnits = [
-          "podman-fluxer-admin.service"
-          "podman-fluxer-api.service"
-          "podman-fluxer-gateway.service"
-          "podman-fluxer-gifs.service"
-          "podman-fluxer-gifs-shard.service"
-          "podman-fluxer-media-proxy.service"
-          "podman-fluxer-messages.service"
-          "podman-fluxer-messages-shard.service"
-          "podman-fluxer-snowflakes.service"
-          "podman-fluxer-snowflakes-shard.service"
-          "podman-fluxer-unfurl.service"
-          "podman-fluxer-unfurl-shard.service"
-          "podman-fluxer-users.service"
-          "podman-fluxer-users-shard.service"
-          "podman-fluxer-worker.service"
-        ];
-      };
       virtualisation.oci-containers.containers =
         lib.genAttrs [
           "fluxer-admin"
@@ -159,7 +108,7 @@
             LOG_LEVEL = "info";
             NODE_ENV = "production";
           };
-          environmentFiles = [config.sops.templates."fluxer-common.env".path];
+          environmentFiles = ["/run/fluxer-env/fluxer-common.env"];
         });
     };
   };

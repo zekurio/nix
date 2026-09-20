@@ -8,21 +8,13 @@
   in {
     config = lib.mkIf cfg.enable {
       systemd.tmpfiles.rules = ["d /var/lib/fluxer/postgres 0700 70 70 -"];
-      sops.templates."fluxer-postgres.env" = {
-        content = ''
-          POSTGRES_PASSWORD=${config.sops.placeholder.fluxer_postgres_password}
-        '';
-        restartUnits = [
-          "podman-fluxer-postgres.service"
-        ];
-      };
       virtualisation.oci-containers.containers.fluxer-postgres = {
         image = "docker.io/library/postgres:16-alpine";
         environment = {
           POSTGRES_DB = "fluxer";
           POSTGRES_USER = "fluxer";
         };
-        environmentFiles = [config.sops.templates."fluxer-postgres.env".path];
+        environmentFiles = ["/run/fluxer-env/fluxer-postgres.env"];
         cmd = [
           "postgres"
           "-c"

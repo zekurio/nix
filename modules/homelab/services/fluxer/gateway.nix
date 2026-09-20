@@ -8,14 +8,6 @@
     domain = "chat.${config.services.homelab.domains.zekurio}";
   in {
     config = lib.mkIf cfg.enable {
-      sops.templates."fluxer-gateway.env" = {
-        content = ''
-          FLUXER_ERLANG_COOKIE=${config.sops.placeholder.fluxer_erlang_cookie}
-        '';
-        restartUnits = [
-          "podman-fluxer-gateway.service"
-        ];
-      };
       virtualisation.oci-containers.containers.fluxer-gateway = {
         image = "ghcr.io/fluxerapp/fluxer-gateway:${cfg.imageTag}";
         environment = {
@@ -26,7 +18,7 @@
           FLUXER_GATEWAY_PORT = "8080";
           FLUXER_GATEWAY_STATIC_CDN_ENDPOINT = "https://${domain}";
         };
-        environmentFiles = [config.sops.templates."fluxer-gateway.env".path];
+        environmentFiles = ["/run/fluxer-env/fluxer-gateway.env"];
         dependsOn = [
           "fluxer-nats"
           "fluxer-valkey"

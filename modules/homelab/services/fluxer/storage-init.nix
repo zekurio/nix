@@ -33,23 +33,6 @@
     '';
   in {
     config = lib.mkIf cfg.enable {
-      sops.templates."fluxer-seaweedfs-init.env" = {
-        content = ''
-          FLUXER_S3_ACCESS_KEY=fluxer
-          FLUXER_S3_BUCKET_CDN=fluxer
-          FLUXER_S3_BUCKET_DOWNLOADS=fluxer-downloads
-          FLUXER_S3_BUCKET_HARVESTS=fluxer-harvests
-          FLUXER_S3_BUCKET_REPORTS=fluxer-reports
-          FLUXER_S3_BUCKET_UPLOADS=fluxer-uploads
-          FLUXER_S3_SECRET_KEY=${config.sops.placeholder.fluxer_s3_secret_key}
-        '';
-        restartUnits = [
-          "fluxer-seaweedfs-init.service"
-          "podman-fluxer-api.service"
-          "podman-fluxer-worker.service"
-          "podman-fluxer-media-proxy.service"
-        ];
-      };
       systemd.services.fluxer-storage = {
         description = "Prepare Fluxer attachment storage";
         path = [config.virtualisation.podman.package];
@@ -90,7 +73,7 @@
         script = ''
           podman run --rm --name fluxer-seaweedfs-init --network fluxer_fluxer \
             --memory=134217728 \
-            --env-file ${config.sops.templates."fluxer-seaweedfs-init.env".path} \
+            --env-file /run/fluxer-env/fluxer-seaweedfs-init.env \
             --volume ${initScript}:/init.sh:ro --entrypoint /bin/sh \
             docker.io/chrislusf/seaweedfs:4.34 /init.sh
         '';
