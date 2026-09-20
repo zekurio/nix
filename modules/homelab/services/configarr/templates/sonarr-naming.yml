@@ -1,0 +1,10 @@
+# Keep source quality, Proper/Repack and group for later imports.
+# Anime uses season/episode numbers without a second absolute episode number.
+media_naming_api:
+  renameEpisodes: true
+  replaceIllegalCharacters: true
+  seriesFolderFormat: '{Series CleanTitleWithoutYear} {(Series Year)}'
+  seasonFolderFormat: 'Season {season:00}'
+  standardEpisodeFormat: '{Series CleanTitleWithoutYear} - S{season:00}E{episode:00} {[Quality Full]}{-Release Group}'
+  dailyEpisodeFormat: '{Series CleanTitleWithoutYear} - {Air-Date} {[Quality Full]}{-Release Group}'
+  animeEpisodeFormat: '{Series CleanTitleWithoutYear} - S{season:00}E{episode:00} {[Quality Full]}{-Release Group}'

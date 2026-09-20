@@ -128,6 +128,7 @@
               base_url: ${config.services.homelab.sonarr.baseUrl}
               api_key: !env SONARR_API_KEY
               include:
+                - template: sonarr-naming
                 - template: dca7e5e9e99c703bcbdaaa471dd40e98 # [German] HD Bluray + WEB
                   source: TRASH
                 - template: 6fe5937e1dcc2269e23b49eb46dfe6d6 # [German] Anime HD Bluray + WEB
@@ -192,6 +193,7 @@
               base_url: ${config.services.homelab.radarr.baseUrl}
               api_key: !env RADARR_API_KEY
               include:
+                - template: radarr-naming
                 - template: 2b90e905c99490edc7c7a5787443748b # [German] HD Bluray + WEB
                   source: TRASH
                 - template: bf3cc2e99ad9a804a9b0d0e538e1fbba # [German] Anime HD Bluray + WEB
