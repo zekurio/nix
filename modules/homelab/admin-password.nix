@@ -96,7 +96,6 @@
       group = adminGroup;
       mode = "0440";
       restartUnits = [
-        "lidarr.service"
         "prowlarr.service"
         "radarr.service"
         "sabnzbd.service"
@@ -116,9 +115,6 @@
     };
 
     systemd.services = lib.mkMerge [
-      (lib.mkIf config.services.homelab.lidarr.enable {
-        lidarr = mkServarrAuth "${config.services.lidarr.dataDir}/lidarr.db";
-      })
       (lib.mkIf config.services.homelab.slskd.enable {
         slskd.serviceConfig.EnvironmentFile = lib.mkAfter [
           config.sops.templates."slskd-admin.env".path
