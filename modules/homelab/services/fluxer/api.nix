@@ -22,7 +22,6 @@
           "fluxer-messages"
           "fluxer-messages-shard"
           "fluxer-nats"
-          "fluxer-postgres"
           "fluxer-snowflakes"
           "fluxer-snowflakes-shard"
           "fluxer-users"
@@ -67,7 +66,6 @@
         dependsOn = [
           "fluxer-messages-shard"
           "fluxer-nats"
-          "fluxer-postgres"
           "fluxer-snowflakes-shard"
           "fluxer-users-shard"
           "fluxer-valkey"

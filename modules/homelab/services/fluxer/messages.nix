@@ -44,7 +44,6 @@
         };
         dependsOn = [
           "fluxer-nats"
-          "fluxer-postgres"
         ];
         podman.sdnotify = "healthy";
         extraOptions = [

@@ -5,7 +5,7 @@
     pkgs,
     ...
   }: let
-    units = ["fluxer-seaweedfs-init" "podman-fluxer-admin" "podman-fluxer-api" "podman-fluxer-gateway" "podman-fluxer-gifs" "podman-fluxer-gifs-shard" "podman-fluxer-livekit" "podman-fluxer-media-proxy" "podman-fluxer-meilisearch" "podman-fluxer-messages" "podman-fluxer-messages-shard" "podman-fluxer-postgres" "podman-fluxer-snowflakes" "podman-fluxer-snowflakes-shard" "podman-fluxer-unfurl" "podman-fluxer-unfurl-shard" "podman-fluxer-users" "podman-fluxer-users-shard" "podman-fluxer-worker"];
+    units = ["fluxer-seaweedfs-init" "podman-fluxer-admin" "podman-fluxer-api" "podman-fluxer-gateway" "podman-fluxer-gifs" "podman-fluxer-gifs-shard" "podman-fluxer-livekit" "podman-fluxer-media-proxy" "podman-fluxer-meilisearch" "podman-fluxer-messages" "podman-fluxer-messages-shard" "fluxer-postgres-password" "podman-fluxer-snowflakes" "podman-fluxer-snowflakes-shard" "podman-fluxer-unfurl" "podman-fluxer-unfurl-shard" "podman-fluxer-users" "podman-fluxer-users-shard" "podman-fluxer-worker"];
     render = pkgs.writeShellScript "fluxer-render-secrets" ''
       exec ${lib.getExe pkgs.python3} ${./render-secrets.py} ${config.sops.secrets.fluxer_env.path} ${./secret-files.json} /run/fluxer-env
     '';

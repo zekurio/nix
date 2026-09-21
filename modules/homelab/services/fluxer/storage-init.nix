@@ -44,6 +44,10 @@
         # Existing installs need an offline copy before the first start.
         # The marker is written only after the manual migration is verified.
         script = ''
+          if test -f /var/lib/fluxer/postgres/PG_VERSION && ! test -f /var/lib/fluxer/.postgresql-migrated; then
+            echo "Restore Fluxer's container database into NixOS PostgreSQL before starting the services." >&2
+            exit 1
+          fi
           for volume in fluxer_postgres-data fluxer_meilisearch-data fluxer_nats-data fluxer_valkey-data fluxer_edge-data fluxer_edge-config; do
             if podman volume exists "$volume" && ! test -f /var/lib/fluxer/.named-volumes-migrated; then
               echo "Migrate Fluxer's named volumes to /var/lib/fluxer before starting the services." >&2

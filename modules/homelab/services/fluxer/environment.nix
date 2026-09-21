@@ -77,7 +77,7 @@
             FLUXER_PASSKEY_RP_ID = "${domain}";
             FLUXER_PASSKEY_RP_NAME = "Fluxer";
             FLUXER_POSTGRES_DATABASE = "fluxer";
-            FLUXER_POSTGRES_HOST = "postgres";
+            FLUXER_POSTGRES_HOST = "/run/postgresql";
             FLUXER_POSTGRES_PORT = "5432";
             FLUXER_POSTGRES_PREPARED_STATEMENTS = "true";
             FLUXER_POSTGRES_SSL = "false";
