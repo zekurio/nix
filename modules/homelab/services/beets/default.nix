@@ -200,7 +200,8 @@
 
       lyrics = {
         auto = true;
-        fallback = "";
+        # A failed lookup must not erase lyrics already stored in a track.
+        fallback = null;
         # Replace downloader-provided lyrics instead of preserving malformed
         # app-specific tags, and write plain lyrics for media players.
         force = true;
@@ -296,9 +297,8 @@
         fi
 
         run_phase fetchart fetchart -f
-        # Remove every downloader embed, then repopulate tracks only from the
-        # validated sidecar selected by normalize-artwork/fetchart.
-        run_phase clearart clearart -y
+        # Replace embeds from validated sidecars. Keep existing art when no
+        # replacement is available instead of clearing every track first.
         run_phase embedart embedart -y
         run_phase lyrics lyrics -f
         touch ${lib.escapeShellArg libraryRefreshComplete}
