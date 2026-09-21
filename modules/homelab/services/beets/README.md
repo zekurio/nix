@@ -16,6 +16,8 @@ After a successful import, the worker removes unchanged artwork, lyrics,
 and other known sidecars from folders whose audio files were all moved.
 It keeps skipped audio, changed sidecars, partial uploads, and unknown files.
 It also removes empty inbox folders. Copyparty's `.hist` folders stay intact.
+A daily slskd job removes empty completed and incomplete download folders
+that have been idle for more than a day. It never removes files.
 
 The migration from Lidarr uses a ZFS snapshot and a database backup before
 repairing library paths and importing missing albums. The Lidarr state,

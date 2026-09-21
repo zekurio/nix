@@ -2,6 +2,7 @@
   flake.modules.nixos.homelab = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     cfg = config.services.homelab.slskd;
@@ -122,6 +123,37 @@
 
       # The whole admin domain is LAN/tailnet-only, so no per-path source
       # restriction is needed here.
+      systemd.services.slskd-clean-empty-directories = {
+        description = "Remove old empty Soulseek download directories";
+        after = ["slskd.service"];
+        unitConfig.RequiresMountsFor = [downloadsDir incompleteDir];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "slskd";
+          Group = "slskd";
+          SupplementaryGroups = [mediaShare.group];
+          NoNewPrivileges = true;
+          ProtectHome = true;
+          ProtectSystem = "strict";
+          ReadWritePaths = [downloadsDir incompleteDir];
+        };
+        # Transfers leave empty parent folders in the incomplete tree too.
+        # Keep recent folders. The type and empty checks exclude every file.
+        script = ''
+          ${lib.getExe pkgs.findutils} ${lib.escapeShellArgs [downloadsDir incompleteDir]} \
+            -depth -mindepth 1 -type d -empty -mmin +1440 -delete
+        '';
+      };
+
+      systemd.timers.slskd-clean-empty-directories = {
+        description = "Clean old empty Soulseek folders daily";
+        wantedBy = ["timers.target"];
+        timerConfig = {
+          OnCalendar = "daily";
+          Persistent = true;
+        };
+      };
+
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
         extraConfig = ''
