@@ -228,6 +228,8 @@
       name = "beet-music-internal";
       runtimeInputs = [
         beetsPackage
+        # Audioread needs FFmpeg in the service PATH to decode M4A imports.
+        pkgs.ffmpeg
         pkgs.util-linux
       ];
       text = ''
