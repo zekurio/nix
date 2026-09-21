@@ -12,6 +12,10 @@ Use `beet-music import /path/to/album` on Adam to review an album by hand.
 Use `journalctl -u beets-import.service` for worker logs. Beets also writes
 `/var/lib/beets/import.log`.
 
+Imports fetch metadata, covers, and plain lyrics. A failed lyrics lookup keeps
+existing lyrics. `beet-music` serializes library commands with a lock. Use this
+wrapper for manual changes so they cannot overlap a scheduled import.
+
 After a successful import, the worker removes unchanged artwork, lyrics,
 and other known sidecars from folders whose audio files were all moved.
 It keeps skipped audio, changed sidecars, partial uploads, and unknown files.
@@ -22,3 +26,19 @@ that have been idle for more than a day. It never removes files.
 The migration from Lidarr uses a ZFS snapshot and a database backup before
 repairing library paths and importing missing albums. The Lidarr state,
 API secret, and Prowlarr application are removed as part of that migration.
+
+The 2026-09-21 migration keeps these recovery and review records on Adam:
+
+- Music snapshot: `tank/media@before-beets-migration-20260921`
+- Original beets state and last legacy download:
+  `/var/backups/beets-migration-20260921/`
+- Lyrics results: `/var/lib/beets/migration-lyrics-report.json`
+- FLAC header repairs and decoded-audio hashes:
+  `/var/lib/beets/migration-flac-repairs.json`
+- Final file, tag, and cover audit:
+  `/var/lib/beets/migration-final-audit.json`
+
+The migration repaired stale library paths, registered untracked music, and
+imported the last legacy download. It also repaired 20 FLAC stream headers
+without changing their decoded audio. Lookup failures stay in the local
+reports for later review. Keep the snapshot and backup until that review ends.
