@@ -6,6 +6,8 @@
   }: let
     cfg = config.services.homelab.forgejo.runner;
     slice = "forgejo-runner.slice";
+    network = "forgejo-runner";
+    subnet = "10.90.0.0/24";
   in {
     options.services.homelab.forgejo.runner = {
       enable = lib.mkEnableOption "small Forgejo Actions runner";
@@ -28,6 +30,9 @@
       ];
 
       services.forgejo.settings.actions.ENABLED = true;
+      # Bridge traffic retains its container source IP when reaching Caddy.
+      # Permit this network only on Forgejo, not on every private virtual host.
+      services.homelab.caddy.virtualHosts.forgejo.extraAllowedRanges = [subnet];
 
       sops.secrets.forgejo_adam_small_token.restartUnits = ["forgejo-runner-small.service"];
 
@@ -43,6 +48,7 @@
             labels = ["small:docker://docker.io/library/node:22-bookworm"];
           };
           container = {
+            inherit network;
             # Podman starts containers outside the runner service's cgroup.
             # Share one budget across the runner, jobs, and service containers.
             options = "--cgroup-parent=${slice} --cpus=2 --memory=4g --memory-swap=4g";
@@ -64,8 +70,19 @@
         };
       };
 
+      systemd.services.forgejo-runner-network = {
+        description = "Podman network for Forgejo Actions";
+        path = [config.virtualisation.podman.package];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = "podman network exists ${network} || podman network create --subnet ${subnet} ${network}";
+      };
+
       systemd.services.forgejo-runner-small = {
-        after = ["forgejo.service"];
+        after = ["forgejo.service" "forgejo-runner-network.service"];
+        requires = ["forgejo-runner-network.service"];
         wants = ["forgejo.service"];
         serviceConfig.Slice = slice;
       };
