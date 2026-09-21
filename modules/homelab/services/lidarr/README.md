@@ -1,5 +1,5 @@
 Lidarr replaces Beets on Adam at `https://admin.zekurio.me/lidarr/`, using the
-shared admin login. Navidrome and Soulseek still read `/tank/media/music`.
+shared admin login. Jellyfin and Soulseek still read `/tank/media/music`.
 Beets' database and existing music remain on disk.
 
 On startup, `lidarr-integrations` adds the Soulseek indexer and the Lidarr app
