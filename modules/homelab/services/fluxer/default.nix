@@ -20,7 +20,6 @@
       "messages"
       "messages-shard"
       "nats"
-      "postgres"
       "seaweedfs"
       "snowflakes"
       "snowflakes-shard"

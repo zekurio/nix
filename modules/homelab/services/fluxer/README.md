@@ -1,6 +1,6 @@
 # Fluxer services
 
-NixOS manages 24 Podman containers and one storage setup job. The settings
+NixOS manages PostgreSQL, 23 Podman containers, and one storage setup job. The settings
 match the previously pinned
 [upstream stack](https://github.com/fluxerapp/fluxer/blob/34b6ecfbd27f29f2a7b9637ea7685e67e0582b85/deploy/self-hosting/docker-compose.yml).
 Compose is no longer used.
@@ -8,7 +8,7 @@ Compose is no longer used.
 Each module configures one service or a router and its shard. `environment.nix`
 holds the shared app settings. `secrets.nix` prepares the secret files. `default.nix` sets
 up the network and `fluxer.target`. The container names start with `fluxer-`.
-Network aliases keep upstream names such as `api`, `postgres`, and `nats`.
+Network aliases keep upstream names such as `api` and `nats`.
 
 Caddy serves `chat.zekurio.me` through the edge container on `127.0.0.1:8080`.
 LiveKit keeps its direct ports, TCP 7881 and UDP 7882. Other backend ports
@@ -19,11 +19,11 @@ Only `unfurl`, `unfurl-shard`, and `media-proxy` use public DNS servers
 DNS prevents Alloy links from resolving to LAN addresses that Fluxer's SSRF
 checks reject. Host DNS and SSO settings keep their existing values.
 
-Persistent data lives under `/var/lib/fluxer`:
+Persistent data uses these directories:
 
 | Service | Host directory |
 |---|---|
-| PostgreSQL | `/var/lib/fluxer/postgres` |
+| PostgreSQL | `/var/lib/postgresql/16` on Adam, shared with the other native databases |
 | Meilisearch | `/var/lib/fluxer/meilisearch` |
 | NATS | `/var/lib/fluxer/nats` |
 | Valkey | `/var/lib/fluxer/valkey` |
@@ -38,8 +38,39 @@ API, worker, and media proxy wait for it to finish. Containers with health
 checks report readiness to systemd only after the check passes. Failed health
 checks stop the container so systemd can restart it. Normal health check
 intervals, retry counts, memory limits, and memory reservations match the
-upstream stack. PostgreSQL's readiness check uses TCP to exclude its temporary
-init server.
+upstream stack.
+
+The API, worker, users shard, and messages shard connect to native PostgreSQL
+through a read-only mount of `/run/postgresql`. They use SCRAM authentication
+with the existing password. The `fluxer` role owns only the Fluxer database
+and has no superuser access. PostgreSQL keeps its existing TCP listeners and
+firewall rules. The shared server allows 250 connections.
+
+These four containers wait for database setup and password setup. They restart
+with PostgreSQL to remount its socket directory. `fluxer.target` does not stop
+the shared database server.
+
+## PostgreSQL migration
+
+Before the first switch, build the new system while Fluxer is still running.
+Stop `fluxer.target`, then start only `podman-fluxer-postgres.service` to make
+an offline `pg_dump -Fc` backup of the `fluxer` database. Keep the backup in a
+root-only directory. Stop the old PostgreSQL service after the dump.
+
+Create a native `fluxer` login role without superuser rights and a database
+owned by that role. Use the source encoding and locale. Restore the dump with
+`pg_restore --exit-on-error --single-transaction --no-owner --no-privileges
+--role=fluxer`. Compare every table's row count and data checksum while the
+app stays stopped. After verification, create
+`/var/lib/fluxer/.postgresql-migrated`, switch to the new system, and start
+`fluxer.target`. The storage guard blocks startup if the old data directory
+exists but this marker is missing.
+
+Keep `/var/lib/fluxer/postgres` and the dump until the move is accepted. They
+stop receiving writes after the move. A later rollback must copy new native
+database writes back before the old container starts.
+
+## Earlier Compose migration
 
 Deploy with the commit, push, and rebuild steps in the root `AGENTS.md`.
 Before the first switch, stop the old `fluxer.service` and copy its six
