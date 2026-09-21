@@ -9,7 +9,7 @@ from pathlib import Path
 import mediafile
 from PIL import Image, UnidentifiedImageError
 
-from beets import config
+from beets import config, plugins
 from beets.library import Library
 from beets.util import bytestring_path, syspath
 
@@ -99,6 +99,8 @@ def main():
 
     config.read()
     config.set_file(arguments.config)
+    # The permissions plugin must see set_art events for recovered covers.
+    plugins.load_plugins()
     music_directory = config["directory"].as_filename()
     library = Library(config["library"].as_filename(), music_directory)
     music_root = Path(music_directory).resolve()

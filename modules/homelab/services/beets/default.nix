@@ -429,6 +429,13 @@
       environment.systemPackages = [beetMusic];
 
       system.checks = [
+        (pkgs.runCommand "beets-artwork-check" {
+            nativeBuildInputs = [(pkgs.python3.withPackages (ps: [beetsPackage ps.pillow]))];
+          } ''
+            export HOME="$TMPDIR"
+            python ${./test-normalize-music-artwork.py} ${./normalize-music-artwork.py}
+            touch "$out"
+          '')
         (pkgs.runCommand "beets-import-cleanup-check" {
             nativeBuildInputs = [pkgs.python3];
           } ''
