@@ -23,7 +23,6 @@
       ];
       casks = [
         "1password"
-        "discord"
         "feishin"
         "ghostty"
         "helium-browser"
@@ -32,6 +31,7 @@
         "notion"
         "steam"
         "tailscale-app"
+        "vesktop"
         "zekurio/fluxer/fluxer"
         "zed"
       ];
