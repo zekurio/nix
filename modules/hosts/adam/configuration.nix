@@ -260,7 +260,7 @@
 
     system.autoUpgrade = {
       enable = true;
-      flake = "github:zekurio/nix#adam";
+      flake = "git+https://git.zekurio.me/zekurio/nix.git?ref=main#adam";
       dates = "Sun *-*-* 03:00:00";
       randomizedDelaySec = "45min";
     };

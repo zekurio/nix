@@ -199,15 +199,15 @@
       "locked": {
         "lastModified": 1788476209,
         "narHash": "sha256-nyC0lZYvqUHrwvV0lnL9hdfXDRxMwW//u69gaRXP+I4=",
-        "owner": "zekurio",
-        "repo": "calthing",
-        "rev": "64e0ecab6a665c70ce886bb8f26d1a4e4aca62bc",
-        "type": "github"
+        "ref": "refs/heads/main",
+        "rev": "4d8379fb28a4831176dd161cee14902fed8c37f4",
+        "revCount": 23,
+        "type": "git",
+        "url": "https://git.zekurio.me/zekurio/calthing.git"
       },
       "original": {
-        "owner": "zekurio",
-        "repo": "calthing",
-        "type": "github"
+        "type": "git",
+        "url": "https://git.zekurio.me/zekurio/calthing.git"
       }
     },
     "catppuccin": {
@@ -262,15 +262,15 @@
       "locked": {
         "lastModified": 1788476201,
         "narHash": "sha256-cHGHXHijauNHBe6ziitWjU5Kb1lRY+qBh5uwL/v4HfQ=",
-        "owner": "zekurio",
-        "repo": "costthing",
-        "rev": "5d3f59913ebe304ffb75a692b5a7b9e8abeb9e11",
-        "type": "github"
+        "ref": "refs/heads/main",
+        "rev": "c43362606024872d2548a81988570179433c6d88",
+        "revCount": 11,
+        "type": "git",
+        "url": "https://git.zekurio.me/zekurio/costthing.git"
       },
       "original": {
-        "owner": "zekurio",
-        "repo": "costthing",
-        "type": "github"
+        "type": "git",
+        "url": "https://git.zekurio.me/zekurio/costthing.git"
       }
     },
     "cpu-microcodes": {

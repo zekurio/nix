@@ -31,8 +31,15 @@ secrets/                sops-encrypted, one file per host
 
 ### Rebuilding
 
-`adam` holds no checkout and builds straight from GitHub, so changes must be
+`adam` holds no checkout and builds straight from Forgejo, so changes must be
 pushed to `main` first. It also auto-upgrades from `main` on a weekly timer.
+The first rebuild after the Forgejo migration must select the new source:
+
+```bash
+ssh adam 'nixos-rebuild switch --flake "git+https://git.zekurio.me/zekurio/nix.git?ref=main#adam" --sudo'
+```
+
+After that rebuild, use the upgrade service:
 
 ```bash
 ssh adam 'sudo systemctl start nixos-upgrade.service'
@@ -61,6 +68,11 @@ sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 Before pushing, run `nix fmt`, `git add` any new files (flakes only see tracked
 files), then `nix flake check`.
 
+The weekly lock-file workflow lives in `.forgejo/workflows/`. Enable Actions
+in the Forgejo repository settings. It uses the `small` runner and opens a PR
+from `update-flake-lock` with the job token. Review and merge the PR before
+Adam can use the updates.
+
 ### Bootstrap: macOS
 
 Install upstream multi-user Nix — **not** the Determinate installer — then let
@@ -69,7 +81,8 @@ on a fresh install, so the first generation goes through `nix run`:
 
 ```bash
 sh <(curl -L https://nixos.org/nix/install)
-# new shell, then clone this repo to ~/Git/nix
+# Start a new shell, then clone the repository.
+git clone ssh://forgejo@git.zekurio.me/zekurio/nix.git ~/Git/nix
 sudo nix --extra-experimental-features "nix-command flakes" \
     run nix-darwin/master#darwin-rebuild -- switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
@@ -87,7 +100,7 @@ HOST=adam
 DISK='/dev/disk/by-id/<your-disk-id>'
 
 curl -o /tmp/disko.nix \
-    "https://raw.githubusercontent.com/zekurio/nix/main/modules/hosts/${HOST}/disko.nix"
+    "https://git.zekurio.me/zekurio/nix/raw/branch/main/modules/hosts/${HOST}/disko.nix"
 sed -i "s|device = \"/dev/disk/by-id/[^\"]*\"|device = \"${DISK}\"|" /tmp/disko.nix
 nix --experimental-features "nix-command flakes" run github:nix-community/disko \
     -- -m destroy,format,mount /tmp/disko.nix
@@ -96,7 +109,7 @@ nix --experimental-features "nix-command flakes" run github:nix-community/disko 
 Install and reboot:
 
 ```bash
-nixos-install --root /mnt --no-root-passwd --flake "github:zekurio/nix#${HOST}"
+nixos-install --root /mnt --no-root-passwd --flake "git+https://git.zekurio.me/zekurio/nix.git?ref=main#${HOST}"
 umount -Rl /mnt
 reboot
 ```

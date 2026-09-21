@@ -88,6 +88,8 @@
       plugins = pluginNames;
 
       import = {
+        # Use one current name per artist; retain release spellings in credit tags.
+        artist_credit = false;
         autotag = true;
         copy = false;
         duplicate_action = "skip";

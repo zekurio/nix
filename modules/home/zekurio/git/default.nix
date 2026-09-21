@@ -61,6 +61,8 @@
           signByDefault = true;
         };
         settings = {
+          # Clear the osxkeychain helper inherited from the Darwin Git package.
+          credential.helper = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "";
           user = {
             name = "Michael Schwieger";
             email = "git@zekurio.me";

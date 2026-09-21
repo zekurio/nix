@@ -82,7 +82,7 @@
       inputs.flake-parts.follows = "flake-parts";
     };
     calthing = {
-      url = "github:zekurio/calthing";
+      url = "git+https://git.zekurio.me/zekurio/calthing.git";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     inviterr = {
@@ -90,7 +90,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     costthing = {
-      url = "github:zekurio/costthing";
+      url = "git+https://git.zekurio.me/zekurio/costthing.git";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {

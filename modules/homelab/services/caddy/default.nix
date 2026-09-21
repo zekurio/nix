@@ -13,7 +13,6 @@
     # the Tailscale tailnet (v4 and v6), plus loopback for local tooling and
     # health checks. Everything else gets a 404 before routing happens.
     privateRanges = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
-    privateRangesStr = lib.concatStringsSep " " privateRanges;
 
     # Helper to replace generic matchers with service-specific ones
     makeMatchersUnique = name: config: let
@@ -34,6 +33,7 @@
             reverseProxies = [];
             extraConfigs = [];
             public = false;
+            extraAllowedRanges = [];
           };
         # Make matchers unique to avoid conflicts
         uniqueExtraConfig =
@@ -48,6 +48,7 @@
               existing.reverseProxies
               ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
             extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
+            extraAllowedRanges = lib.unique (existing.extraAllowedRanges ++ hostCfg.extraAllowedRanges);
             # One public entry makes the whole domain public; a private
             # service sharing the domain must restrict its own paths in
             # extraConfig with a `@blocked` matcher (renamed per service by
@@ -81,6 +82,14 @@
                 type = lib.types.lines;
                 default = "";
                 description = "Extra Caddy configuration for this virtual host";
+              };
+              extraAllowedRanges = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                description = ''
+                  Additional source IP ranges allowed to reach a private virtual
+                  host. Entries sharing a domain combine their allowed ranges.
+                '';
               };
               public = lib.mkOption {
                 type = lib.types.bool;
@@ -125,7 +134,7 @@
                 resolvers 1.1.1.1 1.0.0.1
               }
               ${lib.optionalString (!hostCfg.public) ''
-                @not_local not remote_ip ${privateRangesStr}
+                @not_local not remote_ip ${lib.concatStringsSep " " (privateRanges ++ hostCfg.extraAllowedRanges)}
                 respond @not_local 404
               ''}
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
