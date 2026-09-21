@@ -11,7 +11,7 @@ Create a runner in Forgejo under **User settings > Actions > Runners** to serve
 all repositories owned by that user. Use repository settings instead to limit
 the runner to one repository. Save the UUID.
 
-Run `sops secrets/adam.yaml` and add `forgejo_runner_token` with the raw token.
+Run `sops secrets/adam.yaml` and add `forgejo_adam_small_token` with the raw token.
 Do not add a `TOKEN=` prefix. The token must not appear in Nix source.
 
 Then set this under `services.homelab` in Adam's configuration:

@@ -29,7 +29,7 @@
 
       services.forgejo.settings.actions.ENABLED = true;
 
-      sops.secrets.forgejo_runner_token.restartUnits = ["forgejo-runner-small.service"];
+      sops.secrets.forgejo_adam_small_token.restartUnits = ["forgejo-runner-small.service"];
 
       services.forgejo-runner.instances.small = {
         enable = true;
@@ -52,7 +52,7 @@
           };
         };
         secrets.server.connections.default.token_url =
-          config.sops.secrets.forgejo_runner_token.path;
+          config.sops.secrets.forgejo_adam_small_token.path;
       };
 
       systemd.slices.forgejo-runner = {
