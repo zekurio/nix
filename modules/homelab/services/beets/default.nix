@@ -354,12 +354,12 @@
 
         # Copyparty keeps resumable uploads as .PARTIAL files in the inbox.
         # Wait for completion before cleaning tags or importing any album.
-        if find "''${import_dirs[@]}" -name '*.PARTIAL' -print -quit | grep -q .; then
+        if find "''${import_dirs[@]}" -name '.hist' -prune -o -name '*.PARTIAL' -print -quit | grep -q .; then
           echo "Deferring Beets import until resumable uploads finish."
           exit 0
         fi
 
-        if find "''${import_dirs[@]}" -type f -mmin -2 -print -quit | grep -q .; then
+        if find "''${import_dirs[@]}" -name '.hist' -prune -o -type f -mmin -2 -print -quit | grep -q .; then
           echo "Deferring Beets import until the completed trees have settled."
           exit 0
         fi
@@ -427,6 +427,14 @@
       environment.systemPackages = [beetMusic];
 
       system.checks = [
+        (pkgs.runCommand "beets-import-cleanup-check" {
+            nativeBuildInputs = [pkgs.python3];
+          } ''
+            cp ${./clean-import-leftovers.py} clean-import-leftovers.py
+            cp ${./test-clean-import-leftovers.py} test-clean-import-leftovers.py
+            python test-clean-import-leftovers.py
+            touch "$out"
+          '')
         (pkgs.runCommand "beets-provider-check" {
             nativeBuildInputs = [(pkgs.python3.withPackages (_: [beetsPackage]))];
           } ''

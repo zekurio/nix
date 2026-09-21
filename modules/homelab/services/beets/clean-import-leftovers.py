@@ -28,21 +28,32 @@ def entries(root):
 def record(roots):
     result = []
     for root in roots:
-        for directory, files in entries(root):
+        root = Path(root)
+        if root.is_symlink():
+            continue
+        folders = dict(entries(root))
+        imported = set()
+        for directory, files in folders.items():
             if any(Path(name).suffix.lower() in AUDIO for name in files):
-                sidecars = {}
-                for name in files:
-                    path = directory / name
-                    if path.suffix.lower() in SIDECARS and not path.is_symlink():
-                        sidecars[name] = signature(path)
-                result.append({'directory': str(directory), 'sidecars': sidecars})
+                while directory != root:
+                    imported.add(directory)
+                    directory = directory.parent
+        for directory in sorted(imported, key=lambda p: len(p.parts), reverse=True):
+            sidecars = {}
+            for name in folders[directory]:
+                path = directory / name
+                if path.suffix.lower() in SIDECARS and not path.is_symlink():
+                    sidecars[name] = signature(path)
+            result.append({'directory': str(directory),
+                           'identity': signature(directory)[:2], 'sidecars': sidecars})
     return result
 
 
 def clean(records):
     for record in records:
         directory = Path(record['directory'])
-        if not directory.is_dir() or directory.is_symlink():
+        if (not directory.is_dir() or directory.is_symlink()
+                or signature(directory)[:2] != record['identity']):
             continue
         remaining = list(directory.iterdir())
         # Unknown files, partial uploads, subfolders, and symlinks block cleanup.
@@ -59,6 +70,8 @@ def clean(records):
 
 def prune(roots):
     for root in roots:
+        if Path(root).is_symlink():
+            continue
         directories = [directory for directory, _ in entries(root)]
         for directory in reversed(directories):
             if directory == Path(root):

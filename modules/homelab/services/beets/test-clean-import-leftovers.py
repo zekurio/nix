@@ -10,6 +10,20 @@ spec.loader.exec_module(cleanup)
 
 
 class CleanupTest(unittest.TestCase):
+    def test_multidisc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            disc = root / 'album' / 'Disc 1'
+            disc.mkdir(parents=True)
+            track = disc / 'song.flac'
+            track.write_bytes(b'audio')
+            (disc.parent / 'cover.jpg').write_bytes(b'cover')
+            records = cleanup.record([root])
+            track.unlink()
+            cleanup.clean(records)
+            self.assertFalse(disc.parent.exists())
+            self.assertTrue(root.exists())
+
     def test_cleanup(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
