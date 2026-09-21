@@ -30,6 +30,8 @@
       ];
 
       services.forgejo.settings.actions.ENABLED = true;
+      # The runner network is idle between jobs but must survive daily pruning.
+      virtualisation.podman.autoPrune.flags = ["--filter=label!=forgejo-runner"];
       # Bridge traffic retains its container source IP when reaching Caddy.
       # Permit this network only on Forgejo, not on every private virtual host.
       services.homelab.caddy.virtualHosts.forgejo.extraAllowedRanges = [subnet];
@@ -77,7 +79,7 @@
           Type = "oneshot";
           RemainAfterExit = true;
         };
-        script = "podman network exists ${network} || podman network create --subnet ${subnet} ${network}";
+        script = "podman network exists ${network} || podman network create --subnet ${subnet} --label forgejo-runner ${network}";
       };
 
       systemd.services.forgejo-runner-small = {
