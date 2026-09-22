@@ -68,7 +68,6 @@
       description = "Ensure tank ZFS datasets and quotas";
       wantedBy = ["multi-user.target"];
       before = [
-        "forgejo.service"
         "mediaShare-user-library-acl.service"
         "fluxer-storage.service"
       ];

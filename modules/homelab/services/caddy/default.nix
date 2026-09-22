@@ -33,7 +33,6 @@
             reverseProxies = [];
             extraConfigs = [];
             public = false;
-            extraAllowedRanges = [];
           };
         # Make matchers unique to avoid conflicts
         uniqueExtraConfig =
@@ -48,7 +47,6 @@
               existing.reverseProxies
               ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
             extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
-            extraAllowedRanges = lib.unique (existing.extraAllowedRanges ++ hostCfg.extraAllowedRanges);
             # One public entry makes the whole domain public; a private
             # service sharing the domain must restrict its own paths in
             # extraConfig with a `@blocked` matcher (renamed per service by
@@ -82,14 +80,6 @@
                 type = lib.types.lines;
                 default = "";
                 description = "Extra Caddy configuration for this virtual host";
-              };
-              extraAllowedRanges = lib.mkOption {
-                type = lib.types.listOf lib.types.str;
-                default = [];
-                description = ''
-                  Additional source IP ranges allowed to reach a private virtual
-                  host. Entries sharing a domain combine their allowed ranges.
-                '';
               };
               public = lib.mkOption {
                 type = lib.types.bool;
@@ -134,7 +124,7 @@
                 resolvers 1.1.1.1 1.0.0.1
               }
               ${lib.optionalString (!hostCfg.public) ''
-                @not_local not remote_ip ${lib.concatStringsSep " " (privateRanges ++ hostCfg.extraAllowedRanges)}
+                @not_local not remote_ip ${lib.concatStringsSep " " privateRanges}
                 respond @not_local 404
               ''}
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}

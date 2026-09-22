@@ -232,13 +232,6 @@
       costthing.enable = true;
       coolercontrol.enable = true;
       fluxer.enable = true;
-      forgejo = {
-        enable = true;
-        runner = {
-          enable = true;
-          uuid = "9fc37aa2-ff31-432f-a33a-56ab0ba79903";
-        };
-      };
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
@@ -260,7 +253,7 @@
 
     system.autoUpgrade = {
       enable = true;
-      flake = "git+https://git.zekurio.me/zekurio/nix.git?ref=main#adam";
+      flake = "github:zekurio/nix/main#adam";
       dates = "Sun *-*-* 03:00:00";
       randomizedDelaySec = "45min";
     };

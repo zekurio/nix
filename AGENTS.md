@@ -128,18 +128,17 @@ every referencing module in the same commit so no intermediate state is broken.
 
 ## Deployment
 
-`adam` is stateless with respect to this repo: it keeps no local
-checkout and resolves `git+https://git.zekurio.me/zekurio/nix.git?ref=main` on every rebuild, including its
-`system.autoUpgrade` timer (Sundays 03:00). Uncommitted or
-unpushed work never reaches it — commit and push to `origin/main` first, then:
+`adam` resolves `github:zekurio/nix/main` for its `system.autoUpgrade` timer
+(Sundays 03:00). `origin` is `git@github.com:zekurio/nix.git`. Commit and push
+to `origin/main` before a remote-source rebuild:
 
 ```sh
-ssh adam 'nixos-rebuild switch --flake "git+https://git.zekurio.me/zekurio/nix.git?ref=main#adam" --sudo'
+ssh adam 'nixos-rebuild switch --flake "github:zekurio/nix/main#adam" --sudo'
 ```
 
-Passwordless sudo makes `--sudo` non-interactive. Never point `nixos-rebuild` at
-a local path or use `--target-host` from a dirty tree as a substitute for
-pushing.
+Passwordless sudo makes `--sudo` non-interactive. Local-checkout rebuilds on
+Adam are allowed when explicitly requested. Keep evaluation and builds in
+`nix-build.slice` with `NIX_REMOTE=daemon` to respect the host's resource limits.
 
 `sachiel` rebuilds from its local checkout; `path:` keeps the root activation
 step from treating the working tree as root-owned:
