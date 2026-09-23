@@ -8,9 +8,10 @@
   }: let
     cfg = config.services.homelab.configarr;
     normalProfile = "[German] HD Bluray + WEB";
+    normalUhdProfile = "[German] UHD+HD Bluray + WEB";
     animeProfile = "[German] Anime HD Bluray + WEB";
     animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
-    animeRemuxScore = 5000;
+    remuxScore = 5000;
   in {
     imports = [
       inputs.configarr.nixosModules.default
@@ -52,17 +53,19 @@
           localConfigTemplatesPath: ${./templates}
 
           # TRaSH has release-group tiers for remuxes, but no generic Radarr
-          # format for the remux quality modifier. Keep the anime qualities
-          # merged so their language/group scores remain authoritative, then
+          # format for the remux quality modifier. Keep the qualities merged
+          # so their language/group scores remain authoritative, then
           # add enough of a bonus to prefer a remux at the same resolution,
           # all else being equal.
-          # The UHD profile's 9000-point resolution boost still wins over this
+          # The UHD profiles' 9000-point resolution boost still wins over this
           # bonus, so it alone cannot make a 1080p remux displace a 2160p encode.
           customFormatDefinitions:
-            - trash_id: radarr-anime-remux
+            - trash_id: radarr-remux
               trash_scores:
-                default: ${toString animeRemuxScore}
-              trash_description: Prefer Radarr anime remuxes within a resolution
+                default: ${toString remuxScore}
+              trash_description: Prefer Radarr remuxes within a resolution
+              # Configarr matches existing Radarr formats by name; keep this
+              # name so the already-synced format receives the new scores.
               name: Anime Remux
               includeCustomFormatWhenRenaming: false
               specifications:
@@ -150,25 +153,35 @@
                   source: TRASH
 
               cloneQualityProfiles:
+                - from: "${normalProfile}"
+                  to: "${normalUhdProfile}"
                 - from: "${animeProfile}"
                   to: "${animeUhdProfile}"
 
               custom_formats:
                 - trash_ids:
-                    - radarr-anime-remux # Anime Remux
+                    - radarr-remux # Anime Remux
                   assign_scores_to:
+                    - name: "${normalProfile}"
+                      score: ${toString remuxScore}
+                    - name: "${normalUhdProfile}"
+                      score: ${toString remuxScore}
                     - name: "${animeProfile}"
-                      score: ${toString animeRemuxScore}
+                      score: ${toString remuxScore}
                     - name: "${animeUhdProfile}"
-                      score: ${toString animeRemuxScore}
+                      score: ${toString remuxScore}
                 - trash_ids:
                     - cc7b1e64e2513a6a271090cdfafaeb55 # German 2160p Booster
                   assign_scores_to:
+                    - name: "${normalUhdProfile}"
+                      score: 9000
                     - name: "${animeUhdProfile}"
                       score: 9000
                 - trash_ids:
                     - fb392fb0d61a010ae38e49ceaa24a1ef # 2160p
                   assign_scores_to:
+                    - name: "${normalUhdProfile}"
+                      score: 100
                     - name: "${animeUhdProfile}"
                       score: 100
                 # Use TRaSH's recommended HDR scores on every profile.
@@ -176,6 +189,8 @@
                     - 493b6d1dbec3c3364c59d7607f7e3405 # HDR
                   assign_scores_to:
                     - name: "${normalProfile}"
+                      score: 500
+                    - name: "${normalUhdProfile}"
                       score: 500
                     - name: "${animeProfile}"
                       score: 500
@@ -186,6 +201,8 @@
                   assign_scores_to:
                     - name: "${normalProfile}"
                       score: 1000
+                    - name: "${normalUhdProfile}"
+                      score: 1000
                     - name: "${animeProfile}"
                       score: 1000
                     - name: "${animeUhdProfile}"
@@ -194,6 +211,8 @@
                     - caa37d0df9c348912df1fb1d88f9273a # HDR10+ Boost
                   assign_scores_to:
                     - name: "${normalProfile}"
+                      score: 100
+                    - name: "${normalUhdProfile}"
                       score: 100
                     - name: "${animeProfile}"
                       score: 100
@@ -204,11 +223,13 @@
                   assign_scores_to:
                     - name: "${normalProfile}"
                       score: -10000
+                    - name: "${normalUhdProfile}"
+                      score: -10000
                     - name: "${animeProfile}"
                       score: -10000
                     - name: "${animeUhdProfile}"
                       score: -10000
-                # Only "x265 (HD)" is penalized, on the non-anime profile;
+                # Only "x265 (HD)" is penalized on the non-anime profiles;
                 # "x265 (no HDR/DV)" is explicitly neutral because the German
                 # templates otherwise assign it -35000 everywhere. See the
                 # Sonarr block above for the anime rationale.
@@ -216,6 +237,8 @@
                     - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
                   assign_scores_to:
                     - name: "${normalProfile}"
+                      score: -35000
+                    - name: "${normalUhdProfile}"
                       score: -35000
                     - name: "${animeProfile}"
                       score: 0
@@ -226,12 +249,40 @@
                   assign_scores_to:
                     - name: "${normalProfile}"
                       score: 0
+                    - name: "${normalUhdProfile}"
+                      score: 0
                     - name: "${animeProfile}"
                       score: 0
                     - name: "${animeUhdProfile}"
                       score: 0
 
               quality_profiles:
+                - name: "${normalProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - Remux-1080p
+                        - Bluray-1080p
+                        - WEBRip-1080p
+                        - WEBDL-1080p
+                        - Bluray-720p
+                        - WEBDL-720p
+                        - WEBRip-720p
+                - name: "${normalUhdProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - Remux-2160p
+                        - Bluray-2160p
+                        - WEBDL-2160p
+                        - WEBRip-2160p
+                        - Remux-1080p
+                        - Bluray-1080p
+                        - WEBRip-1080p
+                        - WEBDL-1080p
+                        - Bluray-720p
+                        - WEBDL-720p
+                        - WEBRip-720p
                 - name: "${animeProfile}"
                   qualities:
                     - name: Merged QPs

@@ -20,6 +20,7 @@
       "messages"
       "messages-shard"
       "nats"
+      "postgres"
       "seaweedfs"
       "snowflakes"
       "snowflakes-shard"
@@ -49,6 +50,13 @@
           assertion = config.virtualisation.oci-containers.backend == "podman";
           message = "services.homelab.fluxer needs the Podman OCI backend.";
         }
+        {
+          assertion = lib.all (name:
+            lib.all (volume: lib.hasPrefix "/" volume)
+            config.virtualisation.oci-containers.containers.${name}.volumes)
+          containers;
+          message = "Fluxer storage must use absolute host paths, never named Podman volumes.";
+        }
       ];
       virtualisation.oci-containers.containers = lib.listToAttrs (map (name: {
           name = "fluxer-${name}";
@@ -56,7 +64,11 @@
             autoStart = false;
             networks = ["fluxer_fluxer"];
             # Keep upstream DNS names after the container names change.
-            extraOptions = ["--network-alias=${name}"];
+            extraOptions = [
+              "--network-alias=${name}"
+              # Ignore Dockerfile VOLUME declarations; persistence is explicitly bind-mounted.
+              "--image-volume=ignore"
+            ];
           };
         })
         components);

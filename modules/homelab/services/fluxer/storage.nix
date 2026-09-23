@@ -17,7 +17,7 @@
           "-s3"
           "-dir=/data"
         ];
-        volumes = ["/tank/fluxer/seaweedfs:/data"];
+        volumes = ["/var/lib/fluxer/seaweedfs:/data"];
         podman.sdnotify = "healthy";
         extraOptions = [
           "--memory=2147483648"

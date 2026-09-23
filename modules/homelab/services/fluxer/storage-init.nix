@@ -36,21 +36,15 @@
       systemd.services.fluxer-storage = {
         description = "Prepare Fluxer attachment storage";
         path = [config.virtualisation.podman.package];
-        unitConfig.RequiresMountsFor = ["/tank/fluxer/seaweedfs"];
+        unitConfig.RequiresMountsFor = ["/var/lib/fluxer"];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
         };
-        # Existing installs need an offline copy before the first start.
-        # The marker is written only after the manual migration is verified.
         script = ''
-          if test -f /var/lib/fluxer/postgres/PG_VERSION && ! test -f /var/lib/fluxer/.postgresql-migrated; then
-            echo "Restore Fluxer's container database into NixOS PostgreSQL before starting the services." >&2
-            exit 1
-          fi
-          for volume in fluxer_postgres-data fluxer_meilisearch-data fluxer_nats-data fluxer_valkey-data fluxer_edge-data fluxer_edge-config; do
-            if podman volume exists "$volume" && ! test -f /var/lib/fluxer/.named-volumes-migrated; then
-              echo "Migrate Fluxer's named volumes to /var/lib/fluxer before starting the services." >&2
+          for volume in fluxer_postgres-data fluxer_meilisearch-data fluxer_nats-data fluxer_valkey-data fluxer_edge-data fluxer_edge-config fluxer_seaweedfs-data; do
+            if podman volume exists "$volume"; then
+              echo "Remove obsolete Fluxer named volumes before starting the services." >&2
               exit 1
             fi
           done
@@ -59,7 +53,7 @@
       systemd.services.podman-fluxer-seaweedfs = {
         requires = ["fluxer-storage.service"];
         after = ["fluxer-storage.service"];
-        unitConfig.RequiresMountsFor = ["/tank/fluxer/seaweedfs"];
+        unitConfig.RequiresMountsFor = ["/var/lib/fluxer"];
       };
       systemd.services.fluxer-seaweedfs-init = {
         description = "Create Fluxer buckets and S3 identity";
@@ -79,7 +73,7 @@
             --memory=134217728 \
             --env-file /run/fluxer-env/fluxer-seaweedfs-init.env \
             --volume ${initScript}:/init.sh:ro --entrypoint /bin/sh \
-            docker.io/chrislusf/seaweedfs:4.34 /init.sh
+            --image-volume=ignore docker.io/chrislusf/seaweedfs:4.34 /init.sh
         '';
         postStop = "podman rm -f --ignore fluxer-seaweedfs-init";
       };

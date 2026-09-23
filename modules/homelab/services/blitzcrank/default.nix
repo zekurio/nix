@@ -53,6 +53,8 @@
 
         # Non-secret configuration; every API key lives in the env template.
         settings = {
+          # Share pi's refreshed model registry with the interactive helper.
+          PI_CODING_AGENT_DIR = "/var/lib/blitzcrank";
           SEERR_URL = config.services.homelab.seerr.baseUrl;
           # The Seerr account blitzcrank comments as: the id attributes its
           # comments, the name makes the server drop its own webhooks.

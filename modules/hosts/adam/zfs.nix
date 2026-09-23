@@ -49,7 +49,9 @@
       };
       datasets = {
         "tank/immich".useTemplate = ["precious"];
-        "tank/fluxer".useTemplate = ["precious"];
+        "tank/fluxer" = lib.mkIf config.services.homelab.fluxer.enable {
+          useTemplate = ["precious"];
+        };
         "tank/shares" = {
           useTemplate = ["precious"];
           # Cover current and future per-user share datasets.
@@ -69,7 +71,6 @@
       wantedBy = ["multi-user.target"];
       before = [
         "mediaShare-user-library-acl.service"
-        "fluxer-storage.service"
       ];
       after = ["zfs-import.target"];
       serviceConfig = {
@@ -79,17 +80,31 @@
       script = ''
         ${ensureDataset "tank/media" "6600G"}
         ${ensureDataset "tank/immich" "100G"}
-        ${ensureDataset "tank/fluxer" "100G"}
+        ${lib.optionalString config.services.homelab.fluxer.enable ''
+          ${ensureDataset "tank/fluxer" "100G"}
+          # Keep all Fluxer container state in host directories on the snapshot-backed dataset.
+          if [ "$(${zfs} get -H -o value mountpoint tank/fluxer)" != /var/lib/fluxer ]; then
+            ${zfs} set mountpoint=/var/lib/fluxer tank/fluxer
+          fi
+          if [ "$(${zfs} get -H -o value mounted tank/fluxer)" != yes ]; then
+            ${zfs} mount tank/fluxer
+          fi
+          # Fluxer's SeaweedFS container bind-mounts this directory (see the
+          # storage module). Rootful podman runs the
+          # container as root, so root:root 0700 is sufficient.
+          ${pkgs.coreutils}/bin/mkdir -p /var/lib/fluxer/seaweedfs
+          ${pkgs.coreutils}/bin/chown root:root /var/lib/fluxer/seaweedfs
+          ${pkgs.coreutils}/bin/chmod 0700 /var/lib/fluxer/seaweedfs
+        ''}
         ${ensureDataset "tank/alloy" "100G"}
         ${ensureDataset "tank/shares" "100G"}
         ${ensureUserShareDatasets}
-
-        # Fluxer's SeaweedFS container bind-mounts this directory (see the
-        # storage module). Rootful podman runs the
-        # container as root, so root:root 0700 is sufficient.
-        ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
-        ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
       '';
+    };
+
+    systemd.services.fluxer-storage = lib.mkIf config.services.homelab.fluxer.enable {
+      requires = ["tank-datasets.service"];
+      after = ["tank-datasets.service"];
     };
 
     # Dataset reconciliation reapplies the private 0700 modes, which collapses
