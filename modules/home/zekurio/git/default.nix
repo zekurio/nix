@@ -136,8 +136,8 @@
             HostName = "adam.zekurio.me";
             HostKeyAlias = "adam";
             User = "zekurio";
-            # Pass the local palette so remote CLI tools match the terminal.
-            SendEnv = ["COLORTERM" "TERM_PROGRAM" "TERMINAL_THEME"];
+            # Pass terminal capabilities to remote CLI tools.
+            SendEnv = ["COLORTERM" "TERM_PROGRAM"];
           };
         };
       };

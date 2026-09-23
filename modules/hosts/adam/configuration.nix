@@ -88,8 +88,7 @@
     services.openssh.settings.AllowAgentForwarding = true;
 
     home-manager.users.${mainUser} = {
-      # Lets truecolor terminals (kitty, etc.) render the Catppuccin Frappe
-      # theme exactly instead of falling back to 256-color approximations.
+      # Enable truecolor output for terminal applications.
       home.sessionVariables.COLORTERM = "truecolor";
 
       programs.keychain = {

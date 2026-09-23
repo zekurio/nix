@@ -38,10 +38,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    catppuccin = {
-      url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Claude Code and OpenCode; updates arrive through the weekly flake.lock PR.
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
     # against that pin.
