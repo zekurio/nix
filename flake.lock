@@ -260,11 +260,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788476201,
-        "narHash": "sha256-cHGHXHijauNHBe6ziitWjU5Kb1lRY+qBh5uwL/v4HfQ=",
+        "lastModified": 1790119281,
+        "narHash": "sha256-FVSTwy9KCSmcwM4WUZYZg1XJNr9o3yN9pWcBVOBQH2k=",
         "owner": "zekurio",
         "repo": "costthing",
-        "rev": "5d3f59913ebe304ffb75a692b5a7b9e8abeb9e11",
+        "rev": "1d960784d55d527408349cda33adef5d61a4bbbc",
         "type": "github"
       },
       "original": {
