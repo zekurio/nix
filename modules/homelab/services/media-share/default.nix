@@ -64,22 +64,7 @@
       ])
       cfg.userShares
     );
-    userShareSambaSettings = lib.listToAttrs (
-      lib.mapAttrsToList (_: share: {
-        name = share.name;
-        value = {
-          path = share.path;
-          "valid users" = share.owner;
-          "force user" = share.owner;
-          "create mask" = "0600";
-          "directory mask" = "0700";
-          "read only" = "no";
-          "browseable" = "yes";
-          "guest ok" = "no";
-        };
-      })
-      cfg.userShares
-    );
+    userShareOwners = lib.unique (map (share: share.owner) (lib.attrValues cfg.userShares));
     userSharePaths = lib.mapAttrsToList (_: share: share.path) cfg.userShares;
     immichLibraryPaths = lib.mapAttrsToList (_: share: share.libraryPath) cfg.userShares;
 
@@ -121,12 +106,6 @@
 
     userShareOptions = {name, ...}: {
       options = {
-        name = lib.mkOption {
-          type = lib.types.str;
-          default = name;
-          description = "SMB share name for this user's private share.";
-        };
-
         owner = lib.mkOption {
           type = lib.types.str;
           default = name;
@@ -159,7 +138,7 @@
 
         libraryPath = lib.mkOption {
           type = lib.types.str;
-          default = "/tank/shares/${name}/Immich External Library";
+          default = "/tank/shares/${name}/Fotos";
           description = "Immich external-library subtree inside this user's private share.";
         };
       };
@@ -323,6 +302,11 @@
             message = "modules.homelab.mediaShare.userShares.${name} requires a Samba password file for ${share.owner}.";
           })
           cfg.userShares)
+        ++ (lib.mapAttrsToList (name: share: {
+            assertion = share.path == "/tank/shares/${share.owner}";
+            message = "modules.homelab.mediaShare.userShares.${name}.path must be /tank/shares/${share.owner} for the Meine Dateien SMB share.";
+          })
+          cfg.userShares)
         ++ map (name: {
           assertion = lib.hasAttr name config.users.users;
           message = "modules.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
@@ -434,28 +418,21 @@
               "fruit:wipe_intentionally_left_blank_rfork" = "yes";
               "fruit:delete_empty_adfiles" = "yes";
             };
-            media = {
-              path = "/tank/media";
-              "valid users" = lib.concatStringsSep " " cfg.collaborators;
-              "force group" = shareGroup;
-              "create mask" = shareFileMode;
-              "directory mask" = shareDirMode;
-              "read only" = "no";
-              "browseable" = "yes";
-              "guest ok" = "no";
-            };
-            downloads = {
-              path = cfg.downloadsRoot;
-              "valid users" = lib.concatStringsSep " " cfg.collaborators;
-              "force group" = shareGroup;
-              "create mask" = shareFileMode;
-              "directory mask" = shareDirMode;
-              "read only" = "no";
-              "browseable" = "yes";
-              "guest ok" = "no";
-            };
           }
-          // userShareSambaSettings;
+          // lib.optionalAttrs (cfg.userShares != {}) {
+            "Meine Dateien" = {
+              # Samba substitutes the authenticated Unix user here, keeping one
+              # Finder volume name while each account reaches its own dataset.
+              path = "/tank/shares/%u";
+              "valid users" = lib.concatStringsSep " " userShareOwners;
+              "create mask" = "0600";
+              "directory mask" = "0700";
+              "read only" = "no";
+              "browseable" = "yes";
+              "guest ok" = "no";
+              "veto files" = "/Immich External Library/";
+            };
+          };
       };
 
       systemd.services.samba-passwd = lib.mkIf (cfg.samba.enable && cfg.samba.passwordFiles != {}) {

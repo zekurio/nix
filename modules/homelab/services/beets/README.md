@@ -1,7 +1,7 @@
 Beets imports music on Adam every five minutes from:
 
 - slskd: `/mnt/downloads/complete/slskd`
-- Copyparty's `/music-drop`: `/mnt/downloads/complete/copyparty`
+- Copyparty's `/musik-ablage`: `/mnt/downloads/complete/copyparty`
 
 The worker waits until files have been idle for two minutes. It waits while
 Copyparty has unfinished `.PARTIAL` uploads. It cleans source tags, matches

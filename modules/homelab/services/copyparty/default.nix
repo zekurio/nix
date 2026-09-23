@@ -52,7 +52,7 @@
             rproxy: 1
             xff-src: 127.0.0.0/8,::1/128
             site: https://${domain}/
-            name: Files and media
+            name: Dateien und Medien
             hist: /var/cache/copyparty
             dotpart
             xdev
@@ -62,7 +62,7 @@
           ${lib.concatMapStringsSep "\n" (owner: "  ${owner}: ${config.sops.placeholder."smb_password_${owner}"}") owners}
 
           ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: share: ''
-              [/shares/${name}]
+              [/dateien/${name}]
                 ${share.path}
                 accs:
                   rwmd: ${share.owner}
@@ -74,7 +74,14 @@
             '')
             shares)}
 
-          [/media]
+          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: _: ''
+              # Immich still uses this path, but people should see only Fotos.
+              [/dateien/${name}/Immich External Library]
+                //NULL
+            '')
+            shares)}
+
+          [/medien]
             ${mediaDir}
             accs:
               rwmd: zekurio
@@ -85,7 +92,7 @@
               chmod_d: 775
               chmod_f: 664
 
-          [/music-drop]
+          [/musik-ablage]
             ${uploadDir}
             accs:
               rwmd: ${lib.concatStringsSep ", " owners}
