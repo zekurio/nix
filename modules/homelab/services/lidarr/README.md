@@ -16,6 +16,9 @@ preserves these choices and other indexer filters across restarts.
 
 Lidarr owns Soulseek downloads, imports, and file paths. Its own tag writing
 is disabled so beets can enrich tags after import without later overwrites.
+Track renaming is enabled so the naming templates put downloads in album
+folders. Without it, plugin downloads land in the artist root and the beets
+hook refuses to scan the whole artist. Existing naming templates are preserved.
 The hook uses a temporary database, tags multi-disc releases together, and
 never moves or copies files. Copyparty's `/musik-ablage` still feeds the
 persistent beets importer. Lidarr watches the music library for those imports.

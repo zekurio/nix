@@ -74,6 +74,8 @@ def main():
                             raise
                         time.sleep(1)
                 assert api.request("system/status")["version"] == "3.1.6.5078"
+                naming_before = api.request("config/naming")
+                assert not naming_before["renameTracks"]
                 configure.configure(api, settings, "first-test-api-key-1234567890")
                 before = {endpoint: api.request(endpoint) for endpoint in (
                     "indexer", "downloadclient", "notification", "rootfolder"
@@ -89,6 +91,10 @@ def main():
                     assert len(resources) == 1, endpoint
                 assert api.request("config/metadataprovider")["writeAudioTags"] == "no"
                 assert api.request("config/mediamanagement")["watchLibraryForChanges"]
+                naming_after = api.request("config/naming")
+                assert naming_after["renameTracks"]
+                for field in ("standardTrackFormat", "multiDiscTrackFormat", "artistFolderFormat"):
+                    assert naming_after[field] == naming_before[field]
                 client = before["downloadclient"][0]
                 fields = {field["name"]: field.get("value") for field in client["fields"]}
                 assert client["enable"] and client["removeCompletedDownloads"]

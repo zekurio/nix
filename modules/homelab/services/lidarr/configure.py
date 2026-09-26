@@ -81,6 +81,9 @@ def configure(api, args, slskd_key):
     # separate beets importer adding files to the same music root.
     api.settings("config/metadataprovider", writeAudioTags="no")
     api.settings("config/mediamanagement", watchLibraryForChanges=True)
+    # With renaming disabled, plugin downloads land in the artist root. The
+    # beets hook needs an album folder so it cannot retag the whole artist.
+    api.settings("config/naming", renameTracks=True)
     api.provider(
         "notification", "Beets tag enrichment", "CustomScript",
         {"path": args.beets_script}, onReleaseImport=True, onUpgrade=True,
