@@ -26,6 +26,8 @@
         environmentFile = config.sops.secrets.slskd_env.path;
         openFirewall = true;
         settings = {
+          # Lidarr removes completed batches after importing them.
+          remote_file_management = config.services.homelab.lidarr.enable;
           rooms = [];
           filters.search.request = [];
           global = {
@@ -68,7 +70,7 @@
               "\\.ini$"
             ];
             # Without a retention interval slskd only indexes shares at
-            # startup. Beets imports into this tree continuously, so
+            # startup. Music imports into this tree continuously, so
             # the index would otherwise go stale and advertise less than we
             # hold. Soulseek peers can withhold search results from users who
             # share nothing, which silently breaks acquisition.

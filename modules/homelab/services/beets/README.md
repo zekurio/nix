@@ -1,7 +1,11 @@
-Beets imports music on Adam every five minutes from:
+Beets imports music on Adam every five minutes from Copyparty's
+`/musik-ablage` at `/mnt/downloads/complete/copyparty`.
 
-- slskd: `/mnt/downloads/complete/slskd`
-- Copyparty's `/musik-ablage`: `/mnt/downloads/complete/copyparty`
+Lidarr manages Soulseek downloads and imports. Beets no longer scans the slskd
+download directory. After a Lidarr import or upgrade, a separate beets hook
+enriches the album's tags in place, using the same metadata, artwork, and
+lyrics settings. It uses a temporary database and never moves or copies files.
+The hook shares the `beet-music` lock with the Copyparty worker.
 
 The worker waits until files have been idle for two minutes. It waits while
 Copyparty has unfinished `.PARTIAL` uploads. It cleans source tags, matches
@@ -23,9 +27,10 @@ It also removes empty inbox folders. Copyparty's `.hist` folders stay intact.
 A daily slskd job removes empty completed and incomplete download folders
 that have been idle for more than a day. It never removes files.
 
-The migration from Lidarr uses a ZFS snapshot and a database backup before
-repairing library paths and importing missing albums. The Lidarr state,
-API secret, and Prowlarr application are removed as part of that migration.
+The earlier migration from Lidarr used a ZFS snapshot and a database backup
+before repairing library paths and importing missing albums. That migration
+removed the old Lidarr state, API secret, and Prowlarr application. The current
+Lidarr service has a new API secret and keeps the Copyparty importer.
 
 The 2026-09-21 migration keeps these recovery and review records on Adam:
 

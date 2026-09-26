@@ -10,10 +10,7 @@
     serviceUser = "beets";
     stateDir = "/var/lib/beets";
     musicDir = mediaShare.musicDir;
-    soulseekImportDir = "${mediaShare.downloadsRoot}/complete/slskd";
-    importDirs =
-      [soulseekImportDir]
-      ++ lib.optional config.services.homelab.copyparty.enable "${mediaShare.downloadsRoot}/complete/copyparty";
+    importDirs = lib.optional config.services.homelab.copyparty.enable "${mediaShare.downloadsRoot}/complete/copyparty";
     importDirsShell = lib.concatStringsSep " " (map lib.escapeShellArg importDirs);
     lockFile = "${stateDir}/library.lock";
     importLog = "${stateDir}/import.log";
@@ -82,7 +79,8 @@
       '';
     };
 
-    beetsConfig = (pkgs.formats.yaml {}).generate "beets-config.yaml" {
+    beetsConfig = (pkgs.formats.yaml {}).generate "beets-config.yaml" beetsSettings;
+    beetsSettings = {
       directory = musicDir;
       library = "${stateDir}/library.db";
       plugins = pluginNames;
@@ -226,6 +224,30 @@
       };
     };
 
+    # Lidarr already moved these files. Keep its enrichment database temporary
+    # and never apply the Copyparty importer's move or incremental settings.
+    lidarrConfig = (pkgs.formats.yaml {}).generate "beets-lidarr.yaml" (lib.recursiveUpdate beetsSettings {
+      import = {
+        copy = false;
+        move = false;
+        incremental = false;
+        log = null;
+        quiet = true;
+      };
+    });
+    lidarrHook = pkgs.writeShellApplication {
+      name = "lidarr-beets";
+      runtimeInputs = [pkgs.ffmpeg pkgs.util-linux];
+      text = ''
+        umask ${mediaShare.umask}
+        exec flock -x ${lib.escapeShellArg lockFile} \
+          ${lib.getExe pkgs.python3} ${./lidarr-import.py} \
+            --beet ${lib.getExe beetsPackage} \
+            --config ${lidarrConfig} \
+            --music-dir ${lib.escapeShellArg musicDir}
+      '';
+    };
+
     beetInternal = pkgs.writeShellApplication {
       name = "beet-music-internal";
       runtimeInputs = [
@@ -341,8 +363,7 @@
       text = ''
         import_dirs=(${importDirsShell})
 
-        # slskd keeps active files outside the completed tree. Remove only
-        # settled, empty directories from that tree.
+        # Remove only settled, empty directories from the upload inbox.
         for import_dir in "''${import_dirs[@]}"; do
           find "$import_dir" -name '.hist' -prune -o -mindepth 1 -type d -empty -mmin +2 -exec rmdir -- {} +
         done
@@ -418,6 +439,12 @@
   in {
     options.services.homelab.beets = {
       enable = lib.mkEnableOption "Beets music metadata and import tooling";
+      lidarrHook = lib.mkOption {
+        type = lib.types.package;
+        readOnly = true;
+        default = lidarrHook;
+        description = "Beets tag enrichment hook for Lidarr release imports.";
+      };
     };
 
     config = lib.mkIf cfg.enable {
@@ -431,6 +458,12 @@
       environment.systemPackages = [beetMusic];
 
       system.checks = [
+        (pkgs.runCommand "beets-lidarr-check" {
+            nativeBuildInputs = [(pkgs.python3.withPackages (ps: [ps.pyyaml]))];
+          } ''
+            python ${./test-lidarr-import.py} ${./lidarr-import.py} ${lidarrConfig}
+            touch "$out"
+          '')
         (pkgs.runCommand "beets-artwork-check" {
             nativeBuildInputs = [(pkgs.python3.withPackages (ps: [beetsPackage ps.pillow]))];
           } ''
@@ -575,8 +608,8 @@
         };
       };
 
-      systemd.services.beets-import = {
-        description = "Import completed music downloads with Beets";
+      systemd.services.beets-import = lib.mkIf (importDirs != []) {
+        description = "Import Copyparty music uploads with Beets";
         after = [
           "beets-library-layout.service"
           "local-fs.target"
@@ -606,11 +639,10 @@
         };
       };
 
-      # A timer avoids repeated path triggers while slskd finishes a set. The
-      # worker also checks that the completed tree has been quiet for two
-      # minutes.
-      systemd.timers.beets-import = {
-        description = "Periodically import completed music downloads";
+      # A timer avoids repeated triggers during uploads. The worker also
+      # waits until the inbox has been quiet for two minutes.
+      systemd.timers.beets-import = lib.mkIf (importDirs != []) {
+        description = "Periodically import Copyparty music uploads";
         wantedBy = ["timers.target"];
         timerConfig = {
           OnBootSec = "5m";

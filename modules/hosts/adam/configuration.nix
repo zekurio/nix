@@ -234,6 +234,7 @@
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
+      lidarr.enable = true;
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
