@@ -64,7 +64,7 @@
           # Clear the osxkeychain helper inherited from the Darwin Git package.
           credential.helper = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "";
           user = {
-            name = "Michael Schwieger";
+            name = "zekurio";
             email = "git@zekurio.me";
           };
           init.defaultBranch = "main";
@@ -81,7 +81,7 @@
         enable = true;
         settings = {
           user = {
-            name = "Michael Schwieger";
+            name = "zekurio";
             email = "git@zekurio.me";
           };
 
