@@ -114,18 +114,6 @@
           prune_empty_dirs = true;
         };
       };
-    mkMediaLibrary = {
-      path,
-      arr,
-      profile,
-    }:
-      mediaFiles
-      // {
-        kind = "media";
-        inherit path arr profile;
-        scan_interval = "1h";
-        media.replacement_mode = "replace";
-      };
   in {
     imports = [
       inputs.anvil.nixosModules.default
@@ -179,22 +167,6 @@
           };
 
           libraries = {
-            movies = mkMediaLibrary {
-              path = "/tank/media/movies";
-              arr = "radarr";
-              profile = slowProfile;
-            };
-            shows = mkMediaLibrary {
-              path = "/tank/media/shows";
-              arr = "sonarr";
-              profile = veryslowProfile;
-            };
-            anime = mkMediaLibrary {
-              path = "/tank/media/anime";
-              arr = "sonarr";
-              profile = veryslowProfile;
-            };
-
             radarr-downloads = mkDownloadLibrary {
               path = "${downloadsRoot}/complete/radarr";
               handoffPath = "${downloadsRoot}/converted/radarr";
