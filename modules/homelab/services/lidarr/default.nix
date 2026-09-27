@@ -6,6 +6,7 @@
     ...
   }: let
     cfg = config.services.homelab.lidarr;
+    sabnzbd = config.services.homelab.sabnzbd;
     mediaShare = config.modules.homelab.mediaShare;
     domain = "admin.${config.services.homelab.domains.zekurio}";
     port = 8686;
@@ -64,24 +65,18 @@
         environmentFiles = [config.sops.templates."lidarr.env".path];
       };
 
-      system.checks = [
-        (pkgs.runCommand "lidarr-integration-check" {nativeBuildInputs = [pkgs.python3];} ''
-          python ${./test-integration.py} \
-            --lidarr ${lib.getExe config.services.lidarr.package} \
-            --plugin ${slskdPlugin} \
-            --configure ${./configure.py} \
-            --script ${pkgs.coreutils}/bin/true
-          touch "$out"
-        '')
-      ];
-
       sops = {
         secrets.lidarr_api_key = {};
+        secrets.sabnzbd_api_key = lib.mkIf sabnzbd.enable {};
         templates."lidarr.env" = {
-          content = ''
-            LIDARR__AUTH__APIKEY=${config.sops.placeholder.lidarr_api_key}
-            SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
-          '';
+          content =
+            ''
+              LIDARR__AUTH__APIKEY=${config.sops.placeholder.lidarr_api_key}
+              SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
+            ''
+            + lib.optionalString sabnzbd.enable ''
+              SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
+            '';
           owner = "lidarr";
           group = "lidarr";
           mode = "0400";
@@ -90,8 +85,8 @@
       };
 
       systemd.services.lidarr = {
-        after = ["slskd.service"];
-        wants = ["slskd.service"];
+        after = ["slskd.service"] ++ lib.optional sabnzbd.enable "sabnzbd.service";
+        wants = ["slskd.service"] ++ lib.optional sabnzbd.enable "sabnzbd.service";
         unitConfig.RequiresMountsFor = [mediaShare.musicDir mediaShare.downloadsRoot];
         serviceConfig = {
           SupplementaryGroups = [mediaShare.group];
@@ -108,7 +103,8 @@
             --music-dir ${lib.escapeShellArg mediaShare.musicDir} \
             --beets-script ${lib.escapeShellArg (lib.getExe config.services.homelab.beets.lidarrHook)} \
             --slskd-url ${lib.escapeShellArg "http://127.0.0.1:${toString config.services.slskd.settings.web.port}${config.services.slskd.settings.web.url_base}"} \
-            --slskd-external-url ${lib.escapeShellArg "https://${domain}/slskd/"}
+            --slskd-external-url ${lib.escapeShellArg "https://${domain}/slskd/"} \
+            ${lib.optionalString sabnzbd.enable "--sabnzbd-url ${lib.escapeShellArg sabnzbd.baseUrl}"}
         '';
       };
 

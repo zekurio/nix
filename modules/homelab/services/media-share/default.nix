@@ -34,6 +34,7 @@
       "/tank/media/movies"
       usenetDownloadsDir
       "${usenetDownloadsDir}/complete"
+      "${usenetDownloadsDir}/complete/lidarr"
       "${usenetDownloadsDir}/complete/manual"
       "${usenetDownloadsDir}/complete/radarr"
       "${usenetDownloadsDir}/complete/sonarr"

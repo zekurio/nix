@@ -36,7 +36,7 @@
       systemd.services.fluxer-storage = {
         description = "Prepare Fluxer attachment storage";
         path = [config.virtualisation.podman.package];
-        unitConfig.RequiresMountsFor = ["/var/lib/fluxer"];
+        unitConfig.RequiresMountsFor = ["/tank/fluxer"];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
@@ -53,7 +53,7 @@
       systemd.services.podman-fluxer-seaweedfs = {
         requires = ["fluxer-storage.service"];
         after = ["fluxer-storage.service"];
-        unitConfig.RequiresMountsFor = ["/var/lib/fluxer"];
+        unitConfig.RequiresMountsFor = ["/tank/fluxer"];
       };
       systemd.services.fluxer-seaweedfs-init = {
         description = "Create Fluxer buckets and S3 identity";

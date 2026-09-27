@@ -2,6 +2,7 @@
   flake.modules.nixos.homelab = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     cfg = config.services.homelab.fluxer;
@@ -20,7 +21,6 @@
       "messages"
       "messages-shard"
       "nats"
-      "postgres"
       "seaweedfs"
       "snowflakes"
       "snowflakes-shard"
@@ -82,12 +82,24 @@
         // {
           fluxer-network = {
             description = "Podman network for Fluxer";
-            path = [config.virtualisation.podman.package];
+            path = [config.virtualisation.podman.package pkgs.jq];
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
             };
-            script = "podman network exists fluxer_fluxer || podman network create fluxer_fluxer";
+            script = ''
+              if ! podman network exists fluxer_fluxer; then
+                podman network create --subnet 10.89.42.0/24 --gateway 10.89.42.1 --interface-name fluxer0 fluxer_fluxer
+              fi
+              # The database address, HBA rule, and firewall depend on this network layout.
+              if ! podman network inspect fluxer_fluxer | jq -e '
+                .[0] | .network_interface == "fluxer0" and
+                (.subnets == [{"subnet": "10.89.42.0/24", "gateway": "10.89.42.1"}])
+              ' >/dev/null; then
+                echo "Fluxer network has an obsolete layout. Stop and remove its containers, then remove fluxer_fluxer so it can be recreated." >&2
+                exit 1
+              fi
+            '';
           };
         };
       systemd.targets.fluxer = {

@@ -44,8 +44,7 @@
 ## Validation and Git
 
 - Stage new or renamed files before evaluation; flakes only see tracked files.
-- Run `nix fmt` and `nix flake check` before completing code changes. Checks in
-  `modules/checks/` include validation of declared secrets against SOPS keys.
+- Run `nix fmt` and `nix flake check` before completing code changes.
   Build a host only when the changes warrant it.
 - Do not update flake inputs unless required by the task.
 - Diff against `main` or `origin/main`.

@@ -109,9 +109,10 @@
         ${ensureDataset "tank/immich" "100G"}
         ${lib.optionalString config.services.homelab.fluxer.enable ''
           ${ensureDataset "tank/fluxer" "100G"}
-          # Keep all Fluxer container state in host directories on the snapshot-backed dataset.
-          if [ "$(${zfs} get -H -o value mountpoint tank/fluxer)" != /var/lib/fluxer ]; then
-            ${zfs} set mountpoint=/var/lib/fluxer tank/fluxer
+          # Keep attachment storage on tank; /var/lib/fluxer stays on the SSD
+          # for search indexes, queues, and cache state.
+          if [ "$(${zfs} get -H -o value mountpoint tank/fluxer)" != /tank/fluxer ]; then
+            ${zfs} set mountpoint=/tank/fluxer tank/fluxer
           fi
           if [ "$(${zfs} get -H -o value mounted tank/fluxer)" != yes ]; then
             ${zfs} mount tank/fluxer
@@ -119,9 +120,9 @@
           # Fluxer's SeaweedFS container bind-mounts this directory (see the
           # storage module). Rootful podman runs the
           # container as root, so root:root 0700 is sufficient.
-          ${pkgs.coreutils}/bin/mkdir -p /var/lib/fluxer/seaweedfs
-          ${pkgs.coreutils}/bin/chown root:root /var/lib/fluxer/seaweedfs
-          ${pkgs.coreutils}/bin/chmod 0700 /var/lib/fluxer/seaweedfs
+          ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
+          ${pkgs.coreutils}/bin/chown root:root /tank/fluxer/seaweedfs
+          ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
         ''}
         ${ensureDataset "tank/alloy" "100G"}
         ${ensureDataset "tank/shares" "100G"}

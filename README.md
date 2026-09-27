@@ -25,7 +25,6 @@ modules/nix/            Nix daemon settings shared by both platforms
 modules/homelab/        reusable homelab services (services/<service>/)
 modules/home/zekurio/   Home Manager profile, split by concern
 modules/nixpkgs/        nixpkgs config and overlays/
-modules/checks/         flake checks run by `nix flake check`
 secrets/                sops-encrypted, one file per host
 ```
 

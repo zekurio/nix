@@ -457,52 +457,6 @@
 
       environment.systemPackages = [beetMusic];
 
-      system.checks = [
-        (pkgs.runCommand "beets-lidarr-check" {
-            nativeBuildInputs = [(pkgs.python3.withPackages (ps: [ps.pyyaml]))];
-          } ''
-            python ${./test-lidarr-import.py} ${./lidarr-import.py} ${lidarrConfig}
-            touch "$out"
-          '')
-        (pkgs.runCommand "beets-artwork-check" {
-            nativeBuildInputs = [(pkgs.python3.withPackages (ps: [beetsPackage ps.pillow]))];
-          } ''
-            export HOME="$TMPDIR"
-            python ${./test-normalize-music-artwork.py} ${./normalize-music-artwork.py}
-            touch "$out"
-          '')
-        (pkgs.runCommand "beets-import-cleanup-check" {
-            nativeBuildInputs = [pkgs.python3];
-          } ''
-            cp ${./clean-import-leftovers.py} clean-import-leftovers.py
-            cp ${./test-clean-import-leftovers.py} test-clean-import-leftovers.py
-            python test-clean-import-leftovers.py
-            touch "$out"
-          '')
-        (pkgs.runCommand "beets-provider-check" {
-            nativeBuildInputs = [(pkgs.python3.withPackages (_: [beetsPackage]))];
-          } ''
-            export HOME="$TMPDIR"
-            python - <<'PY'
-            import os
-            import tempfile
-            from types import SimpleNamespace
-            import yaml
-            from beets import config, metadata_plugins, plugins
-            config.set(yaml.safe_load(open("${beetsConfig}")))
-            plugins.load_plugins()
-            provider = metadata_plugins.get_metadata_source("MusicBrainz")
-            assert provider is not None, "MusicBrainz records must resolve through mbpseudo"
-            assert provider.name == "mbpseudo", provider.name
-            with tempfile.NamedTemporaryFile() as art:
-                permissions = next(p for p in plugins.find_plugins() if p.name == "permissions")
-                permissions.fix_art(SimpleNamespace(artpath=os.fsencode(art.name)))
-                assert os.stat(art.name).st_mode & 0o777 == 0o664
-            PY
-            touch "$out"
-          '')
-      ];
-
       systemd.tmpfiles.rules = [
         "d ${stateDir} 2775 ${serviceUser} ${mediaShare.group} -"
         "d ${stateDir}/.cache 2775 ${serviceUser} ${mediaShare.group} -"

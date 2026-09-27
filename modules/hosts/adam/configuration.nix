@@ -179,7 +179,7 @@
         };
       };
       networks."99-podman" = {
-        matchConfig.Name = "podman0 veth*";
+        matchConfig.Name = "podman0 fluxer0 veth*";
         networkConfig.DHCP = "no";
         linkConfig.Unmanaged = true;
       };
@@ -235,6 +235,7 @@
       jellyfin.enable = true;
       inviterr.enable = true;
       lidarr.enable = true;
+      navidrome.enable = true;
       paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
