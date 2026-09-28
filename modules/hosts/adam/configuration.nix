@@ -188,6 +188,8 @@
     # SOPS secrets configuration. The age key is hand-placed during bootstrap
     # (see README) and deliberately not generated on the host.
     sops = {
+      # The activation script's unit restart list is deprecated in NixOS 26.11.
+      useSystemdActivation = true;
       # sops-nix master builds sops-install-secrets with buildGo125Module,
       # which nixpkgs removed on 2026-09-15 (Go 1.25 EOL) as a throwing alias.
       # Call sops-nix's package expression with that builder shimmed to the
