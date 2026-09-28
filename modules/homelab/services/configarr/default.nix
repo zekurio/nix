@@ -87,7 +87,27 @@
                 - template: 6fe5937e1dcc2269e23b49eb46dfe6d6 # [German] Anime HD Bluray + WEB
                   source: TRASH
 
+              cloneQualityProfiles:
+                - from: "${normalProfile}"
+                  to: "${normalUhdProfile}"
+                - from: "${animeProfile}"
+                  to: "${animeUhdProfile}"
+
               custom_formats:
+                - trash_ids:
+                    - b493cd40d8a3bbf2839127a706bdb673 # German 2160p Booster
+                  assign_scores_to:
+                    - name: "${normalUhdProfile}"
+                      score: 9000
+                    - name: "${animeUhdProfile}"
+                      score: 9000
+                - trash_ids:
+                    - 1bef6c151fa35093015b0bfef18279e5 # 2160p
+                  assign_scores_to:
+                    - name: "${normalUhdProfile}"
+                      score: 100
+                    - name: "${animeUhdProfile}"
+                      score: 100
                 # Use TRaSH's recommended HDR scores on every profile.
                 - trash_ids:
                     - 505d871304820ba7106b693be6fe4a9e # HDR
@@ -140,6 +160,43 @@
                       score: 0
                     - name: "${animeProfile}"
                       score: 0
+
+              # Anvil scores with VMAF. Keep 720p out so it need not upscale.
+              quality_profiles:
+                - name: "${normalProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - Bluray-1080p
+                        - WEBRip-1080p
+                        - WEBDL-1080p
+                - name: "${animeProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - WEBDL-1080p
+                        - WEBRip-1080p
+                        - Bluray-1080p
+                - name: "${normalUhdProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - Bluray-2160p
+                        - WEBRip-2160p
+                        - WEBDL-2160p
+                        - Bluray-1080p
+                        - WEBRip-1080p
+                        - WEBDL-1080p
+                - name: "${animeUhdProfile}"
+                  qualities:
+                    - name: Merged QPs
+                      qualities:
+                        - WEBDL-2160p
+                        - WEBRip-2160p
+                        - Bluray-2160p
+                        - WEBDL-1080p
+                        - WEBRip-1080p
+                        - Bluray-1080p
 
           radarr:
             radarr:
@@ -265,9 +322,6 @@
                         - Bluray-1080p
                         - WEBRip-1080p
                         - WEBDL-1080p
-                        - Bluray-720p
-                        - WEBDL-720p
-                        - WEBRip-720p
                 - name: "${normalUhdProfile}"
                   qualities:
                     - name: Merged QPs
@@ -280,9 +334,6 @@
                         - Bluray-1080p
                         - WEBRip-1080p
                         - WEBDL-1080p
-                        - Bluray-720p
-                        - WEBDL-720p
-                        - WEBRip-720p
                 - name: "${animeProfile}"
                   qualities:
                     - name: Merged QPs
@@ -291,9 +342,6 @@
                         - Bluray-1080p
                         - WEBRip-1080p
                         - WEBDL-1080p
-                        - Bluray-720p
-                        - WEBDL-720p
-                        - WEBRip-720p
                 - name: "${animeUhdProfile}"
                   qualities:
                     - name: Merged QPs
@@ -306,9 +354,6 @@
                         - Bluray-1080p
                         - WEBRip-1080p
                         - WEBDL-1080p
-                        - Bluray-720p
-                        - WEBDL-720p
-                        - WEBRip-720p
         '';
       };
 

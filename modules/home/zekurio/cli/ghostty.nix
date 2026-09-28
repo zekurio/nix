@@ -8,8 +8,8 @@
       name = "ghostty-ssh-tint";
       runtimeInputs = [pkgs.coreutils];
       text = ''
-        # LocalCommand supplies the authenticated host key, including for aliases
-        # and ProxyJump destinations. Never probe a separate, unverified key.
+        # %C hashes the connection details into a safe shell argument.
+        # %f fails during LocalCommand expansion with OpenSSH 10.5.
         [[ -n "''${1:-}" ]] || exit 0
         read -r checksum _ < <(printf '%s' "$1" | cksum)
 
@@ -33,7 +33,7 @@
       programs.fish = {
         functions.ssh = {
           wraps = "ssh";
-          description = "Tint Ghostty using the SSH host key";
+          description = "Tint Ghostty for each SSH connection";
           body = ''
             if not status is-interactive; or test "$TERM_PROGRAM" != ghostty; or set -q TMUX; or not isatty stdin; or not isatty stdout
               command ssh $argv
@@ -41,10 +41,10 @@
             end
 
             set -g __ghostty_ssh_tinted 1
-            # Multiplexed sessions skip LocalCommand and expose no fingerprint.
+            # Multiplexed sessions skip LocalCommand, so disable sharing for tint.
             command ssh -S none \
               -o PermitLocalCommand=yes \
-              -o 'LocalCommand=${lib.getExe sshTint} %f' $argv
+              -o 'LocalCommand=${lib.getExe sshTint} %C' $argv
             set -l ssh_status $status
             printf '\e]111\a'
             set -e __ghostty_ssh_tinted
