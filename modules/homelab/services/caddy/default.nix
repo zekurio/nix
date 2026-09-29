@@ -9,11 +9,6 @@
 
     acmeEmail = "admin@zekurio.me";
 
-    # Source ranges allowed to reach private virtual hosts: the home LAN and
-    # the Tailscale tailnet (v4 and v6), plus loopback for local tooling and
-    # health checks. Everything else gets a 404 before routing happens.
-    privateRanges = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
-
     # Helper to replace generic matchers with service-specific ones
     makeMatchersUnique = name: config: let
       # Replace @blocked with @blocked_<servicename>
@@ -57,6 +52,12 @@
     ) {} (builtins.attrNames cfg.virtualHosts);
   in {
     options.services.homelab.caddy = {
+      privateRanges = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
+        description = "Source ranges allowed private access: the home LAN, Tailscale, and loopback.";
+      };
+
       enable =
         lib.mkEnableOption "Caddy reverse proxy with Cloudflare DNS"
         // {
@@ -124,7 +125,7 @@
                 resolvers 1.1.1.1 1.0.0.1
               }
               ${lib.optionalString (!hostCfg.public) ''
-                @not_local not remote_ip ${lib.concatStringsSep " " privateRanges}
+                @not_local not remote_ip ${lib.concatStringsSep " " cfg.privateRanges}
                 respond @not_local 404
               ''}
               ${lib.concatStringsSep "\n" hostCfg.extraConfigs}

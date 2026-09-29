@@ -10,6 +10,11 @@
     port = config.services.homelab.jellyfin.port;
     serviceUser = "jellyfin";
     serviceGroup = "jellyfin";
+    landingPage = pkgs.writeTextDir "index.html" (
+      builtins.replaceStrings ["@serverUrl@"]
+      [(lib.escapeXML config.services.homelab.jellyfin.publicUrl)]
+      (builtins.readFile ./landing.html)
+    );
   in {
     options.services.homelab.jellyfin = {
       enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
@@ -72,6 +77,23 @@
         domain = domain;
         public = true;
         reverseProxy = "127.0.0.1:${toString port}";
+        extraConfig = ''
+          # URL fragments such as #/home never reach Caddy. Replace the web
+          # routes for public visitors, leaving API and streaming paths alone.
+          @blocked {
+            path / /web /web/*
+            not remote_ip ${lib.concatStringsSep " " config.services.homelab.caddy.privateRanges}
+            # Jellium loads the server's web UI but uses mpv for playback.
+            # This spoofable app identifier is a UX exception, not authentication.
+            not header User-Agent *jellium-desktop/*
+          }
+          handle @blocked {
+            root * ${landingPage}
+            rewrite * /index.html
+            header Cache-Control "no-store"
+            file_server
+          }
+        '';
       };
     };
   };

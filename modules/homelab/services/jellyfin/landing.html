@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Schnitzelflix | Apps für dein Gerät</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --surface: #fef7ff;
+        --container: #f3edf7;
+        --on-surface: #1d1b20;
+        --on-surface-variant: #49454f;
+        --primary: #6750a4;
+        --primary-container: #eaddff;
+        --on-primary-container: #21005d;
+        --outline: #cac4d0;
+        font-family: Roboto, "Segoe UI", system-ui, sans-serif;
+        color: var(--on-surface);
+        background: var(--surface);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --surface: #141218;
+          --container: #211f26;
+          --on-surface: #e6e0e9;
+          --on-surface-variant: #cac4d0;
+          --primary: #d0bcff;
+          --primary-container: #4f378b;
+          --on-primary-container: #eaddff;
+          --outline: #49454f;
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 2rem 1.25rem 3rem; }
+      main { max-width: 68rem; margin: 0 auto; }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.2rem;
+        font-weight: 650;
+        margin: 0 0 3.5rem;
+      }
+      .brand svg {
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0.6rem;
+        border-radius: 0.85rem;
+        fill: var(--on-primary-container);
+        background: var(--primary-container);
+      }
+      h2 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+      h3 { font-size: 1.05rem; font-weight: 600; margin: 0; }
+      p { line-height: 1.6; margin: 0; }
+      a { color: var(--primary); text-underline-offset: 0.2em; }
+      a:hover { text-decoration-thickness: 0.15em; }
+      a:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+      .layout { display: grid; grid-template-columns: 0.9fr 1.2fr; gap: 4rem; align-items: start; }
+      .intro { color: var(--on-surface-variant); font-size: 1.1rem; max-width: 38ch; }
+      .setup { margin-top: 2rem; padding: 1.5rem; border-radius: 1.5rem; background: var(--primary-container); color: var(--on-primary-container); }
+      .setup h2 { margin-bottom: 1rem; }
+      .setup ol { margin: 0; padding-left: 1.25rem; }
+      .setup li { padding-left: 0.25rem; line-height: 1.6; }
+      .setup li + li { margin-top: 0.75rem; }
+      code {
+        display: block;
+        margin-top: 0.5rem;
+        font: inherit;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+        user-select: all;
+      }
+      .platforms { display: grid; gap: 1rem; }
+      .platform { padding: 1.5rem; border-radius: 1.5rem; background: var(--container); }
+      .platform-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; margin-bottom: 1.25rem; }
+      .platform-heading p { color: var(--on-surface-variant); font-size: 0.875rem; }
+      .client + .client { border-top: 1px solid var(--outline); margin-top: 1rem; padding-top: 1rem; }
+      .client p { margin-top: 0.25rem; color: var(--on-surface-variant); font-size: 0.925rem; }
+      .downloads { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.5rem; }
+      .downloads a { display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.925rem; font-weight: 600; }
+      footer { margin-top: 2rem; color: var(--on-surface-variant); font-size: 0.875rem; }
+      @media (max-width: 48rem) {
+        .brand { margin-bottom: 2.5rem; }
+        .layout { grid-template-columns: 1fr; gap: 2rem; }
+        .intro { max-width: 55ch; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 class="brand">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z"/></svg>
+        Schnitzelflix
+      </h1>
+      <div class="layout">
+        <div>
+          <p class="intro">Die Web-App steht nicht zum Streamen zur Verfügung. Nutze dafür eine der vielen verfügbaren Apps.</p>
+          <section class="setup" aria-labelledby="setup-title">
+            <h2 id="setup-title">So verbindest du dich</h2>
+            <ol>
+              <li>Wähle eine App und installiere sie auf deinem Gerät.</li>
+              <li>Füge in der App einen Jellyfin-Server mit dieser Adresse hinzu:<code>@serverUrl@</code></li>
+              <li>Melde dich mit deinem Schnitzelflix-Benutzernamen und Passwort an.</li>
+            </ol>
+          </section>
+        </div>
+        <div class="platforms" aria-label="Apps nach Gerät">
+          <section class="platform" aria-labelledby="android-title">
+            <div class="platform-heading"><h2 id="android-title">Android</h2><p>Smartphone &amp; Tablet</p></div>
+            <div class="client">
+              <h3>Findroid</h3>
+              <p>Für Filme und Serien, auch mit Downloads zum Offline-Schauen.</p>
+              <div class="downloads">
+                <a href="https://play.google.com/store/apps/details?id=dev.jdtech.jellyfin" aria-label="Findroid im Play Store">Play Store</a>
+                <a href="https://github.com/jarnedemeulemeester/findroid/releases/latest" aria-label="Findroid als APK auf GitHub">APK herunterladen</a>
+              </div>
+            </div>
+            <div class="client">
+              <h3>Plezy</h3>
+              <p>Die APK von GitHub ist kostenlos. Im Play Store kostet die App einmalig.</p>
+              <div class="downloads">
+                <a href="https://github.com/edde746/plezy/releases/latest" aria-label="Kostenloser Android-Download von Plezy auf GitHub">Kostenloser Download</a>
+                <a href="https://play.google.com/store/apps/details?id=com.edde746.plezy" aria-label="Plezy kostenpflichtig im Play Store">Play Store</a>
+              </div>
+              <p>Beim GitHub-Download das Android-Archiv entpacken und die enthaltene APK installieren.</p>
+            </div>
+          </section>
+          <section class="platform" aria-labelledby="desktop-title">
+            <div class="platform-heading"><h2 id="desktop-title">Desktop</h2><p>Windows, macOS &amp; Linux</p></div>
+            <div class="client">
+              <h3>Jellium Desktop</h3>
+              <p>Die vertraute Jellyfin-Oberfläche mit mpv als Videoplayer.</p>
+              <div class="downloads"><a href="https://github.com/andrewrabert/jellium-desktop#downloads" aria-label="Downloads für Jellium Desktop">Downloads &amp; Installation</a></div>
+            </div>
+            <div class="client">
+              <h3>Plezy</h3>
+              <p>Auch am Computer verfügbar. Die Downloads von GitHub sind kostenlos.</p>
+              <div class="downloads"><a href="https://github.com/edde746/plezy/releases/latest" aria-label="Plezy für den Desktop kostenlos herunterladen">Kostenlos herunterladen</a></div>
+            </div>
+          </section>
+          <section class="platform" aria-labelledby="ios-title">
+            <div class="platform-heading"><h2 id="ios-title">iOS &amp; iPadOS</h2><p>iPhone &amp; iPad</p></div>
+            <div class="client">
+              <h3>Swiftfin</h3>
+              <p>Der kostenlose Videoplayer vom Jellyfin-Projekt.</p>
+              <div class="downloads"><a href="https://apps.apple.com/app/swiftfin/id1604098728" aria-label="Swiftfin für iPhone und iPad im App Store">App Store</a></div>
+            </div>
+            <div class="client">
+              <h3>Plezy</h3>
+              <p>Im App Store als Einmalkauf erhältlich.</p>
+              <div class="downloads"><a href="https://apps.apple.com/app/id6754315964" aria-label="Plezy kostenpflichtig im App Store">App Store</a></div>
+            </div>
+          </section>
+          <section class="platform" aria-labelledby="appletv-title">
+            <div class="platform-heading"><h2 id="appletv-title">Apple TV</h2></div>
+            <div class="client">
+              <h3>Swiftfin</h3>
+              <p>Kostenlos. Suche auf deinem Apple TV im App Store nach Swiftfin.</p>
+              <div class="downloads"><a href="https://apps.apple.com/app/swiftfin/id1604098728" aria-label="Swiftfin für Apple TV im App Store">App Store</a></div>
+            </div>
+          </section>
+          <section class="platform" aria-labelledby="androidtv-title">
+            <div class="platform-heading"><h2 id="androidtv-title">Android TV</h2><p>Auch für Google TV</p></div>
+            <div class="client">
+              <h3>Wholphin</h3>
+              <p>Für den Fernseher und die Bedienung mit der Fernbedienung.</p>
+              <div class="downloads">
+                <a href="https://play.google.com/store/apps/details?id=com.github.damontecres.wholphin" aria-label="Wholphin im Play Store">Play Store</a>
+                <a href="https://github.com/damontecres/Wholphin/releases/latest" aria-label="Wholphin als APK auf GitHub">APK herunterladen</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <footer>Die Links führen zu den offiziellen Projektseiten und Store-Einträgen der jeweiligen Apps.</footer>
+    </main>
+  </body>
+</html>
