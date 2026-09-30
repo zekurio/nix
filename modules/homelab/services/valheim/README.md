@@ -12,10 +12,13 @@ the public address. There is no HTTP reverse proxy for the game.
 
 Install the matching Grantapher Valheim Plus release on every player's client.
 The server enforces the mod version and syncs its configuration to clients.
-The host configuration keeps vanilla combat and multiplayer difficulty scaling,
-doubles mining ore yields, item stack limits, and mob-drop quantities, and
-doubles the slots in wood, personal, reinforced, and blackmetal chests.
-Crafting can use chests within 20 metres, measured from the workbench when in
+The host configuration uses Hard combat with vanilla multiplayer scaling,
+triples mining ore yields, and sets item stack limits to four times vanilla.
+Base carry capacity is 600, or 750 with Megingjord's default bonus.
+Wood chests have 40 slots, personal chests 24, reinforced chests 96, and
+blackmetal chests 128. Creature drops use vanilla quantities because V+'s
+global loot multiplier also increases trophies and boss rewards.
+Crafting can use chests within 40 metres, measured from the workbench when in
 its area. Skill loss on death is disabled; items still go into a recoverable
 tombstone under normal world death settings.
 
