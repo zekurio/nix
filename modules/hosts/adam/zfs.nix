@@ -20,28 +20,16 @@
         ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg share.path}
 
         ${lib.optionalString (share.libraryPath != legacyLibraryPath) ''
-          # Keep Immich's recorded paths valid while the visible folder becomes
-          # Fotos. Never cover two populated directories with a bind mount.
-          if [ -d ${lib.escapeShellArg legacyLibraryPath} ] && ! ${pkgs.util-linux}/bin/mountpoint -q ${lib.escapeShellArg legacyLibraryPath}; then
-            if [ -n "$(${pkgs.findutils}/bin/find ${lib.escapeShellArg legacyLibraryPath} -mindepth 1 -maxdepth 1 -print -quit)" ]; then
-              if [ -d ${lib.escapeShellArg share.libraryPath} ]; then
-                if [ -n "$(${pkgs.findutils}/bin/find ${lib.escapeShellArg share.libraryPath} -mindepth 1 -maxdepth 1 -print -quit)" ]; then
-                  echo "Both Immich library folders contain files; refusing to hide either one" >&2
-                  exit 1
-                fi
-                ${pkgs.coreutils}/bin/rmdir ${lib.escapeShellArg share.libraryPath}
-              fi
-              ${pkgs.coreutils}/bin/mv -T ${lib.escapeShellArg legacyLibraryPath} ${lib.escapeShellArg share.libraryPath}
-              ${pkgs.coreutils}/bin/mkdir ${lib.escapeShellArg legacyLibraryPath}
-            fi
+          # Retire the compatibility mount without touching Fotos.
+          if ${pkgs.util-linux}/bin/mountpoint -q ${lib.escapeShellArg legacyLibraryPath}; then
+            ${pkgs.util-linux}/bin/umount ${lib.escapeShellArg legacyLibraryPath}
+          fi
+          if [ -d ${lib.escapeShellArg legacyLibraryPath} ]; then
+            # Refuse to delete files left in an unmounted legacy directory.
+            ${pkgs.coreutils}/bin/rmdir ${lib.escapeShellArg legacyLibraryPath}
           fi
         ''}
         ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg share.libraryPath}
-        ${lib.optionalString (share.libraryPath != legacyLibraryPath) ''
-          if [ -d ${lib.escapeShellArg legacyLibraryPath} ] && ! ${pkgs.util-linux}/bin/mountpoint -q ${lib.escapeShellArg legacyLibraryPath}; then
-            ${pkgs.util-linux}/bin/mount --bind ${lib.escapeShellArg share.libraryPath} ${lib.escapeShellArg legacyLibraryPath}
-          fi
-        ''}
 
         # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule
         # (which races the mount). Own it here, after the mount already exists.
@@ -142,7 +130,7 @@
     systemd.services.mediaShare-user-library-acl.requires = ["tank-datasets.service"];
     systemd.services.mediaShare-user-library-acl.after = ["tank-datasets.service"];
 
-    # Immich must never scan the library while its compatibility path is absent.
+    # Immich must only scan after the library permissions have been restored.
     systemd.services.immich-server.partOf = ["tank-datasets.service"];
     systemd.services.immich-server.requires = ["mediaShare-user-library-acl.service"];
     systemd.services.immich-server.after = ["mediaShare-user-library-acl.service"];

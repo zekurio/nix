@@ -431,7 +431,6 @@
               "read only" = "no";
               "browseable" = "yes";
               "guest ok" = "no";
-              "veto files" = "/Immich External Library/";
             };
           };
       };

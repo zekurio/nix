@@ -74,13 +74,6 @@
             '')
             shares)}
 
-          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: _: ''
-              # Immich still uses this path, but people should see only Fotos.
-              [/dateien/${name}/Immich External Library]
-                //NULL
-            '')
-            shares)}
-
           [/medien]
             ${mediaDir}
             accs:
