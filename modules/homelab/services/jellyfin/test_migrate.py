@@ -23,6 +23,7 @@ class MigrationTest(unittest.TestCase):
             "data/jellyfin.db",
             "data/jellyfin.db-wal",
             "data/jellyfin.db-shm",
+            "data/device.txt",
             "data/playlists/list.xml",
             "data/collections/list.xml",
             "root/default/TV/.mblink",
@@ -52,12 +53,37 @@ class MigrationTest(unittest.TestCase):
         for name, content in before.items():
             self.assertEqual((self.source / name).read_bytes(), content)
             if name.parts[0] != "plugins":
-                self.assertEqual((self.target / name).read_bytes(), content)
+                target_name = Path("config/system_id") if name == Path("data/device.txt") else name
+                self.assertEqual((self.target / target_name).read_bytes(), content)
         self.assertFalse((self.target / "plugins").exists())
         database = self.target / "data/jellyfin.db"
         database.write_text("new watch progress")
         self.assertEqual(self.run_copy().returncode, 0)
         self.assertEqual(database.read_text(), "new watch progress")
+
+    def test_completed_copy_repairs_server_id_without_replacing_database(self):
+        self.assertEqual(self.run_copy().returncode, 0)
+        (self.target / ".jellyfin-id-copied").unlink()
+        server_id = self.target / "config/system_id"
+        server_id.write_text("generated ID")
+        database = self.target / "data/jellyfin.db"
+        database.write_text("new watch progress")
+        self.assertEqual(self.run_copy().returncode, 0)
+        self.assertEqual(server_id.read_text(), "data/device.txt")
+        self.assertEqual(database.read_text(), "new watch progress")
+        server_id.write_text("later ID change")
+        self.assertEqual(self.run_copy().returncode, 0)
+        self.assertEqual(server_id.read_text(), "later ID change")
+
+    def test_server_id_omits_the_dotnet_byte_order_mark(self):
+        device = self.source / "data/device.txt"
+        device.write_text("\ufefffea20701fc1b408f968d0864c46b923d")
+        self.assertEqual(self.run_copy().returncode, 0)
+        self.assertEqual(
+            (self.target / "config/system_id").read_text(),
+            "fea20701fc1b408f968d0864c46b923d",
+        )
+        self.assertTrue(device.read_text().startswith("\ufeff"))
 
     def test_interrupted_copy_resumes_and_removes_old_wal(self):
         commands = self.root / "commands"

@@ -6,11 +6,28 @@ target_dir=$2
 pending="$target_dir/.jellyfin-copy-pending"
 complete="$target_dir/.jellyfin-copy-complete"
 
+preserve_server_id() {
+  # Clients key saved connections by this ID. Ferrofin uses a different file.
+  # Also repair copies made before this step, without replacing their database.
+  if [[ -s "$source_dir/data/device.txt" && ! -f "$target_dir/.jellyfin-id-copied" ]]; then
+    mkdir -p "$target_dir/config"
+    # .NET reads the UTF-8 byte-order mark as encoding, but Rust keeps it.
+    local server_id
+    server_id=$(<"$source_dir/data/device.txt")
+    printf '%s' "${server_id#$'\xef\xbb\xbf'}" > "$target_dir/config/system_id"
+    touch "$target_dir/.jellyfin-id-copied"
+  fi
+}
+
 # The same systemd unit runs both servers. It stops Jellyfin before this copy.
 # Keep a marker until all files arrive so a failed copy can resume on restart.
 for database in ferrofin.db jellyfin.db data/jellyfin.db; do
   if [[ -e "$target_dir/$database" ]]; then
-    if [[ -f "$complete" || ! -f "$pending" ]]; then
+    if [[ -f "$complete" ]]; then
+      preserve_server_id
+      exit 0
+    fi
+    if [[ ! -f "$pending" ]]; then
       exit 0
     fi
     if [[ "$database" == ferrofin.db || -e "$target_dir/$database.pre-ferrofin" ]]; then
@@ -48,6 +65,7 @@ for directory in data/playlists data/collections root/default metadata config; d
   fi
 done
 
+preserve_server_id
 touch "$complete"
 rm "$pending"
 echo "Copied Jellyfin state to $target_dir. The source files are unchanged."

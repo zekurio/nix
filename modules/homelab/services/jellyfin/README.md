@@ -17,6 +17,9 @@ artwork, playlists, collections, and XML settings from `/var/lib/jellyfin`
 to `/var/lib/ferrofin`. It does not change the source files. A failed copy
 resumes before Ferrofin starts. Ferrofin then adopts the copied database.
 Its cache lives in `/var/cache/ferrofin`. Later starts keep the Ferrofin state.
+The copy also maps Jellyfin's `data/device.txt` to Ferrofin's `config/system_id`.
+This keeps the server ID used by saved client connections. A later start repairs
+this ID once for copies made before this step, without replacing the database.
 Inviterr updates its reset-file path to `/var/lib/ferrofin/data` at startup.
 
 Check `journalctl -u jellyfin.service` for copy and adoption errors.
