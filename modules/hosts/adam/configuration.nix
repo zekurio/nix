@@ -234,7 +234,10 @@
       coolercontrol.enable = true;
       fluxer.enable = false;
       immich.enable = true;
-      jellyfin.enable = true;
+      jellyfin = {
+        enable = true;
+        backend = "ferrofin";
+      };
       inviterr.enable = true;
       lidarr.enable = true;
       navidrome.enable = true;
