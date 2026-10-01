@@ -1,7 +1,7 @@
 # nix
 
-Nix configurations for my NixOS server and my Mac: a homelab server and a
-laptop, plus the Home Manager profile they share.
+Nix configurations for my homelab server, gaming desktop, and MacBook Air,
+plus the Home Manager profile they share.
 
 Built with [flake-parts](https://flake.parts) in a dendritic layout — every file
 under `modules/` is a flake-parts module discovered by
@@ -13,6 +13,7 @@ inputs, systems, and the formatter.
 | Host | Type | Channel | Description |
 |------|------|---------|-------------|
 | `adam` | NixOS | unstable | Homelab server: media, photos, documents, behind Caddy; public services on 443, management UIs LAN/tailnet-only |
+| `lilith` | NixOS | unstable | Ryzen/Radeon gaming desktop with KDE Plasma on Wayland |
 | `sachiel` | nix-darwin | unstable | MacBook Air |
 
 ### Layout
@@ -57,10 +58,11 @@ are disabled; schedule kernel reboots separately. Direct `nixos-rebuild`
 commands bypass the upgrade serialization and evaluation limits, and root
 builds using the local store also bypass the daemon limits.
 
-`sachiel` builds from its local checkout. `path:` keeps the root activation
-step from treating the Git working tree as root-owned:
+`lilith` and `sachiel` build from their local checkouts. `path:` keeps the root
+activation step from treating the Git working tree as root-owned:
 
 ```bash
+sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
@@ -111,6 +113,34 @@ nixos-install --root /mnt --no-root-passwd --flake "github:zekurio/nix/main#${HO
 umount -Rl /mnt
 reboot
 ```
+
+#### Lilith: dual boot and Secure Boot
+
+Lilith uses KDE Plasma on Wayland with SDDM and the default Breeze theme.
+PipeWire handles audio with its standard WirePlumber configuration.
+The gaming stack includes Steam, Heroic, GameMode, MangoHud, Proton GE, and
+Proton CachyOS, with a cached CachyOS kernel from Chaotic.
+
+Lilith's disko layout owns the Samsung NVMe at
+`nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0T205473J_1`. Windows stays on the Crucial
+drive, which is absent from the layout. The root filesystem is btrfs with
+`@`, `@home`, `@nix`, and `@swap` subvolumes and a 16 GiB swapfile.
+An existing ext4 installation needs a separate migration or reinstall.
+Preserve the EFI partition and its `EFI/Microsoft` directory when migrating.
+
+Limine boots Windows through the firmware's existing `Windows Boot Manager`
+entry to preserve its BitLocker measurements. Signing keys are generated,
+but firmware enrollment is manual. Test both systems with Secure Boot
+disabled first, back up the BitLocker recovery key, and enter firmware
+Setup/Custom Mode before enrolling keys:
+
+```bash
+sudo sbctl status
+sudo sbctl enroll-keys --microsoft --firmware-builtin
+```
+
+Enable Secure Boot after enrollment succeeds. Back up `/var/lib/sbctl`,
+which contains the keys needed to sign future bootloader updates.
 
 ### Secrets
 

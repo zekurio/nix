@@ -1,5 +1,7 @@
 {...}: let
   sharePath = "/tank/shares/zekurio";
+  clientPath = "/home/zekurio/Share";
+  serverAddress = "10.0.0.2";
   lanCidr = "10.0.0.0/24";
 in {
   flake.modules.nixos = {
@@ -21,6 +23,24 @@ in {
       '';
 
       networking.firewall.interfaces.enp42s0.allowedTCPPorts = [2049];
+    };
+
+    lilith = {lib, ...}: {
+      # Automount on first access so an unavailable server cannot delay boot.
+      fileSystems.${clientPath} = {
+        device = "${serverAddress}:${lib.removePrefix "/tank" sharePath}";
+        fsType = "nfs";
+        options = [
+          "nfsvers=4.2"
+          "rw"
+          "_netdev"
+          "noauto"
+          "nofail"
+          "x-systemd.automount"
+          "x-systemd.idle-timeout=10min"
+          "x-systemd.mount-timeout=10s"
+        ];
+      };
     };
   };
 }

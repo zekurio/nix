@@ -6,8 +6,8 @@
   module. No import list is needed. `flake.nix` wires inputs, systems, and the
   formatter.
 - Files contribute to shared aggregates under `flake.modules`: `nixos.base`,
-  `nixos.adam`, `nixos.homelab`, `darwin.base`, `darwin.sachiel`, and
-  `homeManager.zekurio`. The module system merges contributions.
+  `nixos.adam`, `nixos.lilith`, `nixos.homelab`, `darwin.base`,
+  `darwin.sachiel`, and `homeManager.zekurio`. The module system merges contributions.
 - Host entrypoints at `modules/hosts/<host>/system.nix` only assemble aggregates.
   Put configuration in focused modules named after their concern.
 - Never import module files by relative path. Define shared values in a module
