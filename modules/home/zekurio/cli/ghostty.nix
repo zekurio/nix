@@ -1,5 +1,6 @@
 {
   flake.modules.homeManager.zekurio = {
+    config,
     lib,
     pkgs,
     ...
@@ -29,8 +30,8 @@
       '';
     };
   in {
-    config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-      programs.fish = {
+    config = {
+      programs.fish = lib.mkIf config.programs.ghostty.enable {
         functions.ssh = {
           wraps = "ssh";
           description = "Tint Ghostty for each SSH connection";
@@ -63,24 +64,30 @@
       };
 
       programs.ghostty = {
-        enable = true;
-        package = null;
+        enable = lib.mkDefault pkgs.stdenv.hostPlatform.isDarwin;
+        package =
+          if pkgs.stdenv.hostPlatform.isDarwin
+          then null
+          else pkgs.ghostty;
         enableFishIntegration = true;
         systemd.enable = false;
-        settings = {
-          window-width = 150;
-          window-height = 38;
-          window-save-state = "never";
-          window-padding-x = 10;
-          window-padding-y = 8;
-          background-blur = true;
-          background-opacity = 0.96;
-          font-family = "FiraCode Nerd Font";
-          font-size = 14;
-          term = "xterm-256color";
-          window-inherit-font-size = false;
-          macos-titlebar-style = "transparent";
-        };
+        settings =
+          {
+            window-width = 150;
+            window-height = 38;
+            window-save-state = "never";
+            window-padding-x = 10;
+            window-padding-y = 8;
+            background-blur = true;
+            background-opacity = 0.96;
+            font-family = "FiraCode Nerd Font";
+            font-size = 12;
+            term = "xterm-256color";
+            window-inherit-font-size = false;
+          }
+          // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+            macos-titlebar-style = "transparent";
+          };
       };
     };
   };

@@ -1,5 +1,6 @@
 {
   flake.modules.nixos.lilith = {
+    home-manager.users.zekurio.programs.ghostty.enable = true;
     home-manager.users.zekurio.programs.kitty = {
       enable = true;
       settings = {

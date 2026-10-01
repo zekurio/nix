@@ -136,11 +136,25 @@ Setup/Custom Mode before enrolling keys:
 
 ```bash
 sudo sbctl status
+sudo sbctl create-keys
+sudo sbctl verify
 sudo sbctl enroll-keys --microsoft --firmware-builtin
+sudo sbctl list-enrolled-keys
+sudo sbctl status
 ```
 
-Enable Secure Boot after enrollment succeeds. Back up `/var/lib/sbctl`,
-which contains the keys needed to sign future bootloader updates.
+`create-keys` keeps existing keys. Enrollment includes Microsoft's 2011 and
+2023 certificates and the firmware's default db and KEK certificates, alongside
+the local signing keys. Do not enroll local keys alone on this board.
+
+`verify` should report the Limine EFI executable as signed. Unsigned kernels
+are expected: Limine verifies kernel and initrd hashes against its configuration,
+whose hash is embedded in the signed executable.
+
+Enable Secure Boot in firmware and reboot, then confirm `sudo sbctl status`
+reports Secure Boot enabled and Setup Mode disabled, and test both
+NixOS and Windows. Back up `/var/lib/sbctl` securely; it contains private keys
+needed to sign future bootloader updates. Do not commit those keys.
 
 ### Secrets
 

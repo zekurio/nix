@@ -1,6 +1,6 @@
 {...}: let
   sharePath = "/tank/shares/zekurio";
-  clientPath = "/home/zekurio/Share";
+  clientPath = "/home/zekurio/Meine Dateien";
   serverAddress = "10.0.0.2";
   lanCidr = "10.0.0.0/24";
 in {

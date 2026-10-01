@@ -63,6 +63,7 @@
       environment.systemPackages = [
         heroic
         pkgs.mangohud
+        pkgs.r2modman
       ];
 
       users.users.zekurio.extraGroups = ["gamemode"];
