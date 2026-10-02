@@ -32,7 +32,7 @@
       services.blitzcrank = {
         enable = true;
         inherit package port;
-        model = "openai-codex/gpt-6-sol:medium";
+        model = "openai-codex/gpt-6.1-sol:high";
         automationModel = "openai-codex/gpt-6-luna:max";
         language = "German";
         webProvider = "firecrawl";
@@ -71,7 +71,7 @@
           DISCORD_GUILD_ID = "418795186475237376";
           DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
           DISCORD_INBOX_CHANNEL_ID = "1473398718127407188";
-          BLITZCRANK_DISCORD_MODEL = "openai-codex/gpt-6-sol:medium";
+          BLITZCRANK_DISCORD_MODEL = "openai-codex/gpt-6.1-sol:medium";
           BLITZCRANK_DISCORD_TRIAGE_MODEL = "openai-codex/gpt-6-luna:max";
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
