@@ -23,7 +23,7 @@ checks reject.
 ## Storage
 
 The `tank/fluxer` ZFS dataset mounts at `/tank/fluxer` for attachment and other
-S3 object storage. It has a shared `100G` quota and retains 24 hourly, 30 daily,
+S3 object storage. It has a shared `800G` quota and retains 24 hourly, 30 daily,
 and 6 monthly snapshots. `/var/lib/fluxer` stays on the system SSD for search,
 queue, cache, and proxy state.
 

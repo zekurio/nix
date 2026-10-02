@@ -93,10 +93,10 @@
         RemainAfterExit = true;
       };
       script = ''
-        ${ensureDataset "tank/media" "6600G"}
-        ${ensureDataset "tank/immich" "100G"}
+        ${ensureDataset "tank/media" "6000G"}
+        ${ensureDataset "tank/immich" "50G"}
         ${lib.optionalString config.services.homelab.fluxer.enable ''
-          ${ensureDataset "tank/fluxer" "100G"}
+          ${ensureDataset "tank/fluxer" "800G"}
           # Keep attachment storage on tank; /var/lib/fluxer stays on the SSD
           # for search indexes, queues, and cache state.
           if [ "$(${zfs} get -H -o value mountpoint tank/fluxer)" != /tank/fluxer ]; then
@@ -113,7 +113,7 @@
           ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
         ''}
         ${ensureDataset "tank/alloy" "100G"}
-        ${ensureDataset "tank/shares" "100G"}
+        ${ensureDataset "tank/shares" "50G"}
         ${ensureUserShareDatasets}
       '';
     };

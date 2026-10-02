@@ -132,7 +132,7 @@
       };
       userShares = {
         ${mainUser} = {
-          quota = "100G";
+          quota = "50G";
         };
       };
     };
@@ -232,7 +232,7 @@
       copyparty.enable = true;
       costthing.enable = true;
       coolercontrol.enable = true;
-      fluxer.enable = false;
+      fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
       inviterr.enable = true;
