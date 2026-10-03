@@ -13,19 +13,6 @@ the public address. There is no HTTP reverse proxy for the game.
 Install the matching Grantapher Valheim Plus release on every player's client.
 The server enforces the mod version and syncs its configuration to clients.
 
-The server also installs [RecyclePlus 1.3.5](https://thunderstore.io/c/valheim/p/TastyChickenLegs/RecyclePlus/v/1.3.5/)
-for recycling or deleting inventory items. Install the same version alongside
-Valheim Plus on every player's client. RecyclePlus provides an inventory trash
-can and a configurable hotkey, Delete by default, and syncs its server settings
-to clients.
-
-Nix pins the plugin archive and installs its DLL before each container start.
-Recycling settings are generated on first load in
-`/var/lib/valheim/config/valheimplus/TastyChickenLegs.RecyclePlus.cfg`.
-`ReturnResources` controls the fraction returned: `0` returns no materials,
-`0.5` returns half, and the default `1` returns all. Configuration locking is
-enabled by default. Restart the service after editing its configuration.
-
 The host configuration uses Hard combat with vanilla multiplayer scaling,
 triples mining ore yields, and sets item stack limits to four times vanilla.
 Base carry capacity is 600, or 750 with Megingjord's default bonus.
@@ -77,7 +64,6 @@ Data on adam:
 
 - `/var/lib/valheim/config/worlds_local`: world saves.
 - `/var/lib/valheim/config/valheimplus/valheim_plus.cfg`: mod configuration.
-- `/var/lib/valheim/config/valheimplus/plugins/RecyclePlus.dll`: Nix-managed recycling plugin.
 - `/var/lib/valheim/config/backups`: hourly backups, retained for seven days.
 - `/var/lib/valheim/data`: downloaded server files and Steam update cache.
 

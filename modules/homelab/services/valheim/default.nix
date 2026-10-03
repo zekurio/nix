@@ -8,13 +8,6 @@
     cfg = config.services.homelab.valheim;
     dataDir = "/var/lib/valheim";
     unit = "${config.virtualisation.oci-containers.backend}-valheim.service";
-    recyclePlus = pkgs.fetchzip {
-      name = "recycle-plus-1.3.5";
-      url = "https://thunderstore.io/package/download/TastyChickenLegs/RecyclePlus/1.3.5/";
-      hash = "sha256-NJHCXkQc/Ax1s0nlfHfIhMcpoJ9aTXRLj/2/SKUhn3A=";
-      extension = "zip";
-      stripRoot = false;
-    };
   in {
     options.services.homelab.valheim = {
       enable = lib.mkEnableOption "Valheim dedicated server with Valheim Plus";
@@ -93,14 +86,13 @@
         "d ${dataDir}/data 0750 1000 1000 -"
       ];
       systemd.services.${lib.removeSuffix ".service" unit} = {
-        # The container syncs plugins at startup and changes their permissions,
-        # so install a writable copy before the OCI startup script runs.
+        # The container's plugin sync retains removed files. Clean both copies
+        # of RecyclePlus, which triggers native Vulkan crashes on clients.
         preStart = lib.mkBefore ''
-          ${pkgs.coreutils}/bin/install -D -m 0644 -o 1000 -g 1000 \
-            ${recyclePlus}/RecyclePlus.dll \
-            ${dataDir}/config/valheimplus/plugins/RecyclePlus.dll
+          ${pkgs.coreutils}/bin/rm -f \
+            ${dataDir}/config/valheimplus/plugins/RecyclePlus.dll \
+            ${dataDir}/data/plus/BepInEx/plugins/RecyclePlus.dll
         '';
-        restartTriggers = [recyclePlus];
         # Allow the container's two-minute world-save grace period to finish.
         serviceConfig.TimeoutStopSec = lib.mkForce 150;
       };
