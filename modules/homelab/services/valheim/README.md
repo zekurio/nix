@@ -39,7 +39,10 @@ tombstone under normal world death settings.
 Kilns, smelters, and blast furnaces automatically pull fuel and raw materials
 from chests within 10 metres and deposit their output into nearby chests.
 A coal chest within range of both a kiln and a smelter connects the two.
-Production speeds and fuel costs retain their defaults.
+Production runs at five times vanilla speed: kilns make one coal every three
+seconds, and smelters and blast furnaces make one ingot every six seconds.
+Each smelter or blast furnace uses two coal per ingot, so one kiln can supply
+one continuously running smelter or blast furnace.
 Kilns preserve fine and core wood and stop refilling when nearby chests contain
 at least 200 coal.
 
