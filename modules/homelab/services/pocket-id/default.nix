@@ -29,7 +29,7 @@
         mode = "0400";
       };
 
-      # Public: external OIDC clients (Immich mobile sync, Paperless redirects)
+      # Public: external OIDC clients (Immich mobile sync, Fluxer login)
       # need discovery, authorization and callback reachability.
       services.homelab.caddy.virtualHosts."pocket-id" = {
         domain = domain;

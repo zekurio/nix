@@ -238,7 +238,6 @@
       inviterr.enable = true;
       lidarr.enable = true;
       navidrome.enable = true;
-      paperless-ngx.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
       radarr.enable = true;
