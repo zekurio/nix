@@ -30,8 +30,8 @@ The host configuration uses Hard combat with vanilla multiplayer scaling,
 triples mining ore yields, and sets item stack limits to four times vanilla.
 Base carry capacity is 600, or 750 with Megingjord's default bonus.
 Wood chests have 40 slots, personal chests 24, reinforced chests 96, and
-blackmetal chests 128. Creature drops use vanilla quantities because V+'s
-global loot multiplier also increases trophies and boss rewards.
+blackmetal chests 128. Creature drop quantities are doubled, including
+trophies and boss rewards. Drop chances use their defaults.
 Crafting can use chests within 40 metres, measured from the workbench when in
 its area. Skill loss on death is disabled; items still go into a recoverable
 tombstone under normal world death settings.
@@ -39,8 +39,8 @@ tombstone under normal world death settings.
 Kilns, smelters, and blast furnaces automatically pull fuel and raw materials
 from chests within 10 metres and deposit their output into nearby chests.
 A coal chest within range of both a kiln and a smelter connects the two.
-Production runs at five times vanilla speed: kilns make one coal every three
-seconds, and smelters and blast furnaces make one ingot every six seconds.
+Production runs at three times vanilla speed: kilns make one coal every five
+seconds, and smelters and blast furnaces make one ingot every ten seconds.
 Each smelter or blast furnace uses two coal per ingot, so one kiln can supply
 one continuously running smelter or blast furnace.
 Kilns preserve fine and core wood and stop refilling when nearby chests contain

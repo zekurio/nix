@@ -267,8 +267,8 @@
           VPCFG_Items_noTeleportPrevention = "true";
 
           # The global loot multiplier also multiplies trophies and boss rewards.
-          VPCFG_LootDrop_enabled = "false";
-          VPCFG_LootDrop_lootDropAmountMultiplier = "0";
+          VPCFG_LootDrop_enabled = "true";
+          VPCFG_LootDrop_lootDropAmountMultiplier = "100";
 
           VPCFG_Inventory_enabled = "true";
           VPCFG_Inventory_woodChestRows = "8";
@@ -281,8 +281,8 @@
           VPCFG_CraftFromChest_range = "40";
 
           VPCFG_Kiln_enabled = "true";
-          # productionSpeed is seconds per item: 3/6 seconds gives 5x throughput.
-          VPCFG_Kiln_productionSpeed = "3";
+          # productionSpeed is seconds per item: 5/10 seconds gives 3x throughput.
+          VPCFG_Kiln_productionSpeed = "5";
           VPCFG_Kiln_autoFuel = "true";
           VPCFG_Kiln_autoDeposit = "true";
           VPCFG_Kiln_autoRange = "10";
@@ -291,13 +291,13 @@
           VPCFG_Kiln_stopAutoFuelThreshold = "200";
 
           VPCFG_Smelter_enabled = "true";
-          VPCFG_Smelter_productionSpeed = "6";
+          VPCFG_Smelter_productionSpeed = "10";
           VPCFG_Smelter_autoFuel = "true";
           VPCFG_Smelter_autoDeposit = "true";
           VPCFG_Smelter_autoRange = "10";
 
           VPCFG_Furnace_enabled = "true";
-          VPCFG_Furnace_productionSpeed = "6";
+          VPCFG_Furnace_productionSpeed = "10";
           VPCFG_Furnace_autoFuel = "true";
           VPCFG_Furnace_autoDeposit = "true";
           VPCFG_Furnace_autoRange = "10";
