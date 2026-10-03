@@ -2,11 +2,19 @@
   flake.modules.nixos.homelab = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     cfg = config.services.homelab.valheim;
     dataDir = "/var/lib/valheim";
     unit = "${config.virtualisation.oci-containers.backend}-valheim.service";
+    recyclePlus = pkgs.fetchzip {
+      name = "recycle-plus-1.3.5";
+      url = "https://thunderstore.io/package/download/TastyChickenLegs/RecyclePlus/1.3.5/";
+      hash = "sha256-NJHCXkQc/Ax1s0nlfHfIhMcpoJ9aTXRLj/2/SKUhn3A=";
+      extension = "zip";
+      stripRoot = false;
+    };
   in {
     options.services.homelab.valheim = {
       enable = lib.mkEnableOption "Valheim dedicated server with Valheim Plus";
@@ -84,8 +92,18 @@
         "d ${dataDir}/config 0750 1000 1000 -"
         "d ${dataDir}/data 0750 1000 1000 -"
       ];
-      # Allow the container's two-minute world-save grace period to finish.
-      systemd.services.${lib.removeSuffix ".service" unit}.serviceConfig.TimeoutStopSec = lib.mkForce 150;
+      systemd.services.${lib.removeSuffix ".service" unit} = {
+        # The container syncs plugins at startup and changes their permissions,
+        # so install a writable copy before the OCI startup script runs.
+        preStart = lib.mkBefore ''
+          ${pkgs.coreutils}/bin/install -D -m 0644 -o 1000 -g 1000 \
+            ${recyclePlus}/RecyclePlus.dll \
+            ${dataDir}/config/valheimplus/plugins/RecyclePlus.dll
+        '';
+        restartTriggers = [recyclePlus];
+        # Allow the container's two-minute world-save grace period to finish.
+        serviceConfig.TimeoutStopSec = lib.mkForce 150;
+      };
 
       # Valheim uses UDP directly, so it does not have an HTTP Caddy vhost.
       networking.firewall.allowedUDPPorts = [2456 2457 2458];
