@@ -72,6 +72,13 @@
         programs.mangohud = {
           enable = true;
           enableSessionWide = false;
+          settings = {
+            frametime = true;
+            gpu_core_clock = true;
+            gpu_mem_clock = true;
+            ram = true;
+            vram = true;
+          };
         };
       };
     };
