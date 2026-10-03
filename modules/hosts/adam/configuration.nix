@@ -262,6 +262,15 @@
           VPCFG_Gathering_copperScrap = "200";
           VPCFG_Gathering_flametalOre = "200";
 
+          VPCFG_Pickable_enabled = "true";
+          VPCFG_Pickable_edibles = "200";
+          VPCFG_Pickable_flowersAndIngredients = "200";
+
+          VPCFG_Beehive_enabled = "true";
+          # Seconds per honey: 400 gives 3x production; capacity scales with it.
+          VPCFG_Beehive_honeyProductionSpeed = "400";
+          VPCFG_Beehive_maximumHoneyPerBeehive = "12";
+
           VPCFG_Items_enabled = "true";
           VPCFG_Items_itemStackMultiplier = "300";
           VPCFG_Items_noTeleportPrevention = "true";
@@ -279,6 +288,11 @@
           VPCFG_CraftFromChest_enabled = "true";
           VPCFG_CraftFromChest_checkFromWorkbench = "true";
           VPCFG_CraftFromChest_range = "40";
+
+          VPCFG_Workbench_enabled = "true";
+          VPCFG_Workbench_workbenchRange = "100";
+          # Otherwise spawn suppression inherits the expanded build radius.
+          VPCFG_Workbench_workbenchEnemySpawnRange = "20";
 
           VPCFG_Kiln_enabled = "true";
           # productionSpeed is seconds per item: 5/10 seconds gives 3x throughput.

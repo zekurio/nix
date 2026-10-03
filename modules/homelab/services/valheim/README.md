@@ -15,6 +15,10 @@ The server enforces the mod version and syncs its configuration to clients.
 
 The host configuration uses Hard combat with vanilla multiplayer scaling,
 triples mining ore yields, and sets item stack limits to four times vanilla.
+Harvest yields are tripled for crops, seeds, berries, mushrooms, flowers, and
+other pickable ingredients. The ingredient setting also covers royal jelly
+and volture eggs. Beehives produce one honey every 400 seconds and hold up to
+12 honey, giving three times vanilla production and capacity.
 Base carry capacity is 600, or 750 with Megingjord's default bonus.
 Wood chests have 40 slots, personal chests 24, reinforced chests 96, and
 blackmetal chests 128. Creature drop quantities are doubled, including
@@ -22,6 +26,8 @@ trophies and boss rewards. Drop chances use their defaults.
 Crafting can use chests within 40 metres, measured from the workbench when in
 its area. Skill loss on death is disabled; items still go into a recoverable
 tombstone under normal world death settings.
+Workbench build coverage has a 100-metre radius. Its enemy spawn suppression
+radius stays at 20 metres.
 
 Kilns, smelters, and blast furnaces automatically pull fuel and raw materials
 from chests within 10 metres and deposit their output into nearby chests.
