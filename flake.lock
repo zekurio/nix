@@ -735,6 +735,7 @@
         "nix-linux-builder": "nix-linux-builder",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
+        "t3code-nightly": "t3code-nightly",
         "ucodenix": "ucodenix"
       }
     },
@@ -830,6 +831,26 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "t3code-nightly": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791261750,
+        "narHash": "sha256-2NgjgouppnRIk2osSx91mKSEoc90pkFIa2pouJizHDs=",
+        "owner": "vsgoulart",
+        "repo": "t3code-nightly-flake",
+        "rev": "e3eeae80886cfb95e677e787126d0fee93ccc4ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vsgoulart",
+        "repo": "t3code-nightly-flake",
         "type": "github"
       }
     },

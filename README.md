@@ -156,6 +156,46 @@ reports Secure Boot enabled and Setup Mode disabled, and test both
 NixOS and Windows. Back up `/var/lib/sbctl` securely; it contains private keys
 needed to sign future bootloader updates. Do not commit those keys.
 
+### T3 Code nightly
+
+[t3code-nightly-flake](https://github.com/vsgoulart/t3code-nightly-flake)
+packages the upstream nightly release binaries for Lilith and Adam. Both
+have the CLI (`t3`); Lilith also has the desktop app (`t3code-desktop`).
+Update their pinned nightly with `nix flake update t3code-nightly`, then
+rebuild both hosts. Lilith's desktop self-updates are disabled because the
+application lives in the Nix store.
+
+Sachiel installs the desktop app through Homebrew's `t3-code@nightly` cask
+into `/Applications`. Its version follows Homebrew independently of the
+Linux flake pin. Update it with `brew upgrade --cask --greedy t3-code@nightly`.
+
+Adam runs `t3code.service` as `zekurio`, using that user's repositories, Git
+configuration, provider credentials, and T3 Code state under `~/.t3`.
+The server binds to `127.0.0.1:3773`; Caddy exposes
+`https://t3code.zekurio.me` to the LAN and tailnet. The hostname must resolve
+to Adam, as the other private service names do.
+
+After rebuilding Adam and Sachiel, generate a pairing link:
+
+```bash
+ssh adam 't3 pair'
+```
+
+In the printed pairing URL, replace `http://127.0.0.1:3773` with
+`https://t3code.zekurio.me`, keeping `/pair#token=...` intact. On Sachiel,
+open T3 Code (Nightly), go to **Settings → Connections → Add environment**,
+and paste the modified URL. Pairing links expire after five minutes;
+generate a fresh link for each device. Provider CLIs must be authenticated
+on Adam before starting their threads.
+
+The server starts at boot and survives SSH disconnects. Manage it through
+NixOS, rather than `t3 service install`, so rebuilds update the executable:
+
+```bash
+ssh adam 'sudo systemctl restart t3code.service'
+ssh adam 'journalctl -u t3code.service -f'
+```
+
 ### Secrets
 
 Host secrets are [sops](https://github.com/getsops/sops)-encrypted under

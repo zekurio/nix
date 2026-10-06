@@ -44,6 +44,10 @@
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
     # against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
+    t3code-nightly = {
+      url = "github:vsgoulart/t3code-nightly-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # Shared agent skills.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";
