@@ -92,10 +92,6 @@
       url = "github:raydak-labs/configarr/v1.30.2";
       inputs.flake-parts.follows = "flake-parts";
     };
-    dashthing = {
-      url = "github:zekurio/dashthing";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     inviterr = {
       url = "github:zekurio/inviterr";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

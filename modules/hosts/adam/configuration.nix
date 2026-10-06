@@ -229,7 +229,6 @@
       beets.enable = true;
       copyparty.enable = true;
       coolercontrol.enable = true;
-      dashthing.enable = true;
       fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;

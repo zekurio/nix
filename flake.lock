@@ -208,26 +208,6 @@
         "type": "github"
       }
     },
-    "dashthing": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791296652,
-        "narHash": "sha256-vM13g1Ay90Ynau+0mIV0WBCBz0DYrGBWQ61SfVirqC4=",
-        "owner": "zekurio",
-        "repo": "dashthing",
-        "rev": "4c176f5846d6d701e3a984016813659be7e59797",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "dashthing",
-        "type": "github"
-      }
-    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -679,7 +659,6 @@
         "chaotic": "chaotic",
         "configarr": "configarr",
         "cpu-microcodes": "cpu-microcodes",
-        "dashthing": "dashthing",
         "disko": "disko",
         "flake-parts": "flake-parts",
         "helium": "helium",
