@@ -224,13 +224,12 @@
 
     services.homelab = {
       alloy.enable = true;
-      calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
       beets.enable = true;
       copyparty.enable = true;
-      costthing.enable = true;
       coolercontrol.enable = true;
+      dashthing.enable = true;
       fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;

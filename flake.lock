@@ -132,26 +132,6 @@
         "type": "github"
       }
     },
-    "calthing": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788476209,
-        "narHash": "sha256-nyC0lZYvqUHrwvV0lnL9hdfXDRxMwW//u69gaRXP+I4=",
-        "owner": "zekurio",
-        "repo": "calthing",
-        "rev": "51a20e489892d1633837a222215ae981634095bf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "calthing",
-        "type": "github"
-      }
-    },
     "chaotic": {
       "inputs": {
         "flake-schemas": "flake-schemas",
@@ -196,26 +176,6 @@
         "type": "github"
       }
     },
-    "costthing": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790119281,
-        "narHash": "sha256-FVSTwy9KCSmcwM4WUZYZg1XJNr9o3yN9pWcBVOBQH2k=",
-        "owner": "zekurio",
-        "repo": "costthing",
-        "rev": "264d9957f08ff0cd62a9764234aeca870f688e97",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "costthing",
-        "type": "github"
-      }
-    },
     "cpu-microcodes": {
       "flake": false,
       "locked": {
@@ -245,6 +205,26 @@
       "original": {
         "owner": "ipetkov",
         "repo": "crane",
+        "type": "github"
+      }
+    },
+    "dashthing": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791296652,
+        "narHash": "sha256-vM13g1Ay90Ynau+0mIV0WBCBz0DYrGBWQ61SfVirqC4=",
+        "owner": "zekurio",
+        "repo": "dashthing",
+        "rev": "4c176f5846d6d701e3a984016813659be7e59797",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "dashthing",
         "type": "github"
       }
     },
@@ -696,11 +676,10 @@
         "alloy": "alloy",
         "autoaspm": "autoaspm",
         "blitzcrank": "blitzcrank",
-        "calthing": "calthing",
         "chaotic": "chaotic",
         "configarr": "configarr",
-        "costthing": "costthing",
         "cpu-microcodes": "cpu-microcodes",
+        "dashthing": "dashthing",
         "disko": "disko",
         "flake-parts": "flake-parts",
         "helium": "helium",

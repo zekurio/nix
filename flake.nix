@@ -92,16 +92,12 @@
       url = "github:raydak-labs/configarr/v1.30.2";
       inputs.flake-parts.follows = "flake-parts";
     };
-    calthing = {
-      url = "github:zekurio/calthing";
+    dashthing = {
+      url = "github:zekurio/dashthing";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     inviterr = {
       url = "github:zekurio/inviterr";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    costthing = {
-      url = "github:zekurio/costthing";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     autoaspm = {
