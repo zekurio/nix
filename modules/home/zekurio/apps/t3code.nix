@@ -10,7 +10,7 @@
       pkgs.openssh
       agents.claude-code
       agents.codex
-      agents.opencode
+      inputs.self.packages.${system}.opencode
     ];
   in {
     packages = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {

@@ -1,4 +1,19 @@
 {inputs, ...}: {
+  perSystem = {system, ...}: let
+    pkgs = import inputs.nixpkgs-unstable {inherit system;};
+    upstream = inputs.llm-agents.packages.${system}.opencode2;
+  in {
+    # llm-agents names v2's binary opencode2; T3 Code expects opencode on PATH.
+    packages.opencode = pkgs.symlinkJoin {
+      name = "opencode-${upstream.version}";
+      paths = [upstream];
+      postBuild = ''
+        ln -s opencode2 $out/bin/opencode
+      '';
+      meta = upstream.meta // {mainProgram = "opencode";};
+    };
+  };
+
   flake.modules.homeManager.zekurio = {
     lib,
     pkgs,
@@ -22,7 +37,7 @@
     home.packages = [
       llmAgents.claude-code
       llmAgents.codex
-      llmAgents.opencode
+      inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     ];
 
     home.file = lib.mkMerge (map linkSkills skillDirs);
