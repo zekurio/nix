@@ -9,7 +9,6 @@
     cfg = config.services.homelab.blitzcrank;
     port = 8484;
     package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
-    anvilctlPackage = inputs.anvil.packages.${pkgs.stdenv.hostPlatform.system}.anvilctl;
     shareGroup = config.modules.homelab.mediaShare.group;
     downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
   in {
@@ -32,8 +31,8 @@
       services.blitzcrank = {
         enable = true;
         inherit package port;
-        model = "openai-codex/gpt-6.1-sol:high";
-        automationModel = "openai-codex/gpt-6-luna:max";
+        model = "openai/gpt-6.1-sol:high";
+        automationModel = "openai/gpt-6-luna:max";
         language = "German";
         webProvider = "firecrawl";
 
@@ -64,26 +63,22 @@
           RADARR_URL = config.services.homelab.radarr.baseUrl;
           SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
           JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
-          ANVIL_COMMAND = "${anvilctlPackage}/bin/anvilctl";
-          ANVIL_CONTROL_SOCKET = config.services.anvil.settings.daemon.control_socket or "/run/anvil/anvild.sock";
           # Automation report threads + /automation trigger. Snowflakes are
           # not secrets; the bot token lives in the env template.
           DISCORD_GUILD_ID = "418795186475237376";
           DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
           DISCORD_INBOX_CHANNEL_ID = "1473398718127407188";
-          BLITZCRANK_DISCORD_MODEL = "openai-codex/gpt-6.1-sol:medium";
-          BLITZCRANK_DISCORD_TRIAGE_MODEL = "openai-codex/gpt-6-luna:max";
+          BLITZCRANK_DISCORD_MODEL = "openai/gpt-6.1-sol:medium";
+          BLITZCRANK_DISCORD_TRIAGE_MODEL = "openai/gpt-6-luna:max";
           # Automation cron expressions are evaluated in local time.
           TZ = config.time.timeZone;
         };
       };
 
-      # anvilctl talks to the daemon socket, which anvil owns as the share
-      # user; the same membership makes the media tree readable for ffprobe.
       systemd.services.blitzcrank = {
         serviceConfig.SupplementaryGroups = [shareGroup];
-        after = ["seerr.service" "anvil.service"];
-        wants = ["seerr.service" "anvil.service"];
+        after = ["seerr.service"];
+        wants = ["seerr.service"];
       };
 
       sops.templates."blitzcrank.env" = {

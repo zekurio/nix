@@ -224,7 +224,6 @@
 
     services.homelab = {
       alloy.enable = true;
-      anvil.enable = true;
       calthing.enable = true;
       blitzcrank.enable = true;
       configarr.enable = true;
@@ -237,6 +236,7 @@
       jellyfin.enable = true;
       inviterr.enable = true;
       lidarr.enable = true;
+      mediaCleanup.enable = true;
       navidrome.enable = true;
       pocket-id.enable = true;
       prowlarr.enable = true;
@@ -255,24 +255,24 @@
 
           # V+ modifiers are percentage changes: +100 doubles, -100 removes.
           VPCFG_Gathering_enabled = "true";
-          VPCFG_Gathering_copperOre = "200";
-          VPCFG_Gathering_tinOre = "200";
-          VPCFG_Gathering_ironScrap = "200";
-          VPCFG_Gathering_silverOre = "200";
-          VPCFG_Gathering_copperScrap = "200";
-          VPCFG_Gathering_flametalOre = "200";
+          VPCFG_Gathering_copperOre = "100";
+          VPCFG_Gathering_tinOre = "100";
+          VPCFG_Gathering_ironScrap = "100";
+          VPCFG_Gathering_silverOre = "100";
+          VPCFG_Gathering_copperScrap = "100";
+          VPCFG_Gathering_flametalOre = "100";
 
           VPCFG_Pickable_enabled = "true";
-          VPCFG_Pickable_edibles = "200";
-          VPCFG_Pickable_flowersAndIngredients = "200";
+          VPCFG_Pickable_edibles = "100";
+          VPCFG_Pickable_flowersAndIngredients = "100";
 
           VPCFG_Beehive_enabled = "true";
-          # Seconds per honey: 400 gives 3x production; capacity scales with it.
-          VPCFG_Beehive_honeyProductionSpeed = "400";
-          VPCFG_Beehive_maximumHoneyPerBeehive = "12";
+          # Seconds per honey: 600 gives 2x production; capacity scales with it.
+          VPCFG_Beehive_honeyProductionSpeed = "600";
+          VPCFG_Beehive_maximumHoneyPerBeehive = "8";
 
           VPCFG_Items_enabled = "true";
-          VPCFG_Items_itemStackMultiplier = "300";
+          VPCFG_Items_itemStackMultiplier = "700";
           VPCFG_Items_noTeleportPrevention = "true";
 
           # The global loot multiplier also multiplies trophies and boss rewards.
@@ -280,10 +280,10 @@
           VPCFG_LootDrop_lootDropAmountMultiplier = "100";
 
           VPCFG_Inventory_enabled = "true";
-          VPCFG_Inventory_woodChestRows = "8";
-          VPCFG_Inventory_personalChestRows = "8";
-          VPCFG_Inventory_ironChestRows = "16";
-          VPCFG_Inventory_blackmetalChestRows = "16";
+          VPCFG_Inventory_woodChestRows = "4";
+          VPCFG_Inventory_personalChestRows = "4";
+          VPCFG_Inventory_ironChestRows = "8";
+          VPCFG_Inventory_blackmetalChestRows = "8";
 
           VPCFG_CraftFromChest_enabled = "true";
           VPCFG_CraftFromChest_checkFromWorkbench = "true";
@@ -295,8 +295,8 @@
           VPCFG_Workbench_workbenchEnemySpawnRange = "20";
 
           VPCFG_Kiln_enabled = "true";
-          # productionSpeed is seconds per item: 5/10 seconds gives 3x throughput.
-          VPCFG_Kiln_productionSpeed = "5";
+          # productionSpeed is seconds per item: 7.5/15 seconds doubles throughput.
+          VPCFG_Kiln_productionSpeed = "7.5";
           VPCFG_Kiln_autoFuel = "true";
           VPCFG_Kiln_autoDeposit = "true";
           VPCFG_Kiln_autoRange = "10";
@@ -305,13 +305,13 @@
           VPCFG_Kiln_stopAutoFuelThreshold = "200";
 
           VPCFG_Smelter_enabled = "true";
-          VPCFG_Smelter_productionSpeed = "10";
+          VPCFG_Smelter_productionSpeed = "15";
           VPCFG_Smelter_autoFuel = "true";
           VPCFG_Smelter_autoDeposit = "true";
           VPCFG_Smelter_autoRange = "10";
 
           VPCFG_Furnace_enabled = "true";
-          VPCFG_Furnace_productionSpeed = "10";
+          VPCFG_Furnace_productionSpeed = "15";
           VPCFG_Furnace_autoFuel = "true";
           VPCFG_Furnace_autoDeposit = "true";
           VPCFG_Furnace_autoRange = "10";

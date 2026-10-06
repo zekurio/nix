@@ -14,14 +14,16 @@ Install the matching Grantapher Valheim Plus release on every player's client.
 The server enforces the mod version and syncs its configuration to clients.
 
 The host configuration uses Hard combat with vanilla multiplayer scaling,
-triples mining ore yields, and sets item stack limits to four times vanilla.
-Harvest yields are tripled for crops, seeds, berries, mushrooms, flowers, and
+doubles mining ore yields, and sets item stack limits to eight times vanilla.
+Harvest yields are doubled for crops, seeds, berries, mushrooms, flowers, and
 other pickable ingredients. The ingredient setting also covers royal jelly
-and volture eggs. Beehives produce one honey every 400 seconds and hold up to
-12 honey, giving three times vanilla production and capacity.
+and volture eggs. Beehives produce one honey every 600 seconds and hold up to
+8 honey, giving twice vanilla production and capacity.
 Base carry capacity is 600, or 750 with Megingjord's default bonus.
-Wood chests have 40 slots, personal chests 24, reinforced chests 96, and
-blackmetal chests 128. Creature drop quantities are doubled, including
+Chests have twice their vanilla rows: wooden and personal chests have four
+rows, reinforced and blackmetal chests have eight. With vanilla column counts,
+they hold 20, 12, 48, and 64 slots respectively.
+Creature drop quantities are doubled, including
 trophies and boss rewards. Drop chances use their defaults.
 Crafting can use chests within 40 metres, measured from the workbench when in
 its area. Skill loss on death is disabled; items still go into a recoverable
@@ -32,8 +34,8 @@ radius stays at 20 metres.
 Kilns, smelters, and blast furnaces automatically pull fuel and raw materials
 from chests within 10 metres and deposit their output into nearby chests.
 A coal chest within range of both a kiln and a smelter connects the two.
-Production runs at three times vanilla speed: kilns make one coal every five
-seconds, and smelters and blast furnaces make one ingot every ten seconds.
+Production runs at twice vanilla speed: kilns make one coal every 7.5
+seconds, and smelters and blast furnaces make one ingot every 15 seconds.
 Each smelter or blast furnace uses two coal per ingot, so one kiln can supply
 one continuously running smelter or blast furnace.
 Kilns preserve fine and core wood and stop refilling when nearby chests contain

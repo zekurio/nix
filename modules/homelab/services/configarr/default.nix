@@ -50,7 +50,6 @@
           # by default, but its Nix package still builds v1.30.1, so pin here.
           recyclarrRevision: 4ae377bb704fc7fd69a544ad04e91357e0b09f62
           telemetry: false
-          localConfigTemplatesPath: ${./templates}
 
           # TRaSH has release-group tiers for remuxes, but no generic Radarr
           # format for the remux quality modifier. Keep the qualities merged
@@ -80,8 +79,19 @@
             sonarr:
               base_url: ${config.services.homelab.sonarr.baseUrl}
               api_key: !env SONARR_API_KEY
+              # Configarr resolves TRaSH naming presets only at instance level.
+              media_naming:
+                series: default
+                season: default
+                episodes:
+                  rename: true
+                  standard: default
+                  daily: default
+                  anime: default
+              media_naming_api:
+                replaceIllegalCharacters: true
+                multiEpisodeStyle: 5 # Prefixed Range, as recommended by TRaSH.
               include:
-                - template: sonarr-naming
                 - template: dca7e5e9e99c703bcbdaaa471dd40e98 # [German] HD Bluray + WEB
                   source: TRASH
                 - template: 6fe5937e1dcc2269e23b49eb46dfe6d6 # [German] Anime HD Bluray + WEB
@@ -202,8 +212,14 @@
             radarr:
               base_url: ${config.services.homelab.radarr.baseUrl}
               api_key: !env RADARR_API_KEY
+              media_naming:
+                folder: default
+                movie:
+                  rename: true
+                  standard: standard
+              media_naming_api:
+                replaceIllegalCharacters: true
               include:
-                - template: radarr-naming
                 - template: 2b90e905c99490edc7c7a5787443748b # [German] HD Bluray + WEB
                   source: TRASH
                 - template: bf3cc2e99ad9a804a9b0d0e538e1fbba # [German] Anime HD Bluray + WEB

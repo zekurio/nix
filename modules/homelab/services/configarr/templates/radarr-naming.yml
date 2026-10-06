@@ -1,7 +1,0 @@
-# Keep source quality, Proper/Repack, group and edition for later imports.
-# Codec details can be read from the file.
-media_naming_api:
-  renameMovies: true
-  replaceIllegalCharacters: true
-  movieFolderFormat: '{Movie CleanTitle} ({Release Year})'
-  standardMovieFormat: '{Movie CleanTitle} {(Release Year)} {Edition Tags} {[Quality Full]}{-Release Group}'

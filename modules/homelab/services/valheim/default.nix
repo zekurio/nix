@@ -86,8 +86,7 @@
         "d ${dataDir}/data 0750 1000 1000 -"
       ];
       systemd.services.${lib.removeSuffix ".service" unit} = {
-        # The container's plugin sync retains removed files. Clean both copies
-        # of RecyclePlus, which triggers native Vulkan crashes on clients.
+        # Remove both copies so persisted plugin files cannot reload RecyclePlus.
         preStart = lib.mkBefore ''
           ${pkgs.coreutils}/bin/rm -f \
             ${dataDir}/config/valheimplus/plugins/RecyclePlus.dll \
