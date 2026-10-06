@@ -7,7 +7,6 @@
       };
       systemPackages = with pkgs; [
         ddcutil
-        inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta
         feishin
         libnotify
         mpv

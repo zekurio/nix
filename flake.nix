@@ -57,10 +57,6 @@
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    delta = {
-      url = "github:zed-industries/delta-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     jellium-desktop = {
       url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
       inputs.flake-parts.follows = "flake-parts";
