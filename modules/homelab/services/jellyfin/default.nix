@@ -6,7 +6,11 @@
     ...
   }: let
     mediaShare = config.modules.homelab.mediaShare;
-    domain = config.services.homelab.domains.schnitzelflix;
+    domain = "media.${config.services.homelab.domains.zekurio}";
+    # Where Jellyfin used to live. Apps and TVs store the server address and
+    # mostly ignore redirects, so the old name keeps serving until every
+    # client has been pointed at the new one.
+    legacyDomain = config.services.homelab.domains.schnitzelflix;
     port = config.services.homelab.jellyfin.port;
     serviceUser = "jellyfin";
     serviceGroup = "jellyfin";
@@ -68,10 +72,17 @@
         "video"
       ];
 
-      services.homelab.caddy.virtualHosts."jellyfin" = {
-        domain = domain;
-        public = true;
-        reverseProxy = "127.0.0.1:${toString port}";
+      services.homelab.caddy.virtualHosts = {
+        jellyfin = {
+          inherit domain;
+          public = true;
+          reverseProxy = "127.0.0.1:${toString port}";
+        };
+        jellyfin-legacy = {
+          domain = legacyDomain;
+          public = true;
+          reverseProxy = "127.0.0.1:${toString port}";
+        };
       };
     };
   };
