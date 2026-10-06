@@ -22,10 +22,16 @@
         allowSubstitutes = false;
       } ''
         mkdir -p "$out" "$steamcompattool"
-        ln -s ${source}/bin/* "$steamcompattool/"
+        # Recent releases unpack directly into $out; older ones used bin/.
+        payload=${source}
+        if [ ! -f "$payload/compatibilitytool.vdf" ]; then
+          payload="$payload/bin"
+        fi
+        test -f "$payload/compatibilitytool.vdf"
+        ln -s "$payload"/* "$steamcompattool/"
         # Steam ignores a symlinked compatibility manifest in current clients.
         rm "$steamcompattool/compatibilitytool.vdf"
-        cp ${source}/bin/compatibilitytool.vdf "$steamcompattool/"
+        cp "$payload/compatibilitytool.vdf" "$steamcompattool/"
         ln -s "$steamcompattool" "$out/${name}"
       '';
 
