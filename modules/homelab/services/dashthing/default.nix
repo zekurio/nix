@@ -80,7 +80,7 @@
               }
             ];
           };
-          # Lives in the unit's StateDirectory; see the migration step below.
+          # Lives in the unit's StateDirectory.
           costs.data_file = "/var/lib/dashthing/costs.json";
         };
       };
@@ -104,19 +104,6 @@
       };
 
       systemd.services.dashthing = {
-        # One-time move from costthing: seed the cost file from the old state
-        # directory if dashthing has none yet. "+" runs it as root, because the
-        # dynamic service user cannot read /var/lib/costthing. Safe to delete
-        # once adam has started dashthing for the first time.
-        serviceConfig.ExecStartPre = "+${pkgs.writeShellScript "dashthing-import-costthing" ''
-          set -eu
-          old=/var/lib/costthing/costs.json
-          new=/var/lib/dashthing/costs.json
-          if [ ! -e "$new" ] && [ -e "$old" ]; then
-            ${pkgs.coreutils}/bin/install -m 0600 "$old" "$new"
-            ${pkgs.coreutils}/bin/chown --reference=/var/lib/dashthing/ "$new"
-          fi
-        ''}";
         after = [
           "jellyfin.service"
           "radarr.service"
