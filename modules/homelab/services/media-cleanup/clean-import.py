@@ -57,7 +57,9 @@ def keep_stream(stream):
 
 
 def remux_args(path, output, info, streams):
-    args = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-y", "-i", str(path)]
+    # Blu-ray remuxes can have non-monotonic inferred DTS. Let FFmpeg repair
+    # timestamps while copying packets; -xerror aborts these valid imports.
+    args = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", str(path)]
     for stream in streams:
         args.extend(("-map", f"0:{stream['index']}"))
     args.extend(("-c", "copy", "-map_metadata", "-1", "-map_metadata:s", "-1", "-map_chapters", "0", "-metadata", "encoder="))

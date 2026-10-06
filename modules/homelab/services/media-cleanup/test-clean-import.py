@@ -65,6 +65,8 @@ class Containers(unittest.TestCase):
             "-map", "0:v", "-map", "1:a", "-map", "2:s",
             "-c:v", "libx264", "-c:a", "aac", "-c:s", "srt", "-map_chapters", "3",
             "-metadata", "title=Release title spam", "-metadata", "comment=Download URL",
+            "-metadata:s:v:0", "title=Video release spam",
+            "-metadata:s:v:0", "comment=Video download URL",
             "-metadata:s:a:0", "language=ger", "-metadata:s:a:0", "title=Release commentary spam",
             "-metadata:s:a:0", "comment=Download URL", "-disposition:a:0", "default+comment",
             "-metadata:s:s:0", "language=jpn", "-metadata:s:s:0", "title=Signs and Songs SDH spam",
@@ -95,6 +97,7 @@ class Containers(unittest.TestCase):
         self.assertEqual([stream["codec_type"] for stream in streams], ["video", "audio", "subtitle", "attachment"])
         for stream in streams:
             self.assertNotIn("title", cleanup.tags(stream))
+            self.assertNotIn("comment", cleanup.tags(stream))
         self.assertEqual(cleanup.tags(streams[1])["language"], "ger")
         self.assertNotIn("comment", cleanup.tags(streams[1]))
         for index in (1, 2):
