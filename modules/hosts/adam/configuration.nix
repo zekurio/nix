@@ -249,6 +249,8 @@
         serverName = "Die geilsten Gamer e.V. (nicht offiziell)";
         public = true;
         extraEnvironment = {
+          # Keep both ID formats for legacy and platform-prefixed admin checks.
+          ADMINLIST_IDS = "76561198111376416 Steam_76561198111376416";
           SERVER_ARGS = "-modifier combat hard";
           VPCFG_Game_enabled = "false";
 
@@ -279,6 +281,7 @@
           VPCFG_LootDrop_lootDropAmountMultiplier = "100";
 
           VPCFG_Inventory_enabled = "true";
+          VPCFG_Inventory_playerInventoryRows = "8";
           VPCFG_Inventory_woodChestRows = "4";
           VPCFG_Inventory_personalChestRows = "4";
           VPCFG_Inventory_ironChestRows = "8";
@@ -316,7 +319,8 @@
           VPCFG_Furnace_autoRange = "10";
 
           VPCFG_Player_enabled = "true";
-          VPCFG_Player_baseMaximumWeight = "600";
+          VPCFG_Player_baseMaximumWeight = "1000";
+          VPCFG_Player_baseMegingjordBuff = "500";
           VPCFG_Player_deathPenaltyMultiplier = "-100";
           VPCFG_Player_autoRepair = "true";
           VPCFG_Player_cropNotifier = "true";
