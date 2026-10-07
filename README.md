@@ -196,6 +196,52 @@ ssh adam 'sudo systemctl restart t3code.service'
 ssh adam 'journalctl -u t3code.service -f'
 ```
 
+### vrouter
+
+The prepared `services.homelab.vrouter` module serves
+`https://vrouter.zekurio.me` only to LAN and Tailscale clients. Dashboard
+access goes through OAuth2 Proxy and Pocket ID, restricted to the `admin`
+group. `/v1/*` goes directly to vrouter and requires a vrouter API key.
+Both backend listeners are loopback-only. The public URL is set explicitly
+so copied API endpoints and sign-in return links use HTTPS.
+
+The service is disabled. vrouter's source repository is private, so the
+flake input is optional until authenticated fetching is configured. To enable it:
+
+1. Give Nix on the machines performing evaluations, including Adam's upgrade
+   service and the lock-update workflow, read access to the private repository.
+   Configure GitHub access tokens through runtime Nix configuration or CI
+   secrets; never put them in this repository or the Nix store. Then add the
+   input and run `nix flake lock` to pin the published package and module:
+
+   ```nix
+   vrouter = {
+     url = "github:zekurio/vrouter";
+     inputs.nixpkgs.follows = "nixpkgs-unstable";
+   };
+   ```
+
+2. Create a Pocket ID OIDC client with callback
+   `https://vrouter.zekurio.me/oauth2/callback`. Allow the `admin` group
+   on that client and ensure its members' tokens contain the group claim.
+   `services.homelab.vrouter.adminGroups` must match Pocket ID's emitted
+   group names.
+3. Using `sops secrets/adam.yaml`, add `vrouter_oauth_env` as a multiline
+   value containing `OAUTH2_PROXY_CLIENT_ID`, `OAUTH2_PROXY_CLIENT_SECRET`,
+   and `OAUTH2_PROXY_COOKIE_SECRET` environment assignments. Generate the
+   cookie secret with `openssl rand -base64 32`. Do not add
+   `VROUTER_ADMIN_TOKEN`, which would require a second dashboard login.
+4. Set `services.homelab.vrouter.enable = true` on Adam, then run
+   `nix flake check` and rebuild Adam.
+   Resolve `vrouter.zekurio.me` to Adam through the existing private DNS.
+
+The module uses ports 8180 for vrouter and 4180 for OAuth2 Proxy. Its
+authentication settings currently own `services.oauth2-proxy`; split that
+into service-specific instances before adding another consumer. Hosted
+provider sign-in uses a device code for Codex and Claude's authorization-code
+page, with no localhost callback listeners. State and provider credentials persist in
+`/var/lib/private/vrouter`; include that directory in private backups.
+
 ### Secrets
 
 Host secrets are [sops](https://github.com/getsops/sops)-encrypted under
