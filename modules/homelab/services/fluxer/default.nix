@@ -39,6 +39,8 @@
       enable = lib.mkEnableOption "Fluxer chat services with Caddy integration";
       imageTag = lib.mkOption {
         type = lib.types.str;
+        # This tag moves. The default pull policy reuses the cached image, so
+        # pull the application images by hand before restarting to update.
         default = "v1";
         description = "Tag for the Fluxer application images.";
       };

@@ -101,6 +101,8 @@
         log = importLog;
         move = true;
         quiet = false;
+        # Uncertain matches stay in the inbox, like duplicates. Review them
+        # with "beet-music import <path>".
         quiet_fallback = "skip";
         resume = false;
         write = true;
@@ -231,6 +233,7 @@
         copy = false;
         move = false;
         incremental = false;
+        # Lidarr captures the hook's output in its debug log.
         log = null;
         quiet = true;
       };
@@ -266,6 +269,8 @@
       '';
     };
 
+    # The manual entry point. It runs as the service user and takes the library
+    # lock, so ad-hoc commands cannot overlap the timer or the Lidarr hook.
     beetMusic = pkgs.writeShellApplication {
       name = "beet-music";
       runtimeInputs = [pkgs.coreutils];

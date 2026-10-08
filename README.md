@@ -3,60 +3,37 @@
 Nix configurations for my homelab server, gaming desktop, and MacBook Air,
 plus the Home Manager profile they share.
 
-Built with [flake-parts](https://flake.parts) in a dendritic layout — every file
-under `modules/` is a flake-parts module discovered by
-[import-tree](https://github.com/vic/import-tree), so `flake.nix` only wires
-inputs, systems, and the formatter.
+| Host | Type | Role |
+|------|------|------|
+| `adam` | NixOS | Homelab server |
+| `lilith` | NixOS | Gaming desktop, dual-booting Windows |
+| `sachiel` | nix-darwin | MacBook Air |
 
-### Hosts
+This is a [flake-parts](https://flake.parts) flake in a dendritic layout.
+`AGENTS.md` covers the structure and conventions, and each module explains
+itself in comments. This file only lists the steps you run by hand.
 
-| Host | Type | Channel | Description |
-|------|------|---------|-------------|
-| `adam` | NixOS | unstable | Homelab server: media, photos, documents, behind Caddy; public services on 443, management UIs LAN/tailnet-only |
-| `lilith` | NixOS | unstable | Ryzen/Radeon gaming desktop with KDE Plasma on Wayland |
-| `sachiel` | nix-darwin | unstable | MacBook Air |
+## Rebuilding
 
-### Layout
+`adam` upgrades itself from GitHub's `main` every Sunday around 03:00, so a
+change reaches it only after a push. To upgrade now, start the unit the timer
+uses and follow its log:
 
-```
-modules/hosts/<host>/   host entrypoint (system.nix) and host-specific modules
-modules/nixos/          shared NixOS modules; default.nix holds the base
-modules/darwin/         shared nix-darwin modules
-modules/nix/            Nix daemon settings shared by both platforms
-modules/homelab/        reusable homelab services (services/<service>/)
-modules/home/zekurio/   Home Manager profile, split by concern
-modules/nixpkgs/        nixpkgs config and overlays/
-secrets/                sops-encrypted, one file per host
+```bash
+ssh adam 'sudo systemctl start nixos-upgrade.service'
+ssh adam 'journalctl -fu nixos-upgrade.service'
 ```
 
-### Rebuilding
+That unit runs inside the memory and CPU limits from
+`modules/hosts/adam/build-safety.nix`. A build that hits them fails. Build it
+on another machine and push it to the cache instead of raising the limits.
+Upgrades never reboot the host, so reboot by hand for a new kernel.
 
-`adam` auto-upgrades from GitHub's `main` branch on a weekly timer, so changes
-must be pushed there before an automatic upgrade can use them.
-To rebuild explicitly from GitHub:
+A direct rebuild bypasses those limits. Keep it for emergencies:
 
 ```bash
 ssh adam 'nixos-rebuild switch --flake "github:zekurio/nix/main#adam" --sudo'
 ```
-
-For routine upgrades, use the upgrade service:
-
-```bash
-ssh adam 'sudo systemctl start nixos-upgrade.service'
-```
-
-Once the build-safety configuration is deployed, use this same service for
-manual and scheduled upgrades. Concurrent starts share one running upgrade;
-evaluation and daemon builds share a 3 GiB soft RAM limit, 4 GiB hard RAM
-limit, 4 GiB swap limit, and two CPUs. Builds run one derivation at a time
-with two workers, using disk for temporary files. The existing 16 GiB ext4
-swapfile stays intact. Oversized builds can fail and should be built elsewhere
-and cached, rather than raising these limits on production.
-
-Follow progress with `journalctl -fu nixos-upgrade.service`. Automatic reboots
-are disabled; schedule kernel reboots separately. Direct `nixos-rebuild`
-commands bypass the upgrade serialization and evaluation limits, and root
-builds using the local store also bypass the daemon limits.
 
 `lilith` and `sachiel` build from their local checkouts. `path:` keeps the root
 activation step from treating the Git working tree as root-owned:
@@ -66,16 +43,15 @@ sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
-Before pushing, run `nix fmt`, `git add` any new files (flakes only see tracked
-files), then `nix flake check`.
+A GitHub workflow opens a `flake.lock` update PR every Saturday night. It needs
+"Allow GitHub Actions to create and approve pull requests" enabled in the
+repository settings. `adam` picks the update up after you merge the PR.
 
-The weekly lock-file workflow lives in `.github/workflows/` and runs on a
-GitHub-hosted runner. Allow GitHub Actions to create pull requests in the
-repository settings. Review and merge the PR before Adam can use the updates.
+## Bootstrap
 
-### Bootstrap: macOS
+### macOS
 
-Install upstream multi-user Nix — **not** the Determinate installer — then let
+Install upstream multi-user Nix, not the Determinate installer, then let
 nix-darwin take over. `darwin-rebuild` is not on `PATH` yet and flakes are off
 on a fresh install, so the first generation goes through `nix run`:
 
@@ -87,7 +63,7 @@ sudo nix --extra-experimental-features "nix-command flakes" \
     run nix-darwin/master#darwin-rebuild -- switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
-### Bootstrap: NixOS
+### NixOS
 
 Boot the installer, enable flakes, then partition and mount with
 [disko](https://github.com/nix-community/disko) using the host's own layout:
@@ -106,6 +82,9 @@ nix --experimental-features "nix-command flakes" run github:nix-community/disko 
     -- -m destroy,format,mount /tmp/disko.nix
 ```
 
+Destroy mode wipes the disk you name. On `lilith` that must be the Samsung
+NVMe, because Windows lives on the Crucial drive.
+
 Install and reboot:
 
 ```bash
@@ -114,25 +93,20 @@ umount -Rl /mnt
 reboot
 ```
 
-#### Lilith: dual boot and Secure Boot
+### Adam's age key
 
-Lilith uses KDE Plasma on Wayland with SDDM and the default Breeze theme.
-PipeWire handles audio with its standard WirePlumber configuration.
-The gaming stack includes Steam, Heroic, GameMode, MangoHud, Proton GE, and
-Proton CachyOS, with a cached CachyOS kernel from Chaotic.
+`adam` decrypts its secrets with an age key that the host never generates.
+Until you place it, every service that needs a secret fails to activate:
 
-Lilith's disko layout owns the Samsung NVMe at
-`nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0T205473J_1`. Windows stays on the Crucial
-drive, which is absent from the layout. The root filesystem is btrfs with
-`@`, `@home`, `@nix`, and `@swap` subvolumes and a 16 GiB swapfile.
-An existing ext4 installation needs a separate migration or reinstall.
-Preserve the EFI partition and its `EFI/Microsoft` directory when migrating.
+```bash
+sudo install -Dm600 -o root -g root key.txt /var/lib/sops-nix/key.txt
+```
 
-Limine boots Windows through the firmware's existing `Windows Boot Manager`
-entry to preserve its BitLocker measurements. Signing keys are generated,
-but firmware enrollment is manual. Test both systems with Secure Boot
-disabled first, back up the BitLocker recovery key, and enter firmware
-Setup/Custom Mode before enrolling keys:
+### Lilith's Secure Boot keys
+
+Limine generates its signing keys, but you enroll them in the firmware by
+hand. First test NixOS and Windows with Secure Boot disabled, back up the
+BitLocker recovery key, and put the firmware in Setup/Custom Mode. Then:
 
 ```bash
 sudo sbctl status
@@ -143,70 +117,80 @@ sudo sbctl list-enrolled-keys
 sudo sbctl status
 ```
 
-`create-keys` keeps existing keys. Enrollment includes Microsoft's 2011 and
-2023 certificates and the firmware's default db and KEK certificates, alongside
-the local signing keys. Do not enroll local keys alone on this board.
+`create-keys` keeps existing keys. The enrollment adds Microsoft's 2011 and
+2023 certificates and the firmware's default db and KEK certificates next to
+the local keys. Do not enroll the local keys alone on this board.
 
 `verify` should report the Limine EFI executable as signed. Unsigned kernels
-are expected: Limine verifies kernel and initrd hashes against its configuration,
-whose hash is embedded in the signed executable.
+are expected. Limine checks the kernel and initrd hashes against its
+configuration, and the signed executable embeds that configuration's hash.
 
-Enable Secure Boot in firmware and reboot, then confirm `sudo sbctl status`
-reports Secure Boot enabled and Setup Mode disabled, and test both
-NixOS and Windows. Back up `/var/lib/sbctl` securely; it contains private keys
-needed to sign future bootloader updates. Do not commit those keys.
+Enable Secure Boot in the firmware and reboot. `sudo sbctl status` should then
+report Secure Boot enabled and Setup Mode disabled. Test both systems again.
+Back up `/var/lib/sbctl` somewhere safe and never commit it. It holds the
+private keys that sign every future bootloader update.
 
-### T3 Code nightly
+## Operations
 
-[t3code-nightly-flake](https://github.com/vsgoulart/t3code-nightly-flake)
-packages the upstream nightly release binaries for Lilith and Adam. Both
-have the CLI (`t3`); Lilith also has the desktop app (`t3code-desktop`).
-Update their pinned nightly with `nix flake update t3code-nightly`, then
-rebuild both hosts. Lilith's desktop self-updates are disabled because the
-application lives in the Nix store.
+### T3 Code
 
-Sachiel installs the desktop app through Homebrew's `t3-code@nightly` cask
-into `/Applications`. Its version follows Homebrew independently of the
-Linux flake pin. Update it with `brew upgrade --cask --greedy t3-code@nightly`.
+Bump the Linux packages with `nix flake update t3code-nightly`, then rebuild
+`lilith` and `adam`. `sachiel` follows Homebrew instead:
+`brew upgrade --cask --greedy t3-code@nightly`.
 
-Adam runs `t3code.service` as `zekurio`, using that user's repositories, Git
-configuration, provider credentials, and T3 Code state under `~/.t3`.
-The server binds to `127.0.0.1:3773`; Caddy exposes
-`https://t3code.zekurio.me` to the LAN and tailnet. The hostname must resolve
-to Adam, as the other private service names do.
-
-After rebuilding Adam and Sachiel, generate a pairing link:
+To connect a device to the server on `adam`, generate a pairing link:
 
 ```bash
 ssh adam 't3 pair'
 ```
 
-In the printed pairing URL, replace `http://127.0.0.1:3773` with
-`https://t3code.zekurio.me`, keeping `/pair#token=...` intact. On Sachiel,
-open T3 Code (Nightly), go to **Settings → Connections → Add environment**,
-and paste the modified URL. Pairing links expire after five minutes;
-generate a fresh link for each device. Provider CLIs must be authenticated
-on Adam before starting their threads.
+In the printed URL, replace `http://127.0.0.1:3773` with
+`https://t3code.zekurio.me` and keep `/pair#token=...` intact. In T3 Code, open
+Settings → Connections → Add environment and paste it. A link expires after
+five minutes, so generate one per device. Authenticate the provider CLIs on
+`adam` before you start their threads.
 
-The server starts at boot and survives SSH disconnects. Manage it through
-NixOS, rather than `t3 service install`, so rebuilds update the executable:
+Do not run `t3 service install` on `adam`. NixOS owns the unit, so a rebuild
+updates the executable:
 
 ```bash
 ssh adam 'sudo systemctl restart t3code.service'
 ssh adam 'journalctl -u t3code.service -f'
 ```
 
-### Secrets
+### Fluxer
 
-Host secrets are [sops](https://github.com/getsops/sops)-encrypted under
-`secrets/<host>.yaml`, each keyed to that host's age recipient in `.sops.yaml`.
-Edit them only with `sops secrets/<host>.yaml`.
+After an update, check login, messages, attachment uploads, and a voice call.
+Read the upstream configuration changes before you bump any image tag.
 
-`adam` decrypts with an age key at `/var/lib/sops-nix/key.txt` that
-is deliberately **not** generated on the host (`generateKey = false`), so a
-fresh install has one manual step — without it every secret-dependent service
-fails to activate:
+A full reset needs these steps in order:
 
-```bash
-sudo install -Dm600 -o root -g root key.txt /var/lib/sops-nix/key.txt
-```
+1. Stop `fluxer.target`.
+2. Take a database dump and a copy or snapshot of the state, and keep them
+   outside `tank/fluxer`.
+3. Reset only the `fluxer` database. Leave the shared PostgreSQL data
+   directory alone.
+4. Reset the NATS, Valkey, Meilisearch, and SeaweedFS state folders together.
+5. Recreate the SSD directories with
+   `systemd-tmpfiles --create --prefix=/var/lib/fluxer`, then start the target.
+
+### Leftovers from the beets migration
+
+The 2026-09-21 migration from Lidarr to beets left these on `adam`. Nothing in
+the configuration uses or removes them:
+
+- Music snapshot `tank/media@before-beets-migration-20260921`
+- Original beets state and the last legacy download in
+  `/var/backups/beets-migration-20260921/`
+- `/var/lib/beets/migration-lyrics-report.json`
+- `/var/lib/beets/migration-flac-repairs.json`
+- `/var/lib/beets/migration-final-audit.json`
+
+The reports list lookup failures that still need a review. Once that is done,
+destroy the snapshot and the backup, then delete this section.
+
+## Secrets
+
+Host secrets are [sops](https://github.com/getsops/sops)-encrypted in
+`secrets/<host>.yaml` for the age recipients in `.sops.yaml`. Edit them only
+with `sops secrets/<host>.yaml`.

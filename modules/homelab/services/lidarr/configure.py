@@ -76,6 +76,9 @@ class Lidarr:
             )
 
 
+# Quality ranks before these scores; they only order releases within one
+# quality group. Usenet titles carry no annotation and score 0, as do Slskd
+# results of unknown speed, so title matching cannot tell those two apart.
 # The pinned plugin appends this annotation only when peer speed is known.
 # No queue annotation means an empty queue, not a guaranteed free upload slot.
 PEER_SUFFIX = r"\[\d+(?:[.,]\d+)? MB/s(?:, queued behind \d+)?\]$"
@@ -119,12 +122,16 @@ def quality_profiles(api):
             current = next((profile for profile in profiles if profile["name"] == "Lossless"), None)
         desired = copy.deepcopy(current or template)
         desired.pop("id", None)
+        # The minimum equals the peer penalty, so slow or queued peers stay eligible
+        # as a fallback.
         desired.update(name=name, upgradeAllowed=True, minFormatScore=-1000, cutoffFormatScore=0)
         for item in desired["items"]:
             allowed = item.get("name") == "Lossless" or (fallback and item.get("name") == "High Quality Lossy")
             item["allowed"] = allowed
             for quality in item.get("items", []):
                 quality["allowed"] = allowed
+            # The cutoff is the whole group, so 24-bit files are accepted without
+            # forcing a 24-bit upgrade.
             if item.get("name") == "Lossless":
                 desired["cutoff"] = item["id"]
         desired["formatItems"] = [item | {"score": scores.get(item["format"], item["score"])} for item in desired["formatItems"]]
@@ -147,6 +154,7 @@ def configure(api, args, slskd_key, sabnzbd_key=None):
     api.settings("config/mediamanagement", watchLibraryForChanges=True)
     # With renaming disabled, plugin downloads land in the artist root. The
     # beets hook needs an album folder so it cannot retag the whole artist.
+    # The hook is pattern 1 of https://wiki.servarr.com/lidarr/beets-integration.
     api.settings("config/naming", renameTracks=True)
     api.provider(
         "notification", "Beets tag enrichment", "CustomScript",
@@ -174,6 +182,8 @@ def configure(api, args, slskd_key, sabnzbd_key=None):
             "apiKey": slskd_key,
         },
         enableRss=False, enableAutomaticSearch=True, enableInteractiveSearch=True,
+        # Loses ties to the Usenet indexers, which Prowlarr syncs at priorities
+        # 1 and 2 (set in its UI, not here).
         priority=50,
     )
 

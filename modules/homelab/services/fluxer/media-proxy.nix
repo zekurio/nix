@@ -23,6 +23,7 @@
         ];
         extraOptions = [
           "--memory=536870912"
+          # Public resolvers, for the reason given in unfurl.nix.
           "--dns=1.1.1.1"
           "--dns=1.0.0.1"
         ];

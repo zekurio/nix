@@ -30,6 +30,9 @@
 - Never nest `imports` to control merge order. Use `lib.mkBefore`, `lib.mkAfter`,
   or `lib.mkDefault` where appropriate and explain why.
 - Comment non-obvious constraints and surprising behavior, not assignments.
+- Never add a README that describes what a module does. Comments next to the
+  code carry that. `README.md` only lists manual procedures such as bootstrap,
+  rebuilds, and recovery.
 - Keep substituters in sync in `flake.nix`'s static `nixConfig` and
   `modules/nix/default.nix`.
 - Declare service exposure in the service module through

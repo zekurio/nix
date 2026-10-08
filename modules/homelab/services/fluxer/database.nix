@@ -8,6 +8,8 @@
     clients = ["fluxer-api" "fluxer-worker" "fluxer-users-shard" "fluxer-messages-shard"];
   in {
     config = lib.mkIf cfg.enable {
+      # The host's shared cluster on the SSD. It sits outside tank/fluxer's
+      # quota and snapshots, so the database needs its own backup.
       services.postgresql = {
         enable = true;
         enableTCPIP = true;
@@ -42,6 +44,7 @@
               Type = "oneshot";
               RemainAfterExit = true;
               User = "postgres";
+              # /run/fluxer-env is root-only; postgres gets this one file.
               LoadCredential = "postgres-env:/run/fluxer-env/fluxer-postgres.env";
             };
             path = [config.services.postgresql.finalPackage];

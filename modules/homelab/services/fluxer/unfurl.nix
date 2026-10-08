@@ -22,6 +22,9 @@
         podman.sdnotify = "healthy";
         extraOptions = [
           "--memory=134217728"
+          # Use public resolvers. The LAN resolver answers Alloy's name with a LAN
+          # address, which Fluxer's SSRF check rejects. Podman's DNS still
+          # resolves container names. The shard and media proxy do the same.
           "--dns=1.1.1.1"
           "--dns=1.0.0.1"
           "--health-interval=10s"
