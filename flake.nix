@@ -85,10 +85,6 @@
       url = "github:zekurio/alloy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    vrouter = {
-      url = "github:zekurio/vrouter";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     configarr = {
       # v1.30.2 pins the recyclarr config-templates repo to the last
       # includes/-compatible revision; upstream v8 removed them and crashed

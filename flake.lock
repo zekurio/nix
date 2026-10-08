@@ -673,8 +673,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix",
         "t3code-nightly": "t3code-nightly",
-        "ucodenix": "ucodenix",
-        "vrouter": "vrouter"
+        "ucodenix": "ucodenix"
       }
     },
     "sops-nix": {
@@ -848,26 +847,6 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "vrouter": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791463172,
-        "narHash": "sha256-kF/tfXdCJG6ZKvbUzLCC+OfUNWOuMmgtZmdBxD8t3aA=",
-        "owner": "zekurio",
-        "repo": "vrouter",
-        "rev": "2ab64cd6ced49dac12b5e36fdcf617589205ae68",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zekurio",
-        "repo": "vrouter",
         "type": "github"
       }
     }

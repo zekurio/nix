@@ -196,46 +196,6 @@ ssh adam 'sudo systemctl restart t3code.service'
 ssh adam 'journalctl -u t3code.service -f'
 ```
 
-### vrouter
-
-The enabled `services.homelab.vrouter` module on Adam serves
-`https://vrouter.zekurio.me` only to LAN and Tailscale clients. Dashboard
-access goes through OAuth2 Proxy and Pocket ID, restricted to the `admin`
-group. `/v1/*` goes directly to vrouter and requires a vrouter API key.
-Both backend listeners are loopback-only. The public URL is set explicitly
-so copied API endpoints and sign-in return links use HTTPS.
-
-The package and NixOS module are pinned by the public `vrouter` flake input.
-Pocket ID client and secret setup:
-
-1. Create a Pocket ID OIDC client with callback
-   `https://vrouter.zekurio.me/oauth2/callback`. Allow the `admin` group
-   on that client and ensure its members' tokens contain the group claim.
-   `services.homelab.vrouter.adminGroups` must match Pocket ID's emitted
-   group names.
-2. Using `sops secrets/adam.yaml`, add `vrouter_oauth_env` as a multiline
-   value containing `OAUTH2_PROXY_CLIENT_ID`, `OAUTH2_PROXY_CLIENT_SECRET`,
-   and `OAUTH2_PROXY_COOKIE_SECRET` environment assignments. Generate the
-   cookie secret with `openssl rand -base64 32 | tr -- '+/' '-_'`. Do not add
-   `VROUTER_ADMIN_TOKEN`, which would require a second dashboard login.
-3. Run `nix flake check` and rebuild Adam after changing the credentials.
-   Resolve `vrouter.zekurio.me` to Adam through the existing private DNS.
-
-The module uses ports 8180 for vrouter and 4180 for OAuth2 Proxy. Its
-authentication settings currently own `services.oauth2-proxy`; split that
-into service-specific instances before adding another consumer. Hosted
-provider sign-in uses a device code for Codex and Claude's authorization-code
-page, with no localhost callback listeners. State and provider credentials persist in
-`/var/lib/private/vrouter`; include that directory in private backups.
-
-The service uses `VROUTER_DATA_DIR=.` inside its systemd working directory.
-The vrouter module handles the DynamicUser state path; no host override is needed.
-
-The updated input stores accounts, client keys, quotas, and request history in
-one `vrouter.json` file. It does not read the old `state.json` and `registry.json`
-files. Before the first switch, stop vrouter and back up its data directory.
-Convert the data by hand or start with fresh state. Activation does not migrate it.
-
 ### Secrets
 
 Host secrets are [sops](https://github.com/getsops/sops)-encrypted under
