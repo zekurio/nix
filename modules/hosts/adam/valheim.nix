@@ -9,23 +9,67 @@
       SERVER_ARGS = "-modifier combat normal";
       VPCFG_Game_enabled = "false";
 
+      # Experience modifiers add percentages: +900 gives 10x skill gain.
+      VPCFG_Experience_enabled = "true";
+      VPCFG_Experience_swords = "900";
+      VPCFG_Experience_knives = "900";
+      VPCFG_Experience_clubs = "900";
+      VPCFG_Experience_polearms = "900";
+      VPCFG_Experience_spears = "900";
+      VPCFG_Experience_blocking = "900";
+      VPCFG_Experience_axes = "900";
+      VPCFG_Experience_bows = "900";
+      VPCFG_Experience_elementalMagic = "900";
+      VPCFG_Experience_bloodMagic = "900";
+      VPCFG_Experience_unarmed = "900";
+      VPCFG_Experience_pickaxes = "900";
+      VPCFG_Experience_woodCutting = "900";
+      VPCFG_Experience_crossbows = "900";
+      VPCFG_Experience_jump = "900";
+      VPCFG_Experience_sneak = "900";
+      VPCFG_Experience_run = "900";
+      VPCFG_Experience_swim = "900";
+      VPCFG_Experience_fishing = "900";
+      VPCFG_Experience_cooking = "900";
+      VPCFG_Experience_farming = "900";
+      VPCFG_Experience_crafting = "900";
+      VPCFG_Experience_ride = "900";
+
       # V+ modifiers are percentage changes: +100 doubles, -100 removes.
       VPCFG_Gathering_enabled = "true";
-      VPCFG_Gathering_copperOre = "100";
-      VPCFG_Gathering_tinOre = "100";
-      VPCFG_Gathering_ironScrap = "100";
-      VPCFG_Gathering_silverOre = "100";
-      VPCFG_Gathering_copperScrap = "100";
-      VPCFG_Gathering_flametalOre = "100";
+      VPCFG_Gathering_dropChance = "900";
+      VPCFG_Gathering_wood = "900";
+      VPCFG_Gathering_fineWood = "900";
+      VPCFG_Gathering_coreWood = "900";
+      VPCFG_Gathering_elderBark = "900";
+      VPCFG_Gathering_yggdrasilWood = "900";
+      VPCFG_Gathering_blackwood = "900";
+      VPCFG_Gathering_stone = "900";
+      VPCFG_Gathering_grausten = "900";
+      VPCFG_Gathering_blackMarble = "900";
+      VPCFG_Gathering_copperOre = "900";
+      VPCFG_Gathering_tinOre = "900";
+      VPCFG_Gathering_ironScrap = "900";
+      VPCFG_Gathering_silverOre = "900";
+      VPCFG_Gathering_copperScrap = "900";
+      VPCFG_Gathering_flametalOre = "900";
+      VPCFG_Gathering_chitin = "900";
+      VPCFG_Gathering_feather = "900";
+      VPCFG_Gathering_proustitePowder = "900";
 
       VPCFG_Pickable_enabled = "true";
-      VPCFG_Pickable_edibles = "100";
-      VPCFG_Pickable_flowersAndIngredients = "100";
+      VPCFG_Pickable_edibles = "900";
+      VPCFG_Pickable_flowersAndIngredients = "900";
+      VPCFG_Pickable_materials = "900";
+      VPCFG_Pickable_valuables = "900";
+      VPCFG_Pickable_surtlingCores = "900";
+      VPCFG_Pickable_blackCores = "900";
+      VPCFG_Pickable_questItems = "900";
 
       VPCFG_Beehive_enabled = "true";
-      # Seconds per honey: 600 gives 2x production; capacity scales with it.
-      VPCFG_Beehive_honeyProductionSpeed = "600";
-      VPCFG_Beehive_maximumHoneyPerBeehive = "8";
+      # Seconds per honey: 120 gives 10x production; capacity scales with it.
+      VPCFG_Beehive_honeyProductionSpeed = "120";
+      VPCFG_Beehive_maximumHoneyPerBeehive = "40";
 
       VPCFG_Items_enabled = "true";
       VPCFG_Items_itemStackMultiplier = "700";
@@ -33,7 +77,9 @@
 
       # The global loot multiplier also multiplies trophies and boss rewards.
       VPCFG_LootDrop_enabled = "true";
-      VPCFG_LootDrop_lootDropAmountMultiplier = "100";
+      VPCFG_LootDrop_lootDropAmountMultiplier = "900";
+      # Drop chances saturate at 100%, even when the multiplier exceeds it.
+      VPCFG_LootDrop_lootDropChanceMultiplier = "900";
 
       VPCFG_Inventory_enabled = "true";
       VPCFG_Inventory_playerInventoryRows = "8";
