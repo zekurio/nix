@@ -40,7 +40,8 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Claude Code and OpenCode; updates arrive through the weekly flake.lock PR.
+    # Claude Code, Codex and OpenCode. The weekly flake.lock PR moves the pin;
+    # agents-update runs ahead of it and repeats this URL and t3code-nightly's.
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
     # against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";

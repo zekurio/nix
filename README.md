@@ -132,11 +132,32 @@ private keys that sign every future bootloader update.
 
 ## Operations
 
-### T3 Code
+### Agents and T3 Code
 
-Bump the Linux packages with `nix flake update t3code-nightly`, then rebuild
-`lilith` and `adam`. `sachiel` follows Homebrew instead:
-`brew upgrade --cask --greedy t3-code@nightly`.
+Claude Code, Codex, OpenCode and T3 Code sit in their own Nix profile, so they
+update without a system rebuild:
+
+```bash
+agents-update             # newest upstream releases
+agents-update --rollback  # the previous profile generation
+agents-update --pinned    # the versions this system was built with
+```
+
+`agents-update` leaves `flake.lock` alone. A rebuild moves the profile only
+when the lock's agent pins changed, so the weekly lock update still reaches
+every host. On `sachiel` the command also upgrades the `t3-code@nightly` cask.
+
+It builds from `github:zekurio/nix`, so push a change to the agent packages
+before you expect it there. `AGENTS_FLAKE=path:$HOME/Git/nix agents-update`
+builds from a checkout instead.
+
+On `adam` the T3 Code server keeps running the old build until you restart
+it, which ends its sessions:
+
+```bash
+ssh adam 'sudo systemctl restart t3code.service'
+ssh adam 'journalctl -u t3code.service -f'
+```
 
 To connect a device to the server on `adam`, generate a pairing link:
 
@@ -150,13 +171,7 @@ Settings → Connections → Add environment and paste it. A link expires after
 five minutes, so generate one per device. Authenticate the provider CLIs on
 `adam` before you start their threads.
 
-Do not run `t3 service install` on `adam`. NixOS owns the unit, so a rebuild
-updates the executable:
-
-```bash
-ssh adam 'sudo systemctl restart t3code.service'
-ssh adam 'journalctl -u t3code.service -f'
-```
+Do not run `t3 service install` on `adam`. NixOS owns the unit.
 
 ### Fluxer
 

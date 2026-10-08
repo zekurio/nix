@@ -1,4 +1,4 @@
-{inputs, ...}: {
+{
   flake.modules.nixos.homelab = {
     config,
     lib,
@@ -8,8 +8,8 @@
     cfg = config.services.homelab.t3code;
     user = "zekurio";
     home = config.users.users.${user}.home;
+    agents = config.home-manager.users.${user}.agents;
     port = 3773;
-    package = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.t3code;
   in {
     options.services.homelab.t3code.enable = lib.mkEnableOption "T3 Code nightly remote coding server";
 
@@ -18,8 +18,12 @@
       systemd.services.t3code = {
         description = "T3 Code nightly server";
         wantedBy = ["multi-user.target"];
-        after = ["network-online.target"];
-        wants = ["network-online.target"];
+        # Home Manager's activation creates the agents profile.
+        after = ["network-online.target" "home-manager-${user}.service"];
+        wants = ["network-online.target" "home-manager-${user}.service"];
+        # The profile path never changes, so restart on a new pinned build
+        # here. agents-update leaves the restart to the user.
+        restartTriggers = [agents.pinned];
         path = [
           config.home-manager.users.${user}.home.path
           pkgs.bash
@@ -28,7 +32,7 @@
         ];
         environment.HOME = home;
         serviceConfig = {
-          ExecStart = "${lib.getExe package} serve --host 127.0.0.1 --port ${toString port}";
+          ExecStart = "${agents.profile}/bin/t3 serve --host 127.0.0.1 --port ${toString port}";
           User = user;
           Group = config.users.users.${user}.group;
           WorkingDirectory = home;

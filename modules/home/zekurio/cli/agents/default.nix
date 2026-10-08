@@ -1,25 +1,9 @@
 {inputs, ...}: {
-  perSystem = {system, ...}: let
-    pkgs = import inputs.nixpkgs-unstable {inherit system;};
-    upstream = inputs.llm-agents.packages.${system}.opencode2;
-  in {
-    # llm-agents names v2's binary opencode2; T3 Code expects opencode on PATH.
-    packages.opencode = pkgs.symlinkJoin {
-      name = "opencode-${upstream.version}";
-      paths = [upstream];
-      postBuild = ''
-        ln -s opencode2 $out/bin/opencode
-      '';
-      meta = upstream.meta // {mainProgram = "opencode";};
-    };
-  };
-
   flake.modules.homeManager.zekurio = {
     lib,
     pkgs,
     ...
   }: let
-    llmAgents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
     skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
     # Claude Code reads ~/.claude/skills, and OpenCode reads both directories.
     skillDirs = [".agents/skills" ".claude/skills"];
@@ -30,16 +14,6 @@
         })
       skills;
   in {
-    # Claude Code, Codex, and OpenCode come from llm-agents.nix, pinned in
-    # flake.lock and identical on every host. Upgrades and rollbacks happen
-    # through the lock (weekly update PR, git revert) and a host rebuild, never
-    # imperatively.
-    home.packages = [
-      llmAgents.claude-code
-      llmAgents.codex
-      inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
-    ];
-
     home.file = lib.mkMerge (map linkSkills skillDirs);
 
     # Claude Code writes to ~/.claude/settings.json itself (/model, /config),

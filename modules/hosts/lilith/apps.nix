@@ -2,6 +2,8 @@
   flake.modules.nixos.lilith = {pkgs, ...}: {
     modules.gaming.enable = true;
 
+    home-manager.users.zekurio.agents.desktop = true;
+
     environment = {
       sessionVariables = {
         NIXOS_OZONE_WL = "1";
