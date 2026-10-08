@@ -6,8 +6,6 @@
   }: let
     inherit (lib) mkDefault;
   in {
-    modules.ssh.users = ["zekurio"];
-
     i18n = {
       defaultLocale = "de_AT.UTF-8";
       supportedLocales = [
@@ -23,18 +21,6 @@
     hardware.firmware = mkDefault [pkgs.linux-firmware];
 
     programs.nix-ld.enable = true;
-
-    security.sudo.extraRules = [
-      {
-        users = ["zekurio"];
-        commands = [
-          {
-            command = "ALL";
-            options = ["NOPASSWD"];
-          }
-        ];
-      }
-    ];
 
     # Substituters, experimental features and store optimisation are shared
     # across platforms and live in modules/nix.

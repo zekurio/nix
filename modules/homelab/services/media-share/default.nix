@@ -5,7 +5,7 @@
     pkgs,
     ...
   }: let
-    cfg = config.modules.homelab.mediaShare;
+    cfg = config.services.homelab.mediaShare;
 
     shareUser = cfg.user;
     shareGroup = cfg.group;
@@ -206,7 +206,7 @@
       )}
     '';
   in {
-    options.modules.homelab.mediaShare = {
+    options.services.homelab.mediaShare = {
       enable = lib.mkEnableOption "Shared system account and directory management for homelab media workloads";
 
       user = lib.mkOption {
@@ -292,22 +292,22 @@
       assertions =
         (lib.mapAttrsToList (name: share: {
             assertion = lib.hasAttr share.owner config.users.users;
-            message = "modules.homelab.mediaShare.userShares.${name}.owner (${share.owner}) must be an existing NixOS user.";
+            message = "services.homelab.mediaShare.userShares.${name}.owner (${share.owner}) must be an existing NixOS user.";
           })
           cfg.userShares)
         ++ (lib.mapAttrsToList (name: share: {
             assertion = lib.hasAttr share.owner cfg.samba.passwordFiles;
-            message = "modules.homelab.mediaShare.userShares.${name} requires a Samba password file for ${share.owner}.";
+            message = "services.homelab.mediaShare.userShares.${name} requires a Samba password file for ${share.owner}.";
           })
           cfg.userShares)
         ++ (lib.mapAttrsToList (name: share: {
             assertion = share.path == "/tank/shares/${share.owner}";
-            message = "modules.homelab.mediaShare.userShares.${name}.path must be /tank/shares/${share.owner} for the Meine Dateien SMB share.";
+            message = "services.homelab.mediaShare.userShares.${name}.path must be /tank/shares/${share.owner} for the Meine Dateien SMB share.";
           })
           cfg.userShares)
         ++ map (name: {
           assertion = lib.hasAttr name config.users.users;
-          message = "modules.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
+          message = "services.homelab.mediaShare.samba.passwordFiles.${name} requires a matching NixOS user.";
         })
         (lib.attrNames cfg.samba.passwordFiles);
 

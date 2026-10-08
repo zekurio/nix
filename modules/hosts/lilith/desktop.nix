@@ -16,6 +16,7 @@
           wayland.enable = true;
         };
       };
+      printing.enable = true;
     };
   };
 }

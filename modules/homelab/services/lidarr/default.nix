@@ -7,7 +7,7 @@
   }: let
     cfg = config.services.homelab.lidarr;
     sabnzbd = config.services.homelab.sabnzbd;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     domain = "admin.${config.services.homelab.domains.zekurio}";
     port = 8686;
     dataDir = config.services.lidarr.dataDir;

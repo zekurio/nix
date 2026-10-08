@@ -10,6 +10,20 @@
 
     nix.settings.trusted-users = [username];
 
+    modules.ssh.users = [username];
+
+    security.sudo.extraRules = [
+      {
+        users = [username];
+        commands = [
+          {
+            command = "ALL";
+            options = ["NOPASSWD"];
+          }
+        ];
+      }
+    ];
+
     programs = {
       fish.enable = true;
       vim = {
@@ -49,7 +63,6 @@
       useGlobalPkgs = true;
       useUserPackages = true;
       backupFileExtension = "backup";
-      extraSpecialArgs = {inherit inputs;};
 
       users.${username}.imports = [
         config.flake.modules.homeManager.zekurio

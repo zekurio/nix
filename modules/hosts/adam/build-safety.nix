@@ -49,7 +49,5 @@
         OOMScoreAdjust = 500;
       };
     };
-
-    system.autoUpgrade.allowReboot = false;
   };
 }

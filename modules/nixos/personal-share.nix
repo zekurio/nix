@@ -1,4 +1,4 @@
-{...}: let
+let
   sharePath = "/tank/shares/zekurio";
   clientPath = "/home/zekurio/Meine Dateien";
   serverAddress = "10.0.0.2";

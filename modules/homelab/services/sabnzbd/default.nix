@@ -5,12 +5,12 @@
     ...
   }: let
     cfg = config.services.homelab.sabnzbd;
-    downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
+    downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
     domain = "admin.${config.services.homelab.domains.zekurio}";
     port = 6789;
     serviceUser = "sabnzbd";
     serviceGroup = "sabnzbd";
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
   in {
     options.services.homelab.sabnzbd = {
       enable = lib.mkEnableOption "SABnzbd Usenet downloader with Caddy integration";

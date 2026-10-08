@@ -6,7 +6,7 @@
     ...
   }: let
     cfg = config.services.homelab.beets;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     serviceUser = "beets";
     stateDir = "/var/lib/beets";
     musicDir = mediaShare.musicDir;

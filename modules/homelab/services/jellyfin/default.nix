@@ -5,7 +5,7 @@
     pkgs,
     ...
   }: let
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     domain = "media.${config.services.homelab.domains.zekurio}";
     # Where Jellyfin used to live. Apps and TVs store the server address and
     # mostly ignore redirects, so the old name keeps serving until every

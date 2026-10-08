@@ -1,7 +1,6 @@
-{
+{inputs, ...}: {
   flake.modules.nixos.homelab = {
     config,
-    inputs,
     lib,
     pkgs,
     ...
@@ -9,8 +8,8 @@
     cfg = config.services.homelab.blitzcrank;
     port = 8484;
     package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
-    shareGroup = config.modules.homelab.mediaShare.group;
-    downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
+    shareGroup = config.services.homelab.mediaShare.group;
+    downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default

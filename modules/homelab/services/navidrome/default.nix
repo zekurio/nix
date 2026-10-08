@@ -5,7 +5,7 @@
     ...
   }: let
     cfg = config.services.homelab.navidrome;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     domain = "music.${config.services.homelab.domains.zekurio}";
     port = 4533;
   in {

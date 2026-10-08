@@ -5,7 +5,7 @@
     pkgs,
     ...
   }: let
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     zfs = "${pkgs.zfs}/bin/zfs";
     ensureDataset = name: quota: ''
       if ! ${zfs} list -H -o name ${name} >/dev/null 2>&1; then
@@ -40,6 +40,18 @@
       '')
       mediaShare.userShares);
   in {
+    boot = {
+      supportedFilesystems = ["zfs"];
+      zfs = {
+        extraPools = ["tank"];
+        forceImportRoot = false;
+      };
+    };
+
+    networking.hostId = "eab7e93e";
+
+    environment.systemPackages = [pkgs.zfs];
+
     # Automatic ZFS snapshots. Retention is deliberately asymmetric: irreplaceable
     # data (photos, per-user shares) keeps a month of dailies, while the media
     # library only keeps enough to undo an accidental mass deletion — its

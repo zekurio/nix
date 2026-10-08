@@ -6,11 +6,11 @@
     ...
   }: let
     cfg = config.services.homelab.slskd;
-    downloadsRoot = config.modules.homelab.mediaShare.downloadsRoot;
+    downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
     domain = "admin.${config.services.homelab.domains.zekurio}";
     webPort = 5030;
     listenPort = 50300;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     musicDir = mediaShare.musicDir;
     downloadsDir = "${downloadsRoot}/complete/slskd";
     incompleteDir = "${downloadsRoot}/incomplete/slskd";

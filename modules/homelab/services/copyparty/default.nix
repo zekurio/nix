@@ -6,7 +6,7 @@
     ...
   }: let
     cfg = config.services.homelab.copyparty;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     shares = mediaShare.userShares;
     owners = lib.unique (map (share: share.owner) (lib.attrValues shares));
     uploadDir = "${mediaShare.downloadsRoot}/complete/copyparty";

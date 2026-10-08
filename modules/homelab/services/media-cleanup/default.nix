@@ -6,7 +6,7 @@
     ...
   }: let
     cfg = config.services.homelab.mediaCleanup;
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     apps = ["radarr" "sonarr"];
     importHook = pkgs.writeShellApplication {
       name = "clean-media-import";

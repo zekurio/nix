@@ -4,7 +4,7 @@
     lib,
     ...
   }: let
-    mediaShare = config.modules.homelab.mediaShare;
+    mediaShare = config.services.homelab.mediaShare;
     domain = "admin.${config.services.homelab.domains.zekurio}";
     port = 7878;
   in {

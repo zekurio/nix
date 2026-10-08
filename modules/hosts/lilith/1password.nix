@@ -1,5 +1,5 @@
-{...}: {
-  flake.modules.nixos.lilith = {...}: let
+{
+  flake.modules.nixos.lilith = let
     username = "zekurio";
   in {
     programs._1password-gui = {

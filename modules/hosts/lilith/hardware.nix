@@ -1,11 +1,18 @@
 {inputs, ...}: {
   flake.modules.nixos.lilith = {
     config,
+    modulesPath,
     pkgs,
     ...
   }: let
     system = pkgs.stdenv.hostPlatform.system;
   in {
+    imports = [
+      (modulesPath + "/installer/scan/not-detected.nix")
+    ];
+
+    nixpkgs.hostPlatform = "x86_64-linux";
+
     # The cached CachyOS preset keeps its upstream kernel configuration. Do not
     # add a nixpkgs follow to the Chaotic input or this becomes a local build.
     boot = {
@@ -32,11 +39,16 @@
         enable = true;
         enable32Bit = true;
       };
+      bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
     };
 
     # RADV and radeonsi from Mesa are the supported defaults for the RX 6800;
     # AMDVLK, global RADV flags and overdrive masks are intentionally absent.
     services.fstrim.enable = true;
+    services.fwupd.enable = true;
     programs.coolercontrol.enable = true;
 
     environment.systemPackages = with pkgs; [

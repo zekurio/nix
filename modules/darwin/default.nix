@@ -1,24 +1,8 @@
-{config, ...}: let
-  username = "zekurio";
-  homeDirectory = "/Users/${username}";
-in {
+{
   flake.modules.darwin.base = {
-    inputs,
-    lib,
-    pkgs,
-    ...
-  }: {
-    imports = [
-      inputs.home-manager.darwinModules.home-manager
-      inputs.nix-homebrew.darwinModules.nix-homebrew
-    ];
-
     nixpkgs.hostPlatform = "aarch64-darwin";
 
-    system = {
-      primaryUser = username;
-      stateVersion = 6;
-    };
+    system.stateVersion = 6;
     # nix-darwin master still passes the removed --toc-depth flag to
     # nixos-render-docs from current nixpkgs, breaking darwin-manual-html.
     # Skip the HTML manual and the uninstaller (whose embedded default system
@@ -26,58 +10,14 @@ in {
     documentation.doc.enable = false;
     system.tools.darwin-uninstaller.enable = false;
 
-    programs.fish.enable = true;
-    environment.shells = [pkgs.fish];
-    users.knownUsers = [username];
-    users.users.${username} = {
-      uid = 501;
-      gid = 20;
-      description = "Michael";
-      home = homeDirectory;
-      shell = pkgs.fish;
-    };
-
     # Vanilla (upstream) Nix, managed declaratively by nix-darwin. These settings
     # are written to /etc/nix/nix.conf on activation; the shared substituters and
     # experimental features live in modules/nix.
-    nix = {
-      enable = true;
-      # nix-darwin contributes "root" at the same priority; mkBefore keeps our
-      # entries first in /etc/nix/nix.conf.
-      settings.trusted-users = lib.mkBefore [
-        "root"
-        "@admin"
-        username
-      ];
-    };
+    nix.enable = true;
 
     # Leave macOS's own /etc/pam.d/sudo_local in place; don't let nix-darwin manage
     # it. Setting the option (vs. forcing the etc file off) also removes the stale
     # `include sudo_local` line nix-darwin would otherwise add to /etc/pam.d/sudo.
     security.pam.services.sudo_local.enable = false;
-
-    nix-homebrew = {
-      enable = true;
-      autoMigrate = true;
-      enableFishIntegration = true;
-      user = username;
-    };
-
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      backupFileExtension = "backup";
-      extraSpecialArgs = {inherit inputs;};
-
-      users.${username} = {
-        home = {
-          inherit username homeDirectory;
-        };
-
-        imports = [
-          config.flake.modules.homeManager.zekurio
-        ];
-      };
-    };
   };
 }

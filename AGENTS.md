@@ -8,12 +8,19 @@
 - Files contribute to shared aggregates under `flake.modules`: `nixos.base`,
   `nixos.adam`, `nixos.lilith`, `nixos.homelab`, `darwin.base`,
   `darwin.sachiel`, and `homeManager.zekurio`. The module system merges contributions.
+- `modules/hosts/<host>/` configures one host. `modules/nixos/` and
+  `modules/darwin/` hold each platform's base, `modules/nix/` and
+  `modules/nixpkgs/` cover both platforms, `modules/homelab/` holds the homelab
+  services, and `modules/home/zekurio/` the Home Manager profile.
 - Host entrypoints at `modules/hosts/<host>/system.nix` only assemble aggregates.
-  Put configuration in focused modules named after their concern.
+  Put configuration in focused modules named after their concern, one concern
+  per file. Never add a catch-all such as `configuration.nix`.
 - Never import module files by relative path. Define shared values in a module
   for all consumers, as in `modules/nix/default.nix`. Relative paths are allowed
   for `_`-prefixed package expressions used with `callPackage`; `import-tree`
   ignores these files.
+- Take `inputs` from the flake-parts module arguments. Never pass it down
+  through `specialArgs` or `extraSpecialArgs`.
 - Import third-party modules in the file that configures them.
 - Service options use `services.homelab.<name>`; shared host features use
   `modules.*`. Follow neighbouring modules.
@@ -34,7 +41,8 @@
 
 - Edit `secrets/<host>.yaml` only through `sops`; never read or write plaintext
   under `secrets/`. Host age recipients are defined in `.sops.yaml`.
-- Name credentials after their owner, for example `radarr_api_key`.
+- Name credentials after their owner, for example `radarr_api_key`, and declare
+  each secret in the module that consumes it.
 - Use raw values for shared credentials or options expecting a value file,
   `<service>_env` for one service's `EnvironmentFile`, and `sops.templates`
   to compose secrets into env or config files.
