@@ -244,6 +244,7 @@
       slskd.enable = true;
       sonarr.enable = true;
       t3code.enable = true;
+      vrouter.enable = true;
       valheim = {
         enable = true;
         serverName = "Die geilsten Gamer e.V. (nicht offiziell)";

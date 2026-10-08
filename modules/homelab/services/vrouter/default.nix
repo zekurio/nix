@@ -99,9 +99,7 @@
         public = false;
         extraConfig = ''
           handle /v1/* {
-            reverse_proxy 127.0.0.1:${toString port} {
-              flush_interval -1
-            }
+            reverse_proxy 127.0.0.1:${toString port}
           }
           handle {
             reverse_proxy 127.0.0.1:${toString authPort}
