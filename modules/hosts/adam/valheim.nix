@@ -6,7 +6,7 @@
     extraEnvironment = {
       # Keep both ID formats for legacy and platform-prefixed admin checks.
       ADMINLIST_IDS = "76561198111376416 Steam_76561198111376416";
-      SERVER_ARGS = "-modifier combat hard";
+      SERVER_ARGS = "-modifier combat normal";
       VPCFG_Game_enabled = "false";
 
       # V+ modifiers are percentage changes: +100 doubles, -100 removes.
@@ -37,10 +37,10 @@
 
       VPCFG_Inventory_enabled = "true";
       VPCFG_Inventory_playerInventoryRows = "8";
-      VPCFG_Inventory_woodChestRows = "4";
-      VPCFG_Inventory_personalChestRows = "4";
-      VPCFG_Inventory_ironChestRows = "8";
-      VPCFG_Inventory_blackmetalChestRows = "8";
+      VPCFG_Inventory_woodChestRows = "10";
+      VPCFG_Inventory_personalChestRows = "20";
+      VPCFG_Inventory_ironChestRows = "20";
+      VPCFG_Inventory_blackmetalChestRows = "20";
 
       VPCFG_CraftFromChest_enabled = "true";
       VPCFG_CraftFromChest_checkFromWorkbench = "true";
