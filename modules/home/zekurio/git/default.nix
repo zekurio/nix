@@ -139,6 +139,16 @@
           };
         };
       };
+
+      # OpenSSH only accepts a config owned by its user or by root. A sandbox
+      # that maps just our uid into a user namespace shows the root-owned store
+      # file behind Home Manager's symlink as `nobody`, and ssh refuses to
+      # start. Install a copy we own instead, read-only because the next
+      # activation overwrites it.
+      home.file.".ssh/config".enable = false;
+      home.activation.sshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
+        run install -D -m 0400 ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
+      '';
     };
   };
 }
