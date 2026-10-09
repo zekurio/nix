@@ -81,7 +81,12 @@
             background-blur = true;
             background-opacity = 0.96;
             font-family = "FiraCode Nerd Font";
-            font-size = 12;
+            # Linux lays out points at 96 DPI and macOS at 72, so the same
+            # glyph height needs 4/3 the point size on Darwin.
+            font-size =
+              if pkgs.stdenv.hostPlatform.isDarwin
+              then 16
+              else 12;
             term = "xterm-256color";
             window-inherit-font-size = false;
           }
