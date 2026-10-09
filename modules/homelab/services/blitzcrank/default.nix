@@ -10,6 +10,23 @@
     package = inputs.blitzcrank.packages.${pkgs.stdenv.hostPlatform.system}.default;
     shareGroup = config.services.homelab.mediaShare.group;
     downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
+    vrouterUrl = config.services.homelab.vrouter.baseUrl;
+    # Redirects the built-in openai and anthropic providers to vrouter and keeps
+    # their model catalogs. pi expands "$VROUTER_API_KEY" from the environment,
+    # so the store holds the variable name and never the key. Only the OpenAI
+    # base URL ends in /v1; the Anthropic client appends /v1/messages itself.
+    modelsFile = pkgs.writeText "blitzcrank-models.json" (builtins.toJSON {
+      providers = {
+        openai = {
+          baseUrl = "${vrouterUrl}/v1";
+          apiKey = "$VROUTER_API_KEY";
+        };
+        anthropic = {
+          baseUrl = vrouterUrl;
+          apiKey = "$VROUTER_API_KEY";
+        };
+      };
+    });
   in {
     imports = [
       inputs.blitzcrank.nixosModules.default
@@ -24,6 +41,10 @@
         {
           assertion = config.services.homelab.seerr.enable;
           message = "services.homelab.blitzcrank requires services.homelab.seerr; Seerr is the only mandatory backend.";
+        }
+        {
+          assertion = config.services.homelab.vrouter.enable;
+          message = "services.homelab.blitzcrank requires services.homelab.vrouter; every model request goes through it.";
         }
       ];
 
@@ -46,13 +67,16 @@
           "/tank/media/movies"
         ];
         environmentFile = config.sops.templates."blitzcrank.env".path;
-        # Provider auth is managed interactively in pi's writable state rather
-        # than seeded from SOPS.
+        # Model requests authenticate to vrouter with VROUTER_API_KEY from the
+        # env template. A login stored in pi's writable state outranks that key
+        # and vrouter rejects it, so clear any that remains with
+        # `blitzcrank auth logout <provider>`.
 
         # Non-secret configuration; every API key lives in the env template.
         settings = {
           # Share pi's refreshed model registry with the interactive helper.
           PI_CODING_AGENT_DIR = "/var/lib/blitzcrank";
+          BLITZCRANK_MODELS_PATH = "${modelsFile}";
           SEERR_URL = config.services.homelab.seerr.baseUrl;
           # The Seerr account blitzcrank comments as: the id attributes its
           # comments, the name makes the server drop its own webhooks.
@@ -76,8 +100,8 @@
 
       systemd.services.blitzcrank = {
         serviceConfig.SupplementaryGroups = [shareGroup];
-        after = ["seerr.service"];
-        wants = ["seerr.service"];
+        after = ["seerr.service" "vrouter.service"];
+        wants = ["seerr.service" "vrouter.service"];
       };
 
       sops.templates."blitzcrank.env" = {
@@ -90,6 +114,7 @@
           BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
           DISCORD_BOT_TOKEN=${config.sops.placeholder.discord_bot_token}
           FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
+          VROUTER_API_KEY=${config.sops.placeholder.vrouter_blitzcrank_api_key}
         '';
         mode = "0400";
         # Rendering a changed template does not touch the unit, so without this
@@ -106,6 +131,9 @@
         blitzcrank_webhook_secret = {};
         discord_bot_token = {};
         firecrawl_api_key = {};
+        # A vrouter client key issued to blitzcrank alone; vrouter meters quota
+        # per key.
+        vrouter_blitzcrank_api_key = {};
       };
     };
   };

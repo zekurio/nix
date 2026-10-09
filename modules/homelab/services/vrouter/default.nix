@@ -15,6 +15,11 @@
 
     options.services.homelab.vrouter = {
       enable = lib.mkEnableOption "vrouter model gateway with Caddy integration";
+      baseUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:${toString port}";
+        description = "URL other services use to reach the vrouter API.";
+      };
     };
 
     config = lib.mkIf cfg.enable {
