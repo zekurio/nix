@@ -40,6 +40,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # Claude Code, Codex and OpenCode. The weekly flake.lock PR moves the pin;
     # agents-update runs ahead of it and repeats this URL and t3code-nightly's.
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
