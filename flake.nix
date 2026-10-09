@@ -97,6 +97,10 @@
       url = "github:zekurio/inviterr";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    vrouter = {
+      url = "github:zekurio/vrouter";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

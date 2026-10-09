@@ -24,6 +24,7 @@
       slskd.enable = true;
       sonarr.enable = true;
       t3code.enable = true;
+      vrouter.enable = true;
       windrose = {
         enable = false;
         maxPlayers = 4;
