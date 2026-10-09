@@ -173,6 +173,25 @@ five minutes, so generate one per device. Authenticate the provider CLIs on
 
 Do not run `t3 service install` on `adam`. NixOS owns the unit.
 
+Claude Code and Codex use vrouter instead of their own logins once a machine
+holds a client key. Create one for the machine on the API keys page of
+`https://vrouter.zekurio.me`, save it, and rebuild:
+
+```bash
+mkdir -p ~/.config/vrouter
+$EDITOR ~/.config/vrouter/api-key
+chmod 600 ~/.config/vrouter/api-key
+```
+
+A rebuild without that file leaves both CLIs on their logins. To go back to
+the logins later, remove the key file, then delete `apiKeyHelper`,
+`env.ANTHROPIC_BASE_URL` and `env.ENABLE_TOOL_SEARCH` from
+`~/.claude/settings.json`, and `model_provider` and both
+`model_providers.vrouter` tables from `~/.codex/config.toml`.
+
+`agents-update` does not apply any of this. It only swaps the agent binaries,
+and the settings come from Home Manager activation, so they need a rebuild.
+
 ### Fluxer
 
 After an update, check login, messages, attachment uploads, and a voice call.
