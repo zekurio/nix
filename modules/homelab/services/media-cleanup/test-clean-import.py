@@ -263,14 +263,13 @@ class Provisioning(unittest.TestCase):
         configure.configure(api, "radarr", "/downloads/", "/bin/clean-media-import")
         self.assertEqual(api.writes, writes)
 
-    def test_sonarr_enables_batch_refresh_and_passes_api_url(self):
+    def test_sonarr_enables_batch_refresh_and_clears_arguments(self):
         api = FakeArr()
-        api.url = "http://127.0.0.1:8989/sonarr/api/v3/"
         configure.configure(api, "sonarr", "/downloads", "/bin/clean-media-import")
         hook = api.notifications[0]
         self.assertTrue(hook["onImportComplete"])
         fields = {field["name"]: field["value"] for field in hook["fields"]}
-        self.assertEqual(fields["arguments"], "--api-url " + api.url)
+        self.assertEqual(fields["arguments"], "")
 
 
 class ImportEvents(unittest.TestCase):

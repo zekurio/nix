@@ -4,7 +4,6 @@ import argparse
 import copy
 import json
 import os
-import shlex
 import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -59,7 +58,9 @@ def configure(api, app, downloads_root, import_script):
     desired.update(name=name, tags=[])
     fields = {field["name"]: field for field in desired["fields"]}
     fields["path"]["value"] = import_script
-    fields["arguments"]["value"] = "--api-url " + shlex.quote(api.url)
+    # Servarr rejects custom script arguments, so the hook carries its own.
+    if "arguments" in fields:
+        fields["arguments"]["value"] = ""
     if current is None:
         desired.pop("id", None)
         api.request("notification", desired, "POST")

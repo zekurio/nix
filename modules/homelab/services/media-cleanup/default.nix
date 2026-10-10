@@ -20,6 +20,12 @@
       service = config.services.${app};
       envName = "${app}-media-cleanup.env";
       apiKeyEnv = "${lib.toUpper app}__AUTH__APIKEY";
+      # Servarr rejects custom script arguments, so each app gets a wrapper
+      # that already knows which API to ask for a rescan.
+      appHook = pkgs.writeShellScript "clean-${app}-import" ''
+        exec ${lib.getExe cfg.importHook} \
+          --api-url ${lib.escapeShellArg "${config.services.homelab.${app}.baseUrl}/api/v3"} "$@"
+      '';
     in
       lib.mkIf config.services.homelab.${app}.enable {
         services.${app}.environmentFiles = [config.sops.templates.${envName}.path];
@@ -41,7 +47,7 @@
               --app ${app} \
               --url ${lib.escapeShellArg config.services.homelab.${app}.baseUrl} \
               --downloads-root ${lib.escapeShellArg mediaShare.downloadsRoot} \
-              --import-script ${lib.escapeShellArg (lib.getExe cfg.importHook)}
+              --import-script ${appHook}
           '';
         };
       };
