@@ -26,12 +26,14 @@
     # switch it back on. Drop ENABLE_TOOL_SEARCH here and from settings.json if
     # requests start failing with a 400 that names defer_loading or
     # tool_reference.
+    # The fast-mode availability check goes directly to Anthropic, which
+    # rejects our gateway key. Let vrouter's upstream account decide instead.
     home.activation.claudeVrouter = lib.hm.dag.entryAfter ["claudeSettings"] ''
       if [ -r '${keyFile}' ]; then
         f="$HOME/.claude/settings.json"
         tmp=$(mktemp)
         ${lib.getExe pkgs.jq} --arg helper '${cat} ${keyFile}' --arg url '${url}' \
-          '. * {apiKeyHelper: $helper, env: {ANTHROPIC_BASE_URL: $url, ENABLE_TOOL_SEARCH: "true"}}' "$f" > "$tmp" && run mv "$tmp" "$f"
+          '. * {apiKeyHelper: $helper, env: {ANTHROPIC_BASE_URL: $url, ENABLE_TOOL_SEARCH: "true", CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK: "1"}}' "$f" > "$tmp" && run mv "$tmp" "$f"
       fi
     '';
 

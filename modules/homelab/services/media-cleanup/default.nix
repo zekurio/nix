@@ -8,11 +8,12 @@
     cfg = config.services.homelab.mediaCleanup;
     mediaShare = config.services.homelab.mediaShare;
     apps = ["radarr" "sonarr"];
+    python = pkgs.python3.withPackages (ps: [ps.pycountry]);
     importHook = pkgs.writeShellApplication {
       name = "clean-media-import";
       runtimeInputs = [pkgs.ffmpeg-headless];
       text = ''
-        exec ${lib.getExe pkgs.python3} ${./clean-import.py} "$@"
+        exec ${lib.getExe python} ${./clean-import.py} "$@"
       '';
     };
     configure = app: let
@@ -51,7 +52,7 @@
         type = lib.types.package;
         readOnly = true;
         default = importHook;
-        description = "Import hook that keeps Japanese, German, English and untagged tracks, and cleans metadata without encoding.";
+        description = "Import hook that keeps original-language, German, English and untagged tracks, and cleans metadata without encoding.";
       };
     };
     config = lib.mkIf cfg.enable (lib.mkMerge (

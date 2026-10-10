@@ -4,6 +4,7 @@ import argparse
 import copy
 import json
 import os
+import shlex
 import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -50,15 +51,15 @@ def configure(api, app, downloads_root, import_script):
         if item["implementation"] == "CustomScript"
     )
     desired = copy.deepcopy(template)
-    # Use per-file events, including upgrades. ImportComplete would repeat
-    # cleanup of every episode after Sonarr has already called OnDownload.
+    # Clean each file on download/upgrade. Sonarr's batch completion event
+    # only queues a rescan so its cached media info reflects the cleaned files.
     for key, value in desired.items():
         if key.startswith("on") and isinstance(value, bool):
-            desired[key] = key in {"onDownload", "onUpgrade"}
+            desired[key] = key in {"onDownload", "onUpgrade"} or (app == "sonarr" and key == "onImportComplete")
     desired.update(name=name, tags=[])
     fields = {field["name"]: field for field in desired["fields"]}
     fields["path"]["value"] = import_script
-    fields["arguments"]["value"] = ""
+    fields["arguments"]["value"] = "--api-url " + shlex.quote(api.url)
     if current is None:
         desired.pop("id", None)
         api.request("notification", desired, "POST")

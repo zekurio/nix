@@ -1,4 +1,4 @@
-"""Keep Japanese, German, English and untagged tracks, then clean metadata."""
+"""Keep original-language, German, English and untagged tracks, then clean metadata."""
 
 import argparse
 import fcntl
@@ -8,6 +8,9 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+from urllib.request import Request, urlopen
+
+import pycountry
 
 
 FONT_MIMES = {
@@ -16,7 +19,7 @@ FONT_MIMES = {
     "application/x-font-opentype", "application/font-woff",
 }
 EXTENSIONS = {".mkv", ".mp4", ".m4v", ".mov", ".avi", ".webm", ".ts", ".m2ts"}
-KEEP_LANGUAGES = {"ja", "jpn", "de", "deu", "ger", "en", "eng"}
+KEEP_LANGUAGES = {"deu", "eng"}
 UNKNOWN_LANGUAGES = {"", "und", "unk", "unknown", "mis"}
 
 
@@ -37,17 +40,39 @@ def tags(stream):
     return {key.lower(): value for key, value in stream.get("tags", {}).items()}
 
 
-def keep_stream(stream):
+def language_code(value):
+    value = value.strip().lower().replace("_", "-").split("-")[0]
+    if value in UNKNOWN_LANGUAGES:
+        return "und"
+    # "En" is also a language name in ISO 639-3. Prefer ISO codes over names
+    # so the English two-letter tag cannot resolve to that unrelated language.
+    code = pycountry.languages.get(**{"alpha_2" if len(value) == 2 else "alpha_3": value})
+    if code is not None:
+        return code.alpha_3
+    try:
+        return pycountry.languages.lookup(value).alpha_3
+    except LookupError:
+        return value
+
+
+def original_language(value):
+    language = language_code(value)
+    if language == "und" or pycountry.languages.get(alpha_3=language) is None:
+        raise ValueError("original language is missing or unknown; leaving files unchanged")
+    return language
+
+
+def keep_stream(stream, original):
     kind = stream["codec_type"]
     if kind == "video":
         return not any(stream.get("disposition", {}).get(flag) for flag in (
             "attached_pic", "timed_thumbnails", "still_image",
         ))
     if kind in {"audio", "subtitle"}:
-        language = tags(stream).get("language", "").strip().lower().replace("_", "-").split("-")[0]
+        language = language_code(tags(stream).get("language", ""))
         # Keep untagged tracks so missing language metadata cannot discard
         # the original audio or useful subtitles.
-        return language in KEEP_LANGUAGES or language in UNKNOWN_LANGUAGES
+        return language in KEEP_LANGUAGES | {original, "und"}
     if kind == "attachment":
         mime = tags(stream).get("mimetype", "").lower()
         # ASS subtitles need their embedded fonts. Covers and other attachments
@@ -102,7 +127,8 @@ def identity(stat):
     return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
 
 
-def clean(path):
+def clean(path, original):
+    language = original_language(original)
     path = path.resolve(strict=True)
     if path.suffix.lower() not in EXTENSIONS:
         log(f"unsupported container, skipped {path}")
@@ -114,9 +140,13 @@ def clean(path):
             log(f"another import hook already replaced {path}")
             return
         info = probe(path)
-        streams = [stream for stream in info["streams"] if keep_stream(stream)]
+        streams = [stream for stream in info["streams"] if keep_stream(stream, language)]
         if not any(stream["codec_type"] == "video" for stream in streams):
             raise ValueError(f"no video stream in {path}")
+        if any(stream["codec_type"] == "audio" for stream in info["streams"]) and not any(
+            stream["codec_type"] == "audio" for stream in streams
+        ):
+            raise ValueError(f"language filtering would remove all audio in {path}")
         descriptor, temporary = tempfile.mkstemp(prefix=".media-cleanup-", suffix=path.suffix, dir=path.parent)
         os.close(descriptor)
         output = Path(temporary)
@@ -161,17 +191,56 @@ def event_paths(environ):
     return [Path(paths)] if singular in env and env[singular] else [Path(path) for path in paths.split("|") if path]
 
 
-def main():
+def rescan(api_url, env, app):
+    resource = "series" if app == "sonarr" else "movie"
+    resource_id = int(env[f"{app}_{resource}_id"])
+    if resource_id <= 0:
+        raise ValueError("rescan requires a positive series or movie ID")
+    command = {"name": "RescanSeries" if app == "sonarr" else "RescanMovie", f"{resource}Id": resource_id}
+    request = Request(
+        api_url.rstrip("/") + "/command",
+        data=json.dumps(command).encode(),
+        headers={"X-Api-Key": env[f"{app}__auth__apikey"], "Content-Type": "application/json"},
+    )
+    # Only queue the command. Waiting for it inside an import notification
+    # can block the import that the rescan needs to finish first.
+    with urlopen(request, timeout=15) as response:
+        response.read()
+    log(f"queued {command['name']} for {resource_id}")
+
+
+def main(argv=None, environ=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("files", nargs="*", type=Path)
-    args = parser.parse_args()
+    parser.add_argument("--original-language", help="original language for manually supplied files")
+    parser.add_argument("--api-url", help="Servarr API URL, including /api/v3")
+    args = parser.parse_args(argv)
+    env = {key.lower(): value for key, value in (os.environ if environ is None else environ).items()}
+    app = next((app for app in ("radarr", "sonarr") if f"{app}_eventtype" in env), None)
+    event = env.get(f"{app}_eventtype", "").lower()
+    # Sonarr's batch completion event refreshes media info once all per-file
+    # cleanup has finished, without scanning while other episodes are moving.
+    if not args.files and app == "sonarr" and event == "importcomplete":
+        if not args.api_url:
+            parser.error("--api-url is required to refresh imported media info")
+        rescan(args.api_url, env, app)
+        return False
+    paths = args.files or event_paths(env)
+    if not paths:
+        return False
+    resource = "series" if app == "sonarr" else "movie"
+    original = original_language(args.original_language or env.get(f"{app}_{resource}_originallanguage", ""))
+    if not args.files and not args.api_url:
+        parser.error("--api-url is required to refresh imported media info")
     failures = []
-    for path in dict.fromkeys(args.files or event_paths(os.environ)):
+    for path in dict.fromkeys(paths):
         try:
-            clean(path)
+            clean(path, original)
         except (OSError, ValueError, subprocess.SubprocessError) as error:
             log(f"cleanup failed for {path}: {error}")
             failures.append(path)
+    if not args.files and app == "radarr":
+        rescan(args.api_url, env, app)
     return bool(failures)
 
 

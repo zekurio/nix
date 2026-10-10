@@ -1,4 +1,4 @@
-"""Regression checks with real containers. Run with Python and FFmpeg on PATH."""
+"""Regression checks with real containers. Needs Python, pycountry and FFmpeg."""
 
 import copy
 import errno
@@ -27,7 +27,7 @@ def ffmpeg(*args):
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", *map(str, args)], check=True)
 
 
-def packet_hashes(path):
+def packet_hashes(path, original="jpn"):
     result = subprocess.run([
         "ffprobe", "-v", "error", "-show_packets", "-show_data_hash", "sha256",
         "-show_entries", "packet=stream_index,data_hash", "-of", "json", str(path),
@@ -36,7 +36,7 @@ def packet_hashes(path):
     for packet in json.loads(result.stdout)["packets"]:
         streams.setdefault(packet["stream_index"], []).append(packet["data_hash"])
     indexes = [stream["index"] for stream in cleanup.probe(path)["streams"]
-               if cleanup.keep_stream(stream) and stream["codec_type"] != "attachment"]
+               if cleanup.keep_stream(stream, original) and stream["codec_type"] != "attachment"]
     return [streams.get(index, []) for index in indexes]
 
 
@@ -85,7 +85,7 @@ class Containers(unittest.TestCase):
         # Model the service's user namespace rejecting chown of its unmapped
         # shared group. Cleanup must still succeed and retain that group.
         with patch.object(cleanup.os, "chown", side_effect=OSError(errno.EINVAL, "Invalid argument")):
-            cleanup.clean(path)
+            cleanup.clean(path, "jpn")
         after = cleanup.probe(path)
         self.assertEqual(hashes, packet_hashes(path))
         self.assertEqual(path.stat().st_mode, stat.st_mode)
@@ -120,7 +120,7 @@ class Containers(unittest.TestCase):
             "-metadata:s:v:0", "handler_name=Custom video handler", path,
         )
         hashes = packet_hashes(path)[0]
-        cleanup.clean(path)
+        cleanup.clean(path, "jpn")
         self.assertEqual(packet_hashes(path), [hashes])
         streams = cleanup.probe(path)["streams"]
         self.assertEqual(len(streams), 1)
@@ -132,7 +132,7 @@ class Containers(unittest.TestCase):
         subtitles.write_text("1\n00:00:00,000 --> 00:00:01,000\nA subtitle.\n")
         path = self.root / "Multilingual.mkv"
         audio_languages = ["jpn", "ger", "eng", "fra", "spa", "und"]
-        subtitle_languages = ["jpn", "deu", "eng", "ita", "und"]
+        subtitle_languages = ["jpn", "deu", "eng", "fre", "ita", "und"]
         args = [
             "-f", "lavfi", "-i", "testsrc2=s=320x180:r=10:d=1",
             "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
@@ -151,15 +151,15 @@ class Containers(unittest.TestCase):
                      "-disposition:s:1", "hearing_impaired"))
         ffmpeg(*args, path)
         before = cleanup.probe(path)
-        hashes = packet_hashes(path)
-        cleanup.clean(path)
+        hashes = packet_hashes(path, "fra")
+        cleanup.clean(path, "French")
         streams = cleanup.probe(path)["streams"]
-        self.assertEqual(hashes, packet_hashes(path))
+        self.assertEqual(hashes, packet_hashes(path, "fra"))
         self.assertEqual([cleanup.tags(s).get("language", "und") for s in streams if s["codec_type"] == "audio"],
-                         ["jpn", "ger", "eng", "und"])
+                         ["ger", "eng", "fra", "und"])
         self.assertEqual([cleanup.tags(s).get("language", "und") for s in streams if s["codec_type"] == "subtitle"],
-                         ["jpn", "deu", "eng", "und"])
-        retained = [s for s in before["streams"] if cleanup.keep_stream(s)]
+                         ["deu", "eng", "fre", "und"])
+        retained = [s for s in before["streams"] if cleanup.keep_stream(s, "fra")]
         self.assertEqual([s["disposition"] for s in streams], [s["disposition"] for s in retained])
         self.assertFalse(list(self.root.glob(".media-cleanup-*")))
 
@@ -167,20 +167,43 @@ class Containers(unittest.TestCase):
         for kind in ("audio", "subtitle"):
             for language in ("ja", "JPN", "de", "ger", "DEU", "en", "eng", "en-US", "de_DE", "und", "unknown", ""):
                 with self.subTest(kind=kind, language=language):
-                    self.assertTrue(cleanup.keep_stream({"codec_type": kind, "tags": {"language": language}}))
-            self.assertTrue(cleanup.keep_stream({"codec_type": kind}))
+                    self.assertTrue(cleanup.keep_stream({"codec_type": kind, "tags": {"language": language}}, "jpn"))
+            self.assertTrue(cleanup.keep_stream({"codec_type": kind}, "jpn"))
             for language in ("fra", "spa", "ita", "ara", "fr-FR"):
                 with self.subTest(kind=kind, language=language):
-                    self.assertFalse(cleanup.keep_stream({"codec_type": kind, "tags": {"language": language}}))
+                    self.assertFalse(cleanup.keep_stream({"codec_type": kind, "tags": {"language": language}}, "jpn"))
 
     def test_failed_remux_keeps_original_and_removes_temporary(self):
         path = self.root / "unsupported-tracks.mp4"
         shutil.copyfile(self.fixture(), path)
         original = path.read_bytes()
         with self.assertRaises(subprocess.CalledProcessError):
-            cleanup.clean(path)
+            cleanup.clean(path, "jpn")
         self.assertEqual(path.read_bytes(), original)
         self.assertFalse(list(self.root.glob(".media-cleanup-*")))
+
+    def test_unknown_original_language_leaves_file_unchanged(self):
+        path = self.fixture()
+        original = path.read_bytes()
+        for language in ("", "und", "Unknown", "invalid"):
+            with self.subTest(language=language), self.assertRaises(ValueError):
+                cleanup.clean(path, language)
+        self.assertEqual(path.read_bytes(), original)
+
+    def test_filter_refuses_to_remove_all_audio(self):
+        path = self.root / "French dub.mkv"
+        ffmpeg("-f", "lavfi", "-i", "testsrc2=s=32x32:r=10:d=1",
+               "-f", "lavfi", "-i", "sine=duration=1", "-c:v", "libx264", "-c:a", "aac",
+               "-metadata:s:a:0", "language=fra", path)
+        original = path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "remove all audio"):
+            cleanup.clean(path, "eng")
+        self.assertEqual(path.read_bytes(), original)
+
+    def test_original_language_aliases(self):
+        for alias in ("fr", "fra", "fre", "French", "fr-FR"):
+            self.assertEqual(cleanup.original_language(alias), "fra")
+        self.assertFalse(cleanup.keep_stream({"codec_type": "audio", "tags": {"language": "jpn"}}, "eng"))
 
     def test_arr_events(self):
         self.assertEqual(cleanup.event_paths({"Radarr_EventType": "Test"}), [])
@@ -195,6 +218,7 @@ class Containers(unittest.TestCase):
 
 class FakeArr:
     def __init__(self):
+        self.url = "http://127.0.0.1:7878/radarr/api/v3/"
         self.notifications = []
         self.mappings = [
             {"id": 1, "remotePath": "/downloads/complete/radarr/", "localPath": "/downloads/converted/radarr/"},
@@ -238,6 +262,53 @@ class Provisioning(unittest.TestCase):
         writes = api.writes.copy()
         configure.configure(api, "radarr", "/downloads/", "/bin/clean-media-import")
         self.assertEqual(api.writes, writes)
+
+    def test_sonarr_enables_batch_refresh_and_passes_api_url(self):
+        api = FakeArr()
+        api.url = "http://127.0.0.1:8989/sonarr/api/v3/"
+        configure.configure(api, "sonarr", "/downloads", "/bin/clean-media-import")
+        hook = api.notifications[0]
+        self.assertTrue(hook["onImportComplete"])
+        fields = {field["name"]: field["value"] for field in hook["fields"]}
+        self.assertEqual(fields["arguments"], "--api-url " + api.url)
+
+
+class ImportEvents(unittest.TestCase):
+    def test_sonarr_cleans_per_file_then_only_rescans_on_batch_completion(self):
+        env = {"Sonarr_EventType": "Download", "Sonarr_Series_Id": "532",
+               "Sonarr_Series_OriginalLanguage": "eng", "Sonarr_EpisodeFile_Path": "/shows/A.mkv"}
+        args = ["--api-url", "http://127.0.0.1:8989/sonarr/api/v3/"]
+        with patch.object(cleanup, "clean") as clean, patch.object(cleanup, "rescan") as rescan:
+            self.assertFalse(cleanup.main(args, env))
+            clean.assert_called_once_with(Path("/shows/A.mkv"), "eng")
+            rescan.assert_not_called()
+            env["Sonarr_EventType"] = "ImportComplete"
+            self.assertFalse(cleanup.main(args, env))
+            clean.assert_called_once()
+            rescan.assert_called_once()
+
+    def test_radarr_rescans_after_cleanup(self):
+        env = {"radarr_eventtype": "Download", "radarr_movie_id": "42",
+               "radarr_movie_originallanguage": "kor", "radarr_moviefile_path": "/movies/A.mkv"}
+        calls = []
+        with patch.object(cleanup, "clean", side_effect=lambda *args: calls.append("clean")), \
+             patch.object(cleanup, "rescan", side_effect=lambda *args: calls.append("rescan")):
+            self.assertFalse(cleanup.main(["--api-url", "http://localhost/radarr/api/v3/"], env))
+        self.assertEqual(calls, ["clean", "rescan"])
+
+    def test_connection_test_requires_no_language_or_api(self):
+        self.assertFalse(cleanup.main([], {"sonarr_eventtype": "Test"}))
+
+    def test_rescan_targets_only_imported_title(self):
+        for app, resource, command in (("sonarr", "series", "RescanSeries"), ("radarr", "movie", "RescanMovie")):
+            with self.subTest(app=app), patch.object(cleanup, "urlopen") as urlopen:
+                cleanup.rescan(f"http://localhost/{app}/api/v3/", {
+                    f"{app}_{resource}_id": "532", f"{app}__auth__apikey": "test-key",
+                }, app)
+                request = urlopen.call_args.args[0]
+                self.assertEqual(request.full_url, f"http://localhost/{app}/api/v3/command")
+                self.assertEqual(json.loads(request.data), {"name": command, f"{resource}Id": 532})
+                self.assertEqual(request.get_header("X-api-key"), "test-key")
 
 
 if __name__ == "__main__":

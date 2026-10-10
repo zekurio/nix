@@ -33,7 +33,7 @@
     ];
 
     options.services.homelab.blitzcrank = {
-      enable = lib.mkEnableOption "Blitzcrank media support and automation agent";
+      enable = lib.mkEnableOption "Blitzcrank Seerr issue agent";
     };
 
     config = lib.mkIf cfg.enable {
@@ -52,7 +52,6 @@
         enable = true;
         inherit package port;
         model = "openai/gpt-6.1-sol:high";
-        automationModel = "openai/gpt-6-luna:max";
         language = "German";
         webProvider = "firecrawl";
 
@@ -74,8 +73,6 @@
 
         # Non-secret configuration; every API key lives in the env template.
         settings = {
-          # Share pi's refreshed model registry with the interactive helper.
-          PI_CODING_AGENT_DIR = "/var/lib/blitzcrank";
           BLITZCRANK_MODELS_PATH = "${modelsFile}";
           SEERR_URL = config.services.homelab.seerr.baseUrl;
           # The Seerr account blitzcrank comments as: the id attributes its
@@ -86,15 +83,6 @@
           RADARR_URL = config.services.homelab.radarr.baseUrl;
           SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
           JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
-          # Automation report threads + /automation trigger. Snowflakes are
-          # not secrets; the bot token lives in the env template.
-          DISCORD_GUILD_ID = "418795186475237376";
-          DISCORD_WATCH_CHANNEL_ID = "1473398718127407188";
-          DISCORD_INBOX_CHANNEL_ID = "1473398718127407188";
-          BLITZCRANK_DISCORD_MODEL = "openai/gpt-6.1-sol:medium";
-          BLITZCRANK_DISCORD_TRIAGE_MODEL = "openai/gpt-6-luna:max";
-          # Automation cron expressions are evaluated in local time.
-          TZ = config.time.timeZone;
         };
       };
 
@@ -112,7 +100,6 @@
           SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
           JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
           BLITZCRANK_WEBHOOK_SECRET=${config.sops.placeholder.blitzcrank_webhook_secret}
-          DISCORD_BOT_TOKEN=${config.sops.placeholder.discord_bot_token}
           FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
           VROUTER_API_KEY=${config.sops.placeholder.vrouter_blitzcrank_api_key}
         '';
@@ -129,10 +116,8 @@
         sabnzbd_api_key = {};
         jellyfin_api_key = {};
         blitzcrank_webhook_secret = {};
-        discord_bot_token = {};
         firecrawl_api_key = {};
-        # A vrouter client key issued to blitzcrank alone; vrouter meters quota
-        # per key.
+        # A separate vrouter client key attributes requests to blitzcrank.
         vrouter_blitzcrank_api_key = {};
       };
     };

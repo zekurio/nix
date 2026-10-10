@@ -185,7 +185,8 @@ chmod 600 ~/.config/vrouter/api-key
 
 A rebuild without that file leaves both CLIs on their logins. To go back to
 the logins later, remove the key file, then delete `apiKeyHelper`,
-`env.ANTHROPIC_BASE_URL` and `env.ENABLE_TOOL_SEARCH` from
+`env.ANTHROPIC_BASE_URL`, `env.ENABLE_TOOL_SEARCH` and
+`env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from
 `~/.claude/settings.json`, and `model_provider` and both
 `model_providers.vrouter` tables from `~/.codex/config.toml`.
 
