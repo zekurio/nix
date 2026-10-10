@@ -1,112 +1,105 @@
-# nix
+# Deploying my systems
 
-Nix configurations for my homelab server, gaming desktop, and MacBook Air,
-plus the Home Manager profile they share.
+- `adam`: NixOS homelab server.
+- `lilith`: NixOS desktop, dual-booting Windows.
+- `sachiel`: MacBook Air with nix-darwin.
 
-| Host | Type | Role |
-|------|------|------|
-| `adam` | NixOS | Homelab server |
-| `lilith` | NixOS | Gaming desktop, dual-booting Windows |
-| `sachiel` | nix-darwin | MacBook Air |
+## Rebuild
 
-This is a [flake-parts](https://flake.parts) flake in a dendritic layout.
-`AGENTS.md` covers the structure and conventions, and each module explains
-itself in comments. This file only lists the steps you run by hand.
-
-## Rebuilding
-
-`adam` upgrades itself from GitHub's `main` every Sunday around 03:00, so a
-change reaches it only after a push. To upgrade now, start the unit the timer
-uses and follow its log:
+For `adam`, push changes to `main`, then start the upgrade and follow its log:
 
 ```bash
 ssh adam 'sudo systemctl start nixos-upgrade.service'
 ssh adam 'journalctl -fu nixos-upgrade.service'
 ```
 
-That unit runs inside the memory and CPU limits from
-`modules/hosts/adam/build-safety.nix`. A build that hits them fails. Build it
-on another machine and push it to the cache instead of raising the limits.
-Upgrades never reboot the host, so reboot by hand for a new kernel.
+The same unit runs every Sunday between 03:00 and 03:45. It never reboots;
+reboot by hand for a new kernel. If a build hits the unit's resource limits,
+build elsewhere and push it to the cache.
 
-A direct rebuild bypasses those limits. Keep it for emergencies:
+For emergencies, run a direct rebuild. This bypasses the upgrade unit's limits:
 
 ```bash
-ssh adam 'nixos-rebuild switch --flake "github:zekurio/nix/main#adam" --sudo'
+ssh adam 'nixos-rebuild switch --flake github:zekurio/nix/main#adam --sudo'
 ```
 
-`lilith` and `sachiel` build from their local checkouts. `path:` keeps the root
-activation step from treating the Git working tree as root-owned:
+On `lilith` or `sachiel`, rebuild from the local checkout:
 
 ```bash
+# lilith
 sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
+
+# sachiel
 sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
 ```
 
-A GitHub workflow opens a `flake.lock` update PR every Saturday night. It needs
-"Allow GitHub Actions to create and approve pull requests" enabled in the
-repository settings. `adam` picks the update up after you merge the PR.
+Keep `path:` so root activation can read the user-owned checkout. Merge the
+weekly `flake.lock` PR to deploy input updates through these same commands.
 
-## Bootstrap
+## Install NixOS
 
-### macOS
-
-Install upstream multi-user Nix, not the Determinate installer, then let
-nix-darwin take over. `darwin-rebuild` is not on `PATH` yet and flakes are off
-on a fresh install, so the first generation goes through `nix run`:
+Boot the NixOS installer in UEFI mode and open a root shell:
 
 ```bash
-sh <(curl -L https://nixos.org/nix/install)
-# Start a new shell, then clone the repository.
-git clone git@github.com:zekurio/nix.git ~/Git/nix
-sudo nix --extra-experimental-features "nix-command flakes" \
-    run nix-darwin/master#darwin-rebuild -- switch --flake path:/Users/zekurio/Git/nix#sachiel
+sudo -i
+export NIX_CONFIG='experimental-features = nix-command flakes'
+nix-shell -p git --run 'git clone https://github.com/zekurio/nix.git /tmp/nix'
+cd /tmp/nix
+INSTALL_HOST=adam  # or lilith
+lsblk -o NAME,SIZE,MODEL,MOUNTPOINTS
+ls -l /dev/disk/by-id/
 ```
 
-### NixOS
+Edit `modules/hosts/$INSTALL_HOST/disko.nix`. Set `device` to the full
+`/dev/disk/by-id/...` path for the system disk. On `lilith`, use the Samsung
+NVMe. Leave the Crucial Windows drive alone.
 
-Boot the installer, enable flakes, then partition and mount with
-[disko](https://github.com/nix-community/disko) using the host's own layout:
+The next command wipes the configured system disk and mounts it at `/mnt`:
 
 ```bash
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-
-HOST=adam
-DISK='/dev/disk/by-id/<your-disk-id>'
-
-curl -o /tmp/disko.nix \
-    "https://raw.githubusercontent.com/zekurio/nix/main/modules/hosts/${HOST}/disko.nix"
-sed -i "s|device = \"/dev/disk/by-id/[^\"]*\"|device = \"${DISK}\"|" /tmp/disko.nix
-nix --experimental-features "nix-command flakes" run github:nix-community/disko \
-    -- -m destroy,format,mount /tmp/disko.nix
+nix run github:nix-community/disko -- \
+    --mode destroy,format,mount --flake ".#${INSTALL_HOST}"
 ```
 
-Destroy mode wipes the disk you name. On `lilith` that must be the Samsung
-NVMe, because Windows lives on the Crucial drive.
-
-Install and reboot:
+For `adam`, restore the saved age key before installing. Use the key matching
+the recipient in `.sops.yaml`; the host does not generate one:
 
 ```bash
-nixos-install --root /mnt --no-root-passwd --flake "github:zekurio/nix/main#${HOST}"
+install -Dm600 -o root -g root /path/to/key.txt /mnt/var/lib/sops-nix/key.txt
+```
+
+Install from the same checkout so it uses the disk path you just set:
+
+```bash
+nixos-install --root /mnt --no-root-passwd --flake ".#${INSTALL_HOST}"
 umount -Rl /mnt
 reboot
 ```
 
-### Adam's age key
+Keep Secure Boot disabled on `lilith` until you enroll its keys below.
 
-`adam` decrypts its secrets with an age key that the host never generates.
-Until you place it, every service that needs a secret fails to activate:
+## Install macOS
+
+Install upstream multi-user Nix, then open a new shell:
 
 ```bash
-sudo install -Dm600 -o root -g root key.txt /var/lib/sops-nix/key.txt
+sh <(curl -L https://nixos.org/nix/install)
 ```
 
-### Lilith's Secure Boot keys
+Use the upstream installer rather than Determinate so nix-darwin can manage Nix.
+Clone the repository and build the first generation:
 
-Limine generates its signing keys, but you enroll them in the firmware by
-hand. First test NixOS and Windows with Secure Boot disabled, back up the
-BitLocker recovery key, and put the firmware in Setup/Custom Mode. Then:
+```bash
+git clone git@github.com:zekurio/nix.git ~/Git/nix
+sudo nix --extra-experimental-features 'nix-command flakes' \
+    run nix-darwin/master#darwin-rebuild -- switch \
+    --flake path:/Users/zekurio/Git/nix#sachiel
+```
+
+## Enroll Lilith's Secure Boot keys
+
+Test NixOS and Windows with Secure Boot disabled. Save the BitLocker recovery
+key, then put the firmware in Setup/Custom Mode.
 
 ```bash
 sudo sbctl status
@@ -117,115 +110,20 @@ sudo sbctl list-enrolled-keys
 sudo sbctl status
 ```
 
-`create-keys` keeps existing keys. The enrollment adds Microsoft's 2011 and
-2023 certificates and the firmware's default db and KEK certificates next to
-the local keys. Do not enroll the local keys alone on this board.
+`create-keys` keeps existing keys. `verify` should show the Limine EFI executable
+as signed; unsigned kernels are expected. Keep the Microsoft and firmware keys
+when enrolling so Windows and the board's firmware components still boot.
 
-`verify` should report the Limine EFI executable as signed. Unsigned kernels
-are expected. Limine checks the kernel and initrd hashes against its
-configuration, and the signed executable embeds that configuration's hash.
+Enable Secure Boot and reboot. `sudo sbctl status` should report Secure Boot
+enabled and Setup Mode disabled. Test both systems again. Back up `/var/lib/sbctl`
+securely; it contains private signing keys. Never commit it.
 
-Enable Secure Boot in the firmware and reboot. `sudo sbctl status` should then
-report Secure Boot enabled and Setup Mode disabled. Test both systems again.
-Back up `/var/lib/sbctl` somewhere safe and never commit it. It holds the
-private keys that sign every future bootloader update.
+## Edit secrets
 
-## Operations
-
-### Agents and T3 Code
-
-Claude Code, Codex, OpenCode and T3 Code sit in their own Nix profile, so they
-update without a system rebuild:
+Edit encrypted host secrets with sops, then rebuild the host:
 
 ```bash
-agents-update             # newest upstream releases
-agents-update --rollback  # the previous profile generation
-agents-update --pinned    # the versions this system was built with
+sops secrets/adam.yaml
 ```
 
-`agents-update` leaves `flake.lock` alone. A rebuild moves the profile only
-when the lock's agent pins changed, so the weekly lock update still reaches
-every host. On `sachiel` the command also upgrades the `t3-code@nightly` cask.
-
-It builds from `github:zekurio/nix`, so push a change to the agent packages
-before you expect it there. `AGENTS_FLAKE=path:$HOME/Git/nix agents-update`
-builds from a checkout instead.
-
-On `adam` the T3 Code server keeps running the old build until you restart
-it, which ends its sessions:
-
-```bash
-ssh adam 'sudo systemctl restart t3code.service'
-ssh adam 'journalctl -u t3code.service -f'
-```
-
-To connect a device to the server on `adam`, generate a pairing link:
-
-```bash
-ssh adam 't3 pair'
-```
-
-In the printed URL, replace `http://127.0.0.1:3773` with
-`https://t3code.zekurio.me` and keep `/pair#token=...` intact. In T3 Code, open
-Settings → Connections → Add environment and paste it. A link expires after
-five minutes, so generate one per device. Authenticate the provider CLIs on
-`adam` before you start their threads.
-
-Do not run `t3 service install` on `adam`. NixOS owns the unit.
-
-Claude Code and Codex use vrouter instead of their own logins once a machine
-holds a client key. Create one for the machine on the API keys page of
-`https://vrouter.zekurio.me`, save it, and rebuild:
-
-```bash
-mkdir -p ~/.config/vrouter
-$EDITOR ~/.config/vrouter/api-key
-chmod 600 ~/.config/vrouter/api-key
-```
-
-A rebuild without that file leaves both CLIs on their logins. To go back to
-the logins later, remove the key file, then delete `apiKeyHelper`,
-`env.ANTHROPIC_BASE_URL`, `env.ENABLE_TOOL_SEARCH` and
-`env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from
-`~/.claude/settings.json`, and `model_provider` and both
-`model_providers.vrouter` tables from `~/.codex/config.toml`.
-
-`agents-update` does not apply any of this. It only swaps the agent binaries,
-and the settings come from Home Manager activation, so they need a rebuild.
-
-### Fluxer
-
-After an update, check login, messages, attachment uploads, and a voice call.
-Read the upstream configuration changes before you bump any image tag.
-
-A full reset needs these steps in order:
-
-1. Stop `fluxer.target`.
-2. Take a database dump and a copy or snapshot of the state, and keep them
-   outside `tank/fluxer`.
-3. Reset only the `fluxer` database. Leave the shared PostgreSQL data
-   directory alone.
-4. Reset the NATS, Valkey, Meilisearch, and SeaweedFS state folders together.
-5. Recreate the SSD directories with
-   `systemd-tmpfiles --create --prefix=/var/lib/fluxer`, then start the target.
-
-### Leftovers from the beets migration
-
-The 2026-09-21 migration from Lidarr to beets left these on `adam`. Nothing in
-the configuration uses or removes them:
-
-- Music snapshot `tank/media@before-beets-migration-20260921`
-- Original beets state and the last legacy download in
-  `/var/backups/beets-migration-20260921/`
-- `/var/lib/beets/migration-lyrics-report.json`
-- `/var/lib/beets/migration-flac-repairs.json`
-- `/var/lib/beets/migration-final-audit.json`
-
-The reports list lookup failures that still need a review. Once that is done,
-destroy the snapshot and the backup, then delete this section.
-
-## Secrets
-
-Host secrets are [sops](https://github.com/getsops/sops)-encrypted in
-`secrets/<host>.yaml` for the age recipients in `.sops.yaml`. Edit them only
-with `sops secrets/<host>.yaml`.
+Keep plaintext out of `secrets/`. Age recipients live in `.sops.yaml`.
