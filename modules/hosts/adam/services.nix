@@ -5,6 +5,7 @@
     services.homelab = {
       alloy.enable = true;
       blitzcrank.enable = true;
+      blitzcrank-mcp.enable = true;
       configarr.enable = true;
       beets.enable = true;
       copyparty.enable = true;
