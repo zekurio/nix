@@ -29,7 +29,14 @@
       extraModprobeConfig = ''
         options it87 force_id=0x8628
       '';
-      kernelParams = ["acpi_enforce_resources=lax"];
+      kernelParams = [
+        "acpi_enforce_resources=lax"
+        # Update GPU page tables from the CPU for both graphics and compute
+        # instead of queueing them on the GPU. Experimental: reported to ease
+        # camera-pan stutter in Control Resonant under RADV; drop if it does
+        # not help.
+        "amdgpu.vm_update_mode=3"
+      ];
     };
 
     hardware = {
