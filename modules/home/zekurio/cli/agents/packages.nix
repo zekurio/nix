@@ -6,20 +6,10 @@
     llmAgents = inputs.llm-agents.packages.${system};
     t3code = inputs.t3code-nightly.packages.${system};
 
-    # llm-agents names v2's binary opencode2; T3 Code expects opencode on PATH.
-    opencode = pkgs.symlinkJoin {
-      name = "opencode-${llmAgents.opencode2.version}";
-      paths = [llmAgents.opencode2];
-      postBuild = ''
-        ln -s opencode2 $out/bin/opencode
-      '';
-      meta = llmAgents.opencode2.meta // {mainProgram = "opencode";};
-    };
-
     clis = [
       llmAgents.claude-code
       llmAgents.codex
-      opencode
+      llmAgents.opencode
     ];
 
     # GUI launches and systemd services do not inherit the interactive shell PATH.
