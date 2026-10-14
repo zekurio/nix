@@ -127,3 +127,30 @@ sops secrets/adam.yaml
 ```
 
 Keep plaintext out of `secrets/`. Age recipients live in `.sops.yaml`.
+
+## Upgrade adam's PostgreSQL
+
+`modules/hosts/adam/postgresql.nix` pins the major version. A bump moves the
+cluster to `/var/lib/postgresql/<major>`, and switching without migrating
+starts Immich, Fluxer, Alloy and Kyoo on an empty one. On `adam`, from the
+checkout with the bump, before switching:
+
+```bash
+OLD=$(systemctl cat postgresql | grep -om1 '/nix/store/[^/ ]*-postgresql-and-plugins-[0-9.]*')
+NEW=$(nix build --no-link --print-out-paths .#nixosConfigurations.adam.config.services.postgresql.finalPackage)
+OLDDATA=/var/lib/postgresql/16 NEWDATA=/var/lib/postgresql/18
+
+sudo systemctl stop immich-server immich-machine-learning alloy-server fluxer.target kyoo.target postgresql
+sudo install -d -m 0700 -o postgres -g postgres "$NEWDATA"
+# The old cluster has no data checksums; pg_upgrade needs both to match.
+sudo -u postgres "$NEW/bin/initdb" -U postgres --no-data-checksums -D "$NEWDATA"
+sudo -u postgres env -C "$NEWDATA" "$NEW/bin/pg_upgrade" -U postgres \
+  --old-datadir "$OLDDATA" --new-datadir "$NEWDATA" \
+  --old-bindir "$OLD/bin" --new-bindir "$NEW/bin" \
+  --old-options "-c config_file=$OLDDATA/postgresql.conf" \
+  --new-options "-c shared_preload_libraries=vchord"
+```
+
+Then switch to the new configuration, run
+`sudo -u postgres vacuumdb --all --analyze-in-stages`, and delete `$OLDDATA`
+once the services work.
