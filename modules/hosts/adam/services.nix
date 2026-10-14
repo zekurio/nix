@@ -13,7 +13,6 @@
       fluxer.enable = true;
       immich.enable = true;
       jellyfin.enable = true;
-      kyoo.enable = true;
       inviterr.enable = true;
       lidarr.enable = true;
       mediaCleanup.enable = true;

@@ -132,7 +132,7 @@ Keep plaintext out of `secrets/`. Age recipients live in `.sops.yaml`.
 
 `modules/hosts/adam/postgresql.nix` pins the major version. A bump moves the
 cluster to `/var/lib/postgresql/<major>`, and switching without migrating
-starts Immich, Fluxer, Alloy and Kyoo on an empty one. On `adam`, from the
+starts Immich, Fluxer and Alloy on an empty one. On `adam`, from the
 checkout with the bump, before switching:
 
 ```bash
@@ -140,7 +140,7 @@ OLD=$(systemctl cat postgresql | grep -om1 '/nix/store/[^/ ]*-postgresql-and-plu
 NEW=$(nix build --no-link --print-out-paths .#nixosConfigurations.adam.config.services.postgresql.finalPackage)
 OLDDATA=/var/lib/postgresql/16 NEWDATA=/var/lib/postgresql/18
 
-sudo systemctl stop immich-server immich-machine-learning alloy-server fluxer.target kyoo.target postgresql
+sudo systemctl stop immich-server immich-machine-learning alloy-server fluxer.target postgresql
 sudo install -d -m 0700 -o postgres -g postgres "$NEWDATA"
 # The old cluster has no data checksums; pg_upgrade needs both to match.
 sudo -u postgres "$NEW/bin/initdb" -U postgres --no-data-checksums -D "$NEWDATA"
