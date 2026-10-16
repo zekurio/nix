@@ -5,7 +5,13 @@
     ];
     services.udev.packages = [pkgs.openrgb];
     hardware.i2c.enable = true;
-    boot.kernelModules = ["i2c-piix4"];
+    boot = {
+      kernelModules = ["i2c-piix4"];
+      # i2c-piix4 autoloads the SPD EEPROM driver, whose page selects collide
+      # with OpenRGB writing to the ENE DRAM controllers on the same SMBus.
+      # Nothing here reads SPD data, so keep it out.
+      blacklistedKernelModules = ["ee1004"];
+    };
 
     home-manager.users.zekurio.xdg.configFile = {
       # Hardware Static mode keeps the color after OpenRGB exits.

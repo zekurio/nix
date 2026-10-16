@@ -20,6 +20,9 @@
       kernelModules = [
         "kvm-amd"
         "it87"
+        # Proton only uses NT synchronisation primitives when /dev/ntsync
+        # exists at launch; nothing autoloads the module.
+        "ntsync"
       ];
       extraModulePackages = [
         config.boot.kernelPackages.it87
@@ -31,11 +34,18 @@
       '';
       kernelParams = [
         "acpi_enforce_resources=lax"
+        # simpledrm is built in and races amdgpu for DRM card0 depending on
+        # whether the firmware framebuffer registers first. gamemode addresses
+        # the GPU by card index, so amdgpu must always be card0. amdgpu sits in
+        # the initrd, so the console is only blank until it probes.
+        "initcall_blacklist=simpledrm_platform_driver_init"
         # Update GPU page tables from the CPU for both graphics and compute
-        # instead of queueing them on the GPU. Experimental: reported to ease
-        # camera-pan stutter in Control Resonant under RADV; drop if it does
-        # not help.
+        # instead of queueing them on the GPU. Fixes camera-pan frame pacing
+        # in Control Resonant under RADV; keep it.
         "amdgpu.vm_update_mode=3"
+        # Single-user gaming desktop: retpolines, Safe RET and the other
+        # speculative-execution mitigations only cost CPU-bound frame time.
+        "mitigations=off"
       ];
     };
 
@@ -56,6 +66,11 @@
     # AMDVLK, global RADV flags and overdrive masks are intentionally absent.
     services.fstrim.enable = true;
     services.fwupd.enable = true;
+    # Both drives are NVMe; the kernel still picks mq-deadline, which only
+    # adds queueing overhead on hardware with its own command queues.
+    services.udev.extraRules = ''
+      ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", ATTR{queue/scheduler}="none"
+    '';
     programs.coolercontrol.enable = true;
 
     environment.systemPackages = with pkgs; [
