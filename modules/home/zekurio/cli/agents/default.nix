@@ -5,7 +5,7 @@
     ...
   }: let
     skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
-    # Claude Code reads ~/.claude/skills, and OpenCode reads both directories.
+    # Claude Code reads ~/.claude/skills; Codex reads ~/.agents/skills.
     skillDirs = [".agents/skills" ".claude/skills"];
     linkSkills = dir:
       lib.mapAttrs' (name: _:
