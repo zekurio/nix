@@ -1,13 +1,5 @@
 {
-  flake.modules.darwin.sachiel = {pkgs, ...}: let
-    fluxerTap = pkgs.runCommandLocal "fluxer-homebrew-tap" {} ''
-      mkdir -p "$out/Casks/f"
-      cp ${./homebrew/fluxer.rb} "$out/Casks/f/fluxer.rb"
-    '';
-  in {
-    # nix-homebrew uses the full directory name; brew uses "zekurio/fluxer".
-    nix-homebrew.taps."zekurio/homebrew-fluxer" = fluxerTap;
-
+  flake.modules.darwin.sachiel = {
     homebrew = {
       enable = true;
       user = "zekurio";
@@ -16,14 +8,11 @@
           name = "kgarner7/feishin";
           trusted = true;
         }
-        {
-          name = "zekurio/fluxer";
-          trusted = true;
-        }
       ];
       casks = [
         "1password"
         "feishin"
+        "fluxer"
         "ghostty"
         "helium-browser"
         "iina"
@@ -33,7 +22,6 @@
         "t3-code@nightly"
         "tailscale-app"
         "vesktop"
-        "zekurio/fluxer/fluxer"
         "zed"
       ];
       caskArgs.appdir = "/Applications";
