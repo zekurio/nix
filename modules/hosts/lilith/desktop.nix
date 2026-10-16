@@ -4,7 +4,12 @@
     pkgs,
     ...
   }: {
-    environment.plasma6.excludePackages = [pkgs.kdePackages.konsole];
+    environment.plasma6.excludePackages = with pkgs.kdePackages; [
+      konsole
+      okular
+    ];
+    # Plasma enables the whole PIM suite: KMail, Kontact, Merkuro and Akonadi.
+    programs.kde-pim.enable = false;
     services = {
       desktopManager.plasma6.enable = true;
       displayManager = {
