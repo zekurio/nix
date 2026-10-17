@@ -6,9 +6,8 @@
     extraEnvironment = {
       # Keep both ID formats for legacy and platform-prefixed admin checks.
       ADMINLIST_IDS = "76561198111376416 Steam_76561198111376416";
-      # Hammer: free building and passive enemies. Presets replace earlier
-      # modifiers and persist in the world; reverting needs `setworldpreset default`.
-      SERVER_ARGS = "-preset hammer";
+      # Explicitly reset the persisted Hammer world modifiers to normal.
+      SERVER_ARGS = "-preset normal";
       VPCFG_Game_enabled = "false";
 
       # Experience modifiers add percentages: +900 gives 10x skill gain.
