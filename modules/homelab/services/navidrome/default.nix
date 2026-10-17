@@ -41,6 +41,9 @@
       services.homelab.caddy.virtualHosts.navidrome = {
         inherit domain;
         reverseProxy = "127.0.0.1:${toString port}";
+        # Subsonic clients cannot do SSO, so Navidrome's own login guards the
+        # public vhost.
+        public = true;
       };
     };
   };
