@@ -4,7 +4,15 @@
 
     services.homelab = {
       alloy.enable = true;
-      blitzcrank.enable = true;
+      blitzcrank = {
+        enable = true;
+        discord = {
+          enable = true;
+          channels = ["1511015305592443001"];
+          allowedUsers = ["144853050761150465"];
+          triageModel = "openrouter/typesafe/jev-1.14";
+        };
+      };
       blitzcrank-mcp.enable = true;
       configarr.enable = true;
       beets.enable = true;
