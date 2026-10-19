@@ -23,18 +23,29 @@ For emergencies, run a direct rebuild. This bypasses the upgrade unit's limits:
 ssh adam 'nixos-rebuild switch --flake github:zekurio/nix/main#adam --sudo'
 ```
 
-On `lilith` or `sachiel`, rebuild from the local checkout:
+On `lilith` or `sachiel`, rebuild from the local checkout with `nh`, which
+finds `~/Git/nix` on its own and prints a package diff before activating:
 
 ```bash
-# lilith
-sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
-
-# sachiel
-sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
+nh os switch      # lilith
+nh darwin switch  # sachiel
 ```
 
-Keep `path:` so root activation can read the user-owned checkout. Merge the
-weekly `flake.lock` PR to deploy input updates through these same commands.
+`nh os boot` activates on the next reboot instead. Stage new files first, as
+with any git flake.
+
+`lilith` also builds `main` every day and sets it as the boot default without
+switching, so merging the weekly `flake.lock` PR is enough to update it on the
+next reboot. A reboot also drops any generation switched to from unpushed
+local changes. `sachiel` needs `nh darwin switch` after a merge.
+
+If `nh` is unavailable, rebuild directly. Keep `path:` so root can read the
+user-owned checkout:
+
+```bash
+sudo nixos-rebuild switch --flake path:/home/zekurio/Git/nix#lilith
+sudo darwin-rebuild switch --flake path:/Users/zekurio/Git/nix#sachiel
+```
 
 ## Install NixOS
 

@@ -4,7 +4,8 @@ on:
   schedule:
     # Weekly, Saturday night: leaves the PR waiting for review well before
     # adam's Sunday 03:00 Europe/Vienna auto-upgrade window. Updates only
-    # reach adam once the PR is merged to main.
+    # reach adam and lilith, which both upgrade from main, once the PR is
+    # merged.
     - cron: "15 23 * * 6"
   workflow_dispatch:
 
