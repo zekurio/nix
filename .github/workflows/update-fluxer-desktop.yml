@@ -1,0 +1,54 @@
+name: Update Fluxer desktop
+
+on:
+  schedule:
+    # Shortly after the flake.lock update, so both PRs are ready together
+    # and lilith's nightly upgrade picks up a merge that same night.
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-fluxer-desktop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Pin latest stable release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE: modules/hosts/lilith/fluxer/_source.json
+        run: |
+          # The monorepo tags every component, several times a day, so the
+          # newest desktop build is rarely the newest release.
+          release=$(gh api 'repos/fluxerapp/fluxer/releases?per_page=100' --jq '
+            [.[] | select(.draft | not) | select(.tag_name | startswith("fluxer-desktop-stable@"))][0]')
+          version=$(jq -r '.tag_name | ltrimstr("fluxer-desktop-stable@")' <<< "$release")
+          # GitHub records each asset's SHA-256, which spares downloading
+          # the tarball. A release still uploading its assets has none yet.
+          digest=$(jq -r --arg name "Fluxer-$version-linux-x64.tar.gz" '
+            .assets[] | select(.name == $name) | .digest // empty' <<< "$release")
+          if [ -z "$digest" ]; then
+            echo "No x64 tarball digest for $version yet; keeping the current pin."
+            exit 0
+          fi
+          hash="sha256-$(xxd -r -p <<< "${digest#sha256:}" | base64)"
+          jq -n --arg version "$version" --arg hash "$hash" \
+            '{version: $version, hash: $hash}' > "$SOURCE"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: update-fluxer-desktop
+          title: "chore(fluxer): update desktop to ${{ steps.release.outputs.version }}"
+          commit-message: "chore(fluxer): update desktop to ${{ steps.release.outputs.version }}"
+          body: "Release: https://github.com/fluxerapp/fluxer/releases/tag/fluxer-desktop-stable%40${{ steps.release.outputs.version }}"
+          labels: dependencies
+          delete-branch: true
