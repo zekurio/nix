@@ -2,11 +2,12 @@ name: Update flake.lock
 
 on:
   schedule:
-    # Weekly, Saturday night: leaves the PR waiting for review well before
-    # adam's Sunday 03:00 Europe/Vienna auto-upgrade window. Updates only
-    # reach adam and lilith, which both upgrade from main, once the PR is
-    # merged.
-    - cron: "15 23 * * 6"
+    # Daily, early morning in Europe/Vienna, so the PR is ready to review
+    # during the day and lilith's nightly upgrade picks up a merge that same
+    # night. An open PR is updated in place rather than duplicated. Updates
+    # only reach adam and lilith, which both upgrade from main, once the PR
+    # is merged.
+    - cron: "15 4 * * *"
   workflow_dispatch:
 
 permissions:
