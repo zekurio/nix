@@ -8,7 +8,6 @@
 
     clis = [
       llmAgents.claude-code
-      llmAgents.codex
     ];
 
     # GUI launches and systemd services do not inherit the interactive shell PATH.

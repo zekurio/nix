@@ -5,16 +5,12 @@
     ...
   }: let
     skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
-    # Claude Code reads ~/.claude/skills; Codex reads ~/.agents/skills.
-    skillDirs = [".agents/skills" ".claude/skills"];
-    linkSkills = dir:
-      lib.mapAttrs' (name: _:
-        lib.nameValuePair "${dir}/${name}" {
-          source = "${inputs.agent-stuff}/skills/${name}";
-        })
-      skills;
   in {
-    home.file = lib.mkMerge (map linkSkills skillDirs);
+    home.file = lib.mapAttrs' (name: _:
+      lib.nameValuePair ".claude/skills/${name}" {
+        source = "${inputs.agent-stuff}/skills/${name}";
+      })
+    skills;
 
     # Claude Code writes to ~/.claude/settings.json itself (/model, /config),
     # so merge our keys in instead of owning the file as a read-only symlink.

@@ -17,7 +17,6 @@
           la = "eza -la";
           lt = "eza --tree";
           cat = "bat";
-          codex = "codex --yolo";
         };
       };
 

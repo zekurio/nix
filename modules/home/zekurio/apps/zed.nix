@@ -60,39 +60,6 @@ in {
             }
           ];
         };
-        openai_compatible."OpenAI (vrouter)" = {
-          api_url = "${vrouterUrl}/v1";
-          available_models = map (model:
-            {
-              # Zed manages its own context budget; Codex's CLI override
-              # limit and vrouter's advertised default do not configure it.
-              max_tokens = 1000000;
-              max_output_tokens = 128000;
-              reasoning_effort = "max";
-              capabilities = {
-                # Keep reasoning state through vrouter's native Responses API.
-                chat_completions = false;
-                tools = true;
-                images = true;
-                parallel_tool_calls = true;
-                prompt_cache_key = true;
-              };
-            }
-            // model) [
-            {
-              name = "gpt-6-astra";
-              display_name = "GPT-6 Astra";
-            }
-            {
-              name = "gpt-6.1-sol";
-              display_name = "GPT-6.1 Sol";
-            }
-            {
-              name = "gpt-6-luna";
-              display_name = "GPT-6 Luna";
-            }
-          ];
-        };
       };
       userSettings.agent.default_model = {
         provider = "Anthropic (vrouter)";
