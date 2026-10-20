@@ -14,10 +14,10 @@
       desktopManager.plasma6.enable = true;
       displayManager = {
         defaultSession = "plasma";
-        sddm = {
-          enable = true;
-          wayland.enable = true;
-        };
+        # Plasma's Login Screen settings page ships with this greeter, not SDDM.
+        # Its "Apply Plasma Settings" copies the session's colours, fonts and
+        # monitor layout to the greeter, which otherwise stays Breeze Light.
+        plasma-login-manager.enable = true;
       };
       printing.enable = true;
     };
