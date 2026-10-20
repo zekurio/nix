@@ -65,10 +65,12 @@
 
       programs.ghostty = {
         enable = lib.mkDefault pkgs.stdenv.hostPlatform.isDarwin;
-        package =
+        # Hosts may swap in another build, such as lilith's Ghostty main.
+        package = lib.mkDefault (
           if pkgs.stdenv.hostPlatform.isDarwin
           then null
-          else pkgs.ghostty;
+          else pkgs.ghostty
+        );
         enableFishIntegration = true;
         systemd.enable = false;
         settings =
