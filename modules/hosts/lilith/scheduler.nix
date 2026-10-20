@@ -12,8 +12,5 @@
       # so the scheduler's power mode tracks it without scx_loader.
       extraArgs = ["--autopower"];
     };
-    # COSMIC enables system76-scheduler, which tunes the fair scheduler that
-    # lavd replaces and renices processes underneath it.
-    services.system76-scheduler.enable = false;
   };
 }

@@ -1,8 +1,5 @@
 {
   flake.modules.nixos.lilith = {pkgs, ...}: {
-    # COSMIC enables system76-power unless power-profiles-daemon is on.
-    services.power-profiles-daemon.enable = true;
-
     programs.gamemode.settings = {
       general.renice = 10;
 
