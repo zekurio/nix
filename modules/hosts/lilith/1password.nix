@@ -6,6 +6,9 @@
       enable = true;
       polkitPolicyOwners = [username];
     };
+    # gnome-keyring brings gcr's SSH agent, which would export its own
+    # SSH_AUTH_SOCK to the session ahead of 1Password's.
+    services.gnome.gcr-ssh-agent.enable = false;
 
     # Permit 1Password's browser integration to connect to Helium.
     environment.etc."1password/custom_allowed_browsers" = {

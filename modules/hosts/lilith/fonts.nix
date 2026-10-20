@@ -20,31 +20,32 @@
       };
     };
 
-    # The greeter runs before any user session and reads no Plasma settings.
-    services.displayManager.sddm.settings.Theme.Font = "${sans},10";
-
     home-manager.users.zekurio = {
       # The shared profile disables user fontconfig on macOS and headless hosts;
       # Steam reads the user's fontconfig configuration on this desktop.
       fonts.fontconfig.enable = lib.mkForce true;
 
-      # Plasma names its fonts in kdeglobals instead of asking fontconfig for
-      # the defaults above, and syncs these to GTK applications at login.
-      programs.plasma.fonts = let
-        ui = pointSize: {
-          family = sans;
-          inherit pointSize;
+      # COSMIC names its fonts in its toolkit config instead of asking
+      # fontconfig for the defaults above.
+      wayland.desktopManager.cosmic.appearance.toolkit = let
+        font = family: {
+          inherit family;
+          stretch = {
+            __type = "enum";
+            variant = "Normal";
+          };
+          style = {
+            __type = "enum";
+            variant = "Normal";
+          };
+          weight = {
+            __type = "enum";
+            variant = "Normal";
+          };
         };
       in {
-        general = ui 10;
-        small = ui 8;
-        toolbar = ui 10;
-        menu = ui 10;
-        windowTitle = ui 10;
-        fixedWidth = {
-          family = mono;
-          pointSize = 10;
-        };
+        interface_font = font sans;
+        monospace_font = font mono;
       };
 
       # Zed bundles its own fonts and ignores both of the above. Its terminal
