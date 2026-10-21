@@ -176,18 +176,24 @@
 
         # Keep managed roots owned by the shared service account without stealing
         # ownership from active downloader/importer work files.
-        chown ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
-        chmod ${shareDirMode} "$d" || true
+        [ "$(stat -c %U:%G "$d")" = ${lib.escapeShellArg "${shareUser}:${shareGroup}"} ] \
+          || chown ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
+
+        # Every chmod emits IN_ATTRIB even when the mode is unchanged, and this
+        # runs every 15 minutes over trees that Navidrome and the arrs watch.
+        # Only touch entries that drifted; setfacl already skips no-op writes.
+        # Files get an explicit rw- instead of rwX because inherited default
+        # ACLs carry x, which made rwX restore the mask chmod had just lowered.
 
         # Directories must be group-writable for arr import moves/renames
-        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec chmod ${shareDirMode} {} + || true
+        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d ! -perm ${shareDirMode} -exec chmod ${shareDirMode} {} + || true
+        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec setfacl \
+          -m g:${lib.escapeShellArg shareGroup}:rwx,m::rwx,d:g:${lib.escapeShellArg shareGroup}:rwx,d:m::rwx {} + || true
 
         # Files should be readable and writable by the shared group, but not executable.
-        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type f -exec chmod ${shareFileMode} {} + || true
-
-        # Ensure share group has rwx and inheritance works regardless of creator umask/mode
-        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -exec setfacl -m g:${lib.escapeShellArg shareGroup}:rwX -m m::rwX {} + || true
-        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type d -exec setfacl -d -m g:${lib.escapeShellArg shareGroup}:rwx -m m::rwx {} + || true
+        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type f ! -perm ${shareFileMode} -exec chmod ${shareFileMode} {} + || true
+        find "$d" \( "''${activeDownloadPrune[@]}" \) -prune -o -type f -exec setfacl \
+          -m g:${lib.escapeShellArg shareGroup}:rw-,m::rw- {} + || true
       done
     '';
 
