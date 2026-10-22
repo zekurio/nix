@@ -6,7 +6,6 @@
     ...
   }: let
     cfg = config.services.homelab.fluxer;
-    # Service settings match upstream revision 34b6ecfbd27f29f2a7b9637ea7685e67e0582b85.
     components = [
       "admin"
       "api"
@@ -21,6 +20,7 @@
       "messages"
       "messages-shard"
       "nats"
+      "push"
       "seaweedfs"
       "snowflakes"
       "snowflakes-shard"

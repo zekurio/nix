@@ -18,6 +18,7 @@
           "fluxer-media-proxy"
           "fluxer-messages"
           "fluxer-messages-shard"
+          "fluxer-push"
           "fluxer-snowflakes"
           "fluxer-snowflakes-shard"
           "fluxer-unfurl"
