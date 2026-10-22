@@ -39,8 +39,7 @@
       enable = lib.mkEnableOption "Fluxer chat services with Caddy integration";
       imageTag = lib.mkOption {
         type = lib.types.str;
-        # This tag moves. The default pull policy reuses the cached image, so
-        # pull the application images by hand before restarting to update.
+        # This tag moves; restarting fluxer.target pulls the newest images.
         default = "v1";
         description = "Tag for the Fluxer application images.";
       };
@@ -64,6 +63,9 @@
           name = "fluxer-${name}";
           value = {
             autoStart = false;
+            # Check the registry on every start. Podman falls back to the
+            # cached image when the registry is unreachable, so boot still works.
+            pull = "newer";
             networks = ["fluxer_fluxer"];
             # Keep upstream DNS names after the container names change.
             extraOptions = [
