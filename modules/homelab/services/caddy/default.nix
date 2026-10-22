@@ -106,7 +106,7 @@
           # v0.2.4 is the first release that accepts Cloudflare's prefixed
           # token format (cfut_...); older builds reject those outright.
           plugins = ["github.com/caddy-dns/cloudflare@v0.2.4"];
-          hash = "sha256-xRJ5evsAJ2akg47j3Bt6YDXJOgX88B/rKNP50KSVyNY=";
+          hash = "sha256-5a5cpFl90pEWt0lUC4ZJQ7g+1//ZvsRhee64Dt9vh5o=";
         };
         globalConfig = ''
           email ${acmeEmail}
