@@ -92,8 +92,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     blitzcrank = {
-      # Discord gateway support until https://github.com/zekurio/blitzcrank/pull/48 lands.
-      url = "github:zekurio/blitzcrank/5be03b3d829029bfb39b52870591c609d4301849";
+      url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     alloy = {

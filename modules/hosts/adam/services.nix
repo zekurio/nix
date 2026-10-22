@@ -13,6 +13,12 @@
           allowedUsers = ["144853050761150465"];
           triageModel = "openrouter/typesafe/jev-1.14";
         };
+        fluxer = {
+          enable = true;
+          channels = ["1555737329635688448"];
+          allowedRoles = ["1556974194065932288"];
+          triageModel = "openrouter/typesafe/jev-1.14";
+        };
       };
       blitzcrank-mcp.enable = true;
       configarr.enable = true;
