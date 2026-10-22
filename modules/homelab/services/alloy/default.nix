@@ -28,6 +28,10 @@
         enable = true;
         inherit port;
         publicServerUrl = "https://${domain}";
+        # Caddy is the only proxy and dials Alloy over loopback. Caddy itself
+        # trusts no upstream proxy, so it replaces X-Forwarded-For with the
+        # peer it saw and that header always carries the real client address.
+        trustedProxies = ["127.0.0.1"];
         package = upstreamPackage;
         ffmpegPackage = pkgs.jellyfin-ffmpeg;
         extraGroups = [
