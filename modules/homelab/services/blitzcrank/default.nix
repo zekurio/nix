@@ -33,10 +33,6 @@
     # base URL ends in /v1; the Anthropic client appends /v1/messages itself.
     modelsFile = pkgs.writeText "blitzcrank-models.json" (builtins.toJSON {
       providers = {
-        openai = {
-          baseUrl = "${vrouterUrl}/v1";
-          apiKey = "$VROUTER_API_KEY";
-        };
         anthropic = {
           baseUrl = vrouterUrl;
           apiKey = "$VROUTER_API_KEY";
