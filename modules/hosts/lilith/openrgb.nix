@@ -1,18 +1,8 @@
 {
   flake.modules.nixos.lilith = {pkgs, ...}: let
-    openrgb = pkgs.openrgb.overrideAttrs (old: {
-      # The CLI queues the mode change on the device thread but writes LED
-      # colors from the main thread. Each ENE DRAM register write is a pointer
-      # write plus a value write, so the two threads interleave and the sticks
-      # stay in Direct mode instead of Static. Queue the LED update on the
-      # device thread too so both run in order.
-      postPatch =
-        (old.postPatch or "")
-        + ''
-          substituteInPlace cli.cpp \
-            --replace-fail 'device->DeviceUpdateLEDs();' 'device->UpdateLEDs();'
-        '';
-    });
+    # OpenRGB 1.1 already queues the CLI's LED update on the device thread
+    # (cli.cpp calls UpdateLEDs), so the 1.0-era patch that did this is gone.
+    openrgb = pkgs.openrgb;
   in {
     environment.systemPackages = [
       openrgb
