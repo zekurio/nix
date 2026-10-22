@@ -459,11 +459,13 @@
         enable = true;
         nssmdns4 = true;
         openFirewall = cfg.samba.discovery.interfaces == [];
-        allowInterfaces = lib.mkIf (cfg.samba.discovery.interfaces != []) cfg.samba.discovery.interfaces;
-        publish = {
-          enable = true;
-          addresses = true;
-          workstation = true;
+        settings = {
+          server.allow-interfaces = lib.mkIf (cfg.samba.discovery.interfaces != []) cfg.samba.discovery.interfaces;
+          publish = {
+            disable-publishing = false;
+            publish-addresses = true;
+            publish-workstation = true;
+          };
         };
         extraServiceFiles.smb = ''
           <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
