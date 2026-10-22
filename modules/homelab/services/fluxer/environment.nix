@@ -33,6 +33,9 @@
             AWS_EC2_METADATA_DISABLED = "true";
             FLUXER_API_HEADERS_TIMEOUT_MS = "30000";
             FLUXER_API_REQUEST_TIMEOUT_MS = "120000";
+            # Only new registrations (including SSO) auto-join; existing
+            # accounts need a one-off admin force-add.
+            FLUXER_AUTO_JOIN_INVITE_CODE = "dgg";
             FLUXER_BASE_DOMAIN = "${domain}";
             FLUXER_CAPTCHA_ENABLED = "false";
             FLUXER_CAPTCHA_HCAPTCHA_SECRET_KEY = "";
