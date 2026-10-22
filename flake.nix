@@ -115,6 +115,11 @@
       url = "github:zekurio/vrouter";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # Only the edge router config; the whole repository is a large download.
+    fluxer-caddyfile = {
+      url = "file+https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile";
+      flake = false;
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

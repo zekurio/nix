@@ -336,6 +336,18 @@
         "type": "github"
       }
     },
+    "fluxer-caddyfile": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-anVtH//upvfOT07880NpyKJQUzyToTKRWEKTIkc8uQE=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile"
+      }
+    },
     "ghostty": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -728,6 +740,7 @@
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
         "flake-parts": "flake-parts",
+        "fluxer-caddyfile": "fluxer-caddyfile",
         "ghostty": "ghostty",
         "helium": "helium",
         "home-manager": "home-manager_2",
