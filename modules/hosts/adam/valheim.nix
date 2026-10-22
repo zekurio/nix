@@ -36,36 +36,36 @@
       VPCFG_Experience_crafting = "900";
       VPCFG_Experience_ride = "900";
 
-      # V+ modifiers are percentage changes: +100 doubles, -100 removes.
+      # V+ modifiers are percentage changes: +100 doubles, +900 gives 10x, -100 removes.
       VPCFG_Gathering_enabled = "true";
-      VPCFG_Gathering_dropChance = "200";
-      VPCFG_Gathering_wood = "200";
-      VPCFG_Gathering_fineWood = "200";
-      VPCFG_Gathering_coreWood = "200";
-      VPCFG_Gathering_elderBark = "200";
-      VPCFG_Gathering_yggdrasilWood = "200";
-      VPCFG_Gathering_blackwood = "200";
-      VPCFG_Gathering_stone = "200";
-      VPCFG_Gathering_grausten = "200";
-      VPCFG_Gathering_blackMarble = "200";
-      VPCFG_Gathering_copperOre = "200";
-      VPCFG_Gathering_tinOre = "200";
-      VPCFG_Gathering_ironScrap = "200";
-      VPCFG_Gathering_silverOre = "200";
-      VPCFG_Gathering_copperScrap = "200";
-      VPCFG_Gathering_flametalOre = "200";
-      VPCFG_Gathering_chitin = "200";
-      VPCFG_Gathering_feather = "200";
-      VPCFG_Gathering_proustitePowder = "200";
+      VPCFG_Gathering_dropChance = "900";
+      VPCFG_Gathering_wood = "900";
+      VPCFG_Gathering_fineWood = "900";
+      VPCFG_Gathering_coreWood = "900";
+      VPCFG_Gathering_elderBark = "900";
+      VPCFG_Gathering_yggdrasilWood = "900";
+      VPCFG_Gathering_blackwood = "900";
+      VPCFG_Gathering_stone = "900";
+      VPCFG_Gathering_grausten = "900";
+      VPCFG_Gathering_blackMarble = "900";
+      VPCFG_Gathering_copperOre = "900";
+      VPCFG_Gathering_tinOre = "900";
+      VPCFG_Gathering_ironScrap = "900";
+      VPCFG_Gathering_silverOre = "900";
+      VPCFG_Gathering_copperScrap = "900";
+      VPCFG_Gathering_flametalOre = "900";
+      VPCFG_Gathering_chitin = "900";
+      VPCFG_Gathering_feather = "900";
+      VPCFG_Gathering_proustitePowder = "900";
 
       VPCFG_Pickable_enabled = "true";
-      VPCFG_Pickable_edibles = "200";
-      VPCFG_Pickable_flowersAndIngredients = "200";
-      VPCFG_Pickable_materials = "200";
-      VPCFG_Pickable_valuables = "200";
-      VPCFG_Pickable_surtlingCores = "200";
-      VPCFG_Pickable_blackCores = "200";
-      VPCFG_Pickable_questItems = "200";
+      VPCFG_Pickable_edibles = "900";
+      VPCFG_Pickable_flowersAndIngredients = "900";
+      VPCFG_Pickable_materials = "900";
+      VPCFG_Pickable_valuables = "900";
+      VPCFG_Pickable_surtlingCores = "900";
+      VPCFG_Pickable_blackCores = "900";
+      VPCFG_Pickable_questItems = "900";
 
       VPCFG_Beehive_enabled = "true";
       # Seconds per honey: 120 gives 10x production; capacity scales with it.
@@ -78,9 +78,9 @@
 
       # The global loot multiplier also multiplies trophies and boss rewards.
       VPCFG_LootDrop_enabled = "true";
-      VPCFG_LootDrop_lootDropAmountMultiplier = "100";
-      # Drop chances saturate at 100%, even when the multiplier exceeds it.
-      VPCFG_LootDrop_lootDropChanceMultiplier = "50";
+      VPCFG_LootDrop_lootDropAmountMultiplier = "900";
+      # Drop chances saturate at 100%; 1000x guarantees anything at 0.1% or above.
+      VPCFG_LootDrop_lootDropChanceMultiplier = "99900";
 
       VPCFG_Inventory_enabled = "true";
       VPCFG_Inventory_playerInventoryRows = "8";
