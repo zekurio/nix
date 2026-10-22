@@ -6,7 +6,7 @@
     ...
   }: let
     adminGroup = "homelab-admin";
-    adminUsername = "zekurio";
+    adminUsername = config.services.homelab.adminUsername;
     adminPassword = config.sops.secrets.admin_password.path;
 
     # Servarr stores Web UI users in SQLite rather than its environment-backed
@@ -90,49 +90,57 @@
       serviceConfig.SupplementaryGroups = [adminGroup];
     };
   in {
-    users.groups.homelab-admin = {};
+    options.services.homelab.adminUsername = lib.mkOption {
+      type = lib.types.str;
+      default = "zekurio";
+      description = "Admin account provisioned in each service's web UI with the shared admin password.";
+    };
 
-    sops.secrets.admin_password = {
-      group = adminGroup;
-      mode = "0440";
-      restartUnits = [
-        "lidarr.service"
-        "prowlarr.service"
-        "radarr.service"
-        "sabnzbd.service"
-        "slskd.service"
-        "sonarr.service"
+    config = {
+      users.groups.homelab-admin = {};
+
+      sops.secrets.admin_password = {
+        group = adminGroup;
+        mode = "0440";
+        restartUnits = [
+          "lidarr.service"
+          "prowlarr.service"
+          "radarr.service"
+          "sabnzbd.service"
+          "slskd.service"
+          "sonarr.service"
+        ];
+      };
+
+      sops.templates."slskd-admin.env" = lib.mkIf config.services.homelab.slskd.enable {
+        content = ''
+          SLSKD_USERNAME=${adminUsername}
+          SLSKD_PASSWORD=${config.sops.placeholder.admin_password}
+        '';
+        owner = "slskd";
+        group = "slskd";
+        mode = "0400";
+      };
+
+      systemd.services = lib.mkMerge [
+        (lib.mkIf config.services.homelab.lidarr.enable {
+          lidarr = mkServarrAuth "${config.services.lidarr.dataDir}/lidarr.db";
+        })
+        (lib.mkIf config.services.homelab.slskd.enable {
+          slskd.serviceConfig.EnvironmentFile = lib.mkAfter [
+            config.sops.templates."slskd-admin.env".path
+          ];
+        })
+        (lib.mkIf config.services.homelab.sonarr.enable {
+          sonarr = mkServarrAuth "${config.services.sonarr.dataDir}/sonarr.db";
+        })
+        (lib.mkIf config.services.homelab.radarr.enable {
+          radarr = mkServarrAuth "${config.services.radarr.dataDir}/radarr.db";
+        })
+        (lib.mkIf config.services.homelab.prowlarr.enable {
+          prowlarr = mkServarrAuth "${config.services.prowlarr.dataDir}/prowlarr.db";
+        })
       ];
     };
-
-    sops.templates."slskd-admin.env" = lib.mkIf config.services.homelab.slskd.enable {
-      content = ''
-        SLSKD_USERNAME=${adminUsername}
-        SLSKD_PASSWORD=${config.sops.placeholder.admin_password}
-      '';
-      owner = "slskd";
-      group = "slskd";
-      mode = "0400";
-    };
-
-    systemd.services = lib.mkMerge [
-      (lib.mkIf config.services.homelab.lidarr.enable {
-        lidarr = mkServarrAuth "${config.services.lidarr.dataDir}/lidarr.db";
-      })
-      (lib.mkIf config.services.homelab.slskd.enable {
-        slskd.serviceConfig.EnvironmentFile = lib.mkAfter [
-          config.sops.templates."slskd-admin.env".path
-        ];
-      })
-      (lib.mkIf config.services.homelab.sonarr.enable {
-        sonarr = mkServarrAuth "${config.services.sonarr.dataDir}/sonarr.db";
-      })
-      (lib.mkIf config.services.homelab.radarr.enable {
-        radarr = mkServarrAuth "${config.services.radarr.dataDir}/radarr.db";
-      })
-      (lib.mkIf config.services.homelab.prowlarr.enable {
-        prowlarr = mkServarrAuth "${config.services.prowlarr.dataDir}/prowlarr.db";
-      })
-    ];
   };
 }
