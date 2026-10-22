@@ -22,6 +22,9 @@
       services.navidrome = {
         enable = true;
         openFirewall = false;
+        # Supplies ND_LASTFM_APIKEY and ND_LASTFM_SECRET. Navidrome ships no
+        # Last.fm key and leaves scrobbling off unless both are set.
+        environmentFile = config.sops.secrets.navidrome_env.path;
         settings = {
           Address = "127.0.0.1";
           Port = port;
@@ -36,6 +39,15 @@
         unitConfig.RequiresMountsFor = [mediaShare.musicDir];
         # The upstream module bind-mounts MusicFolder read-only in its sandbox.
         serviceConfig.SupplementaryGroups = [mediaShare.group];
+      };
+
+      sops.secrets.navidrome_env = {
+        owner = config.services.navidrome.user;
+        group = config.services.navidrome.group;
+        mode = "0400";
+        # EnvironmentFile is read once at start, so a rotated key would
+        # otherwise stay unused until an unrelated restart.
+        restartUnits = ["navidrome.service"];
       };
 
       services.homelab.caddy.virtualHosts.navidrome = {
