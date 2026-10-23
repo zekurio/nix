@@ -10,6 +10,14 @@
       llmAgents.claude-code
     ];
 
+    # Tools agents reach for first; without them they fail and retry via `nix run`.
+    tools = [
+      pkgs.fd
+      pkgs.file
+      pkgs.python3
+      pkgs.sqlite
+    ];
+
     # GUI launches and systemd services do not inherit the interactive shell PATH.
     extraRuntimePackages =
       [
@@ -17,7 +25,8 @@
         pkgs.gh
         pkgs.openssh
       ]
-      ++ clis;
+      ++ clis
+      ++ tools;
     server = t3code.t3code.override {inherit extraRuntimePackages;};
     desktop = t3code.t3code-desktop.override {inherit extraRuntimePackages;};
   in {
@@ -27,13 +36,13 @@
         # macOS gets T3 Code from Homebrew.
         agents = pkgs.buildEnv {
           name = "agents";
-          paths = clis ++ lib.optional isLinux server;
+          paths = clis ++ tools ++ lib.optional isLinux server;
         };
       }
       // lib.optionalAttrs isLinux {
         agents-desktop = pkgs.buildEnv {
           name = "agents-desktop";
-          paths = clis ++ [server desktop];
+          paths = clis ++ tools ++ [server desktop];
         };
       };
   };
