@@ -2,12 +2,42 @@
   flake.modules.nixos.homelab = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     cfg = config.services.homelab.backup;
     offsite = cfg.offsite;
-    snapshotOf = mountpoint: "${mountpoint}/.zfs/snapshot/${cfg.snapshot}";
     datasetMounts = map (dataset: "/${dataset}") offsite.datasets;
+
+    # The unit mounts the window's snapshots here, under flat names so no
+    # mount sits inside another read-only snapshot.
+    stage = "/run/restic-offsite";
+    stageOf = dataset: "${stage}/${lib.replaceStrings ["/"] ["+"] dataset}";
+    staged = lib.unique (offsite.datasets ++ [cfg.dataset]);
+    unmountStage = pkgs.writeShellApplication {
+      name = "restic-offsite-unmount";
+      runtimeInputs = [pkgs.util-linux];
+      text = ''
+        for dir in ${lib.escapeShellArgs (map stageOf staged)}; do
+          if mountpoint -q "$dir"; then
+            umount "$dir"
+          fi
+        done
+      '';
+    };
+    mountStage = pkgs.writeShellApplication {
+      name = "restic-offsite-mount";
+      runtimeInputs = [config.boot.zfs.package pkgs.coreutils pkgs.util-linux];
+      text =
+        ''
+          ${lib.getExe unmountStage}
+        ''
+        + lib.concatMapStrings (dataset: ''
+          mkdir -p ${lib.escapeShellArg (stageOf dataset)}
+          mount -t zfs -o ro ${lib.escapeShellArg "${dataset}@${cfg.snapshot}"} ${lib.escapeShellArg (stageOf dataset)}
+        '')
+        staged;
+    };
     within = parent: path: lib.hasPrefix "${parent}/" path;
     # Child datasets are mounts below their parent; restic walks into them.
     paths = lib.filter (mount: !lib.any (parent: within parent mount) datasetMounts) datasetMounts ++ offsite.paths;
@@ -105,13 +135,21 @@
 
       systemd.services.restic-backups-offsite = {
         onFailure = config.modules.notify.onFailure;
-        # Inside this unit each path shows the window's snapshot instead of
-        # the live data, so the repository records the real paths and a
-        # restore puts files back where they belong. Snapshot names must not
-        # contain colons; they separate the bind's fields.
-        serviceConfig.BindReadOnlyPaths =
-          map (mount: "${snapshotOf mount}:${mount}") datasetMounts
-          ++ map (path: "${snapshotOf "/${cfg.dataset}"}${path}:${path}") offsite.paths;
+        serviceConfig = {
+          # systemd sets up the namespace again for every command. Binding
+          # the .zfs/snapshot automounts failed with ELOOP for the command
+          # that started as the upload exited, so the snapshots are mounted
+          # plainly, outside the namespace (+), before the first command.
+          ExecStartPre = lib.mkBefore ["+${lib.getExe mountStage}"];
+          ExecStopPost = ["+${lib.getExe unmountStage}"];
+          # Inside this unit each path shows the window's snapshot instead of
+          # the live data, so the repository records the real paths and a
+          # restore puts files back where they belong. Dataset names must not
+          # contain colons; they separate the bind's fields.
+          BindReadOnlyPaths =
+            map (dataset: "${stageOf dataset}:/${dataset}") offsite.datasets
+            ++ map (path: "${stageOf cfg.dataset}${path}:${path}") offsite.paths;
+        };
       };
     };
   };
