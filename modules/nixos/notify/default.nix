@@ -69,6 +69,13 @@
         readOnly = true;
         description = "Value for a unit's `onFailure` that reports its failure through ntfy; empty while notify is disabled.";
       };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        readOnly = true;
+        default = send;
+        description = "`ntfy-send TITLE [PRIORITY] [TAGS] < MESSAGE`, for other modules' notifications.";
+      };
     };
 
     config = lib.mkIf cfg.enable {
