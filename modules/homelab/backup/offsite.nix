@@ -129,19 +129,35 @@
 
       systemd.services.backup-state = {
         onSuccess = ["restic-backups-offsite.service"];
-        # Wait for the previous upload before replacing its snapshots.
-        after = ["restic-backups-offsite.service"];
+        # Wait for the previous upload, and for its snapshots to be
+        # unmounted, before replacing them.
+        after = [
+          "restic-backups-offsite.service"
+          "restic-offsite-snapshots.service"
+        ];
+      };
+
+      # systemd sets up restic's namespace again for every command, `+` ones
+      # included. Binding the .zfs/snapshot automounts failed with ELOOP for
+      # the command that started as the upload exited, so this unit mounts
+      # the snapshots plainly first and unmounts them once restic is done.
+      systemd.services.restic-offsite-snapshots = {
+        description = "Mount the backup window's snapshots for restic";
+        restartIfChanged = false;
+        unitConfig.StopWhenUnneeded = true;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = lib.getExe mountStage;
+          ExecStop = lib.getExe unmountStage;
+        };
       };
 
       systemd.services.restic-backups-offsite = {
         onFailure = config.modules.notify.onFailure;
+        requires = ["restic-offsite-snapshots.service"];
+        after = ["restic-offsite-snapshots.service"];
         serviceConfig = {
-          # systemd sets up the namespace again for every command. Binding
-          # the .zfs/snapshot automounts failed with ELOOP for the command
-          # that started as the upload exited, so the snapshots are mounted
-          # plainly, outside the namespace (+), before the first command.
-          ExecStartPre = lib.mkBefore ["+${lib.getExe mountStage}"];
-          ExecStopPost = ["+${lib.getExe unmountStage}"];
           # Inside this unit each path shows the window's snapshot instead of
           # the live data, so the repository records the real paths and a
           # restore puts files back where they belong. Dataset names must not
