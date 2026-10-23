@@ -9,6 +9,25 @@
     services.homelab.backup = {
       enable = true;
 
+      # Build output and package caches in the home directories, which
+      # rebuild or download again. They change daily, so every daily snapshot
+      # of the copy would keep them.
+      exclude = [
+        "/home/*/Git/**/target/"
+        "/home/*/Git/**/node_modules/"
+        "/home/*/.cargo/registry/"
+        "/home/*/go/pkg/mod/"
+        "/home/*/.npm/"
+        "/home/*/.local/share/pnpm/"
+        "/home/*/.local/share/NuGet/"
+        # Rootless Podman keeps no volumes here, only images.
+        "/home/*/.local/share/containers/storage/"
+        "/home/*/.local/share/zed/external_agents/"
+        "/home/*/.local/share/zed/languages/"
+        "/home/*/.local/share/zed/node/"
+        "/home/*/.zed_server/"
+      ];
+
       # What a total loss of adam must not take: photos and clips, Fluxer's
       # messages and attachments, and everyone's shares.
       offsite = {

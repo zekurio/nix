@@ -34,7 +34,8 @@
         "/var/lib/containers/storage/"
       ]
       ++ map (swap: swap.device) config.swapDevices
-      ++ lib.optional (config.nix.settings ? build-dir) "${config.nix.settings.build-dir}/";
+      ++ lib.optional (config.nix.settings ? build-dir) "${config.nix.settings.build-dir}/"
+      ++ cfg.exclude;
 
     window = pkgs.writeShellApplication {
       name = "backup-state";
@@ -165,6 +166,19 @@
           Samba's passwords from sops) or that must keep running (Tailscale,
           fan control) stay up. The window waits for listed oneshots that are
           already running.
+        '';
+      };
+
+      exclude = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        example = ["/var/lib/example/downloads/" "/home/*/Git/**/target/"];
+        description = ''
+          rsync patterns for paths the copy of the SSD leaves out, such as
+          caches and files a service downloads again. A leading / anchors a
+          pattern at the root of the SSD, and a trailing / matches only
+          directories. The next window also removes newly excluded paths from
+          the copy.
         '';
       };
 
