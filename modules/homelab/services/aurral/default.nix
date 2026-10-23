@@ -83,6 +83,8 @@
         };
       };
 
+      services.homelab.backup.stopUnits = ["aurral.service"];
+
       services.homelab.caddy.virtualHosts.aurral = {
         inherit domain;
         # Like Seerr, users request music from outside the LAN; Aurral's own

@@ -165,3 +165,103 @@ sudo -u postgres env -C "$NEWDATA" "$NEW/bin/pg_upgrade" -U postgres \
 Then switch to the new configuration, run
 `sudo -u postgres vacuumdb --all --analyze-in-stages`, and delete `$OLDDATA`
 once the services work.
+
+## Back up adam
+
+Run the nightly backup by hand and follow it. The offsite upload starts after
+the copy to tank when it is enabled:
+
+```bash
+ssh adam 'sudo systemctl start backup-state.service'
+ssh adam 'journalctl -fu backup-state.service -u restic-backups-offsite.service'
+```
+
+Failures of either unit arrive through ntfy.
+
+## Restore adam's SSD from tank
+
+Follow [Install NixOS](#install-nixos) through the disko step, with the new
+SSD's path in `disko.nix`. The copy carries the age key, so skip restoring it.
+`@backup` is the newest complete copy; `zfs list -t snapshot tank/backups/adam`
+lists the dailies, which mount the same way:
+
+```bash
+zpool import -f -N -o readonly=on tank
+mkdir /backup
+mount -t zfs tank/backups/adam@backup /backup
+rsync -aHAX --numeric-ids --exclude /boot/ --exclude /etc/ /backup/ /mnt/
+install -d /mnt/etc/ssh
+cp -a /backup/etc/machine-id /mnt/etc/
+cp -a /backup/etc/ssh/ssh_host_* /mnt/etc/ssh/
+umount /backup
+zpool export tank
+nixos-install --root /mnt --no-root-passwd --flake ".#adam"
+```
+
+Reboot. `/var/lib/nixos` came back before the install, so every service keeps
+its UID, and Postgres starts from the data directory copied while it was
+stopped. Podman pulls its images again on first start.
+
+## Set up the offsite backup
+
+Order a Hetzner Storage Box and enable SSH support. Create a sub-account for
+adam with SSH support, and turn on the box's automatic snapshots: restic can
+delete whatever it wrote, but only the Hetzner Console can delete those. Keep
+the sub-account writable, or restic cannot prune.
+
+```bash
+BOX=uXXXXXX-subN.your-storagebox.de
+ssh-keygen -t ed25519 -N '' -C restic@adam -f restic_ssh_key
+ssh-copy-id -p 23 -s -i restic_ssh_key.pub "${BOX%%.*}@$BOX"
+ssh-keyscan -p 23 "$BOX"
+openssl rand -base64 48
+```
+
+Add the random string as `restic_password` and the private key as a YAML block
+under `restic_ssh_key` with `sops secrets/adam.yaml`, then delete
+`restic_ssh_key`. In `modules/hosts/adam/backup.nix`, set `offsite.host` to
+`$BOX`, `offsite.hostKey` to the `ssh-ed25519` key `ssh-keyscan` printed, and
+`offsite.enable = true`. Deploy and run a backup by hand. The first upload
+takes a while.
+
+Save the password in your password manager as well. Without it nobody can
+read the repository, and otherwise the saved age key would be the only way to
+reach it. A lost SSH key can be replaced through the Hetzner Console.
+
+## Restore from the offsite backup
+
+When tank is gone too, reinstall per [Install NixOS](#install-nixos), restoring
+the age key. Before `nixos-install`, restore the UID map so restored files keep
+their owners, and create the new pool:
+
+```bash
+BOX=uXXXXXX-subN.your-storagebox.de
+nix-shell -p restic sops
+export SOPS_AGE_KEY_FILE=/mnt/var/lib/sops-nix/key.txt
+sops -d --extract '["restic_password"]' secrets/adam.yaml > /tmp/restic-password
+(umask 077; sops -d --extract '["restic_ssh_key"]' secrets/adam.yaml > /tmp/restic-key)
+restic -r "sftp:${BOX%%.*}@$BOX:restic" \
+  -o sftp.command="ssh -p 23 -i /tmp/restic-key ${BOX%%.*}@$BOX -s sftp" \
+  --password-file /tmp/restic-password \
+  restore latest --include /var/lib/nixos --target /mnt
+zpool create -o ashift=12 -O compression=zstd -O atime=off -O acltype=posix \
+  -O xattr=sa -O mountpoint=/tank tank mirror /dev/disk/by-id/DISK1 /dev/disk/by-id/DISK2
+zpool export tank
+```
+
+After the install and a reboot, restore the data and databases over the fresh
+services:
+
+```bash
+sudo systemctl stop immich-server immich-machine-learning alloy-server pocket-id fluxer.target
+sudo restic-offsite restore latest --target /
+for db in immich alloy fluxer; do
+  sudo -u postgres dropdb --if-exists "$db"
+  sudo -u postgres pg_restore --create --dbname postgres "/var/backup/postgresql/$db.dump"
+done
+sudo systemctl restart mediaShare-user-library-acl
+sudo systemctl start immich-server immich-machine-learning alloy-server pocket-id fluxer.target
+```
+
+Then run Immich's thumbnail and video transcoding jobs for missing assets, since
+the repository leaves both out.

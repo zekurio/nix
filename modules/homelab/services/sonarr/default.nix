@@ -34,6 +34,8 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
+      services.homelab.backup.stopUnits = ["sonarr.service"];
+
       services.homelab.caddy.virtualHosts."sonarr" = {
         domain = domain;
         extraConfig = ''

@@ -72,6 +72,8 @@
         "video"
       ];
 
+      services.homelab.backup.stopUnits = ["jellyfin.service"];
+
       services.homelab.caddy.virtualHosts = {
         jellyfin = {
           inherit domain;

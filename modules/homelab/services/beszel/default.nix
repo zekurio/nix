@@ -35,6 +35,8 @@
         };
       };
 
+      services.homelab.backup.stopUnits = ["beszel-hub.service"];
+
       services.homelab.caddy.virtualHosts.beszel = {
         inherit domain;
         reverseProxy = "${hub.host}:${toString hub.port}";

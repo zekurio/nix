@@ -46,6 +46,9 @@
     };
     config = lib.mkIf cfg.enable {
       systemd.tmpfiles.rules = ["d /var/lib/fluxer 0750 root root -"];
+      # Starting the target again after the backup window pulls newer images,
+      # like any restart of fluxer.target.
+      services.homelab.backup.stopUnits = ["fluxer.target"];
       assertions = [
         {
           assertion = config.virtualisation.oci-containers.backend == "podman";

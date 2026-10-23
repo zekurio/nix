@@ -116,6 +116,8 @@
         "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
       ];
 
+      services.homelab.backup.stopUnits = ["sabnzbd.service"];
+
       # LAN/tailnet-only vhost with SABnzbd's own login in front. url_base
       # makes SABnzbd handle the prefix itself, so no stripping here.
       services.homelab.caddy.virtualHosts."sabnzbd" = {

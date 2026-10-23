@@ -6,6 +6,7 @@
     ...
   }: let
     mediaShare = config.services.homelab.mediaShare;
+    backup = config.services.homelab.backup;
     zfs = "${pkgs.zfs}/bin/zfs";
     ensureDataset = name: quota: ''
       if ! ${zfs} list -H -o name ${name} >/dev/null 2>&1; then
@@ -89,6 +90,15 @@
           autosnap = true;
           autoprune = true;
         };
+        # The copy of the SSD only changes in the nightly backup window, so
+        # each daily snapshot holds one night's copy.
+        ${backup.dataset} = lib.mkIf backup.enable {
+          hourly = 0;
+          daily = 30;
+          monthly = 6;
+          autosnap = true;
+          autoprune = true;
+        };
       };
     };
 
@@ -109,9 +119,9 @@
         RemainAfterExit = true;
       };
       script = ''
-        # On the 8 TB mirror, these caps leave about 390 GiB available beyond
+        # On the 8 TB mirror, these caps leave about 240 GiB available beyond
         # ZFS's internal reserve even when every dataset reaches its quota.
-        # tank/shares already includes its per-user child datasets.
+        # tank/shares and tank/backups already include their child datasets.
         ${ensureDataset "tank/media" "6700G"}
         ${ensureDataset "tank/immich" "50G"}
         ${lib.optionalString config.services.homelab.fluxer.enable ''
@@ -134,10 +144,23 @@
         ${ensureDataset "tank/alloy" "20G"}
         ${ensureDataset "tank/shares" "50G"}
         ${ensureUserShareDatasets}
+        ${lib.optionalString backup.enable ''
+          # The copy plus 30 dailies and 6 monthlies of its changes.
+          ${ensureDataset "tank/backups" "150G"}
+          ${ensureDataset backup.dataset "none"}
+          # The copy holds every service's secrets, and /tank is NFS-exported
+          # with crossmnt, so only root may enter.
+          ${pkgs.coreutils}/bin/chmod 0700 /tank/backups
+        ''}
       '';
     };
 
     systemd.services.fluxer-storage = lib.mkIf config.services.homelab.fluxer.enable {
+      requires = ["tank-datasets.service"];
+      after = ["tank-datasets.service"];
+    };
+
+    systemd.services.backup-state = lib.mkIf backup.enable {
       requires = ["tank-datasets.service"];
       after = ["tank-datasets.service"];
     };

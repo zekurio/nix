@@ -96,6 +96,9 @@
         serviceConfig.TimeoutStopSec = lib.mkForce 150;
       };
 
+      # Stopping gives the server its grace period to save the world.
+      services.homelab.backup.stopUnits = [unit];
+
       # Valheim uses UDP directly, so it does not have an HTTP Caddy vhost.
       networking.firewall.allowedUDPPorts = [2456 2457 2458];
 

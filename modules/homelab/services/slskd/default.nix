@@ -156,6 +156,8 @@
         };
       };
 
+      services.homelab.backup.stopUnits = ["slskd.service"];
+
       services.homelab.caddy.virtualHosts."slskd" = {
         inherit domain;
         extraConfig = ''

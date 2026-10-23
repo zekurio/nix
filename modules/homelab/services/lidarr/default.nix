@@ -108,6 +108,8 @@
         '';
       };
 
+      services.homelab.backup.stopUnits = ["lidarr.service"];
+
       services.homelab.caddy.virtualHosts.lidarr = {
         inherit domain;
         extraConfig = ''

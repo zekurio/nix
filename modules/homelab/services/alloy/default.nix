@@ -101,6 +101,8 @@
         mode = "0400";
       };
 
+      services.homelab.backup.stopUnits = ["alloy-server.service"];
+
       services.homelab.caddy.virtualHosts."alloy" = {
         inherit domain;
         public = true;

@@ -44,6 +44,8 @@
         restartUnits = ["vrouter.service"];
       };
 
+      services.homelab.backup.stopUnits = ["vrouter.service"];
+
       # Private vhost: the dashboard and /v1 inference answer only the LAN and
       # tailnet.
       services.homelab.caddy.virtualHosts.vrouter = {

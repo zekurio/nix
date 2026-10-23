@@ -98,6 +98,8 @@
         wants = ["seerr.service" "vrouter.service"];
       };
 
+      services.homelab.backup.stopUnits = ["blitzcrank.service"];
+
       sops.templates."blitzcrank.env" = {
         content = ''
           ${config.sops.placeholder.blitzcrank_env}

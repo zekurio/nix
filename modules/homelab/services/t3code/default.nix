@@ -42,6 +42,8 @@
         };
       };
 
+      services.homelab.backup.stopUnits = ["t3code.service"];
+
       services.homelab.caddy.virtualHosts.t3code = {
         domain = "t3code.${config.services.homelab.domains.zekurio}";
         reverseProxy = "127.0.0.1:${toString port}";

@@ -33,6 +33,8 @@
         serviceConfig.StateDirectory = lib.mkForce "seerr";
       };
 
+      services.homelab.backup.stopUnits = ["seerr.service"];
+
       services.homelab.caddy.virtualHosts."seerr" = {
         inherit domain;
         public = true;

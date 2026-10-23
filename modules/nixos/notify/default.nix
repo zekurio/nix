@@ -53,7 +53,7 @@
     '';
   in {
     options.modules.notify = {
-      enable = lib.mkEnableOption "smartd and ZED alerts pushed through ntfy";
+      enable = lib.mkEnableOption "smartd, ZED and unit failure alerts pushed through ntfy";
 
       urlFile = lib.mkOption {
         type = lib.types.path;
@@ -62,11 +62,30 @@
           public server can read and publish to it, so keep it secret.
         '';
       };
+
+      onFailure = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = lib.optional cfg.enable "notify-failure@%n.service";
+        readOnly = true;
+        description = "Value for a unit's `onFailure` that reports its failure through ntfy; empty while notify is disabled.";
+      };
     };
 
     config = lib.mkIf cfg.enable {
       # `sudo ntfy-send TITLE < message` tests the path by hand.
       environment.systemPackages = [send];
+
+      # The tail of the journal says why; ntfy rejects messages over 4 KiB.
+      systemd.services."notify-failure@" = {
+        description = "Report the failure of %i through ntfy";
+        serviceConfig.Type = "oneshot";
+        scriptArgs = "%i";
+        script = ''
+          journalctl --unit "$1" --lines 20 --output cat --no-pager \
+            | tail --bytes 3500 \
+            | ${lib.getExe send} "$1 failed on ${config.networking.hostName}" high warning
+        '';
+      };
 
       services.smartd.notifications.mail = {
         enable = true;

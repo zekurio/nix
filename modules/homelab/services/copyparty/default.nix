@@ -135,6 +135,8 @@
         };
       };
 
+      services.homelab.backup.stopUnits = ["copyparty.service"];
+
       services.homelab.caddy.virtualHosts.copyparty = {
         inherit domain;
         # Every volume requires an account; remote users can reach their files.

@@ -34,6 +34,8 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
+      services.homelab.backup.stopUnits = ["radarr.service"];
+
       services.homelab.caddy.virtualHosts."radarr" = {
         inherit domain;
         extraConfig = ''

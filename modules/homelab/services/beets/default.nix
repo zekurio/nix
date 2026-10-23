@@ -462,6 +462,19 @@
 
       environment.systemPackages = [beetMusic];
 
+      # The backup window waits for a running import or migration, then
+      # pauses the timers.
+      services.homelab.backup.stopUnits =
+        [
+          "beets-library-refresh.service"
+          "beets-library-refresh.timer"
+          "beets-library-layout.service"
+        ]
+        ++ lib.optionals (importDirs != []) [
+          "beets-import.service"
+          "beets-import.timer"
+        ];
+
       systemd.tmpfiles.rules = [
         "d ${stateDir} 2775 ${serviceUser} ${mediaShare.group} -"
         "d ${stateDir}/.cache 2775 ${serviceUser} ${mediaShare.group} -"

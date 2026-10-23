@@ -31,6 +31,8 @@
         pkgs.immich-go
       ];
 
+      services.homelab.backup.stopUnits = ["immich-server.service" "immich-machine-learning.service" "redis-immich.service"];
+
       # Caddy virtual host configuration
       services.homelab.caddy.virtualHosts."immich" = {
         domain = domain;

@@ -50,6 +50,8 @@
         restartUnits = ["navidrome.service"];
       };
 
+      services.homelab.backup.stopUnits = ["navidrome.service"];
+
       services.homelab.caddy.virtualHosts.navidrome = {
         inherit domain;
         reverseProxy = "127.0.0.1:${toString port}";

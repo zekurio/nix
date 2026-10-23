@@ -122,6 +122,8 @@
         ];
       };
 
+      services.homelab.backup.stopUnits = ["${config.virtualisation.oci-containers.backend}-windrose.service"];
+
       systemd.tmpfiles.rules = [
         "d /var/lib/windrose 0755 1000 1000 -"
         "d ${dataDir} 0755 1000 1000 -"
