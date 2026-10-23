@@ -34,7 +34,11 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
-      services.homelab.backup.stopUnits = ["radarr.service"];
+      services.homelab.backup = {
+        stopUnits = ["radarr.service"];
+        # Posters, which Radarr downloads again when it refreshes a movie.
+        exclude = ["${config.services.radarr.dataDir}/MediaCover/"];
+      };
 
       services.homelab.caddy.virtualHosts."radarr" = {
         inherit domain;

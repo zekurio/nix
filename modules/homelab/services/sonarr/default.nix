@@ -34,7 +34,11 @@
         UMask = lib.mkForce mediaShare.umask;
       };
 
-      services.homelab.backup.stopUnits = ["sonarr.service"];
+      services.homelab.backup = {
+        stopUnits = ["sonarr.service"];
+        # Posters, which Sonarr downloads again when it refreshes a series.
+        exclude = ["${config.services.sonarr.dataDir}/MediaCover/"];
+      };
 
       services.homelab.caddy.virtualHosts."sonarr" = {
         domain = domain;

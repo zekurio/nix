@@ -202,6 +202,10 @@ Reboot. `/var/lib/nixos` came back before the install, so every service keeps
 its UID, and Postgres starts from the data directory copied while it was
 stopped. Podman pulls its images again on first start.
 
+The copy leaves out what services fetch or generate again. In Jellyfin,
+refresh each library's metadata with "Replace all images" and run "Generate
+Trickplay Images". The arrs download their posters on their next refresh.
+
 ## Set up the offsite backup
 
 Order a Hetzner Storage Box and enable SSH support. Create a sub-account for

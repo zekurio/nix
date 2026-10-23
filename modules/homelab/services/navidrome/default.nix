@@ -50,7 +50,13 @@
         restartUnits = ["navidrome.service"];
       };
 
-      services.homelab.backup.stopUnits = ["navidrome.service"];
+      services.homelab.backup = {
+        stopUnits = ["navidrome.service"];
+        # Resized images and transcodes, the upstream module's default
+        # location. The artwork folder is not a cache: the database points at
+        # the images Navidrome acquired there.
+        exclude = ["${config.services.navidrome.settings.CacheFolder or "/var/lib/navidrome/cache"}/"];
+      };
 
       services.homelab.caddy.virtualHosts.navidrome = {
         inherit domain;

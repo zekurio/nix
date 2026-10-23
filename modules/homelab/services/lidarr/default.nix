@@ -108,7 +108,11 @@
         '';
       };
 
-      services.homelab.backup.stopUnits = ["lidarr.service"];
+      services.homelab.backup = {
+        stopUnits = ["lidarr.service"];
+        # Covers, which Lidarr downloads again when it refreshes an artist.
+        exclude = ["${dataDir}/MediaCover/"];
+      };
 
       services.homelab.caddy.virtualHosts.lidarr = {
         inherit domain;
