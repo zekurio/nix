@@ -52,11 +52,13 @@
 
     environment.systemPackages = [pkgs.zfs];
 
-    # Automatic ZFS snapshots. Retention is deliberately asymmetric: irreplaceable
-    # data (photos, per-user shares) keeps a month of dailies, while the media
-    # library only keeps enough to undo an accidental mass deletion — its
-    # snapshots pin deleted/upgraded release files, so deep retention would
-    # bloat the pool with churn from the arr pipeline.
+    # Automatic ZFS snapshots. tank/media gets none: everything in it can be
+    # downloaded again, and the arrs replace releases so often that each
+    # snapshot would pin hundreds of gigabytes of replaced files.
+    #
+    # sanoid fills every period a policy leaves unset from its own defaults
+    # (48 hourlies, 90 dailies, 6 monthlies), so each policy sets all three.
+    # Snapshots count against the dataset quotas below.
     services.sanoid = {
       enable = true;
       templates = {
@@ -64,12 +66,6 @@
           hourly = 24;
           daily = 30;
           monthly = 6;
-          autosnap = true;
-          autoprune = true;
-        };
-        replaceable = {
-          hourly = 24;
-          daily = 7;
           autosnap = true;
           autoprune = true;
         };
@@ -84,14 +80,22 @@
           # Cover current and future per-user share datasets.
           recursive = true;
         };
-        "tank/media".useTemplate = ["replaceable"];
+        # A week of dailies, so deleted clips give their space back to the
+        # 20G quota within a week.
         "tank/alloy" = {
+          hourly = 0;
           daily = 7;
+          monthly = 0;
           autosnap = true;
           autoprune = true;
         };
       };
     };
+
+    # Name and schedule snapshots in local time. NixOS runs sanoid in UTC to
+    # sidestep DST changes, but sanoid 2.3 corrects for them itself. It ages
+    # snapshots by their creation time, so the older UTC names prune normally.
+    systemd.services.sanoid.environment.TZ = lib.mkForce config.time.timeZone;
 
     systemd.services.tank-datasets = {
       description = "Ensure tank ZFS datasets and quotas";
