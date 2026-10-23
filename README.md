@@ -269,3 +269,19 @@ sudo systemctl start immich-server immich-machine-learning alloy-server pocket-i
 
 Then run Immich's thumbnail and video transcoding jobs for missing assets, since
 the repository leaves both out.
+
+## Set up adam's uptime checks
+
+healthchecks.io alerts when adam stops pinging it, which covers adam being
+down or offline. In a healthchecks.io project, create a ping key under
+Settings and add an ntfy integration for the topic in `ntfy_url`, with "down"
+at urgent priority. Add the key as `healthchecks_ping_key` with
+`sops secrets/adam.yaml` and deploy. The first pings create the checks; then
+set their schedules:
+
+- `adam-heartbeat`: period 5 minutes, grace 10 minutes.
+- `adam-upgrade`: cron `0 3 * * 0` in Europe/Berlin, grace 3 hours, which
+  covers the timer's random delay and a rebuild.
+
+`ssh adam 'sudo systemctl start healthchecks-heartbeat.service'` pings the
+heartbeat by hand.
