@@ -115,7 +115,16 @@
           }
         '';
         virtualHosts =
-          lib.mapAttrs (_: hostCfg: {
+          lib.mapAttrs (domain: hostCfg: {
+            # Caddy keeps ten rolled 100 MiB files per site for 90 days by
+            # default. Two weeks is enough to look into a problem.
+            logFormat = ''
+              output file ${config.services.caddy.logDir}/access-${domain}.log {
+                roll_size 10MiB
+                roll_keep 5
+                roll_keep_for 14d
+              }
+            '';
             extraConfig = ''
               header {
                 X-Robots-Tag "noindex, nofollow"
