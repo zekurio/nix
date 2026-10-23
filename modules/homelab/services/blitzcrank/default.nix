@@ -69,6 +69,9 @@
         inherit package port;
         gateways = ["seerr"];
         model = "anthropic/claude-opus-5-5:medium";
+        # Names Discord and Fluxer threads; either gateway refuses to start
+        # without it.
+        helperModel = "anthropic/claude-haiku-5-5:medium";
         language = "German";
         webProvider = "firecrawl";
         mcpUrl = config.services.homelab.blitzcrank-mcp.url;
