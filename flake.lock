@@ -475,11 +475,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792657235,
-        "narHash": "sha256-xDVjL7oVMXXfzvWqRG0zAf/aThiyp2TCq6RU1MB6Kp0=",
+        "lastModified": 1792773152,
+        "narHash": "sha256-PxBAJxrFOHlMmfkAYXFK/f8974FXieOWXmLgDFzFAzY=",
         "owner": "zekurio",
         "repo": "inviterr",
-        "rev": "d84baeea116e6eb41b848a6af43ba92ce087162f",
+        "rev": "61df5279b97338b716c7961a6c4dfb1416e32b94",
         "type": "github"
       },
       "original": {
