@@ -23,6 +23,7 @@
       blitzcrank-mcp.enable = true;
       configarr.enable = true;
       beets.enable = true;
+      beszel.enable = true;
       copyparty.enable = true;
       coolercontrol.enable = true;
       fluxer.enable = true;
