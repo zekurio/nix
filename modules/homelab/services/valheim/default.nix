@@ -66,8 +66,12 @@
             VPCFG_Server_serverSyncsConfig = "true";
             UPDATE_CRON = "0 6 * * *";
             UPDATE_IF_IDLE = "true";
+            # The nightly copy on tank keeps 30 days of worlds and covers
+            # mistakes. These guard against a save corrupting the world, so
+            # a few over the last week are enough, and none while idle.
             BACKUPS = "true";
-            BACKUPS_CRON = "5 * * * *";
+            BACKUPS_CRON = "5 */6 * * *";
+            BACKUPS_IF_IDLE = "false";
             BACKUPS_MAX_AGE = "7";
           }
           // cfg.extraEnvironment;
