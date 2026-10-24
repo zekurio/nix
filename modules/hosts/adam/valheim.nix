@@ -3,7 +3,6 @@
     enable = true;
     serverName = "Die geilsten Gamer e.V. (nicht offiziell)";
     public = true;
-    buildersMode = true;
     extraEnvironment = {
       # Keep both ID formats for legacy and platform-prefixed admin checks.
       ADMINLIST_IDS = "76561198111376416 Steam_76561198111376416";
