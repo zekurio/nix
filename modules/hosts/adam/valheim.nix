@@ -97,9 +97,10 @@
       # Otherwise spawn suppression inherits the expanded build radius.
       VPCFG_Workbench_workbenchEnemySpawnRange = "20";
 
+      # Production times are seconds per item, so a tenth of the default gives
+      # 10x throughput. Stations advance once per second and fractions round up.
       VPCFG_Kiln_enabled = "true";
-      # productionSpeed is seconds per item: 7.5/15 seconds doubles throughput.
-      VPCFG_Kiln_productionSpeed = "7.5";
+      VPCFG_Kiln_productionSpeed = "2";
       VPCFG_Kiln_autoFuel = "true";
       VPCFG_Kiln_autoDeposit = "true";
       VPCFG_Kiln_autoRange = "10";
@@ -108,16 +109,44 @@
       VPCFG_Kiln_stopAutoFuelThreshold = "200";
 
       VPCFG_Smelter_enabled = "true";
-      VPCFG_Smelter_productionSpeed = "15";
+      VPCFG_Smelter_productionSpeed = "3";
       VPCFG_Smelter_autoFuel = "true";
       VPCFG_Smelter_autoDeposit = "true";
       VPCFG_Smelter_autoRange = "10";
 
       VPCFG_Furnace_enabled = "true";
-      VPCFG_Furnace_productionSpeed = "15";
+      VPCFG_Furnace_productionSpeed = "3";
       VPCFG_Furnace_autoFuel = "true";
       VPCFG_Furnace_autoDeposit = "true";
       VPCFG_Furnace_autoRange = "10";
+
+      VPCFG_EitrRefinery_enabled = "true";
+      VPCFG_EitrRefinery_productionSpeed = "4";
+      VPCFG_EitrRefinery_autoFuel = "true";
+      VPCFG_EitrRefinery_autoDeposit = "true";
+      VPCFG_EitrRefinery_autoRange = "10";
+
+      VPCFG_FrigidKiln_enabled = "true";
+      VPCFG_FrigidKiln_productionSpeed = "3";
+
+      VPCFG_FrostFoundry_enabled = "true";
+      VPCFG_FrostFoundry_productionSpeed = "5";
+
+      VPCFG_Windmill_enabled = "true";
+      VPCFG_Windmill_productionSpeed = "1";
+      # Weak wind would otherwise slow it below the configured speed.
+      VPCFG_Windmill_ignoreWindIntensity = "true";
+
+      VPCFG_SpinningWheel_enabled = "true";
+      VPCFG_SpinningWheel_productionSpeed = "3";
+
+      VPCFG_Fermenter_enabled = "true";
+      VPCFG_Fermenter_fermenterDuration = "240";
+
+      VPCFG_SapCollector_enabled = "true";
+      # Capacity scales with speed, as for beehives.
+      VPCFG_SapCollector_sapProductionSpeed = "6";
+      VPCFG_SapCollector_maximumSapPerCollector = "100";
 
       VPCFG_Player_enabled = "true";
       VPCFG_Player_baseMaximumWeight = "1000";
