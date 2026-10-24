@@ -8,6 +8,35 @@
     cfg = config.services.homelab.valheim;
     dataDir = "/var/lib/valheim";
     unit = "${config.virtualisation.oci-containers.backend}-valheim.service";
+    # Vanilla has no stamina modifier. V+ treats -100 as zero cost and applies
+    # the movement values when a player spawns. The image merges VPCFG values
+    # into the persisted config and never removes keys, so builders mode
+    # toggles the sections instead of dropping them.
+    noStamina = {
+      VPCFG_Stamina_enabled = lib.boolToString cfg.buildersMode;
+      VPCFG_Stamina_dodgeStaminaUsage = "-100";
+      VPCFG_Stamina_encumberedStaminaDrain = "-100";
+      VPCFG_Stamina_jumpStaminaDrain = "-100";
+      VPCFG_Stamina_runStaminaDrain = "-100";
+      VPCFG_Stamina_sneakStaminaDrain = "-100";
+      VPCFG_Stamina_swimStaminaDrain = "-100";
+
+      VPCFG_StaminaUsage_enabled = lib.boolToString cfg.buildersMode;
+      VPCFG_StaminaUsage_axes = "-100";
+      VPCFG_StaminaUsage_blocking = "-100";
+      VPCFG_StaminaUsage_bows = "-100";
+      VPCFG_StaminaUsage_clubs = "-100";
+      VPCFG_StaminaUsage_knives = "-100";
+      VPCFG_StaminaUsage_pickaxes = "-100";
+      VPCFG_StaminaUsage_polearms = "-100";
+      VPCFG_StaminaUsage_spears = "-100";
+      VPCFG_StaminaUsage_swords = "-100";
+      VPCFG_StaminaUsage_unarmed = "-100";
+      VPCFG_StaminaUsage_hammer = "-100";
+      VPCFG_StaminaUsage_hoe = "-100";
+      VPCFG_StaminaUsage_cultivator = "-100";
+      VPCFG_StaminaUsage_fishing = "-100";
+    };
   in {
     options.services.homelab.valheim = {
       enable = lib.mkEnableOption "Valheim dedicated server with Valheim Plus";
@@ -36,6 +65,8 @@
         description = "Whether to list the server in the community server browser.";
       };
 
+      buildersMode = lib.mkEnableOption "free building, passive enemies, and no stamina use";
+
       extraEnvironment = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         default = {};
@@ -59,6 +90,13 @@
             SERVER_PUBLIC = lib.boolToString cfg.public;
             SERVER_PORT = "2456";
             CROSSPLAY = "false";
+            # Hammer gives free building and passive enemies. Presets persist in
+            # the world, so leaving builders mode must pass normal explicitly.
+            SERVER_ARGS = "-preset ${
+              if cfg.buildersMode
+              then "hammer"
+              else "normal"
+            }";
             VALHEIM_PLUS = "true";
             VALHEIM_PLUS_REPO = "Grantapher/ValheimPlus";
             VPCFG_Server_enabled = "true";
@@ -74,6 +112,7 @@
             BACKUPS_IF_IDLE = "false";
             BACKUPS_MAX_AGE = "7";
           }
+          // noStamina
           // cfg.extraEnvironment;
         environmentFiles = [config.sops.templates."valheim.env".path];
         # Some mod RPCs use game port + 2 in addition to the game/query ports.

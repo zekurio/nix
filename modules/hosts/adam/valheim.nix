@@ -3,11 +3,10 @@
     enable = true;
     serverName = "Die geilsten Gamer e.V. (nicht offiziell)";
     public = true;
+    buildersMode = true;
     extraEnvironment = {
       # Keep both ID formats for legacy and platform-prefixed admin checks.
       ADMINLIST_IDS = "76561198111376416 Steam_76561198111376416";
-      # Explicitly reset the persisted Hammer world modifiers to normal.
-      SERVER_ARGS = "-preset normal";
       VPCFG_Game_enabled = "false";
 
       # Experience modifiers add percentages: +900 gives 10x skill gain.
