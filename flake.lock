@@ -338,13 +338,13 @@
     "fluxer-caddyfile": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-anVtH//upvfOT07880NpyKJQUzyToTKRWEKTIkc8uQE=",
+        "narHash": "sha256-rqMwFF/cX263ZyRhFHGtjwX5qVLB4DSbcydC3uxGOaw=",
         "type": "file",
-        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile"
+        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile"
       },
       "original": {
         "type": "file",
-        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile"
+        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile"
       }
     },
     "ghostty": {

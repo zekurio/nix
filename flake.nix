@@ -115,8 +115,9 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     # Only the edge router config; the whole repository is a large download.
+    # Upstream ships it inside rexctl's embedded compose stack.
     fluxer-caddyfile = {
-      url = "file+https://raw.githubusercontent.com/fluxerapp/fluxer/main/deploy/self-hosting/Caddyfile";
+      url = "file+https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile";
       flake = false;
     };
     autoaspm = {

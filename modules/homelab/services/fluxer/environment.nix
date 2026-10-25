@@ -31,44 +31,40 @@
             AWS_ACCESS_KEY_ID = "fluxer";
             AWS_DEFAULT_REGION = "us-east-1";
             AWS_EC2_METADATA_DISABLED = "true";
+            # Only read on a fresh instance's first boot; Fluxer locks the
+            # mode once anyone signs up. Username sign-in never uses tags.
+            FLUXER_ACCOUNT_IDENTITY = "username";
             FLUXER_API_HEADERS_TIMEOUT_MS = "30000";
             FLUXER_API_REQUEST_TIMEOUT_MS = "120000";
             # Only new registrations (including SSO) auto-join; existing
             # accounts need a one-off admin force-add.
             FLUXER_AUTO_JOIN_INVITE_CODE = "dgg";
             FLUXER_BASE_DOMAIN = "${domain}";
-            FLUXER_CAPTCHA_ENABLED = "false";
-            FLUXER_CAPTCHA_HCAPTCHA_SECRET_KEY = "";
-            FLUXER_CAPTCHA_HCAPTCHA_SITE_KEY = "";
-            FLUXER_CAPTCHA_PROVIDER = "none";
-            FLUXER_CAPTCHA_TURNSTILE_SECRET_KEY = "";
-            FLUXER_CAPTCHA_TURNSTILE_SITE_KEY = "";
             FLUXER_CLAMAV_ENABLED = "false";
             FLUXER_CLIENT_IP_HEADER_NAME = "x-forwarded-for";
             FLUXER_DATABASE_BACKEND = "postgres";
             FLUXER_DISCOVERY_ENABLED = "true";
+            # Email, Klipy and YouTube fields saved in the admin panel override
+            # these and the keys in fluxer_env. SSO and captcha have no env
+            # vars at all and live only in the admin panel.
             FLUXER_EMAIL_APP_BASE_URL = "";
-            FLUXER_EMAIL_ENABLED = "false";
-            FLUXER_EMAIL_FROM_EMAIL = "noreply@localhost";
+            FLUXER_EMAIL_ENABLED = "true";
+            FLUXER_EMAIL_FROM_EMAIL = "fluxer@${config.services.homelab.domains.zekurio}";
             FLUXER_EMAIL_FROM_NAME = "Fluxer";
-            FLUXER_EMAIL_PROVIDER = "none";
-            FLUXER_EMAIL_SMTP_HOST = "";
-            FLUXER_EMAIL_SMTP_PASSWORD = "";
-            FLUXER_EMAIL_SMTP_PORT = "587";
+            FLUXER_EMAIL_PROVIDER = "smtp";
+            FLUXER_EMAIL_SMTP_HOST = "smtp.purelymail.com";
+            FLUXER_EMAIL_SMTP_PORT = "465";
             FLUXER_EMAIL_SMTP_SECURE = "true";
-            FLUXER_EMAIL_SMTP_USERNAME = "";
+            FLUXER_EMAIL_SMTP_USERNAME = "homelab@${config.services.homelab.domains.zekurio}";
             FLUXER_ENV = "production";
             FLUXER_INTERNAL_API_ENDPOINT = "http://api:8080";
-            FLUXER_INTERNAL_GATEWAY_ENDPOINT = "http://gateway:8080";
             FLUXER_INTERNAL_MEDIA_PROXY_ENDPOINT = "http://media-proxy:8080";
-            FLUXER_KLIPY_API_KEY = "";
             FLUXER_KV_URL = "redis://valkey:6379/0";
             FLUXER_LIVEKIT_API_KEY = "fluxer";
             FLUXER_LIVEKIT_DEFAULT_REGION = "{\"id\":\"default\",\"name\":\"Default\",\"emoji\":\"🌍\",\"latitude\":0,\"longitude\":0}";
             FLUXER_LIVEKIT_ENABLED = "true";
             FLUXER_LIVEKIT_INTERNAL_URL = "http://livekit:7880";
             FLUXER_LIVEKIT_URL = "https://${domain}:443/livekit";
-            FLUXER_LIVEKIT_WEBHOOK_URL = "http://api:8080/webhooks/livekit";
             FLUXER_MARKETING_ENDPOINT = "https://${domain}";
             FLUXER_MEDIA_ENDPOINT = "https://${domain}/media";
             FLUXER_MEDIA_PROXY_ENDPOINT = "http://media-proxy:8080";
@@ -76,7 +72,6 @@
             FLUXER_NATS_AUTH_TOKEN = "";
             FLUXER_NATS_JETSTREAM_URL = "nats://nats:4222";
             FLUXER_NATS_URL = "nats://nats:4222";
-            FLUXER_NCMEC_ENABLED = "false";
             FLUXER_PASSKEY_ADDITIONAL_ALLOWED_ORIGINS = "https://${domain}";
             FLUXER_PASSKEY_RP_ID = "${domain}";
             FLUXER_PASSKEY_RP_NAME = "Fluxer";
@@ -102,7 +97,6 @@
             FLUXER_SEARCH_ENGINE = "meilisearch";
             FLUXER_SEARCH_URL = "http://meilisearch:7700";
             FLUXER_SELF_HOSTED = "true";
-            FLUXER_SMS_ENABLED = "false";
             FLUXER_SSO_ALLOW_PRIVATE_ADDRESSES = "true";
             FLUXER_STRIPE_ENABLED = "false";
             FLUXER_SVC_NATS_URL = "nats://nats:4222";
