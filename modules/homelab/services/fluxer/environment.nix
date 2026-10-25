@@ -35,14 +35,12 @@ in {
           FLUXER_ACCOUNT_IDENTITY = "username";
           FLUXER_API_HEADERS_TIMEOUT_MS = "30000";
           FLUXER_API_REQUEST_TIMEOUT_MS = "120000";
-          # Only new registrations (including SSO) auto-join; existing
-          # accounts need a one-off admin force-add.
-          FLUXER_AUTO_JOIN_INVITE_CODE = "dgg";
           FLUXER_BASE_DOMAIN = "${domain}";
           FLUXER_CLAMAV_ENABLED = "false";
           FLUXER_CLIENT_IP_HEADER_NAME = "x-forwarded-for";
           FLUXER_DATABASE_BACKEND = "postgres";
-          FLUXER_DISCOVERY_ENABLED = "true";
+          # One community only; discovery has nothing to list.
+          FLUXER_DISCOVERY_ENABLED = "false";
           # Email, Klipy and YouTube fields saved in the admin panel override
           # these and the keys in fluxer_env. SSO and captcha have no env
           # vars at all and live only in the admin panel.
