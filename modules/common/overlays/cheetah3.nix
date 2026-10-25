@@ -11,6 +11,5 @@ let
       ];
   };
 in {
-  flake.modules.nixos.base.nixpkgs.overlays = [overlay];
-  flake.modules.darwin.base.nixpkgs.overlays = [overlay];
+  nixpkgs.overlays = [overlay];
 }

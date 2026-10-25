@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.adam.boot = {
+  boot = {
     kernelParams = ["consoleblank=60"];
     loader = {
       timeout = 0;

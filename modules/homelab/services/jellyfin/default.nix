@@ -1,98 +1,96 @@
 {
-  flake.modules.nixos.homelab = {
-    config,
-    lib,
-    pkgs,
-    ...
-  }: let
-    mediaShare = config.services.homelab.mediaShare;
-    domain = "media.${config.services.homelab.domains.zekurio}";
-    # Where Jellyfin used to live. Apps and TVs store the server address and
-    # mostly ignore redirects, so the old name keeps serving until every
-    # client has been pointed at the new one.
-    legacyDomain = config.services.homelab.domains.schnitzelflix;
-    port = config.services.homelab.jellyfin.port;
-    serviceUser = "jellyfin";
-    serviceGroup = "jellyfin";
-  in {
-    options.services.homelab.jellyfin = {
-      enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 8096;
-        description = "Local HTTP port Jellyfin listens on.";
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  mediaShare = config.services.homelab.mediaShare;
+  domain = "media.${config.services.homelab.domains.zekurio}";
+  # Where Jellyfin used to live. Apps and TVs store the server address and
+  # mostly ignore redirects, so the old name keeps serving until every
+  # client has been pointed at the new one.
+  legacyDomain = config.services.homelab.domains.schnitzelflix;
+  port = config.services.homelab.jellyfin.port;
+  serviceUser = "jellyfin";
+  serviceGroup = "jellyfin";
+in {
+  options.services.homelab.jellyfin = {
+    enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
+    port = lib.mkOption {
+      type = lib.types.port;
+      default = 8096;
+      description = "Local HTTP port Jellyfin listens on.";
+    };
+    baseUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:${toString config.services.homelab.jellyfin.port}";
+      description = "Internal URL other services use to reach the Jellyfin API.";
+    };
+    publicUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "https://${domain}";
+      description = "Public URL users and external clients use to reach Jellyfin.";
+    };
+  };
+
+  config = lib.mkIf config.services.homelab.jellyfin.enable {
+    services.jellyfin = {
+      enable = true;
+      # Native ports stay closed; external clients reach Jellyfin through
+      # the public Caddy vhost on 443.
+      openFirewall = false;
+      dataDir = "/var/lib/jellyfin";
+      cacheDir = "/var/cache/jellyfin";
+    };
+
+    environment.systemPackages = with pkgs; [
+      jellyfin
+      jellyfin-web
+      jellyfin-ffmpeg
+    ];
+
+    systemd.tmpfiles.rules = [
+      "d /var/cache/jellyfin 2775 ${serviceUser} ${serviceGroup} -"
+    ];
+
+    systemd.services.jellyfin = {
+      environment = {
+        LIBVA_DRIVER_NAME = "iHD";
       };
-      baseUrl = lib.mkOption {
-        type = lib.types.str;
-        default = "http://127.0.0.1:${toString config.services.homelab.jellyfin.port}";
-        description = "Internal URL other services use to reach the Jellyfin API.";
-      };
-      publicUrl = lib.mkOption {
-        type = lib.types.str;
-        default = "https://${domain}";
-        description = "Public URL users and external clients use to reach Jellyfin.";
+      serviceConfig = {
+        UMask = lib.mkForce mediaShare.umask;
+        ReadWritePaths = [
+          "/var/cache/jellyfin"
+          "/var/lib/jellyfin"
+        ];
       };
     };
 
-    config = lib.mkIf config.services.homelab.jellyfin.enable {
-      services.jellyfin = {
-        enable = true;
-        # Native ports stay closed; external clients reach Jellyfin through
-        # the public Caddy vhost on 443.
-        openFirewall = false;
-        dataDir = "/var/lib/jellyfin";
-        cacheDir = "/var/cache/jellyfin";
-      };
+    users.users.jellyfin.extraGroups = [
+      "render"
+      "video"
+    ];
 
-      environment.systemPackages = with pkgs; [
-        jellyfin
-        jellyfin-web
-        jellyfin-ffmpeg
+    services.homelab.backup = {
+      stopUnits = ["jellyfin.service"];
+      # Downloaded artwork and info, and seek-bar previews. A metadata
+      # refresh and the trickplay task bring them back.
+      exclude = [
+        "${config.services.jellyfin.dataDir}/metadata/"
+        "${config.services.jellyfin.dataDir}/data/trickplay/"
       ];
+    };
 
-      systemd.tmpfiles.rules = [
-        "d /var/cache/jellyfin 2775 ${serviceUser} ${serviceGroup} -"
-      ];
-
-      systemd.services.jellyfin = {
-        environment = {
-          LIBVA_DRIVER_NAME = "iHD";
-        };
-        serviceConfig = {
-          UMask = lib.mkForce mediaShare.umask;
-          ReadWritePaths = [
-            "/var/cache/jellyfin"
-            "/var/lib/jellyfin"
-          ];
-        };
+    services.homelab.caddy.virtualHosts = {
+      jellyfin = {
+        inherit domain;
+        public = true;
+        reverseProxy = "127.0.0.1:${toString port}";
       };
-
-      users.users.jellyfin.extraGroups = [
-        "render"
-        "video"
-      ];
-
-      services.homelab.backup = {
-        stopUnits = ["jellyfin.service"];
-        # Downloaded artwork and info, and seek-bar previews. A metadata
-        # refresh and the trickplay task bring them back.
-        exclude = [
-          "${config.services.jellyfin.dataDir}/metadata/"
-          "${config.services.jellyfin.dataDir}/data/trickplay/"
-        ];
-      };
-
-      services.homelab.caddy.virtualHosts = {
-        jellyfin = {
-          inherit domain;
-          public = true;
-          reverseProxy = "127.0.0.1:${toString port}";
-        };
-        jellyfin-legacy = {
-          domain = legacyDomain;
-          public = true;
-          reverseProxy = "127.0.0.1:${toString port}";
-        };
+      jellyfin-legacy = {
+        domain = legacyDomain;
+        public = true;
+        reverseProxy = "127.0.0.1:${toString port}";
       };
     };
   };

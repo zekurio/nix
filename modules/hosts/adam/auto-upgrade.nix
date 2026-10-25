@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.adam.system.autoUpgrade = {
+  system.autoUpgrade = {
     enable = true;
     flake = "github:zekurio/nix/main#adam";
     dates = "Sun *-*-* 03:00:00";

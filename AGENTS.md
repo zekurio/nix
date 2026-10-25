@@ -2,25 +2,25 @@
 
 ## Structure
 
-- `import-tree` discovers every `.nix` file under `modules/` as a flake-parts
-  module. No import list is needed. `flake.nix` wires inputs, systems, and the
-  formatter.
-- Files contribute to shared aggregates under `flake.modules`: `nixos.base`,
-  `nixos.adam`, `nixos.lilith`, `nixos.homelab`, `darwin.base`,
-  `darwin.sachiel`, and `homeManager.zekurio`. The module system merges contributions.
-- `modules/hosts/<host>/` configures one host. `modules/nixos/` and
-  `modules/darwin/` hold each platform's base, `modules/nix/` and
-  `modules/nixpkgs/` cover both platforms, `modules/homelab/` holds the homelab
-  services, and `modules/home/zekurio/` the Home Manager profile.
-- Host entrypoints at `modules/hosts/<host>/system.nix` only assemble aggregates.
-  Put configuration in focused modules named after their concern, one concern
+- Every `.nix` file under a directory of `modules/` is a module of the class
+  that directory serves: NixOS, nix-darwin, or Home Manager. `flake.nix`
+  imports the directories with `import-tree`, so there are no import lists.
+  `flake.nix` wires inputs, hosts, packages, and the formatter; `packages/`
+  holds the package outputs.
+- `modules/common/` holds modules shared by NixOS and nix-darwin; use only
+  options both platforms define there. `modules/nixos/` and `modules/darwin/`
+  hold each platform's base, `modules/homelab/` the homelab services that only
+  `adam` imports, `modules/hosts/<host>/` one host, and `modules/home/zekurio/`
+  the Home Manager profile, exported as `homeModules.zekurio`.
+- Put configuration in focused modules named after their concern, one concern
   per file. Never add a catch-all such as `configuration.nix`.
-- Never import module files by relative path. Define shared values in a module
-  for all consumers, as in `modules/nix/default.nix`. Relative paths are allowed
-  for `_`-prefixed package expressions used with `callPackage`; `import-tree`
-  ignores these files.
-- Take `inputs` from the flake-parts module arguments. Never pass it down
-  through `specialArgs` or `extraSpecialArgs`.
+- `inputs` is a module argument in every class. `flake.nix` passes it through
+  `specialArgs` and the user modules through `extraSpecialArgs`; take it from
+  the module arguments and nowhere else.
+- Never import module files by relative path. Define shared values as options
+  that every consumer reads, as in `modules/homelab/domains.nix`. Relative
+  paths are allowed for `_`-prefixed package expressions used with
+  `callPackage`; `import-tree` ignores these files.
 - Import third-party modules in the file that configures them.
 - Service options use `services.homelab.<name>`; shared host features use
   `modules.*`. Follow neighbouring modules.
@@ -34,7 +34,7 @@
   code carry that. `README.md` only lists manual procedures such as bootstrap,
   rebuilds, and recovery.
 - Keep substituters in sync in `flake.nix`'s static `nixConfig` and
-  `modules/nix/default.nix`.
+  `modules/common/nix.nix`.
 - Declare service exposure in the service module through
   `services.homelab.caddy.virtualHosts.<name>`. Vhosts are private by default;
   set `public = true` deliberately. Private services sharing a public domain

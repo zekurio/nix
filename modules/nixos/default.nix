@@ -1,42 +1,40 @@
 {
-  flake.modules.nixos.base = {
-    lib,
-    pkgs,
-    ...
-  }: let
-    inherit (lib) mkDefault;
-  in {
-    i18n = {
-      defaultLocale = "de_AT.UTF-8";
-      supportedLocales = [
-        "de_AT.UTF-8/UTF-8"
-        "en_US.UTF-8/UTF-8"
-      ];
-      extraLocaleSettings = {
-        LC_TIME = "de_AT.UTF-8";
-      };
+  lib,
+  pkgs,
+  ...
+}: let
+  inherit (lib) mkDefault;
+in {
+  i18n = {
+    defaultLocale = "de_AT.UTF-8";
+    supportedLocales = [
+      "de_AT.UTF-8/UTF-8"
+      "en_US.UTF-8/UTF-8"
+    ];
+    extraLocaleSettings = {
+      LC_TIME = "de_AT.UTF-8";
     };
-
-    hardware.enableRedistributableFirmware = mkDefault true;
-    hardware.firmware = mkDefault [pkgs.linux-firmware];
-
-    programs.nix-ld.enable = true;
-
-    # Substituters, experimental features and store optimisation are shared
-    # across platforms and live in modules/nix.
-    nix = {
-      settings.trusted-users = [
-        "root"
-        "@wheel"
-      ];
-
-      gc = {
-        automatic = mkDefault true;
-        dates = mkDefault "weekly";
-        options = mkDefault "--delete-older-than 7d";
-      };
-    };
-
-    time.timeZone = "Europe/Vienna";
   };
+
+  hardware.enableRedistributableFirmware = mkDefault true;
+  hardware.firmware = mkDefault [pkgs.linux-firmware];
+
+  programs.nix-ld.enable = true;
+
+  # Substituters, experimental features and store optimisation are shared
+  # across platforms and live in modules/nix.
+  nix = {
+    settings.trusted-users = [
+      "root"
+      "@wheel"
+    ];
+
+    gc = {
+      automatic = mkDefault true;
+      dates = mkDefault "weekly";
+      options = mkDefault "--delete-older-than 7d";
+    };
+  };
+
+  time.timeZone = "Europe/Vienna";
 }

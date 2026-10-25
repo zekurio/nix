@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.adam.services.homelab.valheim = {
+  services.homelab.valheim = {
     enable = true;
     serverName = "Die geilsten Gamer e.V. (nicht offiziell)";
     public = true;

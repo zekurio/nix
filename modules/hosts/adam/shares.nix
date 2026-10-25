@@ -1,24 +1,22 @@
-{
-  flake.modules.nixos.adam = {config, ...}: {
-    sops.secrets.smb_password_zekurio = {};
+{config, ...}: {
+  sops.secrets.smb_password_zekurio = {};
 
-    services.homelab.mediaShare = {
+  services.homelab.mediaShare = {
+    enable = true;
+    collaborators = ["zekurio"];
+    nfs.enable = true;
+    samba = {
       enable = true;
-      collaborators = ["zekurio"];
-      nfs.enable = true;
-      samba = {
+      interfaces = [
+        "enp42s0"
+        "tailscale0"
+      ];
+      discovery = {
         enable = true;
-        interfaces = [
-          "enp42s0"
-          "tailscale0"
-        ];
-        discovery = {
-          enable = true;
-          interfaces = ["enp42s0"];
-        };
-        passwordFiles.zekurio = config.sops.secrets.smb_password_zekurio.path;
+        interfaces = ["enp42s0"];
       };
-      userShares.zekurio.quota = "50G";
+      passwordFiles.zekurio = config.sops.secrets.smb_password_zekurio.path;
     };
+    userShares.zekurio.quota = "50G";
   };
 }

@@ -1,90 +1,89 @@
-{inputs, ...}: {
-  flake.modules.nixos.base = {
-    config,
-    lib,
-    pkgs,
-    ...
-  }: let
-    cfg = config.modules.gaming;
-    system = pkgs.stdenv.hostPlatform.system;
-    chaoticPkgs = inputs.chaotic.legacyPackages.${system};
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.modules.gaming;
+  system = pkgs.stdenv.hostPlatform.system;
+  chaoticPkgs = inputs.chaotic.legacyPackages.${system};
 
-    # Chaotic's release wrappers predate nixpkgs' dedicated steamcompattool
-    # output. Adapt their official-release payloads to the contract expected by
-    # programs.steam.extraCompatPackages without rebuilding either Proton.
-    mkSteamCompatTool = name: source:
-      pkgs.runCommand "${name}-${source.version}" {
-        outputs = [
-          "out"
-          "steamcompattool"
-        ];
-        preferLocalBuild = true;
-        allowSubstitutes = false;
-      } ''
-        mkdir -p "$out" "$steamcompattool"
-        # Recent releases unpack directly into $out; older ones used bin/.
-        payload=${source}
-        if [ ! -f "$payload/compatibilitytool.vdf" ]; then
-          payload="$payload/bin"
-        fi
-        test -f "$payload/compatibilitytool.vdf"
-        ln -s "$payload"/* "$steamcompattool/"
-        # Steam ignores a symlinked compatibility manifest in current clients.
-        rm "$steamcompattool/compatibilitytool.vdf"
-        cp "$payload/compatibilitytool.vdf" "$steamcompattool/"
-        ln -s "$steamcompattool" "$out/${name}"
-      '';
-
-    protonGe = mkSteamCompatTool "proton-ge-custom" chaoticPkgs.proton-ge-custom;
-    protonCachyos = mkSteamCompatTool "proton-cachyos-x86-64-v3" chaoticPkgs.proton-cachyos_x86_64_v3;
-    heroic = pkgs.heroic.override {
-      extraPkgs = pkgs':
-        with pkgs'; [
-          gamemode
-          mangohud
-        ];
-    };
-  in {
-    options.modules.gaming.enable = lib.mkEnableOption "the desktop gaming stack";
-
-    config = lib.mkIf cfg.enable {
-      hardware.graphics = {
-        enable = true;
-        enable32Bit = true;
-      };
-
-      programs = {
-        steam = {
-          enable = true;
-          extraPackages = [pkgs.mangohud];
-          extraCompatPackages = [
-            protonGe
-            protonCachyos
-          ];
-          protontricks.enable = true;
-        };
-        gamemode.enable = true;
-      };
-
-      environment.systemPackages = [
-        heroic
-        pkgs.mangohud
-        pkgs.r2modman
+  # Chaotic's release wrappers predate nixpkgs' dedicated steamcompattool
+  # output. Adapt their official-release payloads to the contract expected by
+  # programs.steam.extraCompatPackages without rebuilding either Proton.
+  mkSteamCompatTool = name: source:
+    pkgs.runCommand "${name}-${source.version}" {
+      outputs = [
+        "out"
+        "steamcompattool"
       ];
+      preferLocalBuild = true;
+      allowSubstitutes = false;
+    } ''
+      mkdir -p "$out" "$steamcompattool"
+      # Recent releases unpack directly into $out; older ones used bin/.
+      payload=${source}
+      if [ ! -f "$payload/compatibilitytool.vdf" ]; then
+        payload="$payload/bin"
+      fi
+      test -f "$payload/compatibilitytool.vdf"
+      ln -s "$payload"/* "$steamcompattool/"
+      # Steam ignores a symlinked compatibility manifest in current clients.
+      rm "$steamcompattool/compatibilitytool.vdf"
+      cp "$payload/compatibilitytool.vdf" "$steamcompattool/"
+      ln -s "$steamcompattool" "$out/${name}"
+    '';
 
-      users.users.zekurio.extraGroups = ["gamemode"];
+  protonGe = mkSteamCompatTool "proton-ge-custom" chaoticPkgs.proton-ge-custom;
+  protonCachyos = mkSteamCompatTool "proton-cachyos-x86-64-v3" chaoticPkgs.proton-cachyos_x86_64_v3;
+  heroic = pkgs.heroic.override {
+    extraPkgs = pkgs':
+      with pkgs'; [
+        gamemode
+        mangohud
+      ];
+  };
+in {
+  options.modules.gaming.enable = lib.mkEnableOption "the desktop gaming stack";
 
-      home-manager.users.zekurio = {
-        programs.mangohud = {
-          enable = true;
-          enableSessionWide = false;
-          settings = {
-            frametime = true;
-            gpu_core_clock = true;
-            gpu_mem_clock = true;
-            ram = true;
-            vram = true;
-          };
+  config = lib.mkIf cfg.enable {
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+
+    programs = {
+      steam = {
+        enable = true;
+        extraPackages = [pkgs.mangohud];
+        extraCompatPackages = [
+          protonGe
+          protonCachyos
+        ];
+        protontricks.enable = true;
+      };
+      gamemode.enable = true;
+    };
+
+    environment.systemPackages = [
+      heroic
+      pkgs.mangohud
+      pkgs.r2modman
+    ];
+
+    users.users.zekurio.extraGroups = ["gamemode"];
+
+    home-manager.users.zekurio = {
+      programs.mangohud = {
+        enable = true;
+        enableSessionWide = false;
+        settings = {
+          frametime = true;
+          gpu_core_clock = true;
+          gpu_mem_clock = true;
+          ram = true;
+          vram = true;
         };
       };
     };

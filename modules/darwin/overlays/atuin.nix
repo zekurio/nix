@@ -13,5 +13,5 @@ let
     );
   };
 in {
-  flake.modules.darwin.base.nixpkgs.overlays = [overlay];
+  nixpkgs.overlays = [overlay];
 }

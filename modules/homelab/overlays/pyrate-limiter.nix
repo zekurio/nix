@@ -15,6 +15,7 @@ let
       ];
   };
 in {
-  # Only beets pulls this in, so keep other hosts on the binary cache.
-  flake.modules.nixos.homelab.nixpkgs.overlays = [overlay];
+  # Only beets pulls this in, so the overlay stays out of the base and keeps
+  # other hosts on the binary cache.
+  nixpkgs.overlays = [overlay];
 }

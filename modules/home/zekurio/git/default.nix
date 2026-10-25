@@ -1,154 +1,152 @@
 {
-  flake.modules.homeManager.zekurio = {
-    config,
-    lib,
-    pkgs,
-    ...
-  }: let
-    adamSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOkmYfqv/9dCuR6yLGxao2VqR/gILe8ctZMijsaZ9AH";
-    lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
-    sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
-    signingKeys = [
-      adamSigningKey
-      lilithSigningKey
-      sachielSigningKey
-    ];
-    # Apps may inherit a different agent from the desktop session.
-    signingAgentSocket = config.home.sessionVariables.SSH_AUTH_SOCK or null;
-    signingAgentEnvironment = lib.optionalString (signingAgentSocket != null) ''
-      export SSH_AUTH_SOCK=${lib.escapeShellArg signingAgentSocket}
-    '';
-    gitSshSigningKeyCommand = pkgs.writeShellApplication {
-      name = "git-ssh-signing-key";
-      runtimeInputs = [pkgs.openssh];
-      text = ''
-        ${signingAgentEnvironment}
-        agent_keys="$(ssh-add -L 2>/dev/null || true)"
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  adamSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOkmYfqv/9dCuR6yLGxao2VqR/gILe8ctZMijsaZ9AH";
+  lilithSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPfrsYAgx8QD5Kmic1AfdKC6vEV9v1ZnitfDp/c+PrQ";
+  sachielSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxyfT6gCDvcoUXL6Sln2Gfqihgo4Cx4ggoXFIpxCZpq";
+  signingKeys = [
+    adamSigningKey
+    lilithSigningKey
+    sachielSigningKey
+  ];
+  # Apps may inherit a different agent from the desktop session.
+  signingAgentSocket = config.home.sessionVariables.SSH_AUTH_SOCK or null;
+  signingAgentEnvironment = lib.optionalString (signingAgentSocket != null) ''
+    export SSH_AUTH_SOCK=${lib.escapeShellArg signingAgentSocket}
+  '';
+  gitSshSigningKeyCommand = pkgs.writeShellApplication {
+    name = "git-ssh-signing-key";
+    runtimeInputs = [pkgs.openssh];
+    text = ''
+      ${signingAgentEnvironment}
+      agent_keys="$(ssh-add -L 2>/dev/null || true)"
 
-        case "$agent_keys" in
-          ${lib.concatMapStrings (key: ''
-            *"${key}"*)
-              printf '%s\n' "key::${key}"
-              ;;
-          '')
-          signingKeys}
-          *)
-            printf '%s\n' "No configured Git SSH signing key found in SSH agent" >&2
-            exit 1
+      case "$agent_keys" in
+        ${lib.concatMapStrings (key: ''
+          *"${key}"*)
+            printf '%s\n' "key::${key}"
             ;;
-        esac
-      '';
-    };
-    sshSigningProgram = pkgs.writeShellApplication {
-      name = "git-ssh-sign";
-      text = ''
-        ${signingAgentEnvironment}
-        exec ${pkgs.openssh}/bin/ssh-keygen "$@"
-      '';
-    };
-  in {
-    config = {
-      home.file.".config/git/allowed_signers".text =
-        lib.concatMapStringsSep "\n" (key: "git@zekurio.me ${key}") signingKeys
-        + "\n";
+        '')
+        signingKeys}
+        *)
+          printf '%s\n' "No configured Git SSH signing key found in SSH agent" >&2
+          exit 1
+          ;;
+      esac
+    '';
+  };
+  sshSigningProgram = pkgs.writeShellApplication {
+    name = "git-ssh-sign";
+    text = ''
+      ${signingAgentEnvironment}
+      exec ${pkgs.openssh}/bin/ssh-keygen "$@"
+    '';
+  };
+in {
+  config = {
+    home.file.".config/git/allowed_signers".text =
+      lib.concatMapStringsSep "\n" (key: "git@zekurio.me ${key}") signingKeys
+      + "\n";
 
-      programs.git = {
-        enable = true;
-        lfs.enable = true;
+    programs.git = {
+      enable = true;
+      lfs.enable = true;
+      signing = {
+        signByDefault = true;
+      };
+      settings = {
+        # Clear the osxkeychain helper inherited from the Darwin Git package.
+        credential.helper = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "";
+        user = {
+          name = "zekurio";
+          email = "git@zekurio.me";
+        };
+        init.defaultBranch = "main";
+        pull.rebase = true;
+        rebase.autoStash = true;
+        gpg.format = "ssh";
+        gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.config/git/allowed_signers";
+        gpg.ssh.defaultKeyCommand = "${gitSshSigningKeyCommand}/bin/git-ssh-signing-key";
+        "gpg \"ssh\"".program = "${sshSigningProgram}/bin/git-ssh-sign";
+      };
+    };
+
+    programs.jujutsu = {
+      enable = true;
+      settings = {
+        user = {
+          name = "zekurio";
+          email = "git@zekurio.me";
+        };
+
         signing = {
-          signByDefault = true;
-        };
-        settings = {
-          # Clear the osxkeychain helper inherited from the Darwin Git package.
-          credential.helper = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "";
-          user = {
-            name = "zekurio";
-            email = "git@zekurio.me";
+          behavior = "drop";
+          backend = "ssh";
+          key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+          backends.ssh = {
+            program = "${pkgs.openssh}/bin/ssh-keygen";
+            "allowed-signers" = "${config.home.homeDirectory}/.config/git/allowed_signers";
           };
-          init.defaultBranch = "main";
-          pull.rebase = true;
-          rebase.autoStash = true;
-          gpg.format = "ssh";
-          gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.config/git/allowed_signers";
-          gpg.ssh.defaultKeyCommand = "${gitSshSigningKeyCommand}/bin/git-ssh-signing-key";
-          "gpg \"ssh\"".program = "${sshSigningProgram}/bin/git-ssh-sign";
+        };
+
+        git = {
+          "sign-on-push" = true;
         };
       };
-
-      programs.jujutsu = {
-        enable = true;
-        settings = {
-          user = {
-            name = "zekurio";
-            email = "git@zekurio.me";
-          };
-
-          signing = {
-            behavior = "drop";
-            backend = "ssh";
-            key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
-            backends.ssh = {
-              program = "${pkgs.openssh}/bin/ssh-keygen";
-              "allowed-signers" = "${config.home.homeDirectory}/.config/git/allowed_signers";
-            };
-          };
-
-          git = {
-            "sign-on-push" = true;
-          };
-        };
-      };
-
-      programs.ssh = {
-        enable = true;
-        enableDefaultConfig = false;
-        settings = {
-          "*" =
-            {
-              AddKeysToAgent = "yes";
-              Compression = false;
-              ControlMaster = "auto";
-              ControlPath = "~/.ssh/master-%r@%n:%p";
-              ControlPersist = "10m";
-              HashKnownHosts = true;
-              ServerAliveCountMax = 3;
-              ServerAliveInterval = 30;
-              UserKnownHostsFile = "~/.ssh/known_hosts";
-            }
-            // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-              IgnoreUnknown = "UseKeychain";
-              UseKeychain = "yes";
-            };
-
-          "github.com" = {
-            AddKeysToAgent = lib.mkDefault "yes";
-            HostName = lib.mkDefault "github.com";
-            IdentityFile = lib.mkDefault "~/.ssh/id_ed25519";
-            User = lib.mkDefault "git";
-          };
-
-          # AdGuard on Flint resolves this to Adam's LAN address. Away from
-          # home, Flint's advertised subnet route carries that address over
-          # Tailscale. HostKeyAlias keeps one known-host identity.
-          "adam adam.zekurio.me" = {
-            HostName = "adam.zekurio.me";
-            HostKeyAlias = "adam";
-            User = "zekurio";
-            # Pass terminal capabilities to remote CLI tools.
-            SendEnv = ["COLORTERM" "TERM_PROGRAM"];
-          };
-        };
-      };
-
-      # OpenSSH only accepts a config owned by its user or by root. A sandbox
-      # that maps just our uid into a user namespace shows the root-owned store
-      # file behind Home Manager's symlink as `nobody`, and ssh refuses to
-      # start. Install a copy we own instead, read-only because the next
-      # activation overwrites it.
-      home.file.".ssh/config".enable = false;
-      home.activation.sshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
-        run install -D -m 0400 ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
-      '';
     };
+
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      settings = {
+        "*" =
+          {
+            AddKeysToAgent = "yes";
+            Compression = false;
+            ControlMaster = "auto";
+            ControlPath = "~/.ssh/master-%r@%n:%p";
+            ControlPersist = "10m";
+            HashKnownHosts = true;
+            ServerAliveCountMax = 3;
+            ServerAliveInterval = 30;
+            UserKnownHostsFile = "~/.ssh/known_hosts";
+          }
+          // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+            IgnoreUnknown = "UseKeychain";
+            UseKeychain = "yes";
+          };
+
+        "github.com" = {
+          AddKeysToAgent = lib.mkDefault "yes";
+          HostName = lib.mkDefault "github.com";
+          IdentityFile = lib.mkDefault "~/.ssh/id_ed25519";
+          User = lib.mkDefault "git";
+        };
+
+        # AdGuard on Flint resolves this to Adam's LAN address. Away from
+        # home, Flint's advertised subnet route carries that address over
+        # Tailscale. HostKeyAlias keeps one known-host identity.
+        "adam adam.zekurio.me" = {
+          HostName = "adam.zekurio.me";
+          HostKeyAlias = "adam";
+          User = "zekurio";
+          # Pass terminal capabilities to remote CLI tools.
+          SendEnv = ["COLORTERM" "TERM_PROGRAM"];
+        };
+      };
+    };
+
+    # OpenSSH only accepts a config owned by its user or by root. A sandbox
+    # that maps just our uid into a user namespace shows the root-owned store
+    # file behind Home Manager's symlink as `nobody`, and ssh refuses to
+    # start. Install a copy we own instead, read-only because the next
+    # activation overwrites it.
+    home.file.".ssh/config".enable = false;
+    home.activation.sshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
+      run install -D -m 0400 ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
+    '';
   };
 }

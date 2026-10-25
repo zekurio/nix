@@ -28,5 +28,5 @@ let
       ];
   };
 in {
-  flake.modules.nixos.adam.nixpkgs.overlays = [overlay];
+  nixpkgs.overlays = [overlay];
 }

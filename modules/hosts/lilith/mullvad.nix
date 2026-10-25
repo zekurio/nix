@@ -1,7 +1,5 @@
-{
-  flake.modules.nixos.lilith = {pkgs, ...}: {
-    services.mullvad-vpn.enable = true;
+{pkgs, ...}: {
+  services.mullvad-vpn.enable = true;
 
-    environment.systemPackages = [pkgs.mullvad-vpn];
-  };
+  environment.systemPackages = [pkgs.mullvad-vpn];
 }

@@ -1,56 +1,54 @@
 {
-  flake.modules.nixos.homelab = {
-    config,
-    lib,
-    ...
-  }: let
-    mediaShare = config.services.homelab.mediaShare;
-    domain = "admin.${config.services.homelab.domains.zekurio}";
-    port = 7878;
-  in {
-    options.services.homelab.radarr = {
-      enable = lib.mkEnableOption "Radarr movie manager with Caddy integration";
-      baseUrl = lib.mkOption {
-        type = lib.types.str;
-        default = "http://127.0.0.1:${toString port}/radarr";
-        description = "URL other services use to reach the Radarr API.";
+  config,
+  lib,
+  ...
+}: let
+  mediaShare = config.services.homelab.mediaShare;
+  domain = "admin.${config.services.homelab.domains.zekurio}";
+  port = 7878;
+in {
+  options.services.homelab.radarr = {
+    enable = lib.mkEnableOption "Radarr movie manager with Caddy integration";
+    baseUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:${toString port}/radarr";
+      description = "URL other services use to reach the Radarr API.";
+    };
+  };
+
+  config = lib.mkIf config.services.homelab.radarr.enable {
+    services.radarr = {
+      enable = true;
+      settings = {
+        server.urlBase = "/radarr";
+        # App-native login is provisioned from the shared admin password;
+        # the vhost is LAN/tailnet-only, so no forward auth layer in front.
+        auth.method = "Forms";
       };
     };
 
-    config = lib.mkIf config.services.homelab.radarr.enable {
-      services.radarr = {
-        enable = true;
-        settings = {
-          server.urlBase = "/radarr";
-          # App-native login is provisioned from the shared admin password;
-          # the vhost is LAN/tailnet-only, so no forward auth layer in front.
-          auth.method = "Forms";
-        };
-      };
+    # Set umask for shared library access
+    systemd.services.radarr.serviceConfig = {
+      SupplementaryGroups = [mediaShare.group];
+      UMask = lib.mkForce mediaShare.umask;
+    };
 
-      # Set umask for shared library access
-      systemd.services.radarr.serviceConfig = {
-        SupplementaryGroups = [mediaShare.group];
-        UMask = lib.mkForce mediaShare.umask;
-      };
+    services.homelab.backup = {
+      stopUnits = ["radarr.service"];
+      # Posters, which Radarr downloads again when it refreshes a movie.
+      exclude = ["${config.services.radarr.dataDir}/MediaCover/"];
+    };
 
-      services.homelab.backup = {
-        stopUnits = ["radarr.service"];
-        # Posters, which Radarr downloads again when it refreshes a movie.
-        exclude = ["${config.services.radarr.dataDir}/MediaCover/"];
-      };
-
-      services.homelab.caddy.virtualHosts."radarr" = {
-        inherit domain;
-        extraConfig = ''
-          redir /radarr /radarr/
-          @radarr path /radarr*
-          reverse_proxy @radarr 127.0.0.1:${toString port} {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Prefix /radarr
-          }
-        '';
-      };
+    services.homelab.caddy.virtualHosts."radarr" = {
+      inherit domain;
+      extraConfig = ''
+        redir /radarr /radarr/
+        @radarr path /radarr*
+        reverse_proxy @radarr 127.0.0.1:${toString port} {
+          header_up Host {http.request.host}
+          header_up X-Forwarded-Prefix /radarr
+        }
+      '';
     };
   };
 }

@@ -26,10 +26,6 @@
 
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
-    };
     import-tree.url = "github:vic/import-tree";
 
     disko = {
@@ -65,7 +61,6 @@
     };
     jellium-desktop = {
       url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
-      inputs.flake-parts.follows = "flake-parts";
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
@@ -104,7 +99,6 @@
       # includes/-compatible revision; upstream v8 removed them and crashed
       # every run (raydak-labs/configarr#504).
       url = "github:raydak-labs/configarr/v1.30.2";
-      inputs.flake-parts.follows = "flake-parts";
     };
     inviterr = {
       url = "github:zekurio/inviterr";
@@ -134,35 +128,82 @@
     };
   };
 
-  # Dendritic layout: every file under ./modules is a flake-parts module and is
-  # discovered by import-tree, so this file only wires inputs and systems.
-  outputs = inputs @ {flake-parts, ...}:
-    flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = [
-        inputs.flake-parts.flakeModules.modules
-        (inputs.import-tree ./modules)
-      ];
+  # Every .nix file under a directory of ./modules is a module of that
+  # directory's class, so a system is the import-tree of its directories.
+  # import-tree skips _-prefixed files, which are package expressions for
+  # callPackage.
+  outputs = inputs @ {
+    nixpkgs-unstable,
+    nix-darwin,
+    import-tree,
+    ...
+  }: let
+    forAllSystems = nixpkgs-unstable.lib.genAttrs [
+      "x86_64-linux"
+      "aarch64-darwin"
+    ];
+    pkgsFor = system: import nixpkgs-unstable {inherit system;};
+    specialArgs = {inherit inputs;};
+  in {
+    nixosConfigurations = {
+      adam = nixpkgs-unstable.lib.nixosSystem {
+        inherit specialArgs;
+        modules = [
+          (import-tree [
+            ./modules/common
+            ./modules/nixos
+            ./modules/hosts/adam
+            ./modules/homelab
+          ])
+        ];
+      };
 
-      systems = [
-        "x86_64-linux"
-        "aarch64-darwin"
-      ];
-
-      perSystem = {system, ...}: let
-        pkgs = import inputs.nixpkgs-unstable {inherit system;};
-      in {
-        formatter = pkgs.writeShellApplication {
-          name = "nix-fmt";
-          runtimeInputs = [pkgs.alejandra];
-          text = ''
-            # Format the whole tree when `nix fmt` is called without paths,
-            # but honour the paths it passes when it does.
-            if [ "$#" -eq 0 ]; then
-              set -- .
-            fi
-            exec alejandra "$@"
-          '';
-        };
+      lilith = nixpkgs-unstable.lib.nixosSystem {
+        inherit specialArgs;
+        modules = [
+          (import-tree [
+            ./modules/common
+            ./modules/nixos
+            ./modules/hosts/lilith
+          ])
+        ];
       };
     };
+
+    darwinConfigurations.sachiel = nix-darwin.lib.darwinSystem {
+      inherit specialArgs;
+      modules = [
+        (import-tree [
+          ./modules/common
+          ./modules/darwin
+          ./modules/hosts/sachiel
+        ])
+      ];
+    };
+
+    # The user modules of both platforms import this into Home Manager.
+    homeModules.zekurio = import-tree ./modules/home/zekurio;
+
+    packages = forAllSystems (system:
+      import ./packages/agents.nix {
+        inherit inputs;
+        pkgs = pkgsFor system;
+      });
+
+    formatter = forAllSystems (system: let
+      pkgs = pkgsFor system;
+    in
+      pkgs.writeShellApplication {
+        name = "nix-fmt";
+        runtimeInputs = [pkgs.alejandra];
+        text = ''
+          # Format the whole tree when `nix fmt` is called without paths,
+          # but honour the paths it passes when it does.
+          if [ "$#" -eq 0 ]; then
+            set -- .
+          fi
+          exec alejandra "$@"
+        '';
+      });
+  };
 }
