@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -21,6 +22,17 @@
     };
     printing.enable = true;
   };
+
+  # The NixOS module hands the greeter an XDG_DATA_DIRS holding only the
+  # session directory, so it cannot find icon themes from the system profile
+  # and logs `Icon theme "Papirus-Dark" not found`. mkForce replaces that
+  # value because the option is a plain string, not a list that would merge.
+  systemd.user.services.plasma-login.environment.XDG_DATA_DIRS = lib.mkForce (
+    lib.concatStringsSep ":" [
+      "${config.services.displayManager.sessionData.desktops}/share"
+      "/run/current-system/sw/share"
+    ]
+  );
 
   home-manager.users.zekurio = {
     imports = [inputs.plasma-manager.homeModules.plasma-manager];

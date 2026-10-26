@@ -19,9 +19,6 @@ in {
     };
   };
 
-  # The greeter runs before any user session and reads no Plasma settings.
-  services.displayManager.sddm.settings.Theme.Font = "${sans},10";
-
   home-manager.users.zekurio = {
     # The shared profile disables user fontconfig on macOS and headless hosts;
     # Steam reads the user's fontconfig configuration on this desktop.

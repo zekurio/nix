@@ -5,13 +5,18 @@
   ...
 }: let
   skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-stuff}/skills");
-in {
-  home.file =
+
+  # Claude Code reads ~/.claude/skills; other agents read ~/.agents/skills.
+  skillFiles = dir:
     lib.mapAttrs' (name: _:
-      lib.nameValuePair ".claude/skills/${name}" {
+      lib.nameValuePair "${dir}/${name}" {
         source = "${inputs.agent-stuff}/skills/${name}";
       })
-    skills
+    skills;
+in {
+  home.file =
+    skillFiles ".claude/skills"
+    // skillFiles ".agents/skills"
     // {
       ".claude/CLAUDE.md".text = ''
         This machine is managed with Nix. When a command is missing, use
