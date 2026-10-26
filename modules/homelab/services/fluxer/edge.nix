@@ -49,7 +49,6 @@ in {
     };
     services.homelab.caddy.virtualHosts.fluxer = {
       inherit domain;
-      public = true;
       reverseProxy = "127.0.0.1:8080";
     };
   };
