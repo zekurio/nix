@@ -25,8 +25,6 @@ in {
       environmentFile = config.sops.secrets.slskd_env.path;
       openFirewall = true;
       settings = {
-        # Lidarr removes completed batches after importing them.
-        remote_file_management = config.services.homelab.lidarr.enable;
         rooms = [];
         filters.search.request = [];
         global = {

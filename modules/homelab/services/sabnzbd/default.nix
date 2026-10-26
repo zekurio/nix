@@ -52,9 +52,9 @@ in {
         };
 
         categories = {
-          lidarr = {
-            name = "lidarr";
-            dir = "${downloadsRoot}/complete/lidarr";
+          aurral = {
+            name = "aurral";
+            dir = "${downloadsRoot}/complete/aurral";
             pp = 3;
             priority = 0;
             newzbin = "";

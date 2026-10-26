@@ -4,7 +4,10 @@
   services.homelab = {
     alloy.enable = true;
     atuin-ai.enable = true;
-    aurral.enable = true;
+    aurral = {
+      enable = true;
+      oidc.enable = true;
+    };
     blitzcrank = {
       enable = true;
       discord = {
@@ -23,7 +26,6 @@
     };
     blitzcrank-mcp.enable = true;
     configarr.enable = true;
-    beets.enable = true;
     beszel.enable = true;
     copyparty.enable = true;
     coolercontrol.enable = true;
@@ -31,9 +33,7 @@
     immich.enable = true;
     jellyfin.enable = true;
     inviterr.enable = true;
-    lidarr.enable = true;
     mediaCleanup.enable = true;
-    navidrome.enable = true;
     pocket-id.enable = true;
     prowlarr.enable = true;
     radarr.enable = true;

@@ -33,7 +33,7 @@
     "/tank/media/movies"
     usenetDownloadsDir
     "${usenetDownloadsDir}/complete"
-    "${usenetDownloadsDir}/complete/lidarr"
+    "${usenetDownloadsDir}/complete/aurral"
     "${usenetDownloadsDir}/complete/manual"
     "${usenetDownloadsDir}/complete/radarr"
     "${usenetDownloadsDir}/complete/sonarr"
@@ -179,7 +179,7 @@
         || chown ${lib.escapeShellArg shareUser}:${lib.escapeShellArg shareGroup} "$d" || true
 
       # Every chmod emits IN_ATTRIB even when the mode is unchanged, and this
-      # runs every 15 minutes over trees that Navidrome and the arrs watch.
+      # runs every 15 minutes over trees that Aurral and the arrs watch.
       # Only touch entries that drifted; setfacl already skips no-op writes.
       # Files get an explicit rw- instead of rwX because inherited default
       # ACLs carry x, which made rwX restore the mask chmod had just lowered.
