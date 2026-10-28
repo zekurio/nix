@@ -3,17 +3,20 @@
   lib,
   ...
 }: let
-  inherit (config.theme) hex grey mix accent base raised surface text dimText white ansi brightAnsi;
+  inherit (config.theme) hex mix variants;
 
   # Zed takes #rrggbbaa, so a two-digit suffix on hex sets the opacity.
   transparent = "#00000000";
-  zedStatus = name: color: {
-    ${name} = hex color;
-    "${name}.background" = hex color + "1a";
-    "${name}.border" = hex (mix base color 35);
-  };
   paint = color: names: lib.genAttrs names (_: {color = hex color;});
-  style =
+
+  style = variant: let
+    inherit (variant) shade accent base raised surface text dimText bright ansi brightAnsi;
+    zedStatus = name: color: {
+      ${name} = hex color;
+      "${name}.background" = hex color + "1a";
+      "${name}.border" = hex (mix base color 35);
+    };
+  in
     {
       background = hex surface;
       "surface.background" = hex raised;
@@ -27,34 +30,34 @@
       "tab.inactive_background" = hex raised;
       "tab.active_background" = hex base;
 
-      border = hex (grey 58);
-      "border.variant" = hex (grey 46);
+      border = hex (shade 58);
+      "border.variant" = hex (shade 46);
       "border.focused" = hex accent;
-      "border.selected" = hex (mix base accent 50);
+      "border.selected" = hex variant.selection;
       "border.transparent" = transparent;
-      "border.disabled" = hex (grey 50);
+      "border.disabled" = hex (shade 50);
 
       "element.background" = hex surface;
-      "element.hover" = hex (grey 54);
-      "element.active" = hex (grey 64);
-      "element.selected" = hex (grey 64);
+      "element.hover" = hex (shade 54);
+      "element.active" = hex (shade 64);
+      "element.selected" = hex (shade 64);
       "element.disabled" = hex surface;
       "ghost_element.background" = transparent;
-      "ghost_element.hover" = hex (grey 54);
-      "ghost_element.active" = hex (grey 64);
-      "ghost_element.selected" = hex (grey 64);
+      "ghost_element.hover" = hex (shade 54);
+      "ghost_element.active" = hex (shade 64);
+      "ghost_element.selected" = hex (shade 64);
       "ghost_element.disabled" = hex surface;
       "drop_target.background" = hex accent + "40";
 
       text = hex text;
       "text.muted" = hex dimText;
-      "text.placeholder" = hex (grey 120);
-      "text.disabled" = hex (grey 120);
+      "text.placeholder" = hex brightAnsi.black;
+      "text.disabled" = hex brightAnsi.black;
       "text.accent" = hex brightAnsi.red;
       "link_text.hover" = hex brightAnsi.red;
       icon = hex text;
       "icon.muted" = hex dimText;
-      "icon.disabled" = hex (grey 120);
+      "icon.disabled" = hex brightAnsi.black;
       "icon.placeholder" = hex dimText;
       "icon.accent" = hex accent;
 
@@ -62,13 +65,13 @@
       "editor.background" = hex base;
       "editor.gutter.background" = hex base;
       "editor.subheader.background" = hex raised;
-      "editor.active_line.background" = hex (grey 31);
-      "editor.highlighted_line.background" = hex (grey 31);
-      "editor.line_number" = hex (grey 88);
+      "editor.active_line.background" = hex (shade 31);
+      "editor.highlighted_line.background" = hex (shade 31);
+      "editor.line_number" = hex (shade 88);
       "editor.active_line_number" = hex text;
       "editor.hover_line_number" = hex dimText;
-      "editor.invisible" = hex (grey 70);
-      "editor.wrap_guide" = hex (grey 31);
+      "editor.invisible" = hex (shade 70);
+      "editor.wrap_guide" = hex (shade 31);
       "editor.active_wrap_guide" = hex surface;
       # Red here would read as an error under every use of a symbol.
       "editor.document_highlight.read_background" = hex dimText + "26";
@@ -80,11 +83,11 @@
       "scrollbar.thumb.hover_background" = hex dimText + "80";
       "scrollbar.thumb.border" = transparent;
       "scrollbar.track.background" = transparent;
-      "scrollbar.track.border" = hex (grey 31);
+      "scrollbar.track.border" = hex (shade 31);
 
       "terminal.background" = hex base;
       "terminal.foreground" = hex text;
-      "terminal.bright_foreground" = hex white;
+      "terminal.bright_foreground" = hex bright;
       "terminal.dim_foreground" = hex dimText;
 
       "version_control.added" = hex ansi.green;
@@ -155,18 +158,19 @@
     ansi;
 in {
   programs.zed-editor = {
-    userSettings.theme = config.theme.name;
+    userSettings.theme = {
+      mode = "system";
+      light = variants.light.name;
+      dark = variants.dark.name;
+    };
     themes.${config.theme.name} = {
       "$schema" = "https://zed.dev/schema/themes/v0.2.0.json";
       inherit (config.theme) name;
       author = "zekurio";
-      themes = [
-        {
-          inherit (config.theme) name;
-          appearance = "dark";
-          inherit style;
-        }
-      ];
+      themes = map (variant: {
+        inherit (variant) name appearance;
+        style = style variant;
+      }) [variants.dark variants.light];
     };
   };
 }

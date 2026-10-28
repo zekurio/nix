@@ -3,22 +3,24 @@
   lib,
   ...
 }: let
-  inherit (config.theme) hex mix accent base text white ansi brightAnsi ansiNames;
-  themeName = lib.toLower config.theme.name;
+  inherit (config.theme) hex mix white ansiNames;
+  # The SSH tint only picks dark backgrounds, so Ghostty stays dark.
+  inherit (config.theme.variants) dark;
 in {
   programs.ghostty = {
-    settings.theme = themeName;
-    themes.${themeName} = {
+    settings.theme = dark.id;
+    themes.${dark.id} = {
       # The SSH tint's OSC 111 resets to this background on disconnect.
-      background = hex base;
-      foreground = hex text;
-      cursor-color = hex accent;
+      background = hex dark.base;
+      foreground = hex dark.text;
+      cursor-color = hex dark.accent;
       cursor-text = hex white;
-      selection-background = hex (mix base accent 50);
-      selection-foreground = hex white;
+      # The full accent is too loud across whole selected lines.
+      selection-background = hex dark.selection;
+      selection-foreground = hex dark.bright;
       palette =
-        lib.imap0 (index: name: "${toString index}=${hex ansi.${name}}") ansiNames
-        ++ lib.imap0 (index: name: "${toString (index + 8)}=${hex brightAnsi.${name}}") ansiNames;
+        lib.imap0 (index: name: "${toString index}=${hex dark.ansi.${name}}") ansiNames
+        ++ lib.imap0 (index: name: "${toString (index + 8)}=${hex dark.brightAnsi.${name}}") ansiNames;
     };
   };
 }
