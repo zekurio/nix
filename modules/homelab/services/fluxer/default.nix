@@ -78,6 +78,13 @@ in {
         };
       })
       components);
+    # aardvark-dns answers on the gateway. The Podman module opens DNS only on
+    # podman+ interfaces, and netavark's nftables accept cannot override a drop
+    # in nixos-fw, so containers lose name resolution without this.
+    networking.firewall.interfaces.fluxer0 = {
+      allowedTCPPorts = [53];
+      allowedUDPPorts = [53];
+    };
     systemd.services =
       lib.genAttrs units (_: {
         requires = ["fluxer-network.service" "fluxer-storage.service"];
