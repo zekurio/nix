@@ -128,6 +128,10 @@ in {
             header {
               X-Robots-Tag "noindex, nofollow"
             }
+            # Caddy has no global encode, so every site gets it here. Its
+            # default matcher compresses only text-like types, leaving media
+            # streams alone, and it skips WebSockets and flushes SSE as sent.
+            encode zstd gzip
             tls {
               dns cloudflare {env.CLOUDFLARE_API_TOKEN}
               resolvers 1.1.1.1 1.0.0.1
