@@ -41,15 +41,11 @@
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Claude Code, Codex and OpenCode. The weekly flake.lock PR moves the pin;
-    # agents-update runs ahead of it and repeats this URL and t3code-nightly's.
+    # Claude Code, Codex, OpenCode and T3 Code. The weekly flake.lock PR moves
+    # the pin; agents-update runs ahead of it and repeats this URL.
     # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
     # against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
-    t3code-nightly = {
-      url = "github:vsgoulart/t3code-nightly-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Shared agent skills.
     agent-stuff = {
       url = "github:zekurio/agent-stuff";

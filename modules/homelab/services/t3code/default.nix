@@ -10,12 +10,12 @@
   agents = config.home-manager.users.${user}.agents;
   port = 3773;
 in {
-  options.services.homelab.t3code.enable = lib.mkEnableOption "T3 Code nightly remote coding server";
+  options.services.homelab.t3code.enable = lib.mkEnableOption "T3 Code remote coding server";
 
   config = lib.mkIf cfg.enable {
     # Agents need the user's repositories, provider credentials and Git config.
     systemd.services.t3code = {
-      description = "T3 Code nightly server";
+      description = "T3 Code server";
       wantedBy = ["multi-user.target"];
       # Home Manager's activation creates the agents profile.
       after = ["network-online.target" "home-manager-${user}.service"];

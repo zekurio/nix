@@ -28,18 +28,17 @@
 
       case "''${1:-}" in
         "")
-          # Build this flake's environment against the newest agent inputs.
+          # Build this flake's environment against the newest llm-agents.
           # flake.lock stays as it is; the weekly update PR catches it up.
-          # The URLs repeat those of the two inputs in flake.nix.
+          # The URL repeats that of the input in flake.nix.
           nix build "''${AGENTS_FLAKE:-github:zekurio/nix}#${attr}" \
             --override-input llm-agents github:numtide/llm-agents.nix \
-            --override-input t3code-nightly github:vsgoulart/t3code-nightly-flake \
             --refresh --no-write-lock-file --accept-flake-config \
             --no-link --profile "$profile"
           nix-env --profile "$profile" --delete-generations +3
           ${lib.optionalString isDarwin ''
         if command -v brew >/dev/null; then
-          brew upgrade --cask --greedy t3-code@nightly
+          brew upgrade --cask --greedy t3-code
         fi
       ''}
           ;;

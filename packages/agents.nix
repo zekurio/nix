@@ -7,7 +7,6 @@
   inherit (pkgs) lib;
   inherit (pkgs.stdenv.hostPlatform) isLinux system;
   llmAgents = inputs.llm-agents.packages.${system};
-  t3code = inputs.t3code-nightly.packages.${system};
 
   clis = [
     llmAgents.claude-code
@@ -30,8 +29,13 @@
     ]
     ++ clis
     ++ tools;
-  server = t3code.t3code.override {inherit extraRuntimePackages;};
-  desktop = t3code.t3code-desktop.override {inherit extraRuntimePackages;};
+  # providerPackages replaces llm-agents' default providers, which would
+  # otherwise put every agent it packages on T3 Code's PATH. Its
+  # t3code-desktop package wraps the default build, so take the desktop
+  # output of this one instead.
+  t3code = llmAgents.t3code.override {providerPackages = extraRuntimePackages;};
+  server = t3code;
+  desktop = t3code.desktop;
 in
   {
     # macOS gets T3 Code from Homebrew.

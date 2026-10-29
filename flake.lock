@@ -795,7 +795,6 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "plasma-manager": "plasma-manager",
         "sops-nix": "sops-nix",
-        "t3code-nightly": "t3code-nightly",
         "ucodenix": "ucodenix",
         "vrouter": "vrouter"
       }
@@ -908,26 +907,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "t3code-nightly": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793189151,
-        "narHash": "sha256-45/EpesSx1uraMf462srObypJtWKID6CW7AvnHYuZ2Y=",
-        "owner": "vsgoulart",
-        "repo": "t3code-nightly-flake",
-        "rev": "1e9f2fddd74b6e8a9c3b1b053edfbfea844d36b5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "vsgoulart",
-        "repo": "t3code-nightly-flake",
         "type": "github"
       }
     },
