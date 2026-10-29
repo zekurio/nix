@@ -38,6 +38,16 @@ in {
         Restart = "on-failure";
         RestartSec = 5;
         UMask = "0077";
+        # Everything the agents spawn lands in this cgroup, so a runaway
+        # workload cannot fill RAM and swap until the host hangs. Above
+        # MemoryHigh the kernel throttles, and oomd kills the unit if that
+        # stalls it for too long. Reaching MemoryMax stops the unit
+        # (OOMPolicy=stop); the restart begins clean because every process in
+        # the cgroup, reparented ones included, dies with it.
+        MemoryHigh = "6G";
+        MemoryMax = "8G";
+        MemorySwapMax = "2G";
+        ManagedOOMMemoryPressure = "kill";
       };
     };
 
