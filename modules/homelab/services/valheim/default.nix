@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.services.homelab.valheim;
@@ -66,6 +65,13 @@ in {
 
     buildersMode = lib.mkEnableOption "free building, passive enemies, and no stamina use";
 
+    modifiers = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      example = {combat = "easy";};
+      description = "World modifiers applied on top of the preset, as passed to `-modifier`.";
+    };
+
     extraEnvironment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = {};
@@ -91,11 +97,18 @@ in {
           CROSSPLAY = "false";
           # Hammer gives free building and passive enemies. Presets persist in
           # the world, so leaving builders mode must pass normal explicitly.
-          SERVER_ARGS = "-preset ${
-            if cfg.buildersMode
-            then "hammer"
-            else "normal"
-          }";
+          # The server applies arguments in order, so modifiers follow the
+          # preset, and the preset resets any modifier dropped from config.
+          SERVER_ARGS = lib.concatStringsSep " " (
+            [
+              "-preset ${
+                if cfg.buildersMode
+                then "hammer"
+                else "normal"
+              }"
+            ]
+            ++ lib.mapAttrsToList (name: value: "-modifier ${name} ${value}") cfg.modifiers
+          );
           VALHEIM_PLUS = "true";
           VALHEIM_PLUS_REPO = "Grantapher/ValheimPlus";
           VPCFG_Server_enabled = "true";
@@ -127,16 +140,8 @@ in {
       "d ${dataDir}/config 0750 1000 1000 -"
       "d ${dataDir}/data 0750 1000 1000 -"
     ];
-    systemd.services.${lib.removeSuffix ".service" unit} = {
-      # Remove both copies so persisted plugin files cannot reload RecyclePlus.
-      preStart = lib.mkBefore ''
-        ${pkgs.coreutils}/bin/rm -f \
-          ${dataDir}/config/valheimplus/plugins/RecyclePlus.dll \
-          ${dataDir}/data/plus/BepInEx/plugins/RecyclePlus.dll
-      '';
-      # Allow the container's two-minute world-save grace period to finish.
-      serviceConfig.TimeoutStopSec = lib.mkForce 150;
-    };
+    # Allow the container's two-minute world-save grace period to finish.
+    systemd.services.${lib.removeSuffix ".service" unit}.serviceConfig.TimeoutStopSec = lib.mkForce 150;
 
     services.homelab.backup = {
       # Stopping gives the server its grace period to save the world.
