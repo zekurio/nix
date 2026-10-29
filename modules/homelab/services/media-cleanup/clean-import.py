@@ -153,14 +153,17 @@ def clean(path, original):
         try:
             subprocess.run(remux_args(path, output, info, streams), check=True)
             validate(info, probe(output), streams)
-            # Copy mode, timestamps and ACLs, retaining the shared group even
-            # when SABnzbd owned the file that Radarr/Sonarr moved into place.
+            # Copy mode and ACLs, retaining the shared group even when SABnzbd
+            # owned the file that Radarr/Sonarr moved into place.
             # The setgid library directory already gives the temporary file
             # its shared group. PrivateUsers exposes that unmapped GID as
             # 65534, which chown rejects even when the group would not change.
             if output.stat().st_gid != original.st_gid:
                 os.chown(output, -1, original.st_gid)
             shutil.copystat(path, output)
+            # Jellyfin only re-probes files whose mtime changed, so keep the
+            # source's mode and ACLs but stamp the remux as freshly modified.
+            os.utime(output)
             with output.open("rb") as result:
                 os.fsync(result.fileno())
             if identity(original) != identity(path.stat()):

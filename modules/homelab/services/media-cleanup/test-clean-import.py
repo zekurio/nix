@@ -90,7 +90,7 @@ class Containers(unittest.TestCase):
         self.assertEqual(hashes, packet_hashes(path))
         self.assertEqual(path.stat().st_mode, stat.st_mode)
         self.assertEqual(path.stat().st_gid, stat.st_gid)
-        self.assertEqual(path.stat().st_mtime_ns, stat.st_mtime_ns)
+        self.assertGreater(path.stat().st_mtime_ns, stat.st_mtime_ns)
         self.assertNotIn("title", cleanup.tags(after["format"]))
         self.assertNotIn("comment", cleanup.tags(after["format"]))
         streams = after["streams"]
