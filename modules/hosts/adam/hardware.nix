@@ -61,6 +61,13 @@
     LIBVA_DRIVER_NAME = "iHD";
   };
 
+  # i915 never allows runtime PM on discrete GPUs, so the A380 would stay in
+  # D0 at ~18 W. Every i915 hwmon read wakes the card again, so nothing may
+  # poll its sensors; CoolerControl has the device disabled for that reason.
+  services.udev.extraRules = ''
+    ACTION=="bind", SUBSYSTEM=="pci", DRIVER=="i915", ATTR{power/control}="auto"
+  '';
+
   powerManagement.cpuFreqGovernor = "schedutil";
 
   services.ucodenix.enable = true;
