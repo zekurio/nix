@@ -25,7 +25,33 @@
         4) rgb=("$rising" 31 55) ;;
         5) rgb=(55 31 "$falling") ;;
       esac
+      # Light mode keeps the hue and lifts the channels to 200..224.
+      if [[ "''${GHOSTTY_SSH_TINT_SCHEME:-}" == light ]]; then
+        rgb=($(( rgb[0] + 169 )) $(( rgb[1] + 169 )) $(( rgb[2] + 169 )))
+      fi
       printf '\033]11;#%02x%02x%02x\007' "''${rgb[@]}" > /dev/tty
+    '';
+  };
+
+  # Ghostty answers CSI ? 996 n with CSI ? 997 ; 1 n for dark and ; 2 n for
+  # light. Ask before ssh starts, because ssh owns the TTY by LocalCommand.
+  colorScheme = pkgs.writeShellApplication {
+    name = "ghostty-color-scheme";
+    runtimeInputs = [pkgs.coreutils];
+    text = ''
+      if ! saved=$(stty -g 2> /dev/null < /dev/tty); then
+        echo dark
+        exit 0
+      fi
+      trap 'stty "$saved" < /dev/tty' EXIT
+      stty -echo -icanon < /dev/tty
+      printf '\033[?996n' > /dev/tty
+      reply=
+      IFS= read -r -s -d n -t 0.5 reply < /dev/tty || true
+      case $reply in
+        *'?997;2') echo light ;;
+        *) echo dark ;;
+      esac
     '';
   };
 in {
@@ -41,6 +67,7 @@ in {
           end
 
           set -g __ghostty_ssh_tinted 1
+          set -lx GHOSTTY_SSH_TINT_SCHEME (${lib.getExe colorScheme})
           # Multiplexed sessions skip LocalCommand, so disable sharing for tint.
           command ssh -S none \
             -o PermitLocalCommand=yes \
