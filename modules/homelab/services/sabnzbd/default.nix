@@ -52,14 +52,6 @@ in {
         };
 
         categories = {
-          aurral = {
-            name = "aurral";
-            dir = "${downloadsRoot}/complete/aurral";
-            pp = 3;
-            priority = 0;
-            newzbin = "";
-            script = "None";
-          };
           radarr = {
             name = "radarr";
             dir = "${downloadsRoot}/complete/radarr";

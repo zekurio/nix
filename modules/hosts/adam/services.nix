@@ -4,7 +4,6 @@
   services.homelab = {
     alloy.enable = true;
     atuin-ai.enable = true;
-    aurral.enable = true;
     blitzcrank = {
       enable = true;
       discord = {
@@ -30,6 +29,7 @@
     jellyfin.enable = true;
     inviterr.enable = true;
     mediaCleanup.enable = true;
+    navidrome.enable = true;
     pocket-id.enable = true;
     prowlarr.enable = true;
     radarr.enable = true;
