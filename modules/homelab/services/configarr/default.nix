@@ -50,13 +50,16 @@ in {
         recyclarrRevision: 4ae377bb704fc7fd69a544ad04e91357e0b09f62
         telemetry: false
 
-        # TRaSH has release-group tiers for remuxes, but no generic Radarr
-        # format for the remux quality modifier. Keep the qualities merged
-        # so their language/group scores remain authoritative, then
-        # add enough of a bonus to prefer a remux at the same resolution,
-        # all else being equal.
+        # Only the anime profiles allow remuxes; live-action ones are too
+        # large for what they add. TRaSH has release-group tiers for remuxes,
+        # but no generic format for the remux quality itself. Keep the
+        # qualities merged so their language/group scores remain
+        # authoritative, then add enough of a bonus to prefer a remux at the
+        # same resolution, all else being equal.
         # The UHD profiles' 9000-point resolution boost still wins over this
         # bonus, so it alone cannot make a 1080p remux displace a 2160p encode.
+        # Radarr marks a remux with a quality modifier and Sonarr with its
+        # own source, so each instance needs its own format.
         customFormatDefinitions:
           - trash_id: radarr-remux
             trash_scores:
@@ -73,6 +76,19 @@ in {
                 required: true
                 fields:
                   value: 5
+          - trash_id: sonarr-remux
+            trash_scores:
+              default: ${toString remuxScore}
+            trash_description: Prefer Sonarr remuxes within a resolution
+            name: Anime Remux
+            includeCustomFormatWhenRenaming: false
+            specifications:
+              - name: Remux
+                implementation: SourceSpecification
+                negate: false
+                required: true
+                fields:
+                  value: 7 # BlurayRaw
 
         sonarr:
           sonarr:
@@ -103,6 +119,13 @@ in {
                 to: "${animeUhdProfile}"
 
             custom_formats:
+              - trash_ids:
+                  - sonarr-remux # Anime Remux
+                assign_scores_to:
+                  - name: "${animeProfile}"
+                    score: ${toString remuxScore}
+                  - name: "${animeUhdProfile}"
+                    score: ${toString remuxScore}
               - trash_ids:
                   - b493cd40d8a3bbf2839127a706bdb673 # German 2160p Booster
                 assign_scores_to:
@@ -186,6 +209,7 @@ in {
                       - WEBDL-1080p
                       - WEBRip-1080p
                       - Bluray-1080p
+                      - Bluray-1080p Remux
               - name: "${normalUhdProfile}"
                 qualities:
                   - name: Merged QPs
@@ -203,9 +227,11 @@ in {
                       - WEBDL-2160p
                       - WEBRip-2160p
                       - Bluray-2160p
+                      - Bluray-2160p Remux
                       - WEBDL-1080p
                       - WEBRip-1080p
                       - Bluray-1080p
+                      - Bluray-1080p Remux
 
         radarr:
           radarr:
@@ -234,10 +260,6 @@ in {
               - trash_ids:
                   - radarr-remux # Anime Remux
                 assign_scores_to:
-                  - name: "${normalProfile}"
-                    score: ${toString remuxScore}
-                  - name: "${normalUhdProfile}"
-                    score: ${toString remuxScore}
                   - name: "${animeProfile}"
                     score: ${toString remuxScore}
                   - name: "${animeUhdProfile}"
@@ -333,7 +355,6 @@ in {
                 qualities:
                   - name: Merged QPs
                     qualities:
-                      - Remux-1080p
                       - Bluray-1080p
                       - WEBRip-1080p
                       - WEBDL-1080p
@@ -341,11 +362,9 @@ in {
                 qualities:
                   - name: Merged QPs
                     qualities:
-                      - Remux-2160p
                       - Bluray-2160p
                       - WEBDL-2160p
                       - WEBRip-2160p
-                      - Remux-1080p
                       - Bluray-1080p
                       - WEBRip-1080p
                       - WEBDL-1080p
