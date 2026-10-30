@@ -25,6 +25,11 @@ in {
       "/home/*/.local/share/zed/languages/"
       "/home/*/.local/share/zed/node/"
       "/home/*/.zed_server/"
+      # blitzbench lays out every run's media library from its recordings
+      # as sparse files at their real sizes. rsync reads the holes as data,
+      # over a PiB of them, so the copy never finishes inside the window.
+      "/home/*/Git/blitzbench/runs*/*/media/"
+      "/home/*/Git/blitzbench/runs*/*/probes/"
     ];
 
     # What a total loss of adam must not take: photos and clips, Fluxer's
