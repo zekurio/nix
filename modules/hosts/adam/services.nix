@@ -22,7 +22,6 @@
     };
     blitzcrank-mcp.enable = true;
     configarr.enable = true;
-    beszel.enable = true;
     coolercontrol.enable = true;
     fluxer.enable = true;
     immich.enable = true;

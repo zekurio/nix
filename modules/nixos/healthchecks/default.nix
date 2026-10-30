@@ -109,8 +109,8 @@ in {
       startAt = heartbeatSchedule;
       serviceConfig = {
         Type = "oneshot";
-        # A missed ping is what the check is there to notice. Leaving the
-        # unit failed would also raise Beszel's failed-service alert.
+        # A missed ping is what the check is there to notice, so a failed
+        # one does not also leave the unit failed.
         ExecStart = "-${lib.getExe ping} ${heartbeatCheck}";
       };
     };
