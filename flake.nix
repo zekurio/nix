@@ -1,7 +1,7 @@
 {
   description = "Nix configurations for my NixOS hosts and macOS";
 
-  # nixConfig is parsed statically and cannot import modules/nix/default.nix;
+  # nixConfig is parsed statically and cannot import modules/common/nix.nix;
   # keep this list in sync with that module by hand.
   nixConfig = {
     extra-substituters = [
