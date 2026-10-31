@@ -21,6 +21,6 @@ in {
       };
     };
 
-    programs.git.settings.user.signingkey = sshKey;
+    programs.git.signing.key = sshKey;
   };
 }

@@ -47,31 +47,31 @@
   };
 in {
   config = {
-    home.file.".config/git/allowed_signers".text =
-      lib.concatMapStringsSep "\n" (key: "git@zekurio.me ${key}") signingKeys
-      + "\n";
-
     programs.git = {
       enable = true;
       lfs.enable = true;
       signing = {
+        format = "ssh";
+        signer = lib.getExe sshSigningProgram;
         signByDefault = true;
+        allowedSigners = lib.concatMapStrings (key: "git@zekurio.me ${key}\n") signingKeys;
       };
-      settings = {
+      # A whole-section mkIf, because `credential.helper = mkIf …` would
+      # still leave an empty [credential] section on Linux.
+      settings = lib.mkMerge [
+        {
+          user = {
+            name = "zekurio";
+            email = "git@zekurio.me";
+          };
+          init.defaultBranch = "main";
+          pull.rebase = true;
+          rebase.autoStash = true;
+          gpg.ssh.defaultKeyCommand = lib.getExe gitSshSigningKeyCommand;
+        }
         # Clear the osxkeychain helper inherited from the Darwin Git package.
-        credential.helper = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "";
-        user = {
-          name = "zekurio";
-          email = "git@zekurio.me";
-        };
-        init.defaultBranch = "main";
-        pull.rebase = true;
-        rebase.autoStash = true;
-        gpg.format = "ssh";
-        gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.config/git/allowed_signers";
-        gpg.ssh.defaultKeyCommand = "${gitSshSigningKeyCommand}/bin/git-ssh-signing-key";
-        "gpg \"ssh\"".program = "${sshSigningProgram}/bin/git-ssh-sign";
-      };
+        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {credential.helper = "";})
+      ];
     };
 
     programs.jujutsu = {
@@ -88,7 +88,7 @@ in {
           key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
           backends.ssh = {
             program = "${pkgs.openssh}/bin/ssh-keygen";
-            "allowed-signers" = "${config.home.homeDirectory}/.config/git/allowed_signers";
+            "allowed-signers" = "${config.xdg.configHome}/git/allowed_signers";
           };
         };
 
