@@ -1,34 +1,37 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
-  units = ["fluxer-seaweedfs-init" "podman-fluxer-admin" "podman-fluxer-api" "podman-fluxer-gateway" "podman-fluxer-gifs" "podman-fluxer-gifs-shard" "podman-fluxer-livekit" "podman-fluxer-media-proxy" "podman-fluxer-meilisearch" "podman-fluxer-messages" "podman-fluxer-messages-shard" "podman-fluxer-push" "fluxer-database" "podman-fluxer-snowflakes" "podman-fluxer-snowflakes-shard" "podman-fluxer-unfurl" "podman-fluxer-unfurl-shard" "podman-fluxer-users" "podman-fluxer-users-shard" "podman-fluxer-worker"];
-  render = pkgs.writeShellScript "fluxer-render-secrets" ''
-    exec ${lib.getExe pkgs.python3} ${./render-secrets.py} ${config.sops.secrets.fluxer_env.path} ${./secret-files.json} /run/fluxer-env
-  '';
+  cfg = config.services.homelab.fluxer;
+  # Each sops key is the variable's name in lowercase. fluxer-nix generates
+  # the others into /var/lib/fluxer-secrets: the setup token, the ActivityPub
+  # signing key, and the NATS and Valkey passwords.
+  names = [
+    "FLUXER_ADMIN_OAUTH_CLIENT_SECRET"
+    "FLUXER_ADMIN_SECRET_KEY_BASE"
+    "FLUXER_CONNECTION_INITIATION_SECRET"
+    "FLUXER_EMAIL_SMTP_PASSWORD"
+    "FLUXER_ERLANG_COOKIE"
+    "FLUXER_GATEWAY_RPC_AUTH_TOKEN"
+    "FLUXER_KLIPY_API_KEY"
+    "FLUXER_LIVEKIT_API_SECRET"
+    "FLUXER_MEDIA_PROXY_SECRET_KEY"
+    "FLUXER_MEDIA_PROXY_UPLOAD_RELAY_SECRET_BASE64"
+    "FLUXER_PROFILE_PSEUDONYM_SECRET"
+    "FLUXER_S3_SECRET_ACCESS_KEY"
+    "FLUXER_SEARCH_API_KEY"
+    "FLUXER_SUDO_MODE_SECRET"
+    "FLUXER_VAPID_PRIVATE_KEY"
+    "FLUXER_VAPID_PUBLIC_KEY"
+    "FLUXER_YOUTUBE_API_KEY"
+  ];
 in {
-  config = lib.mkIf config.services.homelab.fluxer.enable {
-    sops.secrets.fluxer_env.restartUnits = ["fluxer-secrets.service"] ++ map (name: "${name}.service") units;
-    systemd.services =
-      lib.genAttrs units (_: {
-        requires = ["fluxer-secrets.service"];
-        after = ["fluxer-secrets.service"];
-        restartTriggers = [render];
-      })
-      // {
-        fluxer-secrets = {
-          description = "Prepare Fluxer secret files";
-          # sops-nix installs system secrets during activation.
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            RuntimeDirectory = "fluxer-env";
-            RuntimeDirectoryMode = "0700";
-            ExecStart = render;
-          };
-        };
-      };
+  config = lib.mkIf cfg.enable {
+    # The units read these through LoadCredential, so they stay root-only.
+    services.fluxer.secrets = lib.genAttrs names (name: config.sops.secrets.${lib.toLower name}.path);
+    sops.secrets = lib.genAttrs (map lib.toLower names) (_: {
+      restartUnits = ["fluxer.target"];
+    });
   };
 }

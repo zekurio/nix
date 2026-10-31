@@ -86,6 +86,10 @@
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    orianna = {
+      url = "github:zekurio/orianna";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     alloy = {
       url = "github:zekurio/alloy/v0.1.1";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -104,12 +108,10 @@
       url = "github:zekurio/vrouter";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Only the edge router config; the whole repository is a large download.
-    # Upstream ships it inside rexctl's embedded compose stack.
-    fluxer-caddyfile = {
-      url = "file+https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile";
-      flake = false;
-    };
+    # Keep fluxer-nix's own nixpkgs pin. No cache serves its packages, and
+    # following ours would rebuild every Fluxer service, with full LTO, on
+    # each weekly flake.lock bump.
+    fluxer-nix.url = "github:zekurio/fluxer-nix";
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

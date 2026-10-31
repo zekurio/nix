@@ -39,7 +39,7 @@
       };
     };
     networks."99-podman" = {
-      matchConfig.Name = "podman0 fluxer0 veth*";
+      matchConfig.Name = "podman0 veth*";
       networkConfig.DHCP = "no";
       linkConfig.Unmanaged = true;
     };

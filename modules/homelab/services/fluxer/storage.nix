@@ -4,36 +4,24 @@
   ...
 }: let
   cfg = config.services.homelab.fluxer;
+  # fluxer-nix runs SeaweedFS as a dynamic user, so its state directory is
+  # the private one.
+  stateDir = "/var/lib/private/fluxer-seaweedfs";
 in {
   config = lib.mkIf cfg.enable {
-    virtualisation.oci-containers.containers.fluxer-seaweedfs = {
-      image = "docker.io/chrislusf/seaweedfs:4.34";
-      environment = {
-        GOMEMLIMIT = "1536MiB";
-      };
-      cmd = [
-        "server"
-        "-s3"
-        "-dir=/data"
-      ];
-      volumes = ["/tank/fluxer/seaweedfs:/data"];
-      podman.sdnotify = "healthy";
-      extraOptions = [
-        "--memory=2147483648"
-        "--health-interval=10s"
-        "--health-timeout=5s"
-        "--health-retries=20"
-        "--health-start-period=1m0s"
-        "--health-on-failure=kill"
-        ("--health-cmd="
-          + builtins.toJSON [
-            "wget"
-            "-q"
-            "-O"
-            "/dev/null"
-            "http://127.0.0.1:8333/healthz"
-          ])
+    # Attachments stay on tank, under its quota, snapshots and offsite
+    # backup. systemd hands the bind mount to the dynamic user on start.
+    # nofail keeps a missing tank from holding up boot.
+    fileSystems.${stateDir} = {
+      device = "/tank/fluxer/seaweedfs";
+      fsType = "none";
+      options = [
+        "bind"
+        "nofail"
+        "x-systemd.requires=zfs-mount.service"
+        "x-systemd.after=zfs-mount.service"
       ];
     };
+    systemd.services.fluxer-seaweedfs.unitConfig.RequiresMountsFor = [stateDir];
   };
 }

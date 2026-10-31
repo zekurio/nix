@@ -29,6 +29,12 @@
     inviterr.enable = true;
     mediaCleanup.enable = true;
     navidrome.enable = true;
+    orianna = {
+      enable = true;
+      guildId = "1563927103177490432";
+      pollsChannelId = "1565113359211167744";
+      adminRoles = ["1564648405819457537"];
+    };
     pocket-id.enable = true;
     prowlarr.enable = true;
     radarr.enable = true;

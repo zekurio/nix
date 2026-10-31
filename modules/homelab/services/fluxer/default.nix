@@ -1,124 +1,53 @@
 {
   config,
+  inputs,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.services.homelab.fluxer;
-  components = [
-    "admin"
-    "api"
-    "app-proxy"
-    "edge"
-    "gateway"
-    "gifs"
-    "gifs-shard"
-    "livekit"
-    "media-proxy"
-    "meilisearch"
-    "messages"
-    "messages-shard"
-    "nats"
-    "push"
-    "seaweedfs"
-    "snowflakes"
-    "snowflakes-shard"
-    "static-proxy"
-    "unfurl"
-    "unfurl-shard"
-    "users"
-    "users-shard"
-    "valkey"
-    "worker"
-  ];
-  containers = map (name: "fluxer-${name}") components;
-  units = map (name: "podman-${name}") containers;
+  zekurio = config.services.homelab.domains.zekurio;
 in {
+  imports = [
+    inputs.fluxer-nix.nixosModules.default
+  ];
+
   options.services.homelab.fluxer = {
     enable = lib.mkEnableOption "Fluxer chat services with Caddy integration";
-    imageTag = lib.mkOption {
-      type = lib.types.str;
-      # This tag moves; restarting fluxer.target pulls the newest images.
-      default = "v1";
-      description = "Tag for the Fluxer application images.";
-    };
   };
+
   config = lib.mkIf cfg.enable {
-    systemd.tmpfiles.rules = ["d /var/lib/fluxer 0750 root root -"];
-    # Starting the target again after the backup window pulls newer images,
-    # like any restart of fluxer.target.
-    services.homelab.backup.stopUnits = ["fluxer.target"];
-    assertions = [
-      {
-        assertion = config.virtualisation.oci-containers.backend == "podman";
-        message = "services.homelab.fluxer needs the Podman OCI backend.";
-      }
-      {
-        assertion = lib.all (name:
-          lib.all (volume: lib.hasPrefix "/" volume)
-          config.virtualisation.oci-containers.containers.${name}.volumes)
-        containers;
-        message = "Fluxer storage must use absolute host paths, never named Podman volumes.";
-      }
-    ];
-    virtualisation.oci-containers.containers = lib.listToAttrs (map (name: {
-        name = "fluxer-${name}";
-        value = {
-          autoStart = false;
-          # Check the registry on every start. Podman falls back to the
-          # cached image when the registry is unreachable, so boot still works.
-          pull = "newer";
-          networks = ["fluxer_fluxer"];
-          # Keep upstream DNS names after the container names change.
-          extraOptions = [
-            "--network-alias=${name}"
-            # Ignore Dockerfile VOLUME declarations; persistence is explicitly bind-mounted.
-            "--image-volume=ignore"
-          ];
-        };
-      })
-      components);
-    # aardvark-dns answers on the gateway. The Podman module opens DNS only on
-    # podman+ interfaces, and netavark's nftables accept cannot override a drop
-    # in nixos-fw, so containers lose name resolution without this.
-    networking.firewall.interfaces.fluxer0 = {
-      allowedTCPPorts = [53];
-      allowedUDPPorts = [53];
-    };
-    systemd.services =
-      lib.genAttrs units (_: {
-        requires = ["fluxer-network.service" "fluxer-storage.service"];
-        after = ["fluxer-network.service" "fluxer-storage.service"];
-        partOf = ["fluxer.target"];
-        serviceConfig.RestartSec = 5;
-      })
-      // {
-        fluxer-network = {
-          description = "Podman network for Fluxer";
-          path = [config.virtualisation.podman.package pkgs.jq];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-          };
-          script = ''
-            if ! podman network exists fluxer_fluxer; then
-              podman network create --subnet 10.89.42.0/24 --gateway 10.89.42.1 --interface-name fluxer0 fluxer_fluxer
-            fi
-            # The database address, HBA rule, and firewall depend on this network layout.
-            if ! podman network inspect fluxer_fluxer | jq -e '
-              .[0] | .network_interface == "fluxer0" and
-              (.subnets == [{"subnet": "10.89.42.0/24", "gateway": "10.89.42.1"}])
-            ' >/dev/null; then
-              echo "Fluxer network has an obsolete layout. Stop and remove its containers, then remove fluxer_fluxer so it can be recreated." >&2
-              exit 1
-            fi
-          '';
-        };
+    services.fluxer = {
+      enable = true;
+      domain = "chat.${zekurio}";
+      livekit.openFirewall = true;
+      settings = {
+        # Only read on a fresh instance's first boot; Fluxer locks the mode
+        # once anyone signs up. Username sign-in never uses tags.
+        FLUXER_ACCOUNT_IDENTITY = "username";
+        # One community only; discovery has nothing to list.
+        FLUXER_DISCOVERY_ENABLED = false;
+        # Pocket ID's issuer resolves to adam's LAN address.
+        FLUXER_SSO_ALLOW_PRIVATE_ADDRESSES = true;
+        # The homelab Caddy sets this header; fluxer-nix trusts it only
+        # with its own edge.
+        FLUXER_TRUST_CLIENT_IP_HEADER = true;
+        FLUXER_CLIENT_IP_HEADER_NAME = "x-forwarded-for";
+        # Email fields saved in the admin panel override these and the
+        # password secret. SSO and captcha have no settings at all and live
+        # only in the admin panel.
+        FLUXER_EMAIL_ENABLED = true;
+        FLUXER_EMAIL_PROVIDER = "smtp";
+        FLUXER_EMAIL_FROM_EMAIL = "fluxer@${zekurio}";
+        FLUXER_EMAIL_FROM_NAME = "Fluxer";
+        FLUXER_EMAIL_SMTP_HOST = "smtp.purelymail.com";
+        FLUXER_EMAIL_SMTP_PORT = 465;
+        FLUXER_EMAIL_SMTP_SECURE = true;
+        FLUXER_EMAIL_SMTP_USERNAME = "homelab@${zekurio}";
       };
-    systemd.targets.fluxer = {
-      description = "Fluxer chat services";
-      wantedBy = ["multi-user.target"];
-      wants = (map (name: "${name}.service") units) ++ ["fluxer-seaweedfs-init.service"];
     };
+
+    # fluxer-nix's target holds the whole instance, NATS and Meilisearch
+    # included, but not the shared PostgreSQL, which the backup stops last.
+    services.homelab.backup.stopUnits = ["fluxer.target"];
   };
 }

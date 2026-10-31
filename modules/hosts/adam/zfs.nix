@@ -133,12 +133,11 @@ in {
         if [ "$(${zfs} get -H -o value mounted tank/fluxer)" != yes ]; then
           ${zfs} mount tank/fluxer
         fi
-        # Fluxer's SeaweedFS container bind-mounts this directory (see the
-        # storage module). Rootful podman runs the
-        # container as root, so root:root 0700 is sufficient.
+        # SeaweedFS reaches this directory through a bind mount (see the
+        # Fluxer storage module), whose owner systemd sets for its dynamic
+        # user. /tank is NFS-exported with crossmnt, so only root may enter.
         ${pkgs.coreutils}/bin/mkdir -p /tank/fluxer/seaweedfs
-        ${pkgs.coreutils}/bin/chown root:root /tank/fluxer/seaweedfs
-        ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer/seaweedfs
+        ${pkgs.coreutils}/bin/chmod 0700 /tank/fluxer
       ''}
       ${ensureDataset "tank/alloy" "20G"}
       ${ensureDataset "tank/shares" "50G"}
@@ -154,7 +153,7 @@ in {
     '';
   };
 
-  systemd.services.fluxer-storage = lib.mkIf config.services.homelab.fluxer.enable {
+  systemd.services.fluxer-seaweedfs = lib.mkIf config.services.homelab.fluxer.enable {
     requires = ["tank-datasets.service"];
     after = ["tank-datasets.service"];
   };

@@ -22,6 +22,16 @@ in {
       default = [];
       description = "Discord role IDs whose members may ask the bot for help.";
     };
+    adminUsers = lib.mkOption {
+      type = lib.types.listOf discordId;
+      default = [];
+      description = "Discord user IDs whose requests may remove or unmonitor media that plays fine. Admins need no allowed entry.";
+    };
+    adminRoles = lib.mkOption {
+      type = lib.types.listOf discordId;
+      default = [];
+      description = "Discord role IDs whose members are admins, as for adminUsers.";
+    };
     triageModel = lib.mkOption {
       type = lib.types.nonEmptyStr;
       example = "openrouter/typesafe/jev-1.14";
@@ -36,8 +46,8 @@ in {
         message = "services.homelab.blitzcrank.discord requires services.homelab.blitzcrank.";
       }
       {
-        assertion = cfg.allowedUsers != [] || cfg.allowedRoles != [];
-        message = "Blitzcrank Discord requires at least one allowed user or role.";
+        assertion = lib.any (ids: ids != []) [cfg.allowedUsers cfg.allowedRoles cfg.adminUsers cfg.adminRoles];
+        message = "Blitzcrank Discord requires at least one allowed or admin user or role.";
       }
     ];
 
@@ -47,6 +57,8 @@ in {
         DISCORD_CHANNELS = lib.concatStringsSep "," cfg.channels;
         DISCORD_ALLOWED_USERS = lib.concatStringsSep "," cfg.allowedUsers;
         DISCORD_ALLOWED_ROLES = lib.concatStringsSep "," cfg.allowedRoles;
+        DISCORD_ADMIN_USERS = lib.concatStringsSep "," cfg.adminUsers;
+        DISCORD_ADMIN_ROLES = lib.concatStringsSep "," cfg.adminRoles;
         # Triage uses OpenRouter directly; agent requests still use vrouter.
         DISCORD_TRIAGE_MODEL = cfg.triageModel;
       };

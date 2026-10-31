@@ -47,18 +47,22 @@ in {
         ]
         ++ map (share: share.dataset) (lib.attrValues homelab.mediaShare.userShares)
         ++ lib.optional homelab.fluxer.enable "tank/fluxer";
-      paths = [
-        # Every database, Fluxer's messages included.
-        homelab.backup.dumpDir
-        # Alloy keeps thumbnails and avatars on the SSD.
-        "/var/lib/alloy"
-        # Immich and Fluxer log in through Pocket ID; its passkeys and
-        # OIDC clients keep those accounts reachable.
-        config.services.pocket-id.dataDir
-        # A reinstall that restores this first hands out the same UIDs, so
-        # the restored files keep their owners.
-        "/var/lib/nixos"
-      ];
+      paths =
+        [
+          # Every database, Fluxer's messages included.
+          homelab.backup.dumpDir
+          # Alloy keeps thumbnails and avatars on the SSD.
+          "/var/lib/alloy"
+          # Immich and Fluxer log in through Pocket ID; its passkeys and
+          # OIDC clients keep those accounts reachable.
+          config.services.pocket-id.dataDir
+          # A reinstall that restores this first hands out the same UIDs, so
+          # the restored files keep their owners.
+          "/var/lib/nixos"
+        ]
+        # The Fluxer secrets sops does not hold, the ActivityPub signing key
+        # among them.
+        ++ lib.optional homelab.fluxer.enable "/var/lib/fluxer-secrets";
       # Immich regenerates both from the originals.
       exclude = [
         "/tank/immich/thumbs"

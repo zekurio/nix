@@ -69,11 +69,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793275832,
-        "narHash": "sha256-2+30AlnTBFOTlVEFrzHF3gjl4yswqU49L/XTNUAPFjY=",
+        "lastModified": 1793392214,
+        "narHash": "sha256-4pI2oVR2M6ZpZEORcfCSewD2IGSTE64aDSTo47dveOY=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "58b32b2eed4feccb2b82328d0e6497ea78099a7b",
+        "rev": "8ef30a8f12c168a65be88809fb5a067755c4d12d",
         "type": "github"
       },
       "original": {
@@ -350,16 +350,22 @@
         "type": "github"
       }
     },
-    "fluxer-caddyfile": {
-      "flake": false,
+    "fluxer-nix": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
       "locked": {
-        "narHash": "sha256-Eic3HyV8hzCgkeX/86J7EnJHeSGRwh0CmPziUAY06pQ=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile"
+        "lastModified": 1793443997,
+        "narHash": "sha256-AzD0CmuKzwyKtVIGJLsVOipJug4G90ynmBwz1R9WNrg=",
+        "owner": "zekurio",
+        "repo": "fluxer-nix",
+        "rev": "9f8516a703d089b837d468fef58084acf547d129",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/fluxerapp/fluxer/main/fluxer_rexctl/internal/stack/files/Caddyfile"
+        "owner": "zekurio",
+        "repo": "fluxer-nix",
+        "type": "github"
       }
     },
     "ghostty": {
@@ -534,7 +540,7 @@
       "inputs": {
         "bun2nix": "bun2nix",
         "flake-parts": "flake-parts_3",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "systems": "systems_6",
         "treefmt-nix": "treefmt-nix"
       },
@@ -593,7 +599,7 @@
     },
     "nix-linux-builder": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_5"
       },
       "locked": {
         "lastModified": 1778050539,
@@ -718,6 +724,22 @@
     },
     "nixpkgs_3": {
       "locked": {
+        "lastModified": 1793110635,
+        "narHash": "sha256-dhoW6VgFWlaodSY5jrBn+CF2FLmaUvDVgM7+C7T2+NM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "31ecbaca1bdefa45dffc409f0250bd8039ea0010",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1793225069,
         "narHash": "sha256-sx1f99WGrDfJ83KKuQrqGPmot0rnDgmpLJDzpU2oHQQ=",
         "owner": "NixOS",
@@ -732,7 +754,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1767313136,
         "narHash": "sha256-16KkgfdYqjaeRGBaYsNrhPRRENs0qzkQVUooNHtoy2w=",
@@ -745,6 +767,26 @@
         "owner": "NixOS",
         "ref": "nixos-25.05",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "orianna": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793374122,
+        "narHash": "sha256-Sz9hTggkW1vxAFAvCBw5T6eU33yvO/EE9rACa+EeGI8=",
+        "owner": "zekurio",
+        "repo": "orianna",
+        "rev": "797a6377599a98974cd203720233145119363ceb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "orianna",
         "type": "github"
       }
     },
@@ -781,7 +823,7 @@
         "configarr": "configarr",
         "cpu-microcodes": "cpu-microcodes",
         "disko": "disko",
-        "fluxer-caddyfile": "fluxer-caddyfile",
+        "fluxer-nix": "fluxer-nix",
         "ghostty": "ghostty",
         "helium": "helium",
         "home-manager": "home-manager_2",
@@ -793,6 +835,7 @@
         "nix-homebrew": "nix-homebrew",
         "nix-linux-builder": "nix-linux-builder",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "orianna": "orianna",
         "plasma-manager": "plasma-manager",
         "sops-nix": "sops-nix",
         "ucodenix": "ucodenix",
