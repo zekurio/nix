@@ -37,7 +37,7 @@ class Arr:
                 time.sleep(1)
 
 
-def configure(api, app, downloads_root, import_script):
+def configure(api, app, import_script):
     name = "Clean media metadata"
     current = next(
         (item for item in api.request("notification") if item["name"] == name),
@@ -67,14 +67,6 @@ def configure(api, app, downloads_root, import_script):
     elif desired != current:
         api.request(f"notification/{current['id']}", desired, "PUT")
 
-    root = downloads_root.rstrip("/")
-    for mapping in api.request("remotepathmapping"):
-        if (
-            mapping["remotePath"].rstrip("/") == f"{root}/complete/{app}"
-            and mapping["localPath"].rstrip("/") == f"{root}/converted/{app}"
-        ):
-            api.request(f"remotepathmapping/{mapping['id']}", method="DELETE")
-
     current = api.request("config/downloadclient")
     if not current["enableCompletedDownloadHandling"]:
         api.request(
@@ -87,12 +79,12 @@ def configure(api, app, downloads_root, import_script):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--app", choices=("radarr", "sonarr"), required=True)
-    for option in ("url", "downloads-root", "import-script"):
+    for option in ("url", "import-script"):
         parser.add_argument("--" + option, required=True)
     args = parser.parse_args()
     api = Arr(args.url, os.environ[f"{args.app.upper()}__AUTH__APIKEY"])
     api.wait()
-    configure(api, args.app, args.downloads_root, args.import_script)
+    configure(api, args.app, args.import_script)
     print(f"{args.app}: direct downloads and media cleanup configured.")
 
 

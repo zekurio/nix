@@ -40,12 +40,10 @@
         unitConfig.RequiresMountsFor = [mediaShare.downloadsRoot];
         serviceConfig.TimeoutStartSec = "3min";
         # Configure through the API once it is listening, on every restart.
-        # Register cleanup before removing the old Anvil path redirection.
         postStart = ''
           ${lib.getExe pkgs.python3} ${./configure.py} \
             --app ${app} \
             --url ${lib.escapeShellArg config.services.homelab.${app}.baseUrl} \
-            --downloads-root ${lib.escapeShellArg mediaShare.downloadsRoot} \
             --import-script ${appHook}
         '';
       };

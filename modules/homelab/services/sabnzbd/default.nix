@@ -89,20 +89,6 @@ in {
       UMask = lib.mkForce mediaShare.umask;
     };
 
-    # Reset the history and traffic statistics once. Bump the marker name to
-    # intentionally repeat the reset without affecting the queue or config.
-    systemd.services.sabnzbd.preStart = lib.mkBefore ''
-      resetMarker=/var/lib/sabnzbd/.history-stats-reset-v1
-      if [ ! -e "$resetMarker" ]; then
-        rm -f \
-          /var/lib/sabnzbd/admin/history1.db \
-          /var/lib/sabnzbd/admin/history1.db-shm \
-          /var/lib/sabnzbd/admin/history1.db-wal \
-          /var/lib/sabnzbd/admin/totals10.sab
-        touch "$resetMarker"
-      fi
-    '';
-
     systemd.tmpfiles.rules = [
       "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
     ];

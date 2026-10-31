@@ -220,10 +220,6 @@ class FakeArr:
     def __init__(self):
         self.url = "http://127.0.0.1:7878/radarr/api/v3/"
         self.notifications = []
-        self.mappings = [
-            {"id": 1, "remotePath": "/downloads/complete/radarr/", "localPath": "/downloads/converted/radarr/"},
-            {"id": 2, "remotePath": "/other/", "localPath": "/downloads/converted/radarr/"},
-        ]
         self.settings = {"enableCompletedDownloadHandling": False, "unrelatedSetting": "keep"}
         self.writes = []
 
@@ -237,11 +233,6 @@ class FakeArr:
             if method == "POST":
                 self.notifications.append(data | {"id": 1})
             return copy.deepcopy(self.notifications)
-        if endpoint == "remotepathmapping":
-            return copy.deepcopy(self.mappings)
-        if endpoint.startswith("remotepathmapping/") and method == "DELETE":
-            self.mappings = [item for item in self.mappings if item["id"] != int(endpoint.split("/")[1])]
-            return None
         if endpoint == "config/downloadclient":
             if method == "PUT":
                 self.settings = data
@@ -250,22 +241,21 @@ class FakeArr:
 
 
 class Provisioning(unittest.TestCase):
-    def test_only_anvil_mapping_changes_and_repeated_setup_is_idle(self):
+    def test_repeated_setup_is_idle(self):
         api = FakeArr()
-        configure.configure(api, "radarr", "/downloads/", "/bin/clean-media-import")
-        self.assertEqual([mapping["id"] for mapping in api.mappings], [2])
+        configure.configure(api, "radarr", "/bin/clean-media-import")
         self.assertEqual(api.settings, {"enableCompletedDownloadHandling": True, "unrelatedSetting": "keep"})
         hook = api.notifications[0]
         self.assertTrue(hook["onDownload"] and hook["onUpgrade"])
         self.assertFalse(hook["onImportComplete"] or hook["onGrab"])
         self.assertEqual(api.writes[0], ("POST", "notification"))
         writes = api.writes.copy()
-        configure.configure(api, "radarr", "/downloads/", "/bin/clean-media-import")
+        configure.configure(api, "radarr", "/bin/clean-media-import")
         self.assertEqual(api.writes, writes)
 
     def test_sonarr_enables_batch_refresh_and_clears_arguments(self):
         api = FakeArr()
-        configure.configure(api, "sonarr", "/downloads", "/bin/clean-media-import")
+        configure.configure(api, "sonarr", "/bin/clean-media-import")
         hook = api.notifications[0]
         self.assertTrue(hook["onImportComplete"])
         fields = {field["name"]: field["value"] for field in hook["fields"]}

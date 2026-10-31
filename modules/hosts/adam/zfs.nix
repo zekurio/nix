@@ -13,22 +13,9 @@
     fi
     ${zfs} set quota=${quota} ${name}
   '';
-  ensureUserShareDatasets = lib.concatStringsSep "\n" (lib.mapAttrsToList (_: share: let
-      legacyLibraryPath = "${share.path}/Immich External Library";
-    in ''
+  ensureUserShareDatasets = lib.concatStringsSep "\n" (lib.mapAttrsToList (_: share: ''
       ${ensureDataset share.dataset share.quota}
       ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg share.path}
-
-      ${lib.optionalString (share.libraryPath != legacyLibraryPath) ''
-        # Retire the compatibility mount without touching Fotos.
-        if ${pkgs.util-linux}/bin/mountpoint -q ${lib.escapeShellArg legacyLibraryPath}; then
-          ${pkgs.util-linux}/bin/umount ${lib.escapeShellArg legacyLibraryPath}
-        fi
-        if [ -d ${lib.escapeShellArg legacyLibraryPath} ]; then
-          # Refuse to delete files left in an unmounted legacy directory.
-          ${pkgs.coreutils}/bin/rmdir ${lib.escapeShellArg legacyLibraryPath}
-        fi
-      ''}
       ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg share.libraryPath}
 
       # The dataset root mounts as root:root 0755, shadowing the tmpfiles rule

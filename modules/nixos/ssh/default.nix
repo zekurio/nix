@@ -52,9 +52,5 @@ in {
     users.users = lib.genAttrs cfg.users (_: {
       openssh.authorizedKeys.keys = cfg.authorizedKeys;
     });
-
-    # The old authorized-keys-sync unit cached fetched keys here; nothing
-    # reads it anymore, so clean it up on rebuild.
-    systemd.tmpfiles.rules = ["R /var/lib/authorized-keys"];
   };
 }
