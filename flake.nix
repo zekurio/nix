@@ -129,6 +129,7 @@
   # import-tree skips _-prefixed files, which are package expressions for
   # callPackage.
   outputs = inputs @ {
+    self,
     nixpkgs-unstable,
     nix-darwin,
     import-tree,
@@ -179,6 +180,30 @@
 
     # The user modules of both platforms import this into Home Manager.
     homeModules.zekurio = import-tree ./modules/home/zekurio;
+
+    # `nix flake check` evaluates the NixOS hosts itself; these cover what it
+    # skips.
+    checks.x86_64-linux = let
+      pkgs = pkgsFor "x86_64-linux";
+    in {
+      # darwinConfigurations is not a standard output, so the check would
+      # never evaluate sachiel. Its derivation path is enough; building it
+      # needs a Mac.
+      sachiel =
+        pkgs.writeText "sachiel-drv-path" (builtins.unsafeDiscardStringContext
+          self.darwinConfigurations.sachiel.system.drvPath);
+
+      media-cleanup =
+        pkgs.runCommand "media-cleanup-test" {
+          nativeBuildInputs = [
+            (pkgs.python3.withPackages (ps: [ps.pycountry]))
+            pkgs.ffmpeg-headless
+          ];
+        } ''
+          python3 ${./modules/homelab/services/media-cleanup}/test-clean-import.py
+          touch $out
+        '';
+    };
 
     formatter = forAllSystems (system: let
       pkgs = pkgsFor system;

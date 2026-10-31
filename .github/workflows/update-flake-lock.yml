@@ -17,6 +17,8 @@ permissions:
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
+    outputs:
+      pull-request-number: ${{ steps.update.outputs.pull-request-number }}
 
     steps:
       - name: Check out repository
@@ -26,8 +28,16 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Update flake.lock and open PR
+        id: update
         uses: DeterminateSystems/update-flake-lock@v28
         with:
           pr-title: "chore(flake): update flake.lock"
           commit-msg: "chore(flake): update flake.lock"
           pr-labels: dependencies
+
+  check:
+    needs: update-flake-lock
+    if: needs.update-flake-lock.outputs.pull-request-number != ''
+    uses: ./.github/workflows/check.yml
+    with:
+      ref: update_flake_lock_action

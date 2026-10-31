@@ -29,6 +29,10 @@
 - Never nest `imports` to control merge order. Use `lib.mkBefore`, `lib.mkAfter`,
   or `lib.mkDefault` where appropriate and explain why.
 - Comment non-obvious constraints and surprising behavior, not assignments.
+- Tie a workaround for one upstream release to that release with
+  `lib.warnIf`, naming the file to delete once the version moves on. CI
+  evaluates with `abort-on-warn`, so the flake.lock PR fails instead of the
+  workaround going inert unnoticed.
 - Never add a README that describes what a module does. Comments next to the
   code carry that. `README.md` only lists manual procedures such as bootstrap,
   rebuilds, and recovery.

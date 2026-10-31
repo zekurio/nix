@@ -1,0 +1,35 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # The flake.lock PR is opened with GITHUB_TOKEN, which starts no
+  # pull_request run, so the update workflow calls this one on its branch.
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      # Evaluates adam and lilith, sachiel through its check, and runs the
+      # tests. abort-on-warn fails the run on any evaluation warning, such as
+      # a deprecation or a workaround that outlived the version it fixes.
+      - name: Check the flake
+        run: nix flake check --option abort-on-warn true
