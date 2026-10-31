@@ -97,7 +97,6 @@ in {
         then null
         else pkgs.ghostty
       );
-      enableFishIntegration = true;
       systemd.enable = false;
       settings =
         {

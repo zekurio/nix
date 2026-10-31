@@ -1,9 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}:
-lib.mkIf (pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.hostPlatform.system == "x86_64-linux") (let
+{pkgs, ...}: let
   rift = pkgs.callPackage ./_package.nix {};
 in {
   home.packages = [
@@ -36,4 +31,4 @@ in {
       end
     '';
   };
-})
+}

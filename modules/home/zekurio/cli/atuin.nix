@@ -2,7 +2,6 @@
   programs = {
     atuin = {
       enable = true;
-      enableFishIntegration = true;
       # The model picker cannot save its choice to the store-backed config,
       # so a selection lasts one session. Set ai.model here to change the
       # default instead.

@@ -7,7 +7,6 @@ in {
   home-manager.users.zekurio = {
     programs.keychain = {
       enable = true;
-      enableFishIntegration = true;
       keys = [sshKey];
     };
 

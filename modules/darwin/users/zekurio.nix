@@ -36,12 +36,6 @@ in {
     backupFileExtension = "backup";
     extraSpecialArgs = {inherit inputs;};
 
-    users.${username} = {
-      home = {
-        inherit username homeDirectory;
-      };
-
-      imports = [inputs.self.homeModules.zekurio];
-    };
+    users.${username}.imports = [inputs.self.homeModules.zekurio];
   };
 }

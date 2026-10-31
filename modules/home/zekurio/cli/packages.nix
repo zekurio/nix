@@ -4,9 +4,6 @@
     devenv
     envsubst
     gh
-    git
-    git-lfs
-    jujutsu
     jq
     nil
     nixd
