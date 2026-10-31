@@ -23,15 +23,15 @@
 
   # Codex fetches its model list from the provider, but vrouter answers in
   # OpenAI's format instead of Codex's catalog format, so Codex falls back
-  # to the catalog built into it. That one offers models vrouter refuses and
-  # hides Daybreak Blue. This copy, from the same Codex source, keeps the
-  # models enabled in vrouter's OpenAI section; keep the list in sync with
-  # them. modules/home/zekurio/cli/agents/vrouter.nix points Codex at it.
+  # to the catalog built into it, which offers models vrouter refuses. This
+  # copy, from the same Codex source, keeps the models vrouter's /v1/models
+  # lists; keep the two in sync. Daybreak Blue is enabled in vrouter but no
+  # account advertises it, so requests for it fail.
+  # modules/home/zekurio/cli/agents/vrouter.nix points Codex at it.
   codexModels =
     pkgs.runCommand "codex-models" {
       nativeBuildInputs = [pkgs.jq];
       allowed = builtins.toJSON [
-        "gpt-daybreak-blue-latest"
         "gpt-6-astra"
         "gpt-6-luna"
         "gpt-6-sol"
@@ -41,7 +41,7 @@
     } ''
       install -d $out/share/codex
       jq --argjson allowed "$allowed" \
-        '.models |= map(select(.slug | IN($allowed[])) | .visibility = "list")' \
+        '.models |= map(select(.slug | IN($allowed[])))' \
         ${llmAgents.codex.src}/codex-rs/models-manager/models.json > $out/share/codex/models.json
     '';
   profile = clis ++ tools ++ [codexModels];

@@ -145,11 +145,14 @@ chmod 600 ~/.config/vrouter/api-key
 Then run Home Manager's activation again. On NixOS that needs no rebuild:
 
 ```bash
-sudo systemctl restart home-manager-zekurio.service  # adam, lilith
+sudo systemctl restart home-manager-zekurio.service  # lilith
 nh darwin switch                                     # sachiel
 ```
 
-Sessions that started before keep their old credentials. On `adam`, restart
+`adam` takes its key from sops instead of the file. Put it under
+`agents_vrouter_api_key` with `sops secrets/adam.yaml` and deploy. A replaced
+key needs no restart; the CLIs read the file again on their own. Sessions
+that started before the first key keep their old credentials. On `adam`, restart
 `t3code.service` once its sessions can end.
 
 Without the key file, both CLIs stay on their logins. To go back to them,

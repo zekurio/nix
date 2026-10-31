@@ -16,12 +16,12 @@ in {
       description = "vrouter origin. Anthropic clients append /v1/messages themselves; OpenAI clients need /v1.";
     };
 
-    # Issued on vrouter's API keys page and placed by hand on each machine.
-    # Every client reads it with a command: T3 Code and other GUI launches
-    # never see shell variables, and the key stays out of the store.
+    # Issued on vrouter's API keys page, one per machine. It is placed by
+    # hand except on adam, which takes it from sops. Every client reads it
+    # with a command: T3 Code and other GUI launches never see shell
+    # variables, and the key stays out of the store.
     keyFile = lib.mkOption {
       type = lib.types.str;
-      readOnly = true;
       default = "${config.home.homeDirectory}/.config/vrouter/api-key";
       description = "vrouter client key for this machine.";
     };
