@@ -30,4 +30,10 @@
       "zekurio.cachix.org-1:mv0mACvSLZtBkXXh5YDPPXmFBJ/eO+VkSzep6LJZrAg="
     ];
   };
+
+  # Hosts that keep generations for a different time override these.
+  nix.gc = {
+    automatic = lib.mkDefault true;
+    options = lib.mkDefault "--delete-older-than 7d";
+  };
 }

@@ -21,19 +21,16 @@ in {
 
   programs.nix-ld.enable = true;
 
-  # Substituters, experimental features and store optimisation are shared
-  # across platforms and live in modules/nix.
+  # Substituters, experimental features, store optimisation and garbage
+  # collection are shared across platforms and live in modules/common/nix.nix.
+  # nix-darwin schedules collection with `interval` instead of `dates`.
   nix = {
     settings.trusted-users = [
       "root"
       "@wheel"
     ];
 
-    gc = {
-      automatic = mkDefault true;
-      dates = mkDefault "weekly";
-      options = mkDefault "--delete-older-than 7d";
-    };
+    gc.dates = mkDefault "weekly";
   };
 
   time.timeZone = "Europe/Vienna";
