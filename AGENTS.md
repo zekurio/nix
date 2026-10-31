@@ -32,8 +32,8 @@
 - Never add a README that describes what a module does. Comments next to the
   code carry that. `README.md` only lists manual procedures such as bootstrap,
   rebuilds, and recovery.
-- Keep substituters in sync in `flake.nix`'s static `nixConfig` and
-  `modules/common/nix.nix`.
+- Add substituters to `flake.nix`'s static `nixConfig` only;
+  `modules/common/nix.nix` reads them from there.
 - Declare service exposure in the service module through
   `services.homelab.caddy.virtualHosts.<name>`. Vhosts are private by default;
   set `public = true` deliberately. Private services sharing a public domain

@@ -1,8 +1,8 @@
 {
   description = "Nix configurations for my NixOS hosts and macOS";
 
-  # nixConfig is parsed statically and cannot import modules/common/nix.nix;
-  # keep this list in sync with that module by hand.
+  # Parsed statically, so it has to stay a literal. modules/common/nix.nix
+  # reads these caches back for the daemon of every host.
   nixConfig = {
     extra-substituters = [
       "https://cache.numtide.com"
