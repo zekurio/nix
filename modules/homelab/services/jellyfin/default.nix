@@ -10,26 +10,14 @@
   # mostly ignore redirects, so the old name keeps serving until every
   # client has been pointed at the new one.
   legacyDomain = config.services.homelab.domains.schnitzelflix;
-  port = config.services.homelab.jellyfin.port;
-  serviceUser = "jellyfin";
-  serviceGroup = "jellyfin";
+  port = 8096;
 in {
   options.services.homelab.jellyfin = {
     enable = lib.mkEnableOption "Jellyfin media server with Caddy integration";
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8096;
-      description = "Local HTTP port Jellyfin listens on.";
-    };
     baseUrl = lib.mkOption {
       type = lib.types.str;
-      default = "http://127.0.0.1:${toString config.services.homelab.jellyfin.port}";
+      default = "http://127.0.0.1:${toString port}";
       description = "Internal URL other services use to reach the Jellyfin API.";
-    };
-    publicUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "https://${domain}";
-      description = "Public URL users and external clients use to reach Jellyfin.";
     };
   };
 
@@ -39,31 +27,15 @@ in {
       # Native ports stay closed; external clients reach Jellyfin through
       # the public Caddy vhost on 443.
       openFirewall = false;
-      dataDir = "/var/lib/jellyfin";
-      cacheDir = "/var/cache/jellyfin";
     };
 
-    environment.systemPackages = with pkgs; [
-      jellyfin
-      jellyfin-web
-      jellyfin-ffmpeg
-    ];
-
-    systemd.tmpfiles.rules = [
-      "d /var/cache/jellyfin 2775 ${serviceUser} ${serviceGroup} -"
-    ];
+    environment.systemPackages = [pkgs.jellyfin-ffmpeg];
 
     systemd.services.jellyfin = {
       environment = {
         LIBVA_DRIVER_NAME = "iHD";
       };
-      serviceConfig = {
-        UMask = lib.mkForce mediaShare.umask;
-        ReadWritePaths = [
-          "/var/cache/jellyfin"
-          "/var/lib/jellyfin"
-        ];
-      };
+      serviceConfig.UMask = lib.mkForce mediaShare.umask;
     };
 
     users.users.jellyfin.extraGroups = [

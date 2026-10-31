@@ -6,7 +6,6 @@
   cfg = config.services.homelab.seerr;
   domain = "requests.${config.services.homelab.domains.schnitzelflix}";
   port = 5055;
-  stateDir = "/var/lib/seerr";
 in {
   options.services.homelab.seerr = {
     enable = lib.mkEnableOption "Seerr media request manager with Caddy integration";
@@ -21,7 +20,8 @@ in {
     services.seerr = {
       enable = true;
       inherit port;
-      configDir = stateDir;
+      # Keeps the config in /var/lib/seerr instead of the old jellyseerr path.
+      stateRevision = 1;
     };
 
     systemd.services.seerr = {
@@ -29,7 +29,6 @@ in {
         LOG_LEVEL = "debug";
         TZ = config.time.timeZone;
       };
-      serviceConfig.StateDirectory = lib.mkForce "seerr";
     };
 
     services.homelab.backup.stopUnits = ["seerr.service"];

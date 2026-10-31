@@ -7,8 +7,6 @@
   downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
   domain = "admin.${config.services.homelab.domains.zekurio}";
   port = 6789;
-  serviceUser = "sabnzbd";
-  serviceGroup = "sabnzbd";
   mediaShare = config.services.homelab.mediaShare;
 in {
   options.services.homelab.sabnzbd = {
@@ -23,8 +21,6 @@ in {
   config = lib.mkIf cfg.enable {
     services.sabnzbd = {
       enable = true;
-      user = serviceUser;
-      group = serviceGroup;
       configFile = null;
       allowConfigWrite = true;
       settings = {
@@ -88,10 +84,6 @@ in {
       ];
       UMask = lib.mkForce mediaShare.umask;
     };
-
-    systemd.tmpfiles.rules = [
-      "f /var/lib/sabnzbd/sabnzbd.ini 0600 ${serviceUser} ${serviceGroup} -"
-    ];
 
     services.homelab.backup.stopUnits = ["sabnzbd.service"];
 

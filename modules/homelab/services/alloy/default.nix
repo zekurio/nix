@@ -13,7 +13,6 @@
     thumbnails = "/var/lib/alloy/assets/thumbnails";
     assets = "/var/lib/alloy/assets/users";
   };
-  upstreamPackage = inputs.alloy.packages.${pkgs.stdenv.hostPlatform.system}.alloy;
 in {
   imports = [
     inputs.alloy.nixosModules.default
@@ -32,8 +31,6 @@ in {
       # trusts no upstream proxy, so it replaces X-Forwarded-For with the
       # peer it saw and that header always carries the real client address.
       trustedProxies = ["127.0.0.1"];
-      package = upstreamPackage;
-      ffmpegPackage = pkgs.jellyfin-ffmpeg;
       extraGroups = [
         "render"
         "video"
@@ -52,17 +49,6 @@ in {
 
       limits.defaultStorageQuotaBytes = 16106127360;
     };
-
-    systemd.tmpfiles.rules = let
-      user = config.services.alloy-server.user;
-      group = config.services.alloy-server.group;
-    in [
-      "d /tank/alloy 0750 ${user} ${group} - -"
-      "d ${storageDirs.clips} 0750 ${user} ${group} - -"
-      "d /var/lib/alloy/assets 0750 ${user} ${group} - -"
-      "d ${storageDirs.thumbnails} 0750 ${user} ${group} - -"
-      "d ${storageDirs.assets} 0750 ${user} ${group} - -"
-    ];
 
     systemd.services.alloy-storage-dirs = let
       user = config.services.alloy-server.user;
