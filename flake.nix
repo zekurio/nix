@@ -65,14 +65,6 @@
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Ghostty main for KWin's ext-background-effect blur; 1.3.1 only speaks the
-    # org_kde_kwin_blur protocol that Plasma 6.8 dropped. ghostty.cachix.org
-    # holds no builds of main, so it builds locally against our nixpkgs.
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-      inputs.home-manager.follows = "home-manager";
-    };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-linux-builder.url = "github:input-output-hk/nix-linux-builder";
 

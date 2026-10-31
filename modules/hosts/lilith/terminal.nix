@@ -1,12 +1,6 @@
-{
-  inputs,
-  lib,
-  pkgs,
-  ...
-}: {
+{lib, ...}: {
   home-manager.users.zekurio.programs.ghostty = {
     enable = true;
-    package = inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default;
     # The shared profile's opacity barely shows the blur KWin draws behind
     # Ghostty. Ghostty's settings type keeps duplicate keys, so a plain
     # definition would write the option twice instead of replacing it.

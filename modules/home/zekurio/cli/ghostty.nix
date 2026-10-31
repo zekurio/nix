@@ -91,12 +91,11 @@ in {
 
     programs.ghostty = {
       enable = lib.mkDefault pkgs.stdenv.hostPlatform.isDarwin;
-      # Hosts may swap in another build, such as lilith's Ghostty main.
-      package = lib.mkDefault (
+      # macOS installs Ghostty from Homebrew.
+      package =
         if pkgs.stdenv.hostPlatform.isDarwin
         then null
-        else pkgs.ghostty
-      );
+        else pkgs.ghostty;
       systemd.enable = false;
       settings =
         {
