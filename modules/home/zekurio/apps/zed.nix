@@ -1,6 +1,4 @@
-let
-  vrouterUrl = "https://vrouter.zekurio.me";
-in {
+{config, ...}: {
   # Config only; the binary comes from the host.
   programs.zed-editor = {
     enable = true;
@@ -20,11 +18,11 @@ in {
       "toml"
       "xml"
     ];
-    # Enter the key from ~/.config/vrouter/api-key in each provider's Zed
+    # Enter the key from agents.vrouter.keyFile in each provider's Zed
     # settings. Zed stores it in the system keychain, outside the Nix store.
     userSettings.language_models = {
       anthropic_compatible."Anthropic (vrouter)" = {
-        api_url = vrouterUrl;
+        api_url = config.agents.vrouter.url;
         available_models = map (model:
           {
             max_tokens = 1000000;

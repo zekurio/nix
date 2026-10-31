@@ -129,6 +129,35 @@ Enable Secure Boot and reboot. `sudo sbctl status` should report Secure Boot
 enabled and Setup Mode disabled. Test both systems again. Back up `/var/lib/sbctl`
 securely; it contains private signing keys. Never commit it.
 
+## Connect the agents to vrouter
+
+Claude Code and Codex, and T3 Code through them, send their requests to
+vrouter instead of their own logins once the machine has a vrouter client key.
+Create one key per machine on the API keys page of
+`https://vrouter.zekurio.me` and save it:
+
+```bash
+mkdir -p ~/.config/vrouter
+$EDITOR ~/.config/vrouter/api-key
+chmod 600 ~/.config/vrouter/api-key
+```
+
+Then run Home Manager's activation again. On NixOS that needs no rebuild:
+
+```bash
+sudo systemctl restart home-manager-zekurio.service  # adam, lilith
+nh darwin switch                                     # sachiel
+```
+
+Sessions that started before keep their old credentials. On `adam`, restart
+`t3code.service` once its sessions can end.
+
+Without the key file, both CLIs stay on their logins. To go back to them,
+delete the key file, then remove `apiKeyHelper`, `env.ANTHROPIC_BASE_URL`,
+`env.ENABLE_TOOL_SEARCH` and `env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from
+`~/.claude/settings.json`, and `model_provider`, `model_catalog_json` and the
+`model_providers.vrouter` tables from `~/.codex/config.toml`.
+
 ## Edit secrets
 
 Edit encrypted host secrets with sops, then rebuild the host:
