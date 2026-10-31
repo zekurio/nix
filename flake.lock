@@ -777,11 +777,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793374122,
-        "narHash": "sha256-Sz9hTggkW1vxAFAvCBw5T6eU33yvO/EE9rACa+EeGI8=",
+        "lastModified": 1793447340,
+        "narHash": "sha256-JTrzNtjbE7fOEGXWW+bZO8+CkQc9n4emQh4vXV9b2pU=",
         "owner": "zekurio",
         "repo": "orianna",
-        "rev": "797a6377599a98974cd203720233145119363ceb",
+        "rev": "8c38636949867275d6b6abcf8bce1ad265a662da",
         "type": "github"
       },
       "original": {
