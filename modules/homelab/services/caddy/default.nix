@@ -8,47 +8,21 @@
 
   acmeEmail = "admin@zekurio.me";
 
-  # Helper to replace generic matchers with service-specific ones
-  makeMatchersUnique = name: config: let
-    # Replace @blocked with @blocked_<servicename>
-    uniqueBlockedMatcher = "@blocked_${name}";
-  in
-    builtins.replaceStrings ["@blocked"] [uniqueBlockedMatcher] config;
-
-  # Group virtual hosts by domain and merge their configurations
-  groupedHosts = lib.foldl' (
-    acc: name: let
-      hostCfg = cfg.virtualHosts.${name};
-      domain = hostCfg.domain or name;
-      existing =
-        acc.${
-          domain
-        } or {
-          reverseProxies = [];
-          extraConfigs = [];
-          public = false;
-        };
-      # Make matchers unique to avoid conflicts
-      uniqueExtraConfig =
-        if hostCfg.extraConfig != ""
-        then makeMatchersUnique name hostCfg.extraConfig
-        else "";
-    in
-      acc
-      // {
-        ${domain} = {
-          reverseProxies =
-            existing.reverseProxies
-            ++ (lib.optional (hostCfg.reverseProxy or null != null) hostCfg.reverseProxy);
-          extraConfigs = existing.extraConfigs ++ (lib.optional (uniqueExtraConfig != "") uniqueExtraConfig);
-          # One public entry makes the whole domain public; a private
-          # service sharing the domain must restrict its own paths in
-          # extraConfig with a `@blocked` matcher (renamed per service by
-          # makeMatchersUnique when merging).
-          public = existing.public || hostCfg.public;
-        };
-      }
-  ) {} (builtins.attrNames cfg.virtualHosts);
+  # Services sharing a domain merge into one site. Each service's `@blocked`
+  # matcher is renamed after the service so merged sites keep them apart.
+  sites =
+    lib.mapAttrs (_: hosts: {
+      reverseProxies = lib.filter (proxy: proxy != null) (map (host: host.reverseProxy) hosts);
+      extraConfigs =
+        map (host: builtins.replaceStrings ["@blocked"] ["@blocked_${host.name}"] host.extraConfig)
+        (lib.filter (host: host.extraConfig != "") hosts);
+      # One public entry makes the whole domain public; a private service
+      # sharing the domain must restrict its own paths in extraConfig with
+      # a `@blocked` matcher.
+      public = lib.any (host: host.public) hosts;
+    })
+    (lib.groupBy (host: host.domain)
+      (lib.mapAttrsToList (name: host: host // {inherit name;}) cfg.virtualHosts));
 in {
   options.services.homelab.caddy = {
     privateRanges = lib.mkOption {
@@ -56,12 +30,6 @@ in {
       default = ["10.0.0.0/24" "100.64.0.0/10" "fd7a:115c:a1e0::/48" "127.0.0.1" "::1"];
       description = "Source ranges allowed private access: the home LAN, Tailscale, and loopback.";
     };
-
-    enable =
-      lib.mkEnableOption "Caddy reverse proxy with Cloudflare DNS"
-      // {
-        default = true;
-      };
 
     virtualHosts = lib.mkOption {
       type = lib.types.attrsOf (
@@ -98,7 +66,14 @@ in {
     };
   };
 
-  config = lib.mkIf (cfg.enable && cfg.virtualHosts != {}) {
+  config = lib.mkIf (cfg.virtualHosts != {}) {
+    assertions =
+      lib.mapAttrsToList (domain: site: {
+        assertion = lib.length site.reverseProxies <= 1;
+        message = "services.homelab.caddy: more than one service sets reverseProxy for ${domain}; proxy the others under their own paths in extraConfig.";
+      })
+      sites;
+
     services.caddy = {
       enable = true;
       package = pkgs.caddy.withPlugins {
@@ -114,7 +89,7 @@ in {
         }
       '';
       virtualHosts =
-        lib.mapAttrs (domain: hostCfg: {
+        lib.mapAttrs (domain: site: {
           # Caddy keeps ten rolled 100 MiB files per site for 90 days by
           # default. Two weeks is enough to look into a problem.
           logFormat = ''
@@ -136,17 +111,15 @@ in {
               dns cloudflare {env.CLOUDFLARE_API_TOKEN}
               resolvers 1.1.1.1 1.0.0.1
             }
-            ${lib.optionalString (!hostCfg.public) ''
+            ${lib.optionalString (!site.public) ''
               @not_local not remote_ip ${lib.concatStringsSep " " cfg.privateRanges}
               respond @not_local 404
             ''}
-            ${lib.concatStringsSep "\n" hostCfg.extraConfigs}
-            ${lib.optionalString (
-              hostCfg.reverseProxies != [] && builtins.length hostCfg.reverseProxies == 1
-            ) "reverse_proxy ${builtins.head hostCfg.reverseProxies}"}
+            ${lib.concatStringsSep "\n" site.extraConfigs}
+            ${lib.optionalString (site.reverseProxies != []) "reverse_proxy ${lib.head site.reverseProxies}"}
           '';
         })
-        groupedHosts;
+        sites;
     };
 
     # Access logs only explain the past; a restore needs none of them.
