@@ -41,10 +41,8 @@
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # Claude Code, Codex, OpenCode and T3 Code. The weekly flake.lock PR moves
-    # the pin; agents-update runs ahead of it and repeats this URL.
-    # Keep its own nixpkgs pin: cache.numtide.com only serves builds made
-    # against that pin.
+    # Claude Code, Codex and T3 Code. Keep its own nixpkgs pin:
+    # cache.numtide.com only serves builds made against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Shared agent skills.
     agent-stuff = {
@@ -181,12 +179,6 @@
 
     # The user modules of both platforms import this into Home Manager.
     homeModules.zekurio = import-tree ./modules/home/zekurio;
-
-    packages = forAllSystems (system:
-      import ./packages/agents.nix {
-        inherit inputs;
-        pkgs = pkgsFor system;
-      });
 
     formatter = forAllSystems (system: let
       pkgs = pkgsFor system;

@@ -5,8 +5,7 @@
 - Every `.nix` file under a directory of `modules/` is a module of the class
   that directory serves: NixOS, nix-darwin, or Home Manager. `flake.nix`
   imports the directories with `import-tree`, so there are no import lists.
-  `flake.nix` wires inputs, hosts, packages, and the formatter; `packages/`
-  holds the package outputs.
+  `flake.nix` wires inputs, hosts, and the formatter.
 - `modules/common/` holds modules shared by NixOS and nix-darwin; use only
   options both platforms define there. `modules/nixos/` and `modules/darwin/`
   hold each platform's base, `modules/homelab/` the homelab services that only

@@ -5,8 +5,8 @@
 }: {
   # T3 Code updates a provider with the provider's own updater. For the Nix
   # build of Claude Code that is `claude update`, which installs a native
-  # copy beside the agents profile. With update checks off, T3 Code never
-  # reports a provider as outdated, and agents-update moves the CLIs instead.
+  # copy beside the Nix build. With update checks off, T3 Code never
+  # reports a provider as outdated, and flake.lock moves the CLIs instead.
   # The server then uses the model catalog bundled with its build, so new
   # models arrive with the next T3 Code release.
   # The server rewrites settings.json when settings change in its UI, so

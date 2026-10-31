@@ -37,7 +37,7 @@ in {
   # memories.
   # The Nix wrapper sets DISABLE_AUTOUPDATER too, but a binary started
   # without it installs a self-updating copy into ~/.local/bin that shadows
-  # the agents profile; `autoUpdates = false` in ~/.claude.json does not
+  # the Nix build; `autoUpdates = false` in ~/.claude.json does not
   # stop native installs.
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     f="$HOME/.claude/settings.json"
@@ -49,8 +49,8 @@ in {
 
   # Codex stores the model, trust levels and TUI state in config.toml, so
   # merge here too. tomlq rewrites the whole file and drops any comments in
-  # it. Its update check only suggests npm or Homebrew; agents-update moves
-  # the binary instead.
+  # it. Its update check only suggests npm or Homebrew, while flake.lock
+  # moves the Nix build.
   home.activation.codexSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     f="$HOME/.codex/config.toml"
     run mkdir -p "$(dirname "$f")"

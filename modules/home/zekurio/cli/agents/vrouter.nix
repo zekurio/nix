@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -7,6 +8,29 @@
   cfg = config.agents.vrouter;
   keyFile = lib.escapeShellArg cfg.keyFile;
   cat = lib.getExe' pkgs.coreutils "cat";
+  inherit (inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}) codex;
+
+  # Codex fetches its model list from the provider, but vrouter answers in
+  # OpenAI's format instead of Codex's catalog format, so Codex falls back
+  # to the catalog built into it, which offers models vrouter refuses. This
+  # copy, from the same Codex source, keeps the models vrouter's /v1/models
+  # lists; keep the two in sync. Daybreak Blue is enabled in vrouter but no
+  # account advertises it, so requests for it fail.
+  codexModels =
+    pkgs.runCommand "codex-models.json" {
+      nativeBuildInputs = [pkgs.jq];
+      allowed = builtins.toJSON [
+        "gpt-6-astra"
+        "gpt-6-luna"
+        "gpt-6-sol"
+        "gpt-6.1-terra"
+        "gpt-6.1-sol"
+      ];
+    } ''
+      jq --argjson allowed "$allowed" \
+        '.models |= map(select(.slug | IN($allowed[])))' \
+        ${codex.src}/codex-rs/models-manager/models.json > $out
+    '';
 in {
   options.agents.vrouter = {
     url = lib.mkOption {
@@ -49,14 +73,12 @@ in {
     '';
 
     # A custom provider needs no OpenAI login, so T3 Code skips that check.
-    # The model catalog sits in the agents profile so that it follows the
-    # Codex build agents-update installs; packages/agents.nix explains it.
     codexVrouter = lib.hm.dag.entryAfter ["codexSettings"] ''
       if [ -r ${keyFile} ]; then
         f="$HOME/.codex/config.toml"
         tmp=$(mktemp)
         ${lib.getExe' pkgs.yq "tomlq"} -t --arg cat ${cat} --arg key ${keyFile} --arg url ${lib.escapeShellArg "${cfg.url}/v1"} \
-          --arg catalog ${lib.escapeShellArg "${config.agents.profile}/share/codex/models.json"} \
+          --arg catalog ${codexModels} \
           '. * {model_provider: "vrouter", model_catalog_json: $catalog, model_providers: {vrouter: {name: "vrouter", base_url: $url, auth: {command: $cat, args: [$key]}}}}' "$f" > "$tmp" && run mv "$tmp" "$f"
       fi
     '';
