@@ -29,11 +29,10 @@
     ];
     extraModprobeConfig = ''
       softdep nct6687 pre: i2c_i801
-      options nct6687
     '';
     extraModulePackages = [
       config.boot.kernelPackages.zenpower
-      (config.boot.kernelPackages.callPackage ./_nct6687d.nix {})
+      config.boot.kernelPackages.nct6687d
     ];
     blacklistedKernelModules = [
       "k10temp"
