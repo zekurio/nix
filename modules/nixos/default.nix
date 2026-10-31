@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: let
+{lib, ...}: let
   inherit (lib) mkDefault;
 in {
   i18n = {
@@ -17,7 +13,6 @@ in {
   };
 
   hardware.enableRedistributableFirmware = mkDefault true;
-  hardware.firmware = mkDefault [pkgs.linux-firmware];
 
   programs.nix-ld.enable = true;
 

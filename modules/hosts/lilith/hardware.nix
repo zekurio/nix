@@ -1,16 +1,11 @@
 {
   config,
   inputs,
-  modulesPath,
   pkgs,
   ...
 }: let
   system = pkgs.stdenv.hostPlatform.system;
 in {
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
-
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # The cached CachyOS preset keeps its upstream kernel configuration. Do not

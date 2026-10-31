@@ -1,12 +1,10 @@
 {
   config,
   inputs,
-  modulesPath,
   pkgs,
   ...
 }: {
   imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
     inputs.autoaspm.nixosModules.default
     inputs.ucodenix.nixosModules.default
   ];
