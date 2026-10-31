@@ -99,6 +99,9 @@ in {
       owner = config.services.alloy-server.user;
       group = config.services.alloy-server.group;
       mode = "0400";
+      # EnvironmentFile is read once at start, so a rotated secret would
+      # otherwise stay unused until an unrelated restart.
+      restartUnits = ["alloy-server.service"];
     };
 
     services.homelab.backup.stopUnits = ["alloy-server.service"];

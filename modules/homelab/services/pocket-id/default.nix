@@ -26,6 +26,9 @@ in {
       owner = config.services.pocket-id.user;
       group = config.services.pocket-id.group;
       mode = "0400";
+      # EnvironmentFile is read once at start, so a rotated secret would
+      # otherwise stay unused until an unrelated restart.
+      restartUnits = ["pocket-id.service"];
     };
 
     services.homelab.backup.stopUnits = ["pocket-id.service"];

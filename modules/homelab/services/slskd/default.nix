@@ -96,6 +96,9 @@ in {
           owner = "slskd";
           group = "slskd";
           mode = "0400";
+          # EnvironmentFile is read once at start, so a rotated secret would
+          # otherwise stay unused until an unrelated restart.
+          restartUnits = ["slskd.service"];
         };
         slskd_api_key = {};
       };
