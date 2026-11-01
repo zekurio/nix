@@ -102,6 +102,10 @@
     # following ours would rebuild every Fluxer service, with full LTO, on
     # each weekly flake.lock bump.
     fluxer-nix.url = "github:zekurio/fluxer-nix";
+    # The knot. Keep Tangled's own nixpkgs pin (a stable release) that its
+    # Rust build is tested against. No cache serves it, so adam compiles
+    # knot-server on each bump of this input.
+    tangled.url = "git+https://tangled.org/did:plc:j5hmlfdrwkvtxm7cjmu7j2is";
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
