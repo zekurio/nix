@@ -61,8 +61,6 @@
 - Run `nix fmt` and `nix flake check` before completing code changes.
   Build a host only when the changes warrant it.
 - Do not update flake inputs unless required by the task.
-- Diff against `main` or `origin/main`.
-- Branch names use at most three hyphen-separated words, without slashes or
-  type prefixes.
-- Commits and PR titles use `type(scope): summary`, with optional scope.
+- Work directly on `main`. Never create branches; diff against `origin/main`.
+- Commits use `type(scope): summary`, with optional scope.
   Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`.
