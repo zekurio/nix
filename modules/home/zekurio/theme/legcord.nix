@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (config.theme) rgb grey mix variants;
@@ -52,23 +53,39 @@
       // backgrounds.${variant.appearance});
 
   declarations = attrs: lib.concatStrings (lib.mapAttrsToList (name: value: "  --${name}: ${value};\n") attrs);
-in {
-  programs.vesktop.vencord = {
-    # DiscordRecolor only swaps Discord's colour variables and keeps its
-    # layout. It tracks Discord's variable names across client updates.
-    # It feeds the same variables to light and dark mode, so the light
-    # palette overrides them while Discord's theme class sits on <html>.
-    themes.${themeName} = ''
-      @import url("https://mwittrien.github.io/BetterDiscordAddons/Themes/DiscordRecolor/DiscordRecolor.css");
 
-      :root {
-      ${declarations (colors variants.dark // {settingsicons = "0";})}}
+  # DiscordRecolor only swaps Discord's colour variables and keeps its
+  # layout. It tracks Discord's variable names across client updates.
+  # It feeds the same variables to light and dark mode, so the light
+  # palette overrides them while Discord's theme class sits on <html>.
+  # The remote @import needs Legcord's CSP setting at its default, "none".
+  css = pkgs.writeText "legcord-${themeName}.css" ''
+    @import url("https://mwittrien.github.io/BetterDiscordAddons/Themes/DiscordRecolor/DiscordRecolor.css");
 
-      :root.theme-light {
-      ${declarations (colors variants.light)}}
-    '';
-    # Vencord rewrites its settings file at runtime, so merge into it.
-    mutableSettings = true;
-    settings.enabledThemes = ["${themeName}.css"];
+    :root {
+    ${declarations (colors variants.dark // {settingsicons = "0";})}}
+
+    :root.theme-light {
+    ${declarations (colors variants.light)}}
+  '';
+
+  manifest = (pkgs.formats.json {}).generate "legcord-${themeName}.json" {
+    inherit (config.theme) name;
+    author = "zekurio";
+    theme = "theme.css";
+    enabled = true;
   };
+
+  themesDir =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "${config.home.homeDirectory}/Library/Application Support/legcord/themes"
+    else "${config.xdg.configHome}/legcord/themes";
+in {
+  # Legcord rewrites manifest.json when the theme is toggled, so copy the
+  # files instead of linking them read-only with home.file. A rebuild turns
+  # the theme back on.
+  home.activation.legcordTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    run install -Dm644 ${manifest} "${themesDir}/${themeName}/manifest.json"
+    run install -Dm644 ${css} "${themesDir}/${themeName}/theme.css"
+  '';
 }

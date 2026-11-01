@@ -35,9 +35,9 @@ nh darwin switch  # sachiel
 with any git flake.
 
 `lilith` also builds `main` every day and sets it as the boot default without
-switching, so merging the weekly `flake.lock` PR is enough to update it on the
+switching, so the daily `flake.lock` update CI pushes to `main` reaches it on the
 next reboot. A reboot also drops any generation switched to from unpushed
-local changes. `sachiel` needs `nh darwin switch` after a merge.
+local changes. `sachiel` needs `git pull` and `nh darwin switch`.
 
 If `nh` is unavailable, rebuild directly. Keep `path:` so root can read the
 user-owned checkout:
@@ -131,8 +131,8 @@ securely; it contains private signing keys. Never commit it.
 
 ## Connect the agents to vrouter
 
-Claude Code and Codex, and T3 Code through them, send their requests to
-vrouter instead of their own logins once the machine has a vrouter client key.
+pi, and T3 Code through it, sends Anthropic and OpenAI requests to vrouter
+instead of pi's own logins once the machine has a vrouter client key.
 Create one key per machine on the API keys page of
 `https://vrouter.zekurio.me` and save it:
 
@@ -151,15 +151,38 @@ nh darwin switch                                     # sachiel
 
 `adam` takes its key from sops instead of the file. Put it under
 `agents_vrouter_api_key` with `sops secrets/adam.yaml` and deploy. A replaced
-key needs no restart; the CLIs read the file again on their own. Sessions
+key needs no restart; pi reads the file again on every request. Sessions
 that started before the first key keep their old credentials. On `adam`, restart
 `t3code.service` once its sessions can end.
 
-Without the key file, both CLIs stay on their logins. To go back to them,
-delete the key file, then remove `apiKeyHelper`, `env.ANTHROPIC_BASE_URL`,
-`env.ENABLE_TOOL_SEARCH` and `env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from
-`~/.claude/settings.json`, and `model_provider`, `model_catalog_json` and the
-`model_providers.vrouter` tables from `~/.codex/config.toml`.
+A login stored with `/login` outranks the key and goes to vrouter, which
+rejects it. Run `/logout` for `anthropic` and `openai` in pi once the key is in
+place.
+
+Without the key file, pi stays on its logins. To go back to them, delete the
+key file, then remove `providers.anthropic` and `providers.openai` from
+`~/.pi/agent/models.json` and `/login` again.
+
+## Enable pi's web tools
+
+pi's `web_search` and `web_extract` tools from agent-stuff call Firecrawl
+and stay off until the machine has a Firecrawl API key. Create one at
+`https://firecrawl.dev` and save it:
+
+```bash
+mkdir -p ~/.config/firecrawl
+$EDITOR ~/.config/firecrawl/api-key
+chmod 600 ~/.config/firecrawl/api-key
+```
+
+pi reads the file when it starts, so new sessions pick up the key without a
+rebuild.
+
+`adam` takes the key from sops instead of the file and shares it with
+Blitzcrank. Put it under `firecrawl_api_key` with `sops secrets/adam.yaml`,
+keep `FIRECRAWL_API_KEY` out of `blitzcrank_env`, and deploy. Blitzcrank
+restarts with the new key; restart `t3code.service` once its sessions can
+end.
 
 ## Edit secrets
 

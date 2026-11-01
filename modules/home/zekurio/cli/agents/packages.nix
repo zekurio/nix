@@ -9,10 +9,24 @@
   inherit (pkgs.stdenv.hostPlatform) isLinux system;
   llmAgents = inputs.llm-agents.packages.${system};
 
-  clis = [
-    llmAgents.claude-code
-    llmAgents.codex
-  ];
+  # Reads the key on every launch, so a replaced key needs only a new pi
+  # session. A FIRECRAWL_API_KEY already in the environment wins.
+  pi = pkgs.symlinkJoin {
+    name = "pi-firecrawl";
+    paths = [llmAgents.pi];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram "$out/bin/pi" --run ${lib.escapeShellArg ''
+        if [ -z "''${FIRECRAWL_API_KEY:-}" ] && [ -r ${lib.escapeShellArg cfg.firecrawl.keyFile} ]; then
+          FIRECRAWL_API_KEY="$(${lib.getExe' pkgs.coreutils "cat"} ${lib.escapeShellArg cfg.firecrawl.keyFile})"
+          export FIRECRAWL_API_KEY
+        fi
+      ''}
+    '';
+    inherit (llmAgents.pi) meta;
+  };
+
+  clis = [pi];
 
   # Tools agents reach for first; without them they fail and retry via `nix run`.
   tools = [

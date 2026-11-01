@@ -18,7 +18,7 @@
       libnotify
       mpv
       inputs.jellium-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
-      vesktop
+      legcord
       wl-clipboard
       zed-editor
     ];

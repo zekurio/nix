@@ -2,23 +2,21 @@ name: Update flake.lock
 
 on:
   schedule:
-    # Daily, early morning in Europe/Vienna, so the PR is ready to review
-    # during the day and lilith's nightly upgrade picks up a merge that same
-    # night. An open PR is updated in place rather than duplicated. Updates
-    # only reach adam and lilith, which both upgrade from main, once the PR
-    # is merged.
+    # Daily, early morning in Europe/Vienna. adam and lilith both upgrade
+    # from main, so a pushed update reaches them on their next upgrade.
     - cron: "15 4 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
-  pull-requests: write
+
+concurrency:
+  group: update-flake-lock
+  cancel-in-progress: false
 
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
-    outputs:
-      pull-request-number: ${{ steps.update.outputs.pull-request-number }}
 
     steps:
       - name: Check out repository
@@ -27,17 +25,29 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      - name: Update flake.lock and open PR
-        id: update
-        uses: DeterminateSystems/update-flake-lock@v28
-        with:
-          pr-title: "chore(flake): update flake.lock"
-          commit-msg: "chore(flake): update flake.lock"
-          pr-labels: dependencies
+      - name: Update flake.lock
+        run: nix flake update
 
-  check:
-    needs: update-flake-lock
-    if: needs.update-flake-lock.outputs.pull-request-number != ''
-    uses: ./.github/workflows/check.yml
-    with:
-      ref: update_flake_lock_action
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The update lands on main unreviewed, so it must pass the same check as
+      # a push. abort-on-warn fails the run when a workaround tied to one
+      # upstream release outlives it, and nothing is pushed.
+      - name: Check the flake
+        if: steps.diff.outputs.changed == 'true'
+        run: nix flake check --option abort-on-warn true
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(flake): update flake.lock" flake.lock
+          git push origin HEAD:main

@@ -106,6 +106,7 @@ in {
         ${config.sops.placeholder.blitzcrank_env}
         SEERR_API_KEY=${config.sops.placeholder.seerr_api_key}
         BLITZCRANK_MCP_TOKEN=${config.sops.placeholder.blitzcrank_mcp_token}
+        FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
       '';
       mode = "0400";
       # Rendering a changed template does not touch the unit, so without this
@@ -120,6 +121,9 @@ in {
       seerr_api_key = {};
       # Must match the token the MCP server checks on every request.
       blitzcrank_mcp_token = {};
+      # Shared with pi's web tools; modules/hosts/adam/agents.nix hands it
+      # to zekurio.
+      firecrawl_api_key = {};
     };
   };
 }

@@ -15,12 +15,12 @@
       "ghostty"
       "helium-browser"
       "iina"
+      "legcord"
       "mullvad-vpn"
       "notion"
       "steam"
       "t3-code"
       "tailscale-app"
-      "vesktop"
       "zed"
     ];
     caskArgs.appdir = "/Applications";

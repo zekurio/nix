@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793141657,
-        "narHash": "sha256-8remFWfVxkqopQ2Nl76XXjpv8foTjL7v3dNKwmsVUYI=",
+        "lastModified": 1793554160,
+        "narHash": "sha256-mZNsVSELCUgAvOg++gj2PcrIBb6Rb0uhbhMGtsJu2PM=",
         "owner": "zekurio",
         "repo": "agent-stuff",
-        "rev": "0d99876f8f0e0dfb3bd9829b11a011ae14490ca3",
+        "rev": "ae0f47756b8f8ab61b88584a6102caf9d93fca8b",
         "type": "github"
       },
       "original": {
