@@ -14,7 +14,9 @@ in {
       "nix-command"
       "flakes"
     ];
-    auto-optimise-store = true;
+    # Deduplicating on every store write slows builds and copies; the
+    # scheduled pass below links the same files in one batch.
+    auto-optimise-store = false;
     substituters = ["https://cache.nixos.org/"] ++ nixConfig.extra-substituters;
     # Both platforms add cache.nixos.org's key at the same priority; mkBefore
     # keeps our entries first in /etc/nix/nix.conf.
@@ -26,4 +28,6 @@ in {
     automatic = lib.mkDefault true;
     options = lib.mkDefault "--delete-older-than 7d";
   };
+
+  nix.optimise.automatic = true;
 }
