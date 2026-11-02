@@ -101,13 +101,13 @@ in {
     sops.secrets.admin_password = {
       group = adminGroup;
       mode = "0440";
-      restartUnits = [
-        "prowlarr.service"
-        "radarr.service"
-        "sabnzbd.service"
-        "slskd.service"
-        "sonarr.service"
-      ];
+      restartUnits = map (name: "${name}.service") (lib.filter (name: config.services.homelab.${name}.enable) [
+        "prowlarr"
+        "radarr"
+        "sabnzbd"
+        "slskd"
+        "sonarr"
+      ]);
     };
 
     sops.templates."slskd-admin.env" = lib.mkIf config.services.homelab.slskd.enable {
