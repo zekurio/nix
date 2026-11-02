@@ -84,9 +84,11 @@ in {
       };
       globalConfig = ''
         email ${acmeEmail}
-        acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} {
-          resolvers 1.1.1.1 1.0.0.1
-        }
+        # Every site's certificate comes from this DNS challenge. A
+        # resolvers block nested under acme_dns is silently dropped, so the
+        # resolvers need their own option.
+        acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        tls_resolvers 1.1.1.1 1.0.0.1
       '';
       virtualHosts =
         lib.mapAttrs (domain: site: {
@@ -107,10 +109,6 @@ in {
             # default matcher compresses only text-like types, leaving media
             # streams alone, and it skips WebSockets and flushes SSE as sent.
             encode zstd gzip
-            tls {
-              dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-              resolvers 1.1.1.1 1.0.0.1
-            }
             ${lib.optionalString (!site.public) ''
               @not_local not remote_ip ${lib.concatStringsSep " " cfg.privateRanges}
               respond @not_local 404
