@@ -21,6 +21,9 @@ in {
     # Both platforms add cache.nixos.org's key at the same priority; mkBefore
     # keeps our entries first in /etc/nix/nix.conf.
     trusted-public-keys = lib.mkBefore nixConfig.extra-trusted-public-keys;
+    # Curl's default lets one unreachable cache stall every lookup for
+    # minutes before Nix moves on to the next one.
+    connect-timeout = 5;
   };
 
   # Hosts that keep generations for a different time override these.
