@@ -20,13 +20,20 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
+      # Updating fetches every input, and smaller forges sometimes time out
+      # from the runner. A retry is safe: a failed update writes nothing.
       - name: Update flake.lock
-        run: nix flake update
+        run: |
+          for attempt in 1 2 3; do
+            if nix flake update --accept-flake-config; then exit 0; fi
+            [ "$attempt" -lt 3 ] && sleep $((attempt * 30))
+          done
+          exit 1
 
       - name: Check for changes
         id: diff
@@ -42,7 +49,7 @@ jobs:
       # upstream release outlives it, and nothing is pushed.
       - name: Check the flake
         if: steps.diff.outputs.changed == 'true'
-        run: nix flake check --option abort-on-warn true
+        run: nix flake check --accept-flake-config --option abort-on-warn true
 
       - name: Commit and push
         if: steps.diff.outputs.changed == 'true'

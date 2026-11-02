@@ -8,19 +8,34 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same ref makes the running check moot.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
+
+      # Inputs from smaller forges sometimes time out from the runner. Retry
+      # only the fetch, so a real evaluation failure still fails once.
+      - name: Fetch inputs
+        run: |
+          for attempt in 1 2 3; do
+            if nix flake archive --accept-flake-config; then exit 0; fi
+            [ "$attempt" -lt 3 ] && sleep $((attempt * 30))
+          done
+          exit 1
 
       # Evaluates adam and lilith, sachiel through its check, and runs the
       # tests. abort-on-warn fails the run on any evaluation warning, such as
       # a deprecation or a workaround that outlived the version it fixes.
       - name: Check the flake
-        run: nix flake check --option abort-on-warn true
+        run: nix flake check --accept-flake-config --option abort-on-warn true
