@@ -6,7 +6,7 @@
 }: let
   cfg = config.services.homelab.slskd;
   downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
-  domain = "admin.${config.services.homelab.domains.zekurio}";
+  domain = config.services.homelab.domains.admin;
   webPort = 5030;
   listenPort = 50300;
   mediaShare = config.services.homelab.mediaShare;

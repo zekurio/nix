@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  domain = "admin.${config.services.homelab.domains.zekurio}";
+  domain = config.services.homelab.domains.admin;
   port = 9696;
 in {
   options.services.homelab.prowlarr = {

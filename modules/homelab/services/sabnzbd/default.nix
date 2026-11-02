@@ -5,7 +5,7 @@
 }: let
   cfg = config.services.homelab.sabnzbd;
   downloadsRoot = config.services.homelab.mediaShare.downloadsRoot;
-  domain = "admin.${config.services.homelab.domains.zekurio}";
+  domain = config.services.homelab.domains.admin;
   port = 6789;
   mediaShare = config.services.homelab.mediaShare;
 in {
