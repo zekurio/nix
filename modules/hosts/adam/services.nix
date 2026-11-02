@@ -26,7 +26,6 @@
     fluxer.enable = true;
     immich.enable = true;
     jellyfin.enable = true;
-    knot.enable = true;
     inviterr.enable = true;
     mediaCleanup.enable = true;
     navidrome.enable = true;

@@ -126,19 +126,6 @@ in {
           User = lib.mkDefault "git";
         };
 
-        # Tangled's knot on adam. The router maps the public port 22 to its
-        # 2222, but AdGuard on Flint resolves this name to Adam's LAN address,
-        # where 22 is sshd, so we dial 2222 directly. Off home and tailnet
-        # that port is not forwarded. The knot looks up the keys published
-        # on the atproto account named by the SSH user, and rejects a client
-        # whose agent offers others first.
-        "knot.zekurio.me" = {
-          Port = 2222;
-          User = "zekurio.me";
-          IdentityFile = "~/.ssh/id_ed25519";
-          IdentitiesOnly = true;
-        };
-
         # AdGuard on Flint resolves this to Adam's LAN address. Away from
         # home, Flint's advertised subnet route carries that address over
         # Tailscale. HostKeyAlias keeps one known-host identity.
