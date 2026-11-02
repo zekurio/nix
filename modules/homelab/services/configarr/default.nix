@@ -11,6 +11,19 @@
   animeProfile = "[German] Anime HD Bluray + WEB";
   animeUhdProfile = "[German] Anime UHD+HD Bluray + WEB";
   remuxScore = 5000;
+
+  # Both workarounds are for the 1.30.1 package that tag v1.30.2 still
+  # builds: its pnpm deps hash no longer matches, and it predates the
+  # recyclarrRevision pin set in the config below.
+  upstream = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  package =
+    lib.warnIf (upstream.version != "1.30.1")
+    "modules/homelab/services/configarr/default.nix: configarr's package is now ${upstream.version}; drop the pnpmDeps hash override and the recyclarrRevision pin if it no longer needs them."
+    (upstream.overrideAttrs (old: {
+      pnpmDeps = old.pnpmDeps.overrideAttrs {
+        outputHash = "sha256-auz4JyfHJAOF+baLfV391HgBTua4AJFfX4CtTPh+0Sw=";
+      };
+    }));
 in {
   imports = [
     inputs.configarr.nixosModules.default
@@ -34,11 +47,7 @@ in {
 
     services.configarr = {
       enable = true;
-      package = inputs.configarr.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-        pnpmDeps = old.pnpmDeps.overrideAttrs {
-          outputHash = "sha256-auz4JyfHJAOF+baLfV391HgBTua4AJFfX4CtTPh+0Sw=";
-        };
-      });
+      inherit package;
       schedule = "*-*-* 05:00:00";
       environmentFile = config.sops.templates."configarr.env".path;
       config = ''
