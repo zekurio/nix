@@ -8,7 +8,6 @@
   host = config.networking.hostName;
   heartbeatCheck = "${host}-heartbeat";
   heartbeatSchedule = "*:0/5";
-  upgradeCheck = "${host}-upgrade";
 
   # `hc-ping SLUG [start|fail] < BODY`. The project's ping key and a slug
   # address a check, and `create=1` makes a missing check on its first ping.
@@ -24,15 +23,16 @@
   };
 
   # ExecStopPost learns how the run ended from SERVICE_RESULT.
-  upgradeResult = pkgs.writeShellScript "nixos-upgrade-ping" ''
-    if [ "$SERVICE_RESULT" = success ]; then
-      exec ${lib.getExe ping} ${upgradeCheck} </dev/null
-    fi
-    # healthchecks.io keeps the body, so the failure's log is a click away.
-    ${config.systemd.package}/bin/journalctl --output cat --lines 100 \
-      _SYSTEMD_INVOCATION_ID="$INVOCATION_ID" \
-      | ${lib.getExe ping} ${upgradeCheck} fail
-  '';
+  resultPing = slug:
+    pkgs.writeShellScript "hc-result-${slug}" ''
+      if [ "$SERVICE_RESULT" = success ]; then
+        exec ${lib.getExe ping} ${slug} </dev/null
+      fi
+      # healthchecks.io keeps the body, so the failure's log is a click away.
+      ${config.systemd.package}/bin/journalctl --output cat --lines 100 \
+        _SYSTEMD_INVOCATION_ID="$INVOCATION_ID" \
+        | ${lib.getExe ping} ${slug} fail
+    '';
 
   # A check created by its first ping expects one ping a day, whatever the
   # timer behind it. healthchecks.io parses OnCalendar itself, so each check
@@ -44,14 +44,7 @@
         grace = 15 * 60;
       };
     }
-    // lib.optionalAttrs config.system.autoUpgrade.enable {
-      ${upgradeCheck} = {
-        schedule = config.system.autoUpgrade.dates;
-        # Also the longest a run may take from its start ping, so it covers
-        # the timer's randomized delay and a build that misses the caches.
-        grace = 3 * 60 * 60;
-      };
-    };
+    // lib.mapAttrs' (_: unit: lib.nameValuePair unit.slug {inherit (unit) schedule grace;}) cfg.units;
 
   # Matching on the slug updates the check the pings already created. "*"
   # attaches every integration, as a check created by a ping gets.
@@ -99,43 +92,87 @@ in {
         project; keep it secret.
       '';
     };
+
+    units = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule ({name, ...}: {
+        options = {
+          slug = lib.mkOption {
+            type = lib.types.str;
+            default = "${host}-${name}";
+            description = "Slug of the service's check.";
+          };
+          schedule = lib.mkOption {
+            type = lib.types.str;
+            description = "When the service runs, as a systemd calendar expression.";
+          };
+          grace = lib.mkOption {
+            type = lib.types.ints.positive;
+            description = ''
+              Seconds past the schedule before a missing ping alerts. A run
+              also pings at its start, so this is the longest it may take.
+            '';
+          };
+        };
+      }));
+      default = {};
+      description = ''
+        Services, by unit name, that ping a check of their own at the start
+        and end of each run. The check alerts when a run fails, hangs past
+        its grace, or never starts, which onFailure cannot see.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    # healthchecks.io alerts once these pings stop. That covers the host
-    # being down or offline, which nothing on the host can report.
-    systemd.services.healthchecks-heartbeat = {
-      description = "Ping healthchecks.io while this host is up";
-      startAt = heartbeatSchedule;
-      serviceConfig = {
-        Type = "oneshot";
-        # A missed ping is what the check is there to notice, so a failed
-        # one does not also leave the unit failed.
-        ExecStart = "-${lib.getExe ping} ${heartbeatCheck}";
-      };
-    };
+    systemd.services = lib.mkMerge [
+      {
+        # healthchecks.io alerts once these pings stop. That covers the host
+        # being down or offline, which nothing on the host can report.
+        healthchecks-heartbeat = {
+          description = "Ping healthchecks.io while this host is up";
+          startAt = heartbeatSchedule;
+          serviceConfig = {
+            Type = "oneshot";
+            # A missed ping is what the check is there to notice, so a failed
+            # one does not also leave the unit failed.
+            ExecStart = "-${lib.getExe ping} ${heartbeatCheck}";
+          };
+        };
 
-    # The check definitions are part of the unit, so a switch that changes
-    # them runs it again. Unlike a ping, a failure here leaves the unit
-    # failed: a wrong schedule means false alerts or missed ones.
-    systemd.services.healthchecks-provision = {
-      description = "Set this host's healthchecks.io check schedules";
-      wantedBy = ["multi-user.target"];
-      wants = ["network-online.target"];
-      after = ["network-online.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = lib.getExe provision;
-      };
-    };
+        # The check definitions are part of the unit, so a switch that changes
+        # them runs it again. Unlike a ping, a failure here leaves the unit
+        # failed: a wrong schedule means false alerts or missed ones.
+        healthchecks-provision = {
+          description = "Set this host's healthchecks.io check schedules";
+          wantedBy = ["multi-user.target"];
+          wants = ["network-online.target"];
+          after = ["network-online.target"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = lib.getExe provision;
+          };
+        };
+      }
 
-    # The start ping lets healthchecks.io also flag a run that hangs.
-    systemd.services.nixos-upgrade = lib.mkIf config.system.autoUpgrade.enable {
-      serviceConfig = {
-        ExecStartPre = "-${lib.getExe ping} ${upgradeCheck} start";
-        ExecStopPost = "-${upgradeResult}";
-      };
+      # The start ping lets healthchecks.io also flag a run that hangs. The
+      # result ping runs last: a failing ExecStopPost before it skips the
+      # rest, so a run whose cleanup fails never reports success.
+      (lib.mapAttrs (_: unit: {
+          serviceConfig = {
+            ExecStartPre = lib.mkBefore ["-${lib.getExe ping} ${unit.slug} start"];
+            ExecStopPost = lib.mkAfter ["-${resultPing unit.slug}"];
+          };
+        })
+        cfg.units)
+    ];
+
+    modules.healthchecks.units.nixos-upgrade = lib.mkIf config.system.autoUpgrade.enable {
+      slug = "${host}-upgrade";
+      schedule = config.system.autoUpgrade.dates;
+      # Also covers the timer's randomized delay and a build that misses
+      # the caches.
+      grace = 3 * 60 * 60;
     };
   };
 }

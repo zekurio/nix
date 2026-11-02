@@ -223,5 +223,12 @@ in {
         TimeoutStopSec = "15min";
       };
     };
+
+    modules.healthchecks.units.backup-state = {
+      schedule = cfg.startAt;
+      # The window first waits for a running upgrade, then has the timeouts
+      # above to copy and to bring the services back.
+      grace = 3 * 60 * 60;
+    };
   };
 }

@@ -412,6 +412,7 @@ in {
     services.homelab.backup.stopUnits = ["configarr.service" "configarr.timer"];
 
     systemd.services.configarr = {
+      inherit (config.modules.notify) onFailure;
       after = ["radarr.service" "sonarr.service"];
       wants = [
         "radarr.service"

@@ -152,6 +152,14 @@ in {
       };
     };
 
+    # Started only by a successful window, so a failed copy also shows up
+    # here as a missing upload.
+    modules.healthchecks.units.restic-backups-offsite = {
+      schedule = cfg.startAt;
+      # The window's grace plus the upload, prune and 5% read-back.
+      grace = 5 * 60 * 60;
+    };
+
     systemd.services.restic-backups-offsite = {
       onFailure = config.modules.notify.onFailure;
       requires = ["restic-offsite-snapshots.service"];

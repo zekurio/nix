@@ -100,6 +100,7 @@ in {
       "mediaShare-user-library-acl.service"
     ];
     after = ["zfs-import.target"];
+    inherit (config.modules.notify) onFailure;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
