@@ -109,7 +109,11 @@ in {
       # On the 8 TB mirror, these caps leave about 240 GiB available beyond
       # ZFS's internal reserve even when every dataset reaches its quota.
       # tank/shares and tank/backups already include their child datasets.
+      # Every dataset inherits atime and compression from the pool root.
+      ${zfs} set atime=off compression=zstd tank
       ${ensureDataset "tank/media" "6700G"}
+      # Large files read sequentially. Applies only to newly written data.
+      ${zfs} set recordsize=1M tank/media
       ${ensureDataset "tank/immich" "50G"}
       ${lib.optionalString config.services.homelab.fluxer.enable ''
         ${ensureDataset "tank/fluxer" "100G"}
