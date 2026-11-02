@@ -57,13 +57,4 @@ in {
 
     groups.${username}.gid = 1000;
   };
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    backupFileExtension = "backup";
-    extraSpecialArgs = {inherit inputs;};
-
-    users.${username}.imports = [inputs.self.homeModules.zekurio];
-  };
 }

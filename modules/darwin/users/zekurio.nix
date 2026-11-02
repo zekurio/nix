@@ -29,13 +29,4 @@ in {
     home = homeDirectory;
     shell = pkgs.fish;
   };
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    backupFileExtension = "backup";
-    extraSpecialArgs = {inherit inputs;};
-
-    users.${username}.imports = [inputs.self.homeModules.zekurio];
-  };
 }
