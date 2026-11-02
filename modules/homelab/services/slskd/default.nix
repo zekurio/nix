@@ -117,10 +117,20 @@ in {
       "z ${profilePicture} 0644 slskd slskd -"
     ];
 
-    systemd.services.slskd.serviceConfig = {
-      EnvironmentFile = lib.mkAfter [config.sops.templates."slskd-api.env".path];
-      SupplementaryGroups = [mediaShare.group];
-      UMask = lib.mkForce mediaShare.umask;
+    # Since .NET 10.0.13, named mutexes are per-user and their backing files
+    # live in $XDG_RUNTIME_DIR, else in the passwd home (/var/empty for this
+    # user, read-only). slskd takes a singleton mutex at startup and exits 0
+    # when it can't, so give it a private runtime dir.
+    # https://github.com/dotnet/runtime/issues/135726
+    systemd.services.slskd = {
+      environment.XDG_RUNTIME_DIR = "/run/slskd";
+      serviceConfig = {
+        EnvironmentFile = lib.mkAfter [config.sops.templates."slskd-api.env".path];
+        RuntimeDirectory = "slskd";
+        RuntimeDirectoryMode = "0700";
+        SupplementaryGroups = [mediaShare.group];
+        UMask = lib.mkForce mediaShare.umask;
+      };
     };
 
     # The whole admin domain is LAN/tailnet-only, so no per-path source
