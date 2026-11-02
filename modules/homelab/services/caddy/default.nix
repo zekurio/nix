@@ -89,6 +89,14 @@ in {
         # resolvers need their own option.
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
         tls_resolvers 1.1.1.1 1.0.0.1
+        # Caddy waits forever for request headers by default, which lets
+        # slow clients hold connections open on the public sites. Body and
+        # write timeouts stay unset for uploads and streams.
+        servers {
+          timeouts {
+            read_header 30s
+          }
+        }
       '';
       virtualHosts =
         lib.mapAttrs (domain: site: {
