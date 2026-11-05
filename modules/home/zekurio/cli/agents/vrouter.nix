@@ -36,6 +36,11 @@ in {
   # undo the merge; README.md lists the keys to remove to go back to the
   # logins. Merge instead of owning the file, so providers added by hand
   # survive.
+  #
+  # supportsStrictTools is off because Anthropic rejects pi's strict built-in
+  # tools next to its non-strict __pi_deferred_placeholder__ tool ("compiled
+  # grammar is too large"). pi then resends every turn non-strict, which
+  # costs a round trip and a second upload of the whole context.
   config.home.activation.piVrouter = lib.hm.dag.entryAfter ["writeBoundary"] ''
     if [ -r ${keyFile} ]; then
       f="$HOME/.pi/agent/models.json"
@@ -43,7 +48,7 @@ in {
       [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
       tmp=$(mktemp)
       ${lib.getExe pkgs.jq} --arg key ${lib.escapeShellArg "!${cat} ${keyFile}"} --arg url ${lib.escapeShellArg cfg.url} \
-        '. * {providers: {anthropic: {baseUrl: $url, apiKey: $key}, openai: {baseUrl: "\($url)/v1", apiKey: $key}}}' "$f" > "$tmp" && run mv "$tmp" "$f"
+        '. * {providers: {anthropic: {baseUrl: $url, apiKey: $key, compat: {supportsStrictTools: false}}, openai: {baseUrl: "\($url)/v1", apiKey: $key}}}' "$f" > "$tmp" && run mv "$tmp" "$f"
     fi
   '';
 }

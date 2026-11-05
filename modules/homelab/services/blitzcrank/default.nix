@@ -31,11 +31,13 @@
   # their model catalogs. pi expands "$VROUTER_API_KEY" from the environment,
   # so the store holds the variable name and never the key. Only the OpenAI
   # base URL ends in /v1; the Anthropic client appends /v1/messages itself.
+  # Strict tools stay off for the reason given in agents/vrouter.nix.
   modelsFile = pkgs.writeText "blitzcrank-models.json" (builtins.toJSON {
     providers = {
       anthropic = {
         baseUrl = vrouterUrl;
         apiKey = "$VROUTER_API_KEY";
+        compat.supportsStrictTools = false;
       };
     };
   });
