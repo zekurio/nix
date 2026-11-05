@@ -52,6 +52,26 @@
       }
       // backgrounds.${variant.appearance});
 
+  # The "default" window style puts Legcord's buttons over the right end of
+  # Discord's top bar, and Discord drops that bar's end padding on Linux.
+  # Legcord 1.3.1 reserves the space with a title + trailing sibling
+  # selector that current Discord no longer matches (Legcord#1180), so the
+  # inbox and help icons sit under the buttons. Pad the bar by the width of
+  # #window-controls-container from linuxTitlebar.css, and clear Legcord's
+  # margin in case its selector matches again.
+  titlebarFix =
+    lib.warnIf (pkgs.legcord.version != "1.3.1")
+    "Legcord is past 1.3.1. If Legcord#1180 is fixed, delete titlebarFix in modules/home/zekurio/theme/legcord.nix."
+    ''
+      [legcord-platform="linux"] :is([class^="bar_"], [class*=" bar_"]):has(> [class^="trailing_"]) {
+        padding-inline-end: 142px;
+      }
+
+      [legcord-platform="linux"] :is([class^="bar_"], [class*=" bar_"]) > div[class*="title"] + div[class*="trailing"] {
+        margin-right: 0 !important;
+      }
+    '';
+
   declarations = attrs: lib.concatStrings (lib.mapAttrsToList (name: value: "  --${name}: ${value};\n") attrs);
 
   # DiscordRecolor only swaps Discord's colour variables and keeps its
@@ -67,6 +87,8 @@
 
     :root.theme-light {
     ${declarations (colors variants.light)}}
+
+    ${titlebarFix}
   '';
 
   manifest = (pkgs.formats.json {}).generate "legcord-${themeName}.json" {
