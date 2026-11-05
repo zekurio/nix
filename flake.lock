@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793554160,
-        "narHash": "sha256-mZNsVSELCUgAvOg++gj2PcrIBb6Rb0uhbhMGtsJu2PM=",
+        "lastModified": 1793888174,
+        "narHash": "sha256-/dA8k/p2wlmTrdmITwoG9tltQJDWINkZdC+PziFF70I=",
         "owner": "zekurio",
         "repo": "agent-stuff",
-        "rev": "ae0f47756b8f8ab61b88584a6102caf9d93fca8b",
+        "rev": "e7440de11915da9c8c734a3bc9f240918f3ba0a8",
         "type": "github"
       },
       "original": {
@@ -339,11 +339,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1793798240,
-        "narHash": "sha256-GhaNPGo3QYmqT3VraphMRnmsmetZofL/R6LnIqIRVbc=",
+        "lastModified": 1793884283,
+        "narHash": "sha256-2l9Y9kBznMPjgAp1yWNDthDeV2t9K4QlJApJQreTmEg=",
         "owner": "zekurio",
         "repo": "fluxer-nix",
-        "rev": "85b654cedcdeb90a4b12183c7dd75dd853d5230f",
+        "rev": "af2eb5739e79663b7230aa556b385ebe9c378693",
         "type": "github"
       },
       "original": {
