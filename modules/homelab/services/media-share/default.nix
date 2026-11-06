@@ -240,8 +240,8 @@ in {
 
     downloadsRoot = lib.mkOption {
       type = lib.types.str;
-      default = "/mnt/downloads";
-      description = "Root directory (dedicated disk) for the shared download and import tree used by the usenet and soulseek automation.";
+      default = "/var/lib/downloads";
+      description = "Root directory for the shared download and import tree used by the usenet and soulseek automation.";
     };
 
     samba.enable = lib.mkEnableOption "SMB shares for homelab files and media";

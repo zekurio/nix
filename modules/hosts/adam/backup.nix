@@ -8,28 +8,13 @@ in {
   services.homelab.backup = {
     enable = true;
 
-    # Build output and package caches in the home directories, which
-    # rebuild or download again. They change daily, so every daily snapshot
-    # of the copy would keep them.
     exclude = [
-      "/home/*/Git/**/target/"
-      "/home/*/Git/**/node_modules/"
-      "/home/*/.cargo/registry/"
-      "/home/*/go/pkg/mod/"
-      "/home/*/.npm/"
-      "/home/*/.local/share/pnpm/"
-      "/home/*/.local/share/NuGet/"
-      # Rootless Podman keeps no volumes here, only images.
-      "/home/*/.local/share/containers/storage/"
-      "/home/*/.local/share/zed/external_agents/"
-      "/home/*/.local/share/zed/languages/"
-      "/home/*/.local/share/zed/node/"
-      "/home/*/.zed_server/"
-      # blitzbench lays out every run's media library from its recordings
-      # as sparse files at their real sizes. rsync reads the holes as data,
-      # over a PiB of them, so the copy never finishes inside the window.
-      "/home/*/Git/blitzbench/runs*/*/media/"
-      "/home/*/Git/blitzbench/runs*/*/probes/"
+      # The download tree shares the SSD with the system. Everything in it
+      # can be downloaded again, and it churns daily.
+      "${homelab.mediaShare.downloadsRoot}/"
+      # Home directories hold checkouts and build caches that churn daily,
+      # so every daily snapshot of the copy would keep them.
+      "/home/"
     ];
 
     # What a total loss of adam must not take: photos and clips, Fluxer's

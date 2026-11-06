@@ -3,7 +3,7 @@
 
   services.smartd = {
     enable = true;
-    # Also monitor the system/download SSDs and newly connected drives.
+    # Also monitor the system SSD and newly connected drives.
     autodetect = true;
     # `-a` without its `-t`, which logged every normalized attribute change
     # (temperatures, the IronWolf's drifting Raw_Read_Error_Rate) every 30
