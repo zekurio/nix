@@ -136,6 +136,11 @@ in {
           # Pass terminal capabilities to remote CLI tools.
           SendEnv = ["COLORTERM" "TERM_PROGRAM"];
         };
+
+        flint = {
+          HostName = "10.0.0.1";
+          User = "root";
+        };
       };
     };
 
