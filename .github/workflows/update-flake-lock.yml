@@ -19,8 +19,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # The event's SHA is fixed when the run is queued. A run that waited on
+      # the concurrency group behind another update would start from a stale
+      # main and its push would be rejected, so check out the branch instead.
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          ref: main
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
