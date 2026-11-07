@@ -140,11 +140,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1793976113,
-        "narHash": "sha256-7rNFUW/bYS/f8VLvykvkH2I9W8HnNQti2LDYrY7O08w=",
+        "lastModified": 1794043983,
+        "narHash": "sha256-QyBTtw55XM1kSJbgb+AOr3Dj3PloHJ3DayXOuQaGwpo=",
         "owner": "chaotic-cx",
         "repo": "nyx",
-        "rev": "e47c2b41686d87d20700a70c3042bf0289e84cdb",
+        "rev": "de6de8e3ff4373d7718507baa79eb15c1ddcfb60",
         "type": "github"
       },
       "original": {
@@ -339,11 +339,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1793969663,
-        "narHash": "sha256-Fezagq4aIXoEz1XgkCc2qIr7Kg3oSlbRfknofHvrq+8=",
+        "lastModified": 1794052705,
+        "narHash": "sha256-OxzdlrRJ6ZtCwtzuPltz47qvmmo1LhguAhzXuSK5I80=",
         "owner": "zekurio",
         "repo": "fluxer-nix",
-        "rev": "7238eb4d6767ab738a294d9616c85923ef5ec32b",
+        "rev": "49d1fcc76c1520b2e5ebba3994f8fb87ba9ac92c",
         "type": "github"
       },
       "original": {
@@ -382,11 +382,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793757180,
-        "narHash": "sha256-gyV7AtCwLnOImcrfSETP4J3Ie96bz19DY47B7m7Y3HM=",
+        "lastModified": 1793979366,
+        "narHash": "sha256-7OoWDsYO9teiPxl0QdlS5lYE20Pue8/5mpscSL32FUA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "b787c48e2ec57a9d098f5c2721882a3bc1e16f97",
+        "rev": "2c0c1f01521469cf0271180c453c79782d53c2f6",
         "type": "github"
       },
       "original": {
@@ -681,11 +681,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793726008,
-        "narHash": "sha256-jQp1wKvbwWdLBASTXkSi/VYmDJ5AbBi1WvcMt9HWJC8=",
+        "lastModified": 1793876309,
+        "narHash": "sha256-Wojg9lIH/hDH91iDVH2/EPw8oDSpxjxhXONbU1yf4Zg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "1d060086d60cb76a40cf37109f979d88a5bd6396",
+        "rev": "f9a75f41be3a74eab55d3a7679d34ad6cc0da977",
         "type": "github"
       },
       "original": {
@@ -959,11 +959,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794011220,
-        "narHash": "sha256-yrdr5INH2VZQzGqnoih2bDtcznvhDOhAqHjYPHxpihQ=",
+        "lastModified": 1794054567,
+        "narHash": "sha256-ovmWLXE9XEXiv3zxipUMALw7WNK2r8UGF88n5Gn2/h8=",
         "owner": "zekurio",
         "repo": "vrouter",
-        "rev": "e1f1e8d992c08b19b0836d26d3cf511538849a48",
+        "rev": "8ac3ecb06ae87f6536f903d655efc68532999ff0",
         "type": "github"
       },
       "original": {
