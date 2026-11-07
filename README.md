@@ -63,7 +63,7 @@ ls -l /dev/disk/by-id/
 
 Edit `modules/hosts/$INSTALL_HOST/disko.nix`. Set `device` to the full
 `/dev/disk/by-id/...` path for the system disk. On `lilith`, use the Samsung
-NVMe. Leave the Crucial Windows drive alone.
+NVMe. Leave the Intenso Windows drive alone.
 
 The next command wipes the configured system disk and mounts it at `/mnt`:
 
@@ -109,8 +109,8 @@ sudo nix --extra-experimental-features 'nix-command flakes' \
 
 ## Enroll Lilith's Secure Boot keys
 
-Test NixOS and Windows with Secure Boot disabled. Save the BitLocker recovery
-key, then put the firmware in Setup/Custom Mode.
+Test NixOS and Windows with Secure Boot disabled, then put the firmware in
+Setup/Custom Mode.
 
 ```bash
 sudo sbctl status

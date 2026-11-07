@@ -44,9 +44,9 @@
           };
         };
 
-        # Hand control back to the firmware's existing entry rather than
-        # chainloading bootmgfw.efi. This preserves Windows' expected PCR 4
-        # measurements and avoids unnecessary BitLocker recovery prompts.
+        # Windows keeps its own ESP on the Intenso drive. Rebooting into the
+        # firmware entry by name avoids pinning that ESP's partition GUID,
+        # which changes with every Windows reinstall.
         extraEntries = ''
           /Windows Boot Manager
             protocol: efi_boot_entry

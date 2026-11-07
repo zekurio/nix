@@ -1,7 +1,7 @@
 {inputs, ...}: {
   imports = [inputs.disko.nixosModules.disko];
 
-  # NixOS owns the Samsung NVMe. Disko must not know about the Crucial Windows
+  # NixOS owns the Samsung NVMe. Disko must not know about the Intenso Windows
   # drive, since destroy mode wipes every disk declared here.
   disko.devices.disk = {
     system = {
