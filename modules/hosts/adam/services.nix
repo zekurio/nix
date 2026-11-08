@@ -27,6 +27,7 @@
     immich.enable = true;
     jellyfin.enable = true;
     inviterr.enable = true;
+    knot.enable = true;
     mediaCleanup.enable = true;
     navidrome.enable = true;
     orianna.enable = true;

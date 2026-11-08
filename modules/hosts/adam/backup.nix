@@ -18,7 +18,7 @@ in {
     ];
 
     # What a total loss of adam must not take: photos and clips, Fluxer's
-    # messages and attachments, and everyone's shares.
+    # messages and attachments, the knot's repos, and everyone's shares.
     offsite = {
       enable = true;
       host = "u699442-sub1.your-storagebox.de";
@@ -47,7 +47,10 @@ in {
         ]
         # The Fluxer secrets sops does not hold, the ActivityPub signing key
         # among them.
-        ++ lib.optional homelab.fluxer.enable "/var/lib/fluxer-secrets";
+        ++ lib.optional homelab.fluxer.enable "/var/lib/fluxer-secrets"
+        # Every repo with its issues and pulls, and the sealed keys that
+        # only the master key in sops opens.
+        ++ lib.optional homelab.knot.enable config.services.tangled.knot-rs.stateDir;
       # Immich regenerates both from the originals.
       exclude = [
         "/tank/immich/thumbs"

@@ -3,6 +3,10 @@ let
 in {
   # sshd itself (hardened defaults + pinned keys) comes from modules.ssh.
   services.openssh.settings.AllowAgentForwarding = true;
+  # The knot takes 22, because tangled.org's clone URLs never carry a port
+  # (modules/homelab/services/knot). Flint forwards nothing to 2200, so
+  # sshd answers the LAN and the tailnet only.
+  services.openssh.ports = [2200];
 
   home-manager.users.zekurio = {
     programs.keychain = {

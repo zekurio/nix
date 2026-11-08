@@ -132,6 +132,9 @@ in {
         "adam adam.zekurio.me" = {
           HostName = "adam.zekurio.me";
           HostKeyAlias = "adam";
+          # The knot owns 22 (modules/homelab/services/knot). The alias
+          # also keeps the known-host entry free of the port.
+          Port = 2200;
           User = "zekurio";
           # Pass terminal capabilities to remote CLI tools.
           SendEnv = ["COLORTERM" "TERM_PROGRAM"];

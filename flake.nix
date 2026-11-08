@@ -102,6 +102,15 @@
     # following ours would rebuild every Fluxer service, with full LTO, on
     # each weekly flake.lock bump.
     fluxer-nix.url = "github:zekurio/fluxer-nix";
+    # knot2, Tangled's Rust git server. Keep its own nixpkgs pin: no cache
+    # serves knot-server, and following ours would rebuild its crates on each
+    # flake.lock bump. The tag holds it still; bump it by hand after reading
+    # the release's section in Tangled's "Upgrading knots and spindles".
+    tangled = {
+      url = "git+https://tangled.org/tangled.org/core?ref=refs/tags/v1.20.0&shallow=1";
+      # Only the appview's PDS reads this second pin.
+      inputs.nixpkgs-pds.follows = "nixpkgs-unstable";
+    };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

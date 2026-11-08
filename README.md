@@ -184,6 +184,39 @@ keep `FIRECRAWL_API_KEY` out of `blitzcrank_env`, and deploy. Blitzcrank
 restarts with the new key; restart `t3code.service` once its sessions can
 end.
 
+## Set up the Tangled knot
+
+The knot serves `knot.zekurio.me` and owns port 22, because the clone URLs
+tangled.org shows carry no port. adam's sshd listens on 2200, which the
+`adam` SSH alias sets; any other client needs `-p 2200`. On Flint, forward
+WAN TCP 22 to `10.0.0.2:22`, and forward nothing to 2200.
+
+After the first deploy, check that the knot answers:
+
+```bash
+curl https://knot.zekurio.me/xrpc/_health
+```
+
+Add the SSH public keys of every machine you push from to your tangled.org
+account. The knot reads them from your PDS and caches them for up to an hour.
+Register `knot.zekurio.me` at `https://tangled.org/settings/knots`. It turns
+verified once tangled.org sees your DID as the knot's admin. Then ask the
+indexer to crawl it:
+
+```bash
+curl -X POST https://index.tangled.network/xrpc/com.atproto.sync.requestCrawl \
+    -H 'Content-Type: application/json' -d '{"hostname":"knot.zekurio.me"}'
+```
+
+To upgrade, read the release's section in
+[Upgrading knots and spindles](https://tangled.org/docs/upgrading/knots-and-spindles/),
+then move the `tangled` tag in `flake.nix`.
+
+To restore, stop `knot-rs.service` and bring back `/var/lib/knot` from the
+offsite backup, keeping the `knot_env` already in sops. A new master key
+can't open the old `sealed-keys`, and a knot started on an empty directory
+creates fresh keys.
+
 ## Edit secrets
 
 Edit encrypted host secrets with sops, then rebuild the host:
