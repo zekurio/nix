@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
@@ -40,6 +41,10 @@
           echo "include optional=true \"dms/$name.kdl\"" >> $out
       done
 
+      # After DMS's includes, so these binds and window rules override its
+      # own.
+      cat ${pkgs.writeText "niri-extra.kdl" config.modules.niri.extraConfig} >> $out
+
       # Catch syntax that the niri build no longer accepts.
       mkdir -p check/dms
       cp $out check/config.kdl
@@ -47,32 +52,43 @@
       niri validate --config check/config.kdl
     '';
 in {
-  programs = {
-    dux-shell.enable = true;
-    # File search for the DMS launcher.
-    dux-search.enable = true;
-    dux-files.enable = true;
+  # DMS owns the fragments under ~/.config/niri/dms and rewrites them from
+  # its settings pages, so niri configuration kept in Nix goes here.
+  options.modules.niri.extraConfig = lib.mkOption {
+    type = lib.types.lines;
+    default = "";
+    description = "KDL appended to niri's config.kdl after DMS's includes.";
   };
 
-  home-manager.users.zekurio = {
-    config,
-    lib,
-    ...
-  }: {
-    xdg.configFile."niri/config.kdl".source = niriConfig;
+  config = {
+    programs = {
+      dux-shell.enable = true;
+      # File search for the DMS launcher.
+      dux-search.enable = true;
+      dux-files.enable = true;
+    };
 
-    # DMS's settings pages rewrite the fragments, so they are copied once
-    # instead of linked. DMS creates missing ones empty, and an empty
-    # binds.kdl leaves niri without keybinds, so empty files count as missing.
-    home.activation.duxNiriFragments = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      dir=${lib.escapeShellArg "${config.xdg.configHome}/niri/dms"}
-      run mkdir -p "$dir"
-      for file in ${fragments}/*; do
-        target="$dir/''${file##*/}"
-        if [ ! -s "$target" ]; then
-          run install -m 644 "$file" "$target"
-        fi
-      done
-    '';
+    home-manager.users.zekurio = {
+      config,
+      lib,
+      ...
+    }: {
+      xdg.configFile."niri/config.kdl".source = niriConfig;
+
+      # DMS's settings pages rewrite the fragments, so they are copied once
+      # instead of linked. DMS creates missing ones empty, and an empty
+      # binds.kdl leaves niri without keybinds, so empty files count as
+      # missing.
+      home.activation.duxNiriFragments = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        dir=${lib.escapeShellArg "${config.xdg.configHome}/niri/dms"}
+        run mkdir -p "$dir"
+        for file in ${fragments}/*; do
+          target="$dir/''${file##*/}"
+          if [ ! -s "$target" ]; then
+            run install -m 644 "$file" "$target"
+          fi
+        done
+      '';
+    };
   };
 }
