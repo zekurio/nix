@@ -1,4 +1,7 @@
 {pkgs, ...}: {
+  # The start and end scripts below switch its profiles.
+  services.power-profiles-daemon.enable = true;
+
   programs.gamemode.settings = {
     general.renice = 10;
 

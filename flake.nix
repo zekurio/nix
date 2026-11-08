@@ -36,11 +36,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # pi and T3 Code. Keep its own nixpkgs pin:
     # cache.numtide.com only serves builds made against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
@@ -56,6 +51,12 @@
     jellium-desktop = {
       url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
       inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    # niri's main branch, for the GlobalShortcuts portal that 26.04 lacks.
+    # modules/hosts/lilith/niri-main.nix uses it until a release ships it.
+    niri = {
+      url = "github:niri-wm/niri";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     # Keep Chaotic's nixpkgs pin so its CachyOS kernel and Proton builds

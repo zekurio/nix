@@ -16,30 +16,16 @@ in {
     blacklistedKernelModules = ["ee1004"];
   };
 
-  home-manager.users.zekurio.xdg.configFile = {
-    # Hardware Static mode keeps the color after OpenRGB exits.
-    "autostart/OpenRGB.desktop" = {
-      force = true;
-      text = ''
-        [Desktop Entry]
-        Type=Application
-        Name=OpenRGB
-        Exec=${openrgb}/bin/openrgb --mode Static --color FF050A
-        Terminal=false
-        StartupNotify=false
-      '';
-    };
-
-    # Plasma also created a separate GUI autostart entry for this app.
-    "autostart/org.openrgb.OpenRGB.desktop" = {
-      force = true;
-      text = ''
-        [Desktop Entry]
-        Type=Application
-        Name=OpenRGB
-        Exec=${openrgb}/bin/openrgb
-        Hidden=true
-      '';
-    };
+  # Hardware Static mode keeps the color after OpenRGB exits.
+  home-manager.users.zekurio.xdg.configFile."autostart/OpenRGB.desktop" = {
+    force = true;
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=OpenRGB
+      Exec=${openrgb}/bin/openrgb --mode Static --color FF050A
+      Terminal=false
+      StartupNotify=false
+    '';
   };
 }
