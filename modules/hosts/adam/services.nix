@@ -29,7 +29,7 @@
     inviterr.enable = true;
     mediaCleanup.enable = true;
     navidrome.enable = true;
-    orianna.enable = false;
+    orianna.enable = true;
     pocket-id.enable = true;
     prowlarr.enable = true;
     radarr.enable = true;

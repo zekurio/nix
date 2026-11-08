@@ -76,10 +76,9 @@
       url = "github:zekurio/blitzcrank";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    orianna = {
-      url = "github:zekurio/orianna";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    # Keep Orianna's own nixpkgs pin. Its node_modules hash only holds for
+    # that pin's Bun, and ours moves on with each flake.lock bump.
+    orianna.url = "github:zekurio/orianna";
     alloy = {
       url = "github:zekurio/alloy/v0.1.2";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
