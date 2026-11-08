@@ -15,7 +15,7 @@
       cp ${embedded}/niri-$name.kdl $out/$name.kdl
     done
     substitute ${embedded}/niri-binds.kdl $out/binds.kdl \
-      --replace-fail '{{TERMINAL_COMMAND}}' ghostty
+      --replace-fail '{{TERMINAL_COMMAND}}' kitty
   '';
 
   # DMS's config.kdl, which leaves the starting of DMS to systemd. DMS can

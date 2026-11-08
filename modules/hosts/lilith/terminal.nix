@@ -1,40 +1,48 @@
-{lib, ...}: {
-  home-manager.users.zekurio.programs.ghostty = {
+{
+  home-manager.users.zekurio.programs.kitty = {
     enable = true;
     # The shared profile's opacity barely shows the blur niri draws behind
-    # Ghostty. Ghostty's settings type keeps duplicate keys, so a plain
-    # definition would write the option twice instead of replacing it.
-    settings.background-opacity = lib.mkForce 0.85;
+    # the terminal.
+    settings.background_opacity = 0.85;
     # Treat Alt as the Linux equivalent of macOS Command for the shortcuts
-    # used most often. Alt+arrows remain available to shells, and Ghostty
-    # already binds Alt+1-9 to tabs on Linux.
-    settings.keybind = [
-      "alt+c=copy_to_clipboard"
-      "alt+v=paste_from_clipboard"
-      "alt+t=new_tab"
-      "alt+w=close_surface"
-      "alt+shift+w=close_tab"
-      "alt+d=new_split:right"
-      "alt+shift+d=new_split:down"
-      "alt+bracket_left=goto_split:previous"
-      "alt+bracket_right=goto_split:next"
-      "alt+shift+bracket_left=previous_tab"
-      "alt+shift+bracket_right=next_tab"
-      "alt+enter=toggle_fullscreen"
-      "alt+shift+enter=toggle_split_zoom"
-      "alt+equal=increase_font_size:1"
-      "alt+plus=increase_font_size:1"
-      "alt+minus=decrease_font_size:1"
-      "alt+digit_0=reset_font_size"
+    # used most often. Alt+arrows remain available to shells.
+    keybindings =
+      {
+        "alt+c" = "copy_to_clipboard";
+        "alt+v" = "paste_from_clipboard";
+        "alt+t" = "new_tab_with_cwd";
+        "alt+w" = "close_window";
+        "alt+shift+w" = "close_tab";
+        # kitty names a split after its divider: vsplit puts the new window
+        # to the right, hsplit below.
+        "alt+d" = "launch --location=vsplit --cwd=current";
+        "alt+shift+d" = "launch --location=hsplit --cwd=current";
+        "alt+[" = "previous_window";
+        "alt+]" = "next_window";
+        "alt+shift+[" = "previous_tab";
+        "alt+shift+]" = "next_tab";
+        "alt+enter" = "toggle_fullscreen";
+        "alt+shift+enter" = "toggle_layout stack";
+        "alt+equal" = "change_font_size current +1";
+        "alt+plus" = "change_font_size current +1";
+        "alt+minus" = "change_font_size current -1";
+        "alt+0" = "change_font_size current 0";
 
-      "ctrl+alt+arrow_up=goto_split:up"
-      "ctrl+alt+arrow_down=goto_split:down"
-      "ctrl+alt+arrow_left=goto_split:left"
-      "ctrl+alt+arrow_right=goto_split:right"
-      "ctrl+alt+shift+arrow_up=resize_split:up,30"
-      "ctrl+alt+shift+arrow_down=resize_split:down,30"
-      "ctrl+alt+shift+arrow_left=resize_split:left,30"
-      "ctrl+alt+shift+arrow_right=resize_split:right,30"
-    ];
+        "ctrl+alt+up" = "neighboring_window up";
+        "ctrl+alt+down" = "neighboring_window down";
+        "ctrl+alt+left" = "neighboring_window left";
+        "ctrl+alt+right" = "neighboring_window right";
+        # kitty resizes the focused window, not the divider, so these only
+        # move the divider in the arrow's direction for the left or top one.
+        "ctrl+alt+shift+up" = "resize_window shorter 3";
+        "ctrl+alt+shift+down" = "resize_window taller 3";
+        "ctrl+alt+shift+left" = "resize_window narrower 3";
+        "ctrl+alt+shift+right" = "resize_window wider 3";
+      }
+      # Ghostty bound Alt+1-9 to tabs on Linux; kitty does not.
+      // builtins.listToAttrs (map (n: {
+        name = "alt+${toString n}";
+        value = "goto_tab ${toString n}";
+      }) [1 2 3 4 5 6 7 8 9]);
   };
 }
