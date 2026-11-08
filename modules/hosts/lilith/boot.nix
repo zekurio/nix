@@ -18,27 +18,31 @@
         # The menu and Linux handoff use separate GOP resolution settings.
         resolution = "2560x1440";
 
+        # Monochrome, from shadcn/ui's default dark neutrals: the terminal is
+        # a card (171717) on the background (0a0a0a), with muted text for
+        # help. The palette hues are greys too, so nothing in the menu is
+        # coloured.
         style = {
           wallpapers = [];
-          backdrop = "191919";
+          backdrop = "0A0A0A";
           interface = {
             resolution = "2560x1440";
             branding = "LILITH";
-            brandingColor = "F44336";
-            helpColor = "BDBDBD";
-            helpColorBright = "F44336";
+            brandingColor = "FAFAFA";
+            helpColor = "A1A1A1";
+            helpColorBright = "FAFAFA";
           };
           graphicalTerminal = {
             font = {
               scale = "2x2";
               spacing = 1;
             };
-            foreground = "EEEEEE";
-            background = "00262626";
-            brightForeground = "FFFFFF";
-            brightBackground = "333333";
-            palette = "191919;F44336;81C784;FFB74D;90CAF9;CE93D8;BDBDBD;EEEEEE";
-            brightPalette = "333333;EF5350;A5D6A7;FFCC80;BBDEFB;E1BEE7;EEEEEE;FFFFFF";
+            foreground = "E5E5E5";
+            background = "00171717";
+            brightForeground = "FAFAFA";
+            brightBackground = "262626";
+            palette = "171717;A3A3A3;A3A3A3;A3A3A3;A3A3A3;A3A3A3;A3A3A3;D4D4D4";
+            brightPalette = "404040;E5E5E5;E5E5E5;E5E5E5;E5E5E5;E5E5E5;E5E5E5;FAFAFA";
             margin = 64;
             marginGradient = 0;
           };

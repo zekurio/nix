@@ -3,8 +3,9 @@
     systemPackages = with pkgs; [
       # DMS recolours its own copy of adw-gtk3 for GTK 3 apps.
       adw-gtk3
-      # Papirus ships blue folders; red is its folder colour nearest the accent.
-      (papirus-icon-theme.override {color = "red";})
+      # Dux's docs recommend Papirus for Material Design. Its folders are
+      # blue by default; grey stays neutral whatever colours Dux picks.
+      (papirus-icon-theme.override {color = "grey";})
       qtengine
     ];
     # DMS rewrites qtengine's colour scheme and icon theme on every theme

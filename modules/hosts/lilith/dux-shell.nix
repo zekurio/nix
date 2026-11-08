@@ -4,6 +4,7 @@
   ...
 }: let
   inherit (config.programs) dux-shell niri;
+  inherit (config.home-manager.users.zekurio.home) pointerCursor;
 
   # What `dms setup` deploys, taken from the installed version's source.
   embedded = "${dux-shell.package.src}/core/internal/config/embedded";
@@ -26,8 +27,14 @@
     pkgs.runCommand "niri-config.kdl" {
       nativeBuildInputs = [niri.package];
     } ''
-      cp ${embedded}/niri.kdl $out
-      chmod +w $out
+      # DMS only writes dms/cursor.kdl when its cursor settings change, so
+      # its "System Default" never reaches niri. Set the cursor ahead of
+      # the includes, where a cursor picked in DMS's settings still wins.
+      {
+        printf 'cursor {\n    xcursor-theme "%s"\n    xcursor-size %d\n}\n\n' \
+          ${pointerCursor.name} ${toString pointerCursor.size}
+        cat ${embedded}/niri.kdl
+      } > $out
       for name in windowrules wpblur; do
         grep -q "\"dms/$name.kdl\"" $out ||
           echo "include optional=true \"dms/$name.kdl\"" >> $out
