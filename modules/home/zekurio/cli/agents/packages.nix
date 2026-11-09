@@ -28,8 +28,8 @@
 
   clis = [
     pi
-    inputs.claude-code.packages.${system}.default
-    inputs.codex-cli.packages.${system}.default
+    llmAgents.claude-code
+    llmAgents.codex
   ];
 
   # Tools agents reach for first; without them they fail and retry via `nix run`.
