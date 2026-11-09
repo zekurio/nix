@@ -23,11 +23,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793888174,
-        "narHash": "sha256-/dA8k/p2wlmTrdmITwoG9tltQJDWINkZdC+PziFF70I=",
+        "lastModified": 1794260148,
+        "narHash": "sha256-NZpWjVe3jINnjbBe3CzYRUsqKXyBg+qtK/XEmtWFnIE=",
         "owner": "zekurio",
         "repo": "agent-stuff",
-        "rev": "e7440de11915da9c8c734a3bc9f240918f3ba0a8",
+        "rev": "d8be896f62c926dcef9a497e927fd4e485b6f4fa",
         "type": "github"
       },
       "original": {
