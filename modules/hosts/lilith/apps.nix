@@ -5,7 +5,12 @@
 }: {
   modules.gaming.enable = true;
 
-  home-manager.users.zekurio.agents.desktop = true;
+  home-manager.users.zekurio.agents = {
+    desktop = true;
+    # The emulator needs /dev/kvm, which only exists with SVM enabled in the
+    # firmware; README.md has the procedure.
+    android.enable = true;
+  };
 
   environment = {
     sessionVariables = {

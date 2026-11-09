@@ -26,7 +26,11 @@
     inherit (llmAgents.pi) meta;
   };
 
-  clis = [pi];
+  clis = [
+    pi
+    llmAgents.claude-code
+    llmAgents.codex
+  ];
 
   # Tools agents reach for first; without them they fail and retry via `nix run`.
   tools = [
@@ -54,7 +58,13 @@ in {
             pkgs.openssh
           ]
           ++ clis
-          ++ tools;
+          ++ tools
+          # T3 Code installs its device hub with npm and encodes an
+          # emulator's screen with ffmpeg's libx264.
+          ++ lib.optionals cfg.android.enable [
+            pkgs.nodejs
+            pkgs.ffmpeg-headless
+          ];
       };
       description = "T3 Code with the agent CLIs on its PATH, for the desktop app and adam's server.";
     };

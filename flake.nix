@@ -36,7 +36,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # pi and T3 Code. Keep its own nixpkgs pin:
+    # pi, Claude Code, Codex and T3 Code. Keep its own nixpkgs pin:
     # cache.numtide.com only serves builds made against that pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Shared agent skills.

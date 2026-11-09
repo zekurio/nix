@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -7,6 +8,26 @@
   cfg = config.agents.vrouter;
   keyFile = lib.escapeShellArg cfg.keyFile;
   cat = lib.getExe' pkgs.coreutils "cat";
+  inherit (inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}) codex;
+
+  # Codex fetches its model list from the provider, but vrouter answers in
+  # OpenAI's format instead of Codex's catalog format, so Codex falls back
+  # to the catalog built into it, which offers models vrouter refuses. This
+  # copy, from the same Codex source, keeps the Codex models that vrouter's
+  # /v1/models lists; keep the two in sync.
+  codexModels =
+    pkgs.runCommand "codex-models.json" {
+      nativeBuildInputs = [pkgs.jq];
+      allowed = builtins.toJSON [
+        "gpt-6-luna"
+        "gpt-6.1-terra"
+        "gpt-6.1-sol"
+      ];
+    } ''
+      jq --argjson allowed "$allowed" \
+        '.models |= map(select(.slug | IN($allowed[])))' \
+        ${codex.src}/codex-rs/models-manager/models.json > $out
+    '';
 in {
   options.agents.vrouter = {
     url = lib.mkOption {
@@ -27,28 +48,34 @@ in {
     };
   };
 
-  # Redirects pi's built-in anthropic and openai providers to vrouter and
-  # keeps their model catalogs. pi runs the `!` command on every request, so
-  # a replaced key needs no restart. The merge waits for the key file;
-  # without it pi stays on its /login credentials. A stored login outranks
-  # this key and would be sent to vrouter, which rejects it, so log out of
-  # both providers once the key is in place. Deleting the key later does not
-  # undo the merge; README.md lists the keys to remove to go back to the
-  # logins. Merge instead of owning the file, so providers added by hand
-  # survive.
-  #
-  # supportsStrictTools is off because Anthropic rejects pi's strict built-in
-  # tools next to its non-strict __pi_deferred_placeholder__ tool ("compiled
-  # grammar is too large"). pi then resends every turn non-strict, which
-  # costs a round trip and a second upload of the whole context.
-  config.home.activation.piVrouter = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [ -r ${keyFile} ]; then
-      f="$HOME/.pi/agent/models.json"
-      run mkdir -p "$(dirname "$f")"
-      [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
-      tmp=$(mktemp)
-      ${lib.getExe pkgs.jq} --arg key ${lib.escapeShellArg "!${cat} ${keyFile}"} --arg url ${lib.escapeShellArg cfg.url} \
-        '. * {providers: {anthropic: {baseUrl: $url, apiKey: $key, compat: {supportsStrictTools: false}}, openai: {baseUrl: "\($url)/v1", apiKey: $key}}}' "$f" > "$tmp" && run mv "$tmp" "$f"
-    fi
-  '';
+  # Both merges wait for the key file. Without it a rebuild would point the
+  # CLIs at vrouter with no credential, and Claude Code retries the 401 for
+  # minutes before it reports anything. Deleting the key later does not undo
+  # a merge; README.md lists the keys to remove to go back to the logins.
+  config.home.activation = {
+    # apiKeyHelper replaces a claude.ai login as the credential, and Claude
+    # Code runs it again every five minutes, so a replaced key needs no
+    # restart.
+    # The fast-mode availability check goes directly to Anthropic, which
+    # rejects a vrouter key, so skip it and let the upstream account decide.
+    claudeVrouter = lib.hm.dag.entryAfter ["claudeSettings"] ''
+      if [ -r ${keyFile} ]; then
+        f="$HOME/.claude/settings.json"
+        tmp=$(mktemp)
+        ${lib.getExe pkgs.jq} --arg helper ${lib.escapeShellArg "${cat} ${keyFile}"} --arg url ${lib.escapeShellArg cfg.url} \
+          '. * {apiKeyHelper: $helper, env: {ANTHROPIC_BASE_URL: $url, CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK: "1"}}' "$f" > "$tmp" && run mv "$tmp" "$f"
+      fi
+    '';
+
+    # A custom provider needs no OpenAI login, so T3 Code skips that check.
+    codexVrouter = lib.hm.dag.entryAfter ["codexSettings"] ''
+      if [ -r ${keyFile} ]; then
+        f="$HOME/.codex/config.toml"
+        tmp=$(mktemp)
+        ${lib.getExe' pkgs.yq "tomlq"} -t --arg cat ${cat} --arg key ${keyFile} --arg url ${lib.escapeShellArg "${cfg.url}/v1"} \
+          --arg catalog ${codexModels} \
+          '. * {model_provider: "vrouter", model_catalog_json: $catalog, model_providers: {vrouter: {name: "vrouter", base_url: $url, auth: {command: $cat, args: [$key]}}}}' "$f" > "$tmp" && run mv "$tmp" "$f"
+      fi
+    '';
+  };
 }

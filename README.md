@@ -131,8 +131,8 @@ securely; it contains private signing keys. Never commit it.
 
 ## Connect the agents to vrouter
 
-pi, and T3 Code through it, sends Anthropic and OpenAI requests to vrouter
-instead of pi's own logins once the machine has a vrouter client key.
+Claude Code and Codex, and T3 Code through them, send their requests to
+vrouter instead of their own logins once the machine has a vrouter client key.
 Create one key per machine on the API keys page of
 `https://vrouter.zekurio.me` and save it:
 
@@ -151,17 +151,38 @@ nh darwin switch                                     # sachiel
 
 `adam` takes its key from sops instead of the file. Put it under
 `agents_vrouter_api_key` with `sops secrets/adam.yaml` and deploy. A replaced
-key needs no restart; pi reads the file again on every request. Sessions
+key needs no restart; the CLIs read the file again on their own. Sessions
 that started before the first key keep their old credentials. On `adam`, restart
 `t3code.service` once its sessions can end.
 
-A login stored with `/login` outranks the key and goes to vrouter, which
-rejects it. Run `/logout` for `anthropic` and `openai` in pi once the key is in
-place.
+Without the key file, both CLIs stay on their logins. To go back to them,
+delete the key file, then remove `apiKeyHelper`, `env.ANTHROPIC_BASE_URL` and
+`env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from `~/.claude/settings.json`,
+and `model_provider`, `model_catalog_json` and the `model_providers.vrouter`
+tables from `~/.codex/config.toml`.
 
-Without the key file, pi stays on its logins. To go back to them, delete the
-key file, then remove `providers.anthropic` and `providers.openai` from
-`~/.pi/agent/models.json` and `/login` again.
+## Run Android emulators in T3 Code
+
+`adam` and `lilith` carry an Android SDK at `~/Android/Sdk` and a `Pixel_9`
+virtual device for T3 Code's Device panel. T3 Code looks for the SDK when its
+server starts. After the first rebuild that adds it, reopen the desktop app
+on `lilith`, and on `adam` restart `t3code.service` once its sessions can end.
+
+The emulator needs `/dev/kvm`. `lilith`'s firmware has virtualization off,
+and the kernel logs `SVM disabled (by BIOS)`. Enable **SVM Mode** in the UEFI
+setup, which Gigabyte lists under Tweaker, Advanced CPU Settings. Then check:
+
+```bash
+ls -l /dev/kvm
+```
+
+The virtual device is only created while it is missing. To start over with a
+clean one, delete it and run Home Manager's activation again:
+
+```bash
+rm -r ~/.android/avd/Pixel_9.avd ~/.android/avd/Pixel_9.ini
+sudo systemctl restart home-manager-zekurio.service
+```
 
 ## Enable pi's web tools
 
