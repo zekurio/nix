@@ -148,7 +148,7 @@
 
   # The Dux plugin's view of the miners: one line per miner with its unit
   # state and whether gamemode stopped it.
-  statusScript = pkgs.writeShellScript "xmrig-status" ''
+  statusScript = pkgs.writeShellScriptBin "xmrig-status" ''
     for name in ${toString (lib.attrNames miners)}; do
       unit=xmrig-$name.service
       paused=0
@@ -165,7 +165,7 @@
   # One systemctl call per unit. Given several units, systemctl sends them in
   # a single EnqueueUnitJobMany request, which reaches polkit without a unit
   # or a verb, so the rule below cannot allow it and the request is denied.
-  controlScript = pkgs.writeShellScript "xmrig-control" ''
+  controlScript = pkgs.writeShellScriptBin "xmrig-control" ''
     set -eu
     action=$1
     case $action in
@@ -201,8 +201,13 @@
           inherit (miner) apiPort;
         })
         miners;
-      status = "${statusScript}";
-      control = "${controlScript}";
+      # The shell reads this file once and keeps it until it restarts;
+      # reloading the plugin does not read it again. A store path here would
+      # leave a running shell on the old script after every rebuild that
+      # changes one, so the scripts are named through the system profile,
+      # where a switch replaces them.
+      status = "/run/current-system/sw/bin/xmrig-status";
+      control = "/run/current-system/sw/bin/xmrig-control";
       poolApi = "https://api.moneroocean.stream";
       address = pool.user;
     };
@@ -217,6 +222,7 @@ in {
   # The tile, a right-click on the pill and the popout's "All miners" row
   # each start or stop both miners at once.
   programs.dux-shell.plugins.XmrigControl.src = duxPlugin;
+  environment.systemPackages = [statusScript controlScript];
 
   # Starts and stops both miners at once.
   systemd.targets.xmrig = {
