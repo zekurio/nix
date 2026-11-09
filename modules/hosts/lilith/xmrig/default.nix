@@ -162,6 +162,9 @@
   # Starts or stops one miner, or all of them, for the Dux plugin. A stop
   # also drops gamemode's marker, so the end of a running game does not
   # restart a miner that was turned off during it.
+  # One systemctl call per unit. Given several units, systemctl sends them in
+  # a single EnqueueUnitJobMany request, which reaches polkit without a unit
+  # or a verb, so the rule below cannot allow it and the request is denied.
   controlScript = pkgs.writeShellScript "xmrig-control" ''
     set -eu
     action=$1
@@ -182,7 +185,11 @@
         ${pkgs.coreutils}/bin/rm -f "''${XDG_RUNTIME_DIR:?}/$unit.stopped-by-gamemode"
       done
     fi
-    ${systemctl} "$action" "$@"
+    status=0
+    for unit; do
+      ${systemctl} "$action" "$unit" || status=$?
+    done
+    exit "$status"
   '';
 
   duxPlugin = pkgs.callPackage ./_dux-plugin.nix {
