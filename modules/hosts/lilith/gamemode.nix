@@ -8,9 +8,10 @@
     # power-profiles-daemon owns the CPU EPP on amd-pstate. Balanced keeps
     # idle power low on the desktop; performance only for the game's
     # lifetime. The scripts run as the session user, which polkit allows.
+    # Lists, so other modules such as xmrig.nix can add their own scripts.
     custom = {
-      start = "${pkgs.power-profiles-daemon}/bin/powerprofilesctl set performance";
-      end = "${pkgs.power-profiles-daemon}/bin/powerprofilesctl set balanced";
+      start = ["${pkgs.power-profiles-daemon}/bin/powerprofilesctl set performance"];
+      end = ["${pkgs.power-profiles-daemon}/bin/powerprofilesctl set balanced"];
     };
 
     # Hold the RX 6800 at its high DPM level while a game runs instead of

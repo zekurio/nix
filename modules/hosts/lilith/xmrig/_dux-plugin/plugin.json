@@ -1,0 +1,16 @@
+{
+    "id": "xmrigControl",
+    "name": "Mining",
+    "description": "Turn lilith's XMRig miners on and off and show their hashrate and earnings",
+    "version": "1.0.0",
+    "author": "zekurio",
+    "type": "composite",
+    "capabilities": ["daemon", "dankbar-widget", "control-center"],
+    "components": {
+        "daemon": "./Daemon.qml",
+        "widget": "./Widget.qml"
+    },
+    "icon": "local_fire_department",
+    "requires_dms": ">=1.7.0",
+    "permissions": ["settings_read"]
+}
