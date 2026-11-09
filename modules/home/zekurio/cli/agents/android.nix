@@ -59,10 +59,13 @@ in {
     # stores its system image as a path relative to the SDK, so it survives
     # a new store path. A failure here must not abort the activation of
     # everything else.
+    # avdmanager's launcher finds Java with `which` and checks its version
+    # with awk. The activation's PATH has neither.
     # The emulator needs /dev/kvm to run this x86_64 image.
     home.activation.androidAvd = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -e "$HOME/.android/avd/${avd}.ini" ]; then
-        if ! echo no | run ${root}/cmdline-tools/latest/bin/avdmanager create avd \
+        if ! echo no | run env PATH="${lib.makeBinPath [pkgs.which pkgs.gawk]}:$PATH" \
+          ${root}/cmdline-tools/latest/bin/avdmanager create avd \
           --name ${avd} --package ${lib.escapeShellArg image} --device pixel_9 > /dev/null; then
           warnEcho "Could not create the Android virtual device ${avd}; T3 Code will list no emulator."
         fi
