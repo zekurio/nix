@@ -8,7 +8,13 @@
   cfg = config.agents.vrouter;
   keyFile = lib.escapeShellArg cfg.keyFile;
   cat = lib.getExe' pkgs.coreutils "cat";
-  inherit (inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}) codex;
+  codex = inputs.codex-cli.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # The binary package has no source tree. Fetch the catalog from its release;
+  # update the hash when the Codex input moves to a new version.
+  catalog = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/openai/codex/rust-v${codex.version}/codex-rs/models-manager/models.json";
+    hash = "sha256-E4RiXAtrPmfTxg2im+zqKwF/LCg/weLQW47a+0aY6xA=";
+  };
 
   # Codex fetches its model list from the provider, but vrouter answers in
   # OpenAI's format instead of Codex's catalog format, so Codex falls back
@@ -26,7 +32,7 @@
     } ''
       jq --argjson allowed "$allowed" \
         '.models |= map(select(.slug | IN($allowed[])))' \
-        ${codex.src}/codex-rs/models-manager/models.json > $out
+        ${catalog} > $out
     '';
 in {
   options.agents.vrouter = {

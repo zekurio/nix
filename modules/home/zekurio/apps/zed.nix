@@ -38,6 +38,11 @@
           }
           // model) [
           {
+            name = "claude-fable-5-2";
+            display_name = "Claude Fable 5.2";
+            extra_beta_headers = ["thinking-binding-controls-2026-08-01"];
+          }
+          {
             name = "claude-fable-5-1";
             display_name = "Claude Fable 5.1";
             extra_beta_headers = ["thinking-binding-controls-2026-08-01"];
