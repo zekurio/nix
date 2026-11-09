@@ -199,6 +199,8 @@
           nativeBuildInputs = [
             (pkgs.python3.withPackages (ps: [ps.pycountry]))
             pkgs.ffmpeg-headless
+            pkgs.mkvtoolnix-cli
+            pkgs.coreutils
           ];
         } ''
           python3 ${./modules/homelab/services/media-cleanup}/test-clean-import.py

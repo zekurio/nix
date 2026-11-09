@@ -155,10 +155,10 @@ class Containers(unittest.TestCase):
         cleanup.clean(path, "French")
         streams = cleanup.probe(path)["streams"]
         self.assertEqual(hashes, packet_hashes(path, "fra"))
-        self.assertEqual([cleanup.tags(s).get("language", "und") for s in streams if s["codec_type"] == "audio"],
-                         ["ger", "eng", "fra", "und"])
-        self.assertEqual([cleanup.tags(s).get("language", "und") for s in streams if s["codec_type"] == "subtitle"],
-                         ["deu", "eng", "fre", "und"])
+        self.assertEqual([cleanup.language_code(cleanup.tags(s).get("language", "und")) for s in streams if s["codec_type"] == "audio"],
+                         ["deu", "eng", "fra", "und"])
+        self.assertEqual([cleanup.language_code(cleanup.tags(s).get("language", "und")) for s in streams if s["codec_type"] == "subtitle"],
+                         ["deu", "eng", "fra", "und"])
         retained = [s for s in before["streams"] if cleanup.keep_stream(s, "fra")]
         self.assertEqual([s["disposition"] for s in streams], [s["disposition"] for s in retained])
         self.assertFalse(list(self.root.glob(".media-cleanup-*")))
@@ -205,6 +205,72 @@ class Containers(unittest.TestCase):
             self.assertEqual(cleanup.original_language(alias), "fra")
         self.assertFalse(cleanup.keep_stream({"codec_type": "audio", "tags": {"language": "jpn"}}, "eng"))
 
+    def test_metadata_only_edit_is_lossless_atomic_and_idempotent(self):
+        path = self.fixture()
+        cleanup.clean(path, "jpn")
+        hashes = packet_hashes(path)
+        subprocess.run(["mkvpropedit", str(path), "--edit", "track:a1", "--set", "name=Release label"],
+                       check=True, capture_output=True)
+        before = path.read_bytes()
+        with patch.object(cleanup, "validate", side_effect=ValueError("invalid output")):
+            with self.assertRaisesRegex(ValueError, "invalid output"):
+                cleanup.clean(path, "jpn")
+        self.assertEqual(path.read_bytes(), before)
+        self.assertFalse(list(self.root.glob(".media-cleanup-*")))
+        with patch.object(cleanup, "mkv_remux_args", side_effect=AssertionError("must not remux")):
+            self.assertTrue(cleanup.clean(path, "jpn"))
+        self.assertEqual(hashes, packet_hashes(path))
+        stat = path.stat()
+        with patch.object(cleanup, "mkv_edit", side_effect=AssertionError("must not rewrite")):
+            self.assertFalse(cleanup.clean(path, "jpn"))
+        self.assertEqual(cleanup.identity(stat), cleanup.identity(path.stat()))
+
+    def test_dry_run_does_not_write(self):
+        path = self.fixture()
+        before = path.read_bytes()
+        self.assertTrue(cleanup.clean(path, "jpn", dry_run=True))
+        self.assertEqual(path.read_bytes(), before)
+        self.assertFalse(list(self.root.glob(".media-cleanup-*")))
+
+    def test_filter_without_subtitles_or_attachments(self):
+        path = self.root / "No subtitles.mkv"
+        ffmpeg("-f", "lavfi", "-i", "testsrc2=s=32x32:r=10:d=1",
+               "-f", "lavfi", "-i", "sine=duration=1", "-map", "0:v", "-map", "1:a", "-map", "1:a",
+               "-c:v", "libx264", "-c:a", "aac", "-metadata:s:a:0", "language=eng",
+               "-metadata:s:a:1", "language=fra", path)
+        hashes = packet_hashes(path, "eng")
+        self.assertTrue(cleanup.clean(path, "eng"))
+        self.assertEqual(hashes, packet_hashes(path, "eng"))
+        self.assertEqual(len(cleanup.probe(path)["streams"]), 2)
+
+    def test_termination_removes_temporary_and_leaves_source(self):
+        path = self.fixture()
+        original = path.read_bytes()
+        with patch.object(cleanup, "run_mkv", side_effect=lambda args: cleanup.terminate(cleanup.signal.SIGTERM, None)):
+            with self.assertRaises(SystemExit):
+                cleanup.clean(path, "jpn")
+        self.assertEqual(path.read_bytes(), original)
+        self.assertFalse(list(self.root.glob(".media-cleanup-*")))
+
+    def test_payload_mismatch_keeps_source(self):
+        path = self.fixture()
+        original = path.read_bytes()
+        with patch.object(cleanup, "packet_signatures", side_effect=["source", "damaged"]):
+            with self.assertRaisesRegex(ValueError, "packet payloads"):
+                cleanup.clean(path, "jpn")
+        self.assertEqual(path.read_bytes(), original)
+        self.assertFalse(list(self.root.glob(".media-cleanup-*")))
+
+    def test_ietf_language_takes_precedence(self):
+        stream = {"codec_type": "audio", "tags": {"language": "eng"}, "mkv_language": "fr-FR"}
+        self.assertFalse(cleanup.keep_stream(stream, "jpn"))
+        self.assertTrue(cleanup.keep_stream(stream, "fra"))
+
+    def test_validator_rejects_retained_titles(self):
+        info = {"streams": [{"codec_type": "audio", "tags": {"language": "eng", "title": "Spam"}}]}
+        with self.assertRaisesRegex(ValueError, "track titles"):
+            cleanup.validate(info, info, info["streams"])
+
     def test_arr_events(self):
         self.assertEqual(cleanup.event_paths({"Radarr_EventType": "Test"}), [])
         self.assertEqual(cleanup.event_paths({"sonarr_eventtype": "Grab"}), [])
@@ -214,6 +280,52 @@ class Containers(unittest.TestCase):
         self.assertEqual(cleanup.event_paths({
             "sonarr_eventtype": "Download", "sonarr_episodefile_paths": "/shows/A.mkv|/shows/B.mkv",
         }), [Path("/shows/A.mkv"), Path("/shows/B.mkv")])
+
+
+class Library(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix="media-library-test-")
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+        self.folder = self.root / "Series"
+        self.folder.mkdir()
+        self.file = self.folder / "Episode.mkv"
+        self.file.touch()
+        self.title = {"id": 42, "path": str(self.folder), "originalLanguage": {"name": "Japanese"}}
+
+    def test_library_uses_original_language_and_refreshes_changed_titles_once(self):
+        (self.folder / "Episode 2.mkv").touch()
+        with patch.object(cleanup, "api_request", return_value=[self.title]), \
+             patch.object(cleanup, "clean", return_value=True) as clean, \
+             patch.object(cleanup, "rescan") as rescan:
+            self.assertFalse(cleanup.clean_library("http://sonarr/api/v3", {}, "sonarr", [self.root], False))
+        self.assertEqual(clean.call_count, 2)
+        for call in clean.call_args_list:
+            self.assertEqual(call.args[1], "jpn")
+        rescan.assert_called_once_with("http://sonarr/api/v3", {"sonarr_series_id": "42"}, "sonarr")
+
+    def test_library_dry_run_does_not_rescan(self):
+        with patch.object(cleanup, "api_request", return_value=[self.title]), \
+             patch.object(cleanup, "clean", return_value=True) as clean, \
+             patch.object(cleanup, "rescan") as rescan:
+            self.assertFalse(cleanup.clean_library("http://sonarr/api/v3", {}, "sonarr", [self.root], True))
+        clean.assert_called_once_with(self.file, "jpn", dry_run=True)
+        rescan.assert_not_called()
+
+    def test_unmatched_files_abort_before_any_changes(self):
+        (self.root / "Unmatched.mkv").touch()
+        with patch.object(cleanup, "api_request", return_value=[self.title]), \
+             patch.object(cleanup, "clean") as clean:
+            with self.assertRaisesRegex(ValueError, "no sonarr original-language metadata"):
+                cleanup.clean_library("http://sonarr/api/v3", {}, "sonarr", [self.root], False)
+        clean.assert_not_called()
+
+    def test_unknown_original_does_not_touch_file(self):
+        self.title["originalLanguage"] = {"name": "Unknown"}
+        with patch.object(cleanup, "api_request", return_value=[self.title]), \
+             patch.object(cleanup, "clean") as clean:
+            self.assertTrue(cleanup.clean_library("http://sonarr/api/v3", {}, "sonarr", [self.root], False))
+        clean.assert_not_called()
 
 
 class FakeArr:
@@ -291,6 +403,7 @@ class ImportEvents(unittest.TestCase):
     def test_rescan_targets_only_imported_title(self):
         for app, resource, command in (("sonarr", "series", "RescanSeries"), ("radarr", "movie", "RescanMovie")):
             with self.subTest(app=app), patch.object(cleanup, "urlopen") as urlopen:
+                urlopen.return_value.__enter__.return_value.read.return_value = b"{}"
                 cleanup.rescan(f"http://localhost/{app}/api/v3/", {
                     f"{app}_{resource}_id": "532", f"{app}__auth__apikey": "test-key",
                 }, app)

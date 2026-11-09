@@ -10,7 +10,7 @@
   python = pkgs.python3.withPackages (ps: [ps.pycountry]);
   importHook = pkgs.writeShellApplication {
     name = "clean-media-import";
-    runtimeInputs = [pkgs.ffmpeg-headless];
+    runtimeInputs = [pkgs.ffmpeg-headless pkgs.mkvtoolnix-cli pkgs.coreutils];
     text = ''
       exec ${lib.getExe python} ${./clean-import.py} "$@"
     '';
@@ -55,7 +55,7 @@ in {
       type = lib.types.package;
       readOnly = true;
       default = importHook;
-      description = "Import hook that keeps original-language, German, English and untagged tracks, and cleans metadata without encoding.";
+      description = "Import hook and library audit/repair command that keeps original-language, German, English and untagged tracks, and cleans metadata without encoding.";
     };
   };
   config = lib.mkIf cfg.enable (lib.mkMerge (
