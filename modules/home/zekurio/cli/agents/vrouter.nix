@@ -25,6 +25,33 @@
   # tools next to its non-strict __pi_deferred_placeholder__ tool ("compiled
   # grammar is too large"). pi then resends every turn non-strict, which
   # costs a round trip and a second upload of the whole context.
+  providers = [
+    {
+      id = "anthropic";
+      baseUrl = cfg.url;
+      compat.supportsStrictTools = false;
+    }
+    {
+      id = "openai";
+      baseUrl = cfg.url + "/v1";
+      compat = {};
+    }
+  ];
+
+  apiKey = "!${lib.getExe' pkgs.coreutils "cat"} ${lib.escapeShellArg cfg.keyFile}";
+
+  # T3 Code runs pi with --no-extensions for titles, branch names and commit
+  # messages, so the extension never loads there and pi finds no model.
+  # models.json redirects the same providers without an extension. When the
+  # extension does load, its model list replaces the catalog as before.
+  modelsJson = builtins.toJSON {
+    providers = lib.listToAttrs (map (p: {
+        name = p.id;
+        value = {inherit (p) baseUrl compat;} // {inherit apiKey;};
+      })
+      providers);
+  };
+
   extension = pkgs.writeText "vrouter.ts" ''
     import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
     import { getModel } from "@earendil-works/pi-ai";
@@ -32,14 +59,11 @@
 
     const url = ${json cfg.url};
     const keyFile = ${json cfg.keyFile};
-    const apiKey = ${json "!${lib.getExe' pkgs.coreutils "cat"} ${lib.escapeShellArg cfg.keyFile}"};
+    const apiKey = ${json apiKey};
 
     // Only the OpenAI base URL ends in /v1; the Anthropic client appends
     // /v1/messages itself.
-    const providers = [
-      { id: "anthropic", baseUrl: url, compat: { supportsStrictTools: false } },
-      { id: "openai", baseUrl: url + "/v1", compat: {} },
-    ];
+    const providers = ${json providers};
 
     export default async function (pi: ExtensionAPI) {
       let key = "";
@@ -115,5 +139,24 @@ in {
     };
   };
 
-  config.home.file.".pi/agent/extensions/vrouter.ts".source = extension;
+  config = {
+    home.file.".pi/agent/extensions/vrouter.ts".source = extension;
+
+    # pi creates models.json itself, so merge the providers in instead of
+    # owning the file. Without a key they come out again: a stored /login
+    # would otherwise be sent to vrouter, the same rule the extension follows.
+    home.activation.piVrouterModels = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      f="$HOME/.pi/agent/models.json"
+      run mkdir -p "$(dirname "$f")"
+      [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
+      tmp=$(mktemp)
+      if [ -s ${lib.escapeShellArg cfg.keyFile} ]; then
+        filter='. * {providers: $p.providers}'
+      else
+        filter='.providers |= ((. // {}) | del(.anthropic, .openai))'
+      fi
+      ${lib.getExe pkgs.jq} --argjson p ${lib.escapeShellArg modelsJson} "$filter" "$f" > "$tmp" \
+        && run chmod 600 "$tmp" && run mv "$tmp" "$f"
+    '';
+  };
 }
