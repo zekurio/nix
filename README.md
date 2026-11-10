@@ -131,8 +131,9 @@ securely; it contains private signing keys. Never commit it.
 
 ## Connect the agents to vrouter
 
-Claude Code and Codex, and T3 Code through them, send their requests to
-vrouter instead of their own logins once the machine has a vrouter client key.
+pi, and T3 Code through it, sends Anthropic and OpenAI requests to vrouter
+instead of pi's own logins once the machine has a vrouter client key. `/model`
+then lists only the models vrouter serves.
 Create one key per machine on the API keys page of
 `https://vrouter.zekurio.me` and save it:
 
@@ -151,15 +152,16 @@ nh darwin switch                                     # sachiel
 
 `adam` takes its key from sops instead of the file. Put it under
 `agents_vrouter_api_key` with `sops secrets/adam.yaml` and deploy. A replaced
-key needs no restart; the CLIs read the file again on their own. Sessions
+key needs no restart; pi reads the file again on every request. Sessions
 that started before the first key keep their old credentials. On `adam`, restart
 `t3code.service` once its sessions can end.
 
-Without the key file, both CLIs stay on their logins. To go back to them,
-delete the key file, then remove `apiKeyHelper`, `env.ANTHROPIC_BASE_URL` and
-`env.CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK` from `~/.claude/settings.json`,
-and `model_provider`, `model_catalog_json` and the `model_providers.vrouter`
-tables from `~/.codex/config.toml`.
+A login stored with `/login` outranks the key and goes to vrouter, which
+rejects it. Run `/logout` for `anthropic` and `openai` in pi once the key is in
+place.
+
+Without the key file, pi stays on its logins. To go back to them, delete the
+key file and `/login` again.
 
 ## Run Android emulators in T3 Code
 

@@ -26,11 +26,7 @@
     inherit (llmAgents.pi) meta;
   };
 
-  clis = [
-    pi
-    llmAgents.claude-code
-    llmAgents.codex
-  ];
+  clis = [pi];
 
   # Tools agents reach for first; without them they fail and retry via `nix run`.
   tools = [

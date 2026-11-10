@@ -13,45 +13,58 @@
       [[ -n "''${1:-}" ]] || exit 0
       read -r checksum _ < <(printf '%s' "$1" | cksum)
 
-      # Quantize the hue wheel into 32 dark tints, with RGB channels 31..55.
+      # Quantize the hue wheel into 32 tints, with channel offsets 0..24.
       hue=$(( (checksum % 32) * 6 ))
-      rising=$(( 31 + 24 * (hue % 32) / 32 ))
-      falling=$(( 55 - 24 * (hue % 32) / 32 ))
+      rising=$(( 24 * (hue % 32) / 32 ))
+      falling=$(( 24 - rising ))
       case $(( hue / 32 )) in
-        0) rgb=(55 "$rising" 31) ;;
-        1) rgb=("$falling" 55 31) ;;
-        2) rgb=(31 55 "$rising") ;;
-        3) rgb=(31 "$falling" 55) ;;
-        4) rgb=("$rising" 31 55) ;;
-        5) rgb=(55 31 "$falling") ;;
+        0) offset=(24 "$rising" 0) ;;
+        1) offset=("$falling" 24 0) ;;
+        2) offset=(0 24 "$rising") ;;
+        3) offset=(0 "$falling" 24) ;;
+        4) offset=("$rising" 0 24) ;;
+        5) offset=(24 0 "$falling") ;;
       esac
-      # Light mode keeps the hue and lifts the channels to 200..224.
-      if [[ "''${SSH_TINT_SCHEME:-}" == light ]]; then
-        rgb=($(( rgb[0] + 169 )) $(( rgb[1] + 169 )) $(( rgb[2] + 169 )))
+
+      # Tint relative to the real background, since a fixed range can sit on
+      # top of the theme's own background and vanish. A dark background
+      # lifts by 9..33 and a light one drops by 21..45. Without a reply,
+      # assume #161616, which gives the original tints.
+      read -r -a base <<< "''${SSH_TINT_BACKGROUND:-}"
+      [[ ''${#base[@]} -eq 3 ]] || base=(22 22 22)
+      if (( (299 * base[0] + 587 * base[1] + 114 * base[2]) / 1000 > 127 )); then
+        lift=-45
+      else
+        lift=9
       fi
+      rgb=()
+      for i in 0 1 2; do
+        channel=$(( base[i] + lift + offset[i] ))
+        (( channel < 0 )) && channel=0
+        (( channel > 255 )) && channel=255
+        rgb+=("$channel")
+      done
       printf '\033]11;#%02x%02x%02x\007' "''${rgb[@]}" > /dev/tty
     '';
   };
 
-  # Ghostty answers CSI ? 996 n with CSI ? 997 ; 1 n for dark and ; 2 n for
-  # light. Ask before ssh starts, because ssh owns the TTY by LocalCommand.
-  colorScheme = pkgs.writeShellApplication {
-    name = "terminal-color-scheme";
+  # OSC 11 ; ? asks for the background, and Ghostty answers with
+  # OSC 11 ; rgb:RRRR/GGGG/BBBB BEL. Ask before ssh starts, because ssh owns
+  # the TTY by LocalCommand. Prints the 8-bit channels, or nothing.
+  background = pkgs.writeShellApplication {
+    name = "terminal-background";
     runtimeInputs = [pkgs.coreutils];
     text = ''
-      if ! saved=$(stty -g 2> /dev/null < /dev/tty); then
-        echo dark
-        exit 0
-      fi
+      saved=$(stty -g 2> /dev/null < /dev/tty) || exit 0
       trap 'stty "$saved" < /dev/tty' EXIT
       stty -echo -icanon < /dev/tty
-      printf '\033[?996n' > /dev/tty
+      printf '\033]11;?\007' > /dev/tty
       reply=
-      IFS= read -r -s -d n -t 0.5 reply < /dev/tty || true
-      case $reply in
-        *'?997;2') echo light ;;
-        *) echo dark ;;
-      esac
+      IFS= read -r -s -d $'\a' -t 0.5 reply < /dev/tty || true
+      pattern='rgb:([0-9a-fA-F]{2})[0-9a-fA-F]*/([0-9a-fA-F]{2})[0-9a-fA-F]*/([0-9a-fA-F]{2})'
+      if [[ $reply =~ $pattern ]]; then
+        echo "$(( 16#''${BASH_REMATCH[1]} )) $(( 16#''${BASH_REMATCH[2]} )) $(( 16#''${BASH_REMATCH[3]} ))"
+      fi
     '';
   };
 in {
@@ -67,7 +80,7 @@ in {
         end
 
         set -g __ssh_tinted 1
-        set -lx SSH_TINT_SCHEME (${lib.getExe colorScheme})
+        set -lx SSH_TINT_BACKGROUND (${lib.getExe background})
         # Multiplexed sessions skip LocalCommand, so disable sharing for tint.
         command ssh -S none \
           -o PermitLocalCommand=yes \

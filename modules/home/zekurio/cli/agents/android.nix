@@ -5,11 +5,20 @@
   ...
 }: let
   cfg = config.agents.android;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin isAarch64;
+
+  # The emulator runs only images of the host's own architecture at full
+  # speed: x86_64 under KVM, arm64 under Hypervisor.framework on Apple
+  # silicon.
+  abi =
+    if isAarch64
+    then "arm64-v8a"
+    else "x86_64";
 
   # Android 16. Pinned instead of following "latest", so a flake.lock bump
   # cannot swap the system image under an existing virtual device.
   platform = "36";
-  image = "system-images;android-${platform};google_apis;x86_64";
+  image = "system-images;android-${platform};google_apis;${abi}";
   avd = "Pixel_9";
 
   sdk =
@@ -22,7 +31,7 @@
       includeSystemImages = true;
       platformVersions = [platform];
       systemImageTypes = ["google_apis"];
-      abiVersions = ["x86_64"];
+      abiVersions = [abi];
     }).androidsdk;
 
   # nixpkgs installs the command-line tools under their version number.
@@ -40,17 +49,27 @@
     done
   '';
 
-  sdkHome = "${config.home.homeDirectory}/Android/Sdk";
+  # Android Studio's location on each platform, and the first place T3 Code
+  # looks on it.
+  sdkDir =
+    if isDarwin
+    then "Library/Android/sdk"
+    else "Android/Sdk";
+  sdkHome = "${config.home.homeDirectory}/${sdkDir}";
 in {
   options.agents.android.enable = lib.mkEnableOption "an Android SDK, emulator and virtual device for T3 Code's Device panel";
 
   config = lib.mkIf cfg.enable {
-    # ~/Android/Sdk is where Android Studio installs the SDK and the first
-    # place T3 Code looks. Its desktop app copies only a fixed list of
-    # variables from the login shell, and ANDROID_HOME is not on it, so the
-    # variable alone would not reach it. The SDK is read-only: sdkmanager
-    # and Gradle cannot install packages into it.
-    home.file."Android/Sdk".source = root;
+    # T3 Code's desktop app copies only a fixed list of variables from the
+    # login shell, and ANDROID_HOME is not on it, so the variable alone would
+    # not reach it. The SDK is read-only: sdkmanager and Gradle cannot
+    # install packages into it.
+    home.file.${sdkDir}.source = root;
+
+    # T3 Code encodes an emulator's screen with ffmpeg's libx264. On Linux
+    # the T3 Code package carries it; the Homebrew app on macOS finds it on
+    # the login shell's PATH, as it does npm from the CLI packages.
+    home.packages = lib.optional isDarwin pkgs.ffmpeg-headless;
 
     # Gradle has no default location and needs the variable.
     home.sessionVariables.ANDROID_HOME = sdkHome;
@@ -61,7 +80,7 @@ in {
     # everything else.
     # avdmanager's launcher finds Java with `which` and checks its version
     # with awk. The activation's PATH has neither.
-    # The emulator needs /dev/kvm to run this x86_64 image.
+    # On Linux the emulator needs /dev/kvm to run the x86_64 image.
     home.activation.androidAvd = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -e "$HOME/.android/avd/${avd}.ini" ]; then
         if ! echo no | run env PATH="${lib.makeBinPath [pkgs.which pkgs.gawk]}:$PATH" \
