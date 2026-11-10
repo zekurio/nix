@@ -38,6 +38,7 @@ in {
       environment = {
         ALLOY_FFMPEG_PATH = "${pkgs.jellyfin-ffmpeg}/bin/ffmpeg";
         LIBVA_DRIVER_NAME = "iHD";
+        ALLOY_DEFAULT_STORAGE_QUOTA_BYTES = "16106127360";
       };
       environmentFile = config.sops.secrets.alloy_env.path;
 
@@ -46,8 +47,6 @@ in {
         thumbnailsPath = storageDirs.thumbnails;
         assetsPath = storageDirs.assets;
       };
-
-      limits.defaultStorageQuotaBytes = 16106127360;
     };
 
     systemd.services.alloy-storage-dirs = let

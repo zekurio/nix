@@ -81,7 +81,7 @@
     # that pin's Bun, and ours moves on with each flake.lock bump.
     orianna.url = "github:zekurio/orianna";
     alloy = {
-      url = "github:zekurio/alloy/v0.1.2";
+      url = "github:zekurio/alloy/audit-simplify";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     configarr = {
