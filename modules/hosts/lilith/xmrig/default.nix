@@ -224,11 +224,9 @@ in {
   programs.dux-shell.plugins.XmrigControl.src = duxPlugin;
   environment.systemPackages = [statusScript controlScript];
 
-  # Starts and stops both miners at once.
-  systemd.targets.xmrig = {
-    description = "XMRig miners";
-    wantedBy = ["multi-user.target"];
-  };
+  # Starts and stops both miners at once. Nothing wants it, so the miners
+  # stay off after boot until started from Dux or `systemctl start`.
+  systemd.targets.xmrig.description = "XMRig miners";
   systemd.services = lib.mapAttrs' mkService miners;
 
   programs.gamemode.settings.custom = {

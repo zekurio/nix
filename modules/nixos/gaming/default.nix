@@ -67,6 +67,9 @@ in {
     };
 
     environment.systemPackages = [
+      # nixpkgs patches in a dialog on every launch saying the package is
+      # unofficial and bugs belong on the nixpkgs tracker.
+      (pkgs.bottles.override {removeWarningPopup = true;})
       heroic
       pkgs.mangohud
       pkgs.r2modman
