@@ -5,11 +5,10 @@
   ...
 }: let
   mediaShare = config.services.homelab.mediaShare;
-  domain = "media.${config.services.homelab.domains.zekurio}";
-  # Where Jellyfin used to live. Apps and TVs store the server address and
-  # mostly ignore redirects, so the old name keeps serving until every
-  # client has been pointed at the new one.
-  legacyDomain = config.services.homelab.domains.schnitzelflix;
+  # Matinee took media.zekurio.me. Apps and TVs store the server address
+  # and mostly ignore redirects, so Jellyfin keeps serving on its old name
+  # until everyone has moved over.
+  domain = config.services.homelab.domains.schnitzelflix;
   port = 8096;
 in {
   options.services.homelab.jellyfin = {
@@ -53,17 +52,10 @@ in {
       ];
     };
 
-    services.homelab.caddy.virtualHosts = {
-      jellyfin = {
-        inherit domain;
-        public = true;
-        reverseProxy = "127.0.0.1:${toString port}";
-      };
-      jellyfin-legacy = {
-        domain = legacyDomain;
-        public = true;
-        reverseProxy = "127.0.0.1:${toString port}";
-      };
+    services.homelab.caddy.virtualHosts.jellyfin = {
+      inherit domain;
+      public = true;
+      reverseProxy = "127.0.0.1:${toString port}";
     };
   };
 }

@@ -41,7 +41,7 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Shared agent skills.
     agent-stuff = {
-      url = "github:zekurio/agent-stuff";
+      url = "git+https://tangled.org/zekurio.me/agent-stuff?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     helium = {
@@ -79,9 +79,13 @@
     };
     # Keep Orianna's own nixpkgs pin. Its node_modules hash only holds for
     # that pin's Bun, and ours moves on with each flake.lock bump.
-    orianna.url = "github:zekurio/orianna";
+    orianna.url = "git+https://tangled.org/zekurio.me/orianna?shallow=1";
+    # Keep Matinee's own nixpkgs pin. zekurio.cachix.org serves the server
+    # built against it, and following ours would rebuild it on each
+    # flake.lock bump.
+    matinee.url = "github:zekurio/matinee";
     alloy = {
-      url = "github:zekurio/alloy/audit-simplify";
+      url = "github:zekurio/alloy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     configarr = {

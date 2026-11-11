@@ -25,15 +25,16 @@
       "locked": {
         "lastModified": 1794265138,
         "narHash": "sha256-/dA8k/p2wlmTrdmITwoG9tltQJDWINkZdC+PziFF70I=",
-        "owner": "zekurio",
-        "repo": "agent-stuff",
+        "ref": "refs/heads/main",
         "rev": "d1c08f8986469bcf09428c5f1903aa6156351a72",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://tangled.org/zekurio.me/agent-stuff"
       },
       "original": {
-        "owner": "zekurio",
-        "repo": "agent-stuff",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://tangled.org/zekurio.me/agent-stuff"
       }
     },
     "alloy": {
@@ -43,16 +44,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1794327434,
-        "narHash": "sha256-FKOd+l3JR7GN0JPi1RJlABG73zKF+YcdoKTcSSY5Aqc=",
+        "lastModified": 1794425300,
+        "narHash": "sha256-/fZUqlvpy1FB5ouBzHKaSTfYU1oRufjmN+9dpuBTlXM=",
         "owner": "zekurio",
         "repo": "alloy",
-        "rev": "2390f0bbb1804cf129b87aa73aeca23c1a97dcff",
+        "rev": "d1dc45ab899f3e7accfd2150564e340f1a18009c",
         "type": "github"
       },
       "original": {
         "owner": "zekurio",
-        "ref": "audit-simplify",
         "repo": "alloy",
         "type": "github"
       }
@@ -744,6 +744,24 @@
         "url": "https://cdn.jsdelivr.net/npm/mathjax@4.1.2/tex-svg.js"
       }
     },
+    "matinee": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1794438950,
+        "narHash": "sha256-f8x7T+RwvRH6uC3xps6uLfTUpEs+vkxQUqCOOxPnNn4=",
+        "owner": "zekurio",
+        "repo": "matinee",
+        "rev": "d4cafb9f2432215a1945aac032a56a41690f5bbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zekurio",
+        "repo": "matinee",
+        "type": "github"
+      }
+    },
     "mermaid-src": {
       "flake": false,
       "locked": {
@@ -839,7 +857,7 @@
     },
     "nix-linux-builder": {
       "inputs": {
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_6"
       },
       "locked": {
         "lastModified": 1778050539,
@@ -996,6 +1014,22 @@
     },
     "nixpkgs_5": {
       "locked": {
+        "lastModified": 1793726008,
+        "narHash": "sha256-jQp1wKvbwWdLBASTXkSi/VYmDJ5AbBi1WvcMt9HWJC8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1d060086d60cb76a40cf37109f979d88a5bd6396",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
         "lastModified": 1767313136,
         "narHash": "sha256-16KkgfdYqjaeRGBaYsNrhPRRENs0qzkQVUooNHtoy2w=",
         "owner": "NixOS",
@@ -1010,7 +1044,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_6": {
+    "nixpkgs_7": {
       "locked": {
         "lastModified": 1792502884,
         "narHash": "sha256-IoNisKcGbUjdd45qCqywGMCYmZ5EnkxezvLII0FWwNA=",
@@ -1026,7 +1060,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_7": {
+    "nixpkgs_8": {
       "locked": {
         "lastModified": 1781216227,
         "narHash": "sha256-9mUW6gNwoN2SWc/l0fW4svPNOulXLl8ijqKyeSOGgJE=",
@@ -1044,20 +1078,21 @@
     },
     "orianna": {
       "inputs": {
-        "nixpkgs": "nixpkgs_6"
+        "nixpkgs": "nixpkgs_7"
       },
       "locked": {
         "lastModified": 1794142295,
         "narHash": "sha256-gv5Qzzg/YPhcFk0QwrQVlzBPRh1wRtLQy4s7Wa1GPNY=",
-        "owner": "zekurio",
-        "repo": "orianna",
+        "ref": "refs/heads/main",
         "rev": "a8633c139bc55928aa6eb6f5fb4643d8cf16939f",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://tangled.org/zekurio.me/orianna"
       },
       "original": {
-        "owner": "zekurio",
-        "repo": "orianna",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://tangled.org/zekurio.me/orianna"
       }
     },
     "root": {
@@ -1077,6 +1112,7 @@
         "inviterr": "inviterr",
         "jellium-desktop": "jellium-desktop",
         "llm-agents": "llm-agents",
+        "matinee": "matinee",
         "niri": "niri",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
@@ -1262,7 +1298,7 @@
         "mathjax-src": "mathjax-src",
         "mermaid-src": "mermaid-src",
         "microvm": "microvm",
-        "nixpkgs": "nixpkgs_7",
+        "nixpkgs": "nixpkgs_8",
         "nixpkgs-pds": [
           "nixpkgs-unstable"
         ],
