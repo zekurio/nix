@@ -194,6 +194,15 @@
         pkgs.writeText "sachiel-drv-path" (builtins.unsafeDiscardStringContext
           self.darwinConfigurations.sachiel.system.drvPath);
 
+      zed-vrouter-models =
+        pkgs.runCommand "zed-vrouter-models-test" {
+          nativeBuildInputs = [(pkgs.python3.withPackages (ps: [ps.json5]))];
+        } ''
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 ${./modules/home/zekurio/apps}/test-zed-vrouter-models.py
+          touch $out
+        '';
+
       media-cleanup =
         pkgs.runCommand "media-cleanup-test" {
           nativeBuildInputs = [

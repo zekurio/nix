@@ -163,6 +163,16 @@ place.
 Without the key file, pi stays on its logins. To go back to them, delete the
 key file and `/login` again.
 
+In Zed, open `agent: open settings` and enter the same client key for both
+`Anthropic (vrouter)` and `OpenAI (vrouter)` under LLM Providers. Zed keeps
+these credentials in the system keychain; update both entries when rotating
+the key file. To refresh the model lists immediately instead of waiting for
+the next 15-minute refresh, run:
+
+```bash
+zed-vrouter-models
+```
+
 ## Run Android emulators in T3 Code
 
 `adam` and `lilith` carry an Android SDK at `~/Android/Sdk` and a `Pixel_9`
