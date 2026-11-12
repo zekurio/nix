@@ -67,6 +67,17 @@ in {
       inherit domain;
       public = true;
       reverseProxy = "127.0.0.1:${toString port}";
+      # Caddy 2.11 aborts a response whose writes stall for a minute
+      # (write_idle). A paused player stops reading its stream, which is
+      # how Matinee throttles ffmpeg, so after a minute of pause Caddy
+      # reset the stream and Chrome logged ERR_QUIC_PROTOCOL_ERROR. Media
+      # responses may stall for as long as a pause lasts.
+      extraConfig = ''
+        @matinee_media path /api/media/* /api/downloads/*
+        timeouts @matinee_media {
+          write_timeout 4h
+        }
+      '';
     };
   };
 }
