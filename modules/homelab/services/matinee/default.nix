@@ -42,10 +42,20 @@ in {
         displayName = "Pocket ID";
       };
       # Handed over through LoadCredential, so the file stays root-only.
-      secrets.MATINEE_OIDC_CLIENT_SECRET = config.sops.secrets.matinee_oidc_client_secret.path;
+      secrets = {
+        MATINEE_OIDC_CLIENT_SECRET = config.sops.secrets.matinee_oidc_client_secret.path;
+        # The keys Jellyfin ships in its source: the TMDb provider's and
+        # the TVDB plugin's project key, which works without a subscriber PIN.
+        MATINEE_TMDB_API_KEY = config.sops.secrets.matinee_tmdb_api_key.path;
+        MATINEE_TVDB_API_KEY = config.sops.secrets.matinee_tvdb_api_key.path;
+      };
     };
 
-    sops.secrets.matinee_oidc_client_secret.restartUnits = ["matinee.service"];
+    sops.secrets = lib.genAttrs [
+      "matinee_oidc_client_secret"
+      "matinee_tmdb_api_key"
+      "matinee_tvdb_api_key"
+    ] (_: {restartUnits = ["matinee.service"];});
 
     systemd.services.matinee.environment.LIBVA_DRIVER_NAME = "iHD";
 
