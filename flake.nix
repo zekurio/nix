@@ -83,7 +83,9 @@
     # Keep Matinee's own nixpkgs pin. zekurio.cachix.org serves the server
     # built against it, and following ours would rebuild it on each
     # flake.lock bump.
-    matinee.url = "github:zekurio/matinee";
+    # Pinned to the media requests pull request (zekurio/matinee#13) while
+    # it is under review. Go back to the default branch once it merges.
+    matinee.url = "github:zekurio/matinee?ref=t3/seerr-style-media-requests";
     alloy = {
       url = "github:zekurio/alloy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

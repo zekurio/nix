@@ -155,11 +155,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1794592226,
-        "narHash": "sha256-ud7kuUgITpvfE+YHXPEs5H5MnLVR1zRkKxeOtYOGWt4=",
+        "lastModified": 1794684581,
+        "narHash": "sha256-zuwmNWC27VpOJKTzUMssz25ucErL+r34+fpsbiVXkyk=",
         "owner": "chaotic-cx",
         "repo": "nyx",
-        "rev": "8dbea94d5aff73a224d85f0dbdea95539df01105",
+        "rev": "b9529145a11cbd616f7383a895145e341b4efaeb",
         "type": "github"
       },
       "original": {
@@ -411,11 +411,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1794578823,
-        "narHash": "sha256-rvfmNs2OeIabY56g3+mCoewggaf4RTeEi1CYOc6+0A0=",
+        "lastModified": 1794658948,
+        "narHash": "sha256-EeTeJr0O49igDLhqEthDyEIrGqOQ/1JG6F+b6Xd/0rw=",
         "owner": "zekurio",
         "repo": "fluxer-nix",
-        "rev": "a4fb35d69a8eec879f893490907da5d1d1c1c043",
+        "rev": "23aa896c830745c5b41a22069d598b39ee765aad",
         "type": "github"
       },
       "original": {
@@ -705,11 +705,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794634844,
-        "narHash": "sha256-8HlfWrlXejz26+kK2XQuNvhO6wpQ3g+JOONywNf8d1E=",
+        "lastModified": 1794674015,
+        "narHash": "sha256-7mufIALmKLzCvP5ZAGGvMa0OtMGk7DLa0EA6dNrKtU0=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "ee05b5abb7c7f4af84a5ad5420f8a6e662774f2b",
+        "rev": "1b7ee581dc08b305b31313a5de609c7c50b0cdcc",
         "type": "github"
       },
       "original": {
@@ -748,15 +748,16 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1794655442,
-        "narHash": "sha256-ym5RuORI5g/BlFD3ZCv38v+zkCaRyUEUIGVMcPYy+qY=",
+        "lastModified": 1794687335,
+        "narHash": "sha256-P7VMkAXrrqyH9XQTzbZWOZOUtGFp9qgoFofYAjxnyJg=",
         "owner": "zekurio",
         "repo": "matinee",
-        "rev": "270ed6617ebbbbb4eafd8eee9dec7144647c9350",
+        "rev": "ccaa1e150e730ec38f233e1e019a2de8b4c70f49",
         "type": "github"
       },
       "original": {
         "owner": "zekurio",
+        "ref": "t3/seerr-style-media-requests",
         "repo": "matinee",
         "type": "github"
       }
