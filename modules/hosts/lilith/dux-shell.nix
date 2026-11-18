@@ -43,6 +43,8 @@
         echo 'hl.env("XCURSOR_THEME", ${lua pointerCursor.name})'
         echo 'hl.env("XCURSOR_SIZE", ${lua (toString pointerCursor.size)})'
         echo
+        cat ${pkgs.writeText "hyprland-pre.lua" cfg.preConfig}
+        echo
         cat ${embedded}/hyprland.lua
       } > stock.lua
 
@@ -72,6 +74,11 @@ in {
   # DMS owns the fragments under ~/.config/hypr/dms and rewrites them from
   # its settings pages, so Hyprland configuration kept in Nix goes here.
   options.modules.hyprland = {
+    preConfig = lib.mkOption {
+      type = lib.types.lines;
+      default = "";
+      description = "Lua placed ahead of DMS's requires, which runs before its fragments.";
+    };
     extraConfig = lib.mkOption {
       type = lib.types.lines;
       default = "";

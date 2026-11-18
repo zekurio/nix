@@ -1,0 +1,22 @@
+{
+    "id": "hdrToggle",
+    "name": "HDR",
+    "description": "Switch the desktop between SDR and HDR",
+    "version": "1.0.0",
+    "author": "zekurio",
+    "type": "composite",
+    "capabilities": [
+        "daemon",
+        "dankbar-widget",
+        "control-center"
+    ],
+    "components": {
+        "daemon": "./Daemon.qml",
+        "widget": "./Widget.qml"
+    },
+    "icon": "hdr_on",
+    "requires_dms": ">=1.7.0",
+    "permissions": [
+        "settings_read"
+    ]
+}
