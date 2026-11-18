@@ -19,13 +19,4 @@
     hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
     hl.monitor({ output = "desc:ASUSTek COMPUTER INC XG27AQWMG TCLMTF074235", mode = "2560x1440@279.961", position = "0x0", scale = 1, vrr = 3, bitdepth = 10, cm = "auto" })
   '';
-
-  # In SDR mode Hyprland reports the output as SDR to colour-managed
-  # clients. Helium then never offers HDR video and Wine's Wayland driver
-  # never exposes HDR to games, so the fullscreen switch above has nothing
-  # to react to. prefer_hdr reports HDR as preferred while the desktop
-  # itself stays in SDR.
-  modules.hyprland.extraConfig = ''
-    hl.config({ quirks = { prefer_hdr = 1 } })
-  '';
 }
