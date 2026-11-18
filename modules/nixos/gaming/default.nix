@@ -11,7 +11,7 @@
 
   # Chaotic's release wrappers predate nixpkgs' dedicated steamcompattool
   # output. Adapt their official-release payloads to the contract expected by
-  # programs.steam.extraCompatPackages without rebuilding either Proton.
+  # programs.steam.extraCompatPackages without rebuilding Proton.
   mkSteamCompatTool = name: source:
     pkgs.runCommand "${name}-${source.version}" {
       outputs = [
@@ -35,7 +35,6 @@
       ln -s "$steamcompattool" "$out/${name}"
     '';
 
-  protonGe = mkSteamCompatTool "proton-ge-custom" chaoticPkgs.proton-ge-custom;
   protonCachyos = mkSteamCompatTool "proton-cachyos-x86-64-v3" chaoticPkgs.proton-cachyos_x86_64_v3;
   heroic = pkgs.heroic.override {
     extraPkgs = pkgs':
@@ -57,10 +56,7 @@ in {
       steam = {
         enable = true;
         extraPackages = [pkgs.mangohud];
-        extraCompatPackages = [
-          protonGe
-          protonCachyos
-        ];
+        extraCompatPackages = [protonCachyos];
         protontricks.enable = true;
       };
       gamemode.enable = true;
