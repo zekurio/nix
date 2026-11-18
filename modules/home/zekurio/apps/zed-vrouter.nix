@@ -6,15 +6,12 @@
 }: let
   cfg = config.agents.vrouter;
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
-  provider = "Anthropic (vrouter)";
-  gptProvider = "OpenAI (vrouter)";
+  provider = "Anthropic vrouter";
+  gptProvider = "OpenAI vrouter";
 
-  # Zed reads a compatible provider's key from the provider name in upper
-  # snake case plus _API_KEY, before it looks in the keychain. convert_case
-  # keeps the parentheses and splits "OpenAI" into two words. The UI names
-  # the variable it found under LLM Providers, so a rename shows up there.
-  keyVariables = ["ANTHROPIC_(VROUTER)_API_KEY" "OPEN_AI_(VROUTER)_API_KEY"];
-  # Shells reject parentheses in variable names, so `env` sets them.
+  # Zed derives these from the provider names. Keep punctuation out of the
+  # names so Fish can import Zed's environment in its integrated terminal.
+  keyVariables = ["ANTHROPIC_VROUTER_API_KEY" "OPEN_AI_VROUTER_API_KEY"];
   withKey = pkgs.writeShellScript "zed-vrouter-key" ''
     key=$(${lib.getExe' pkgs.coreutils "tr"} -d '[:space:]' 2>/dev/null < ${lib.escapeShellArg cfg.keyFile}) || key=""
     if [ -n "$key" ]; then
@@ -101,12 +98,14 @@
   # `display_names` derives "Claude Opus 5.5" from claude-opus-5-5.
   catalog = pkgs.writeText "zed-vrouter-catalog.json" (builtins.toJSON {
     anthropic_compatible.${provider} = {
+      legacy_name = "Anthropic (vrouter)";
       prefix = "claude-";
       display_names = true;
       defaults = claudeDefaults;
       models = claudeModels;
     };
     openai_compatible.${gptProvider} = {
+      legacy_name = "OpenAI (vrouter)";
       prefix = "gpt-";
       defaults = gptDefaults;
       models = gptModels;
@@ -203,6 +202,9 @@ in {
           (lib.getExe (pkgs.writeShellApplication {
             name = "zed-vrouter-key";
             text = ''
+              # Clear names left in the login session by the old agent.
+              /bin/launchctl unsetenv 'ANTHROPIC_(VROUTER)_API_KEY' || :
+              /bin/launchctl unsetenv 'OPEN_AI_(VROUTER)_API_KEY' || :
               key=$(tr -d '[:space:]' 2>/dev/null < ${lib.escapeShellArg cfg.keyFile}) || key=""
               for name in ${lib.escapeShellArgs keyVariables}; do
                 if [ -n "$key" ]; then

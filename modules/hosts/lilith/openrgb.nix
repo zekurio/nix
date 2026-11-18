@@ -16,16 +16,18 @@ in {
     blacklistedKernelModules = ["ee1004"];
   };
 
+  # Hyprland starts graphical-session.target, not xdg-desktop-autostart.target.
   # Hardware Static mode keeps the color after OpenRGB exits.
-  home-manager.users.zekurio.xdg.configFile."autostart/OpenRGB.desktop" = {
-    force = true;
-    text = ''
-      [Desktop Entry]
-      Type=Application
-      Name=OpenRGB
-      Exec=${openrgb}/bin/openrgb --mode Static --color FF050A
-      Terminal=false
-      StartupNotify=false
-    '';
+  home-manager.users.zekurio.systemd.user.services.openrgb-apply = {
+    Unit = {
+      Description = "Apply OpenRGB static color";
+      After = ["graphical-session.target"];
+      PartOf = ["graphical-session.target"];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${openrgb}/bin/openrgb --mode Static --color FF050A";
+    };
+    Install.WantedBy = ["graphical-session.target"];
   };
 }

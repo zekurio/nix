@@ -14,6 +14,10 @@ in {
       inherit (helium) name meta;
       paths = [helium];
       nativeBuildInputs = [pkgs.makeWrapper];
+      # While Hyprland is starting, DMS can inherit WAYLAND_DISPLAY before
+      # XDG_SESSION_TYPE. Helium's auto mode then picks XWayland, where GTK
+      # no longer reads DMS's theme. Select the Wayland backend explicitly.
+      #
       # Chromium dlopens libgtk-3.so.0 for its GTK theme. autoPatchelfHook
       # keeps only DT_NEEDED libraries on the RUNPATH, so the flake's gtk3
       # never reaches the binary, and the GTK theme falls back to stock
@@ -28,6 +32,7 @@ in {
       postBuild = ''
         rm $out/bin/helium
         makeWrapper ${lib.getExe helium} $out/bin/helium \
+          --add-flags --ozone-platform=wayland \
           --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [pkgs.gtk3]} \
           --prefix XDG_DATA_DIRS : ${lib.concatMapStringsSep ":" pkgs.glib.getSchemaDataDirPath [pkgs.gsettings-desktop-schemas pkgs.gtk3]}
       '';

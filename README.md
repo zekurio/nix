@@ -164,12 +164,12 @@ Without the key file, pi stays on its logins. To go back to them, delete the
 key file and `/login` again.
 
 Zed takes the same key from the key file at launch, through the
-`ANTHROPIC_(VROUTER)_API_KEY` and `OPEN_AI_(VROUTER)_API_KEY` variables. On
+`ANTHROPIC_VROUTER_API_KEY` and `OPEN_AI_VROUTER_API_KEY` variables. On
 `lilith` the `zeditor` wrapper sets them. On `sachiel` a launchd agent puts
 them in the login session when the file changes. Quit and reopen Zed after
 placing or replacing the key; on `sachiel` also after a login that reopened Zed
 before the agent ran. `agent: open settings` then shows the key as coming from
-the variable under `Anthropic (vrouter)` and `OpenAI (vrouter)`. A key entered
+the variable under `Anthropic vrouter` and `OpenAI vrouter`. A key entered
 there by hand stays in the system keychain but no longer counts; delete it.
 
 The model lists refresh every 15 minutes. A model vrouter serves that

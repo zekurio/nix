@@ -16,11 +16,14 @@ spec = importlib.util.spec_from_file_location(
 sync = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sync)
 
-CLAUDE = "Anthropic (vrouter)"
-GPT = "OpenAI (vrouter)"
+CLAUDE = "Anthropic vrouter"
+GPT = "OpenAI vrouter"
+LEGACY_CLAUDE = "Anthropic (vrouter)"
+LEGACY_GPT = "OpenAI (vrouter)"
 CATALOG = {
     "anthropic_compatible": {
         CLAUDE: {
+            "legacy_name": LEGACY_CLAUDE,
             "prefix": "claude-",
             "display_names": True,
             "defaults": {"max_tokens": 1000000, "mode": {"type": "adaptive"}},
@@ -37,6 +40,7 @@ CATALOG = {
     },
     "openai_compatible": {
         GPT: {
+            "legacy_name": LEGACY_GPT,
             "prefix": "gpt-",
             "defaults": {"max_tokens": 272000, "reasoning_effort": "high"},
             "models": [
@@ -107,7 +111,7 @@ class SyncTests(unittest.TestCase):
           "language_models": {
             "openai_compatible": {
               "other": {"available_models": [{"name": "local"}]},
-              "OpenAI (vrouter)": {"api_url": "https://vrouter.example/v1"},
+              "OpenAI vrouter": {"api_url": "https://vrouter.example/v1"},
             },
           },
         }''')
@@ -118,6 +122,36 @@ class SyncTests(unittest.TestCase):
         providers = settings["language_models"]["openai_compatible"]
         self.assertEqual(providers[GPT]["api_url"], "https://vrouter.example/v1")
         self.assertEqual(providers["other"]["available_models"], [{"name": "local"}])
+
+    def test_migrates_legacy_providers_without_a_network_response(self):
+        cached = [{"name": "gpt-cached"}]
+        self.write({
+            "language_models": {
+                "anthropic_compatible": {LEGACY_CLAUDE: {"available_models": []}},
+                "openai_compatible": {
+                    LEGACY_GPT: {"api_url": "https://old.example/v1", "available_models": cached},
+                    GPT: {"api_url": "https://vrouter.example/v1"},
+                },
+            },
+            "agent": {
+                "default_model": {"provider": LEGACY_CLAUDE, "model": "claude-opus-5-5"},
+                "favorite_models": [{"provider": LEGACY_GPT, "model": "gpt-cached"},
+                                    {"provider": "other", "model": "local"}],
+            },
+        })
+        sync.update_settings(self.settings, CATALOG, None)
+        settings = self.read()
+        self.assertEqual(settings["language_models"], {
+            "anthropic_compatible": {CLAUDE: {"available_models": []}},
+            "openai_compatible": {
+                GPT: {"api_url": "https://vrouter.example/v1", "available_models": cached},
+            },
+        })
+        self.assertEqual(settings["agent"], {
+            "default_model": {"provider": CLAUDE, "model": "claude-opus-5-5"},
+            "favorite_models": [{"provider": GPT, "model": "gpt-cached"},
+                                {"provider": "other", "model": "local"}],
+        })
 
     def test_noop_does_not_replace_file(self):
         sync.update_settings(self.settings, CATALOG, served("gpt-6.1-sol"))

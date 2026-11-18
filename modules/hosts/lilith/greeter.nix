@@ -1,5 +1,6 @@
 {config, ...}: let
   cfg = config.services.displayManager.dux-greeter;
+  inherit (config.home-manager.users.zekurio.home) pointerCursor;
   inherit (config.services.xserver) xkb;
   lua = builtins.toJSON;
 in {
@@ -7,12 +8,16 @@ in {
     enable = true;
     compositor = {
       name = "hyprland";
-      # Replaces the greeter's built-in Hyprland config, so its environment
-      # variable and logo setting are repeated. The monitor rules match the
-      # session's, which saves a modeset into HDR when the session starts.
+      # Replaces the greeter's built-in Hyprland config. Keep its monitor
+      # rules in sync with the session so both request the same mode.
       customConfig = ''
         hl.env("DMS_RUN_GREETER", "1")
+        -- The greeter runs as its own user and cannot use the desktop's ~/.icons.
+        hl.env("XCURSOR_PATH", ${lua "${pointerCursor.package}/share/icons"})
+        hl.env("XCURSOR_THEME", ${lua pointerCursor.name})
+        hl.env("XCURSOR_SIZE", ${lua (toString pointerCursor.size)})
         hl.config({
+            cursor = { enable_hyprcursor = false },
             misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
             input = { kb_layout = ${lua xkb.layout}, kb_variant = ${lua xkb.variant}, kb_options = ${lua xkb.options}, numlock_by_default = true },
         })

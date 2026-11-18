@@ -76,6 +76,18 @@ def provider_models(entry, served):
     return models
 
 
+def rename_agent_providers(value, renamed):
+    if isinstance(value, dict):
+        provider = value.get("provider")
+        if isinstance(provider, str) and provider in renamed:
+            value["provider"] = renamed[provider]
+        for child in value.values():
+            rename_agent_providers(child, renamed)
+    elif isinstance(value, list):
+        for child in value:
+            rename_agent_providers(child, renamed)
+
+
 def update_settings(path, catalog, served):
     path.parent.mkdir(parents=True, exist_ok=True)
     # Serialize activation, timer and manual runs. Read settings only after
@@ -89,16 +101,24 @@ def update_settings(path, catalog, served):
             raise ValueError("settings.json must contain an object")
         settings = copy.deepcopy(original)
         language_models = settings.setdefault("language_models", {})
+        renamed = {}
         for kind, providers in catalog.items():
             compatible = language_models.setdefault(kind, {})
             for name, entry in providers.items():
                 provider = compatible.setdefault(name, {})
+                if legacy := entry.get("legacy_name"):
+                    renamed[legacy] = name
+                    # Home Manager may already have created the new entry.
+                    # Keep cached models and let the new entry win conflicts.
+                    if legacy in compatible:
+                        provider = compatible[name] = compatible.pop(legacy) | provider
                 if served is None:
                     # First activation without a key or network still gets the
                     # static catalog. Later failures keep the last list.
                     provider.setdefault("available_models", entry["models"])
                 else:
                     provider["available_models"] = provider_models(entry, served)
+        rename_agent_providers(settings.get("agent"), renamed)
         if settings == original:
             return
 

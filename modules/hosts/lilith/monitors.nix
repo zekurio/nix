@@ -17,6 +17,6 @@
   # line by line.
   modules.hyprland.outputs = ''
     hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
-    hl.monitor({ output = "desc:ASUSTek COMPUTER INC XG27AQWMG TCLMTF074235", mode = "2560x1440@279.961", position = "0x0", scale = 1, vrr = 3, bitdepth = 10, cm = "hdr" })
+    hl.monitor({ output = "desc:ASUSTek COMPUTER INC XG27AQWMG TCLMTF074235", mode = "2560x1440@279.961", position = "0x0", scale = 1, vrr = 3, bitdepth = 10, cm = "auto" })
   '';
 }
