@@ -54,7 +54,7 @@
 
   extension = pkgs.writeText "vrouter.ts" ''
     import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-    import { getModel } from "@earendil-works/pi-ai";
+    import { getModel, getModels } from "@earendil-works/pi-ai";
     import { readFileSync } from "node:fs";
 
     const url = ${json cfg.url};
@@ -65,6 +65,37 @@
     // /v1/messages itself.
     const providers = ${json providers};
 
+    // gpt-6.2-sol splits into family "gpt-sol" and version [6, 2],
+    // claude-opus-5-5 into "claude-opus" and [5, 5].
+    function parse(id: string) {
+      const parts = id.split("-");
+      const version = parts.filter((p) => /^\d+(\.\d+)*$/.test(p)).flatMap((p) => p.split(".").map(Number));
+      return { family: parts.filter((p) => !/^\d+(\.\d+)*$/.test(p)).join("-"), version };
+    }
+    function newer(a: number[], b: number[]) {
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0);
+      }
+      return false;
+    }
+
+    // vrouter can serve a model before a pi release lists it. Such a model
+    // borrows the newest catalog model of its family, e.g. gpt-6.2-sol takes
+    // gpt-6.1-sol's thinking levels and tool support, with vrouter's context
+    // window. Usage costs then follow the stand-in until pi catches up.
+    function standIn(provider: string, id: string, contextWindow: number | undefined) {
+      const wanted = parse(id);
+      let base: ReturnType<typeof getModels>[number] | undefined;
+      for (const model of getModels(provider as never)) {
+        const candidate = parse(model.id);
+        if (candidate.family !== wanted.family || newer(candidate.version, wanted.version)) continue;
+        if (!base || newer(candidate.version, parse(base.id).version)) base = model;
+      }
+      if (!base) return undefined;
+      const name = base.name.replace(parse(base.id).version.join("."), wanted.version.join("."));
+      return { model: { ...base, id, name, contextWindow: contextWindow ?? base.contextWindow }, base: base.id };
+    }
+
     export default async function (pi: ExtensionAPI) {
       let key = "";
       try {
@@ -72,33 +103,36 @@
       } catch {}
       if (!key) return;
 
-      let ids: string[] | undefined;
-      let warning: string | undefined;
+      let served: Array<{ id: string; context_window?: number }> | undefined;
+      const notes: string[] = [];
       try {
         const response = await fetch(url + "/v1/models", {
           headers: { authorization: "Bearer " + key },
           signal: AbortSignal.timeout(5000),
         });
         if (!response.ok) throw new Error("HTTP " + response.status);
-        const body = (await response.json()) as { data: Array<{ id: string }> };
-        ids = body.data.map((model) => model.id);
+        served = ((await response.json()) as { data: Array<{ id: string; context_window?: number }> }).data;
       } catch (error) {
         // Still route through vrouter, with the full catalog, so pi keeps
         // working while vrouter's model list is unreachable.
-        warning = "vrouter: could not list its models (" + String(error) + "), so /model shows pi's whole catalog.";
+        notes.push("vrouter: could not list its models (" + String(error) + "), so /model shows pi's whole catalog.");
       }
 
       const found = new Set<string>();
       for (const provider of providers) {
-        if (ids === undefined) {
+        if (served === undefined) {
           pi.registerProvider(provider.id, { baseUrl: provider.baseUrl, apiKey, compat: provider.compat });
           continue;
         }
         // vrouter lists both vendors' models together; each provider keeps
-        // the ones its catalog knows.
-        const models = ids.flatMap((id) => {
+        // the ones its catalog knows or has a stand-in for.
+        const models = served.flatMap(({ id, context_window }) => {
           const model = getModel(provider.id as never, id as never);
-          return model ? [model] : [];
+          if (model) return [model];
+          const borrowed = standIn(provider.id, id, context_window);
+          if (!borrowed) return [];
+          notes.push("vrouter: pi's catalog lacks " + id + ", so it uses " + borrowed.base + "'s metadata.");
+          return [borrowed.model];
         });
         for (const model of models) found.add(model.id);
         pi.registerProvider(provider.id, {
@@ -112,11 +146,10 @@
         });
       }
 
-      // A model newer than pi's catalog stays hidden until flake.lock moves
-      // pi to a release that knows it.
-      const unknown = (ids ?? []).filter((id) => !found.has(id));
-      if (unknown.length > 0) warning = "vrouter: pi's catalog lacks " + unknown.join(", ") + ", so /model leaves them out.";
-      if (warning) pi.on("session_start", (_event, ctx) => ctx.ui.notify(warning, "warning"));
+      // Only a model without a family in pi's catalog stays hidden.
+      const unknown = (served ?? []).map(({ id }) => id).filter((id) => !found.has(id));
+      if (unknown.length > 0) notes.push("vrouter: pi's catalog lacks " + unknown.join(", ") + ", so /model leaves them out.");
+      if (notes.length > 0) pi.on("session_start", (_event, ctx) => ctx.ui.notify(notes.join("\n"), "warning"));
     }
   '';
 in {

@@ -5,7 +5,7 @@
 in {
   home-manager.users.zekurio = {
     # Sets XCURSOR_THEME and ~/.icons/default for apps that read neither
-    # gsettings nor niri. dux-shell.nix passes the name on to niri.
+    # gsettings nor Hyprland. dux-shell.nix passes the name on to Hyprland.
     home.pointerCursor = {
       enable = true;
       package = pkgs.bibata-cursors;

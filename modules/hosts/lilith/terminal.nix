@@ -1,8 +1,8 @@
 {
   home-manager.users.zekurio.programs.kitty = {
     enable = true;
-    # The shared profile's opacity barely shows the blur niri draws behind
-    # the terminal.
+    # The shared profile's opacity barely shows the blur Hyprland draws
+    # behind the terminal.
     settings.background_opacity = 0.85;
     # Treat Alt as the Linux equivalent of macOS Command for the shortcuts
     # used most often. Alt+arrows remain available to shells.

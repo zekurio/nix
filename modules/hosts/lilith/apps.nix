@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   pkgs,
   ...
@@ -25,7 +26,8 @@
       inputs.jellium-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
       legcord
       wl-clipboard
-      zed-editor
+      # Launches Zed with the vrouter key in its provider variables.
+      config.home-manager.users.zekurio.agents.vrouter.zedPackage
     ];
   };
 }

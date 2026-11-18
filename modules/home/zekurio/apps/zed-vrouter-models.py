@@ -1,4 +1,4 @@
-"""Filter Zed's known Claude and GPT models through vrouter's live catalog."""
+"""Sync Zed's Claude and GPT models with vrouter's live catalog."""
 
 import argparse
 import copy
@@ -17,7 +17,8 @@ def warn(message):
     print(f"zed-vrouter-models: {message}", file=sys.stderr)
 
 
-def fetch_model_ids(url, key_file):
+def fetch_models(url, key_file):
+    """Return {model id: context window or None}, or None without a key."""
     try:
         key = key_file.read_text().strip()
     except FileNotFoundError:
@@ -33,17 +34,49 @@ def fetch_model_ids(url, key_file):
         body = json.load(response)
     if not isinstance(body, dict) or not isinstance(body.get("data"), list):
         raise ValueError("invalid /v1/models response")
-    if any(
-        not isinstance(model, dict)
-        or not isinstance(model.get("id"), str)
-        or not model["id"]
-        for model in body["data"]
-    ):
-        raise ValueError("invalid model in /v1/models response")
-    return {model["id"] for model in body["data"]}
+    models = {}
+    for model in body["data"]:
+        if (
+            not isinstance(model, dict)
+            or not isinstance(model.get("id"), str)
+            or not model["id"]
+        ):
+            raise ValueError("invalid model in /v1/models response")
+        window = model.get("context_window")
+        # bool is an int subclass; reject it along with zero and negatives.
+        if not isinstance(window, int) or isinstance(window, bool) or window <= 0:
+            window = None
+        models[model["id"]] = window
+    return models
 
 
-def update_settings(path, catalog, ids):
+def display_name(model_id):
+    """claude-opus-5-5 becomes Claude Opus 5.5, like the catalog's names."""
+    words, version = [], []
+    for part in model_id.split("-"):
+        (version if part.isdigit() else words).append(part)
+    return " ".join([word.capitalize() for word in words] + ([".".join(version)] if version else []))
+
+
+def provider_models(entry, served):
+    """The catalog's models vrouter serves, then served ones it lacks."""
+    known = {model["name"] for model in entry["models"]}
+    models = [copy.deepcopy(model) for model in entry["models"] if model["name"] in served]
+    # Newest first, as in the catalog, assuming ids sort by version.
+    for model_id in sorted(served, reverse=True):
+        if model_id in known or not model_id.startswith(entry["prefix"]):
+            continue
+        model = copy.deepcopy(entry["defaults"])
+        model["name"] = model_id
+        if entry.get("display_names"):
+            model["display_name"] = display_name(model_id)
+        if served[model_id] is not None:
+            model["max_tokens"] = served[model_id]
+        models.append(model)
+    return models
+
+
+def update_settings(path, catalog, served):
     path.parent.mkdir(parents=True, exist_ok=True)
     # Serialize activation, timer and manual runs. Read settings only after
     # the HTTP request, so Zed edits made while it was pending are retained.
@@ -58,14 +91,14 @@ def update_settings(path, catalog, ids):
         language_models = settings.setdefault("language_models", {})
         for kind, providers in catalog.items():
             compatible = language_models.setdefault(kind, {})
-            for name, models in providers.items():
+            for name, entry in providers.items():
                 provider = compatible.setdefault(name, {})
-                if ids is None:
+                if served is None:
                     # First activation without a key or network still gets the
                     # static catalog. Later failures keep the last list.
-                    provider.setdefault("available_models", models)
+                    provider.setdefault("available_models", entry["models"])
                 else:
-                    provider["available_models"] = [m for m in models if m["name"] in ids]
+                    provider["available_models"] = provider_models(entry, served)
         if settings == original:
             return
 
@@ -91,21 +124,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     catalog = json.loads(args.catalog.read_text())
     try:
-        ids = fetch_model_ids(args.url, args.key_file)
+        served = fetch_models(args.url, args.key_file)
     except Exception as error:
         warn(f"could not list models ({error}); keeping the last list")
-        ids = None
-    if ids is not None:
-        known = {
-            model["name"]
-            for providers in catalog.values()
-            for models in providers.values()
-            for model in models
-        }
-        unknown = sorted(id for id in ids - known if id.startswith(("claude-", "gpt-")))
-        if unknown:
-            warn("no Zed metadata for " + ", ".join(unknown) + "; omitting them")
-    update_settings(args.settings, catalog, ids)
+        served = None
+    update_settings(args.settings, catalog, served)
 
 
 if __name__ == "__main__":

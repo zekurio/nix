@@ -1,9 +1,24 @@
 {config, ...}: let
   cfg = config.services.displayManager.dux-greeter;
+  inherit (config.services.xserver) xkb;
+  lua = builtins.toJSON;
 in {
   services.displayManager.dux-greeter = {
     enable = true;
-    compositor.name = "niri";
+    compositor = {
+      name = "hyprland";
+      # Replaces the greeter's built-in Hyprland config, so its environment
+      # variable and logo setting are repeated. The monitor rules match the
+      # session's, which saves a modeset into HDR when the session starts.
+      customConfig = ''
+        hl.env("DMS_RUN_GREETER", "1")
+        hl.config({
+            misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
+            input = { kb_layout = ${lua xkb.layout}, kb_variant = ${lua xkb.variant}, kb_options = ${lua xkb.options}, numlock_by_default = true },
+        })
+        ${config.modules.hyprland.outputs}
+      '';
+    };
     # greetd copies the shell's settings, colours and wallpaper from here
     # whenever it starts, so the login screen matches the session.
     configHome = config.users.users.zekurio.home;

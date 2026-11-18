@@ -705,11 +705,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794921230,
-        "narHash": "sha256-RRduLttlM4pcigYa1ba220eiE4YJsgb3BudpjyHdrXQ=",
+        "lastModified": 1794922472,
+        "narHash": "sha256-1A3XeJeVx5X5W2yJsiWqeGJ0HG4EKzRygvT7ydX9JrI=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "63c46399bf34fe8026b7a823862bd7db9b73d13f",
+        "rev": "cc6255a8a195e622ee436fec4ff88a91cdf78044",
         "type": "github"
       },
       "original": {
@@ -793,26 +793,6 @@
       "original": {
         "owner": "microvm-nix",
         "repo": "microvm.nix",
-        "type": "github"
-      }
-    },
-    "niri": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1794745123,
-        "narHash": "sha256-13a2sg+XKWFg+c2jCNTnso+Qbuihy6YHK2awm54VLrc=",
-        "owner": "niri-wm",
-        "repo": "niri",
-        "rev": "689c1e914a5af782a476e433b79c15554bf5a312",
-        "type": "github"
-      },
-      "original": {
-        "owner": "niri-wm",
-        "repo": "niri",
         "type": "github"
       }
     },
@@ -1097,7 +1077,6 @@
         "jellium-desktop": "jellium-desktop",
         "llm-agents": "llm-agents",
         "matinee": "matinee",
-        "niri": "niri",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nix-linux-builder": "nix-linux-builder",

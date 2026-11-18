@@ -1,13 +1,9 @@
 {
-  # With variable-refresh-rate on-demand=true on the output, which DMS's
-  # display settings write to dms/outputs.kdl, niri only turns VRR on while
-  # a window matching this rule is on screen. The desktop stays at a fixed
-  # refresh rate, where VRR can flicker. Steam names its games steam_app_*.
-  modules.niri.extraConfig = ''
-    window-rule {
-        match app-id=r#"^steam_app_"#
-        match app-id=r#"^gamescope$"#
-        variable-refresh-rate true
-    }
+  # The monitor's vrr = 3 in monitors.nix only turns VRR on for fullscreen
+  # windows whose content type is game or video. Few games set one, so this
+  # marks them. The desktop stays at a fixed refresh rate, where VRR can
+  # flicker. Steam names its games steam_app_*.
+  modules.hyprland.extraConfig = ''
+    hl.window_rule({ match = { class = [[^(steam_app_.*|gamescope)$]] }, content = "game" })
   '';
 }

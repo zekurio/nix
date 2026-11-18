@@ -53,12 +53,6 @@
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # niri's main branch, for the GlobalShortcuts portal that 26.04 lacks.
-    # modules/hosts/lilith/niri-main.nix uses it until a release ships it.
-    niri = {
-      url = "github:niri-wm/niri";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Keep Chaotic's nixpkgs pin so its CachyOS kernel and Proton builds
     # match the binaries available in its cache.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";

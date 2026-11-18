@@ -105,6 +105,7 @@ in {
 
     services.homelab.caddy.virtualHosts.fluxer = {
       domain = fluxer.domain;
+      public = true;
       reverseProxy = "unix/${socket}";
     };
   };

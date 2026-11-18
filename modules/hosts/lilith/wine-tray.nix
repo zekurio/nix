@@ -8,14 +8,15 @@ in {
   # Wine and Proton only dock tray icons through the X11 XEmbed protocol,
   # which DMS's Quickshell tray does not speak. Without an X11 tray owner,
   # Wine opens its own "Wine System Tray" window instead. xembsni takes the
-  # X11 tray on xwayland-satellite's display and republishes each icon as a
+  # X11 tray on Hyprland's Xwayland display and republishes each icon as a
   # StatusNotifierItem.
   #
-  # Start Wine apps after xembsni. When the tray owner changes under a
-  # running app, Wine re-docks its icon as a briefly top-level window that
-  # xwayland-satellite marks WM_STATE Withdrawn. Wine then ignores the
-  # icon's moves and drops every click as outside it, so a restarted
-  # xembsni leaves existing icons visible but dead until their app restarts.
+  # Start Wine apps after xembsni. When the tray owner changed under a
+  # running app on niri's xwayland-satellite, Wine re-docked its icon as a
+  # briefly top-level window that the satellite marked WM_STATE Withdrawn.
+  # Wine then ignored the icon's moves and dropped every click as outside
+  # it, so a restarted xembsni left existing icons visible but dead until
+  # their app restarted. Hyprland's Xwayland may not do this; untested.
   systemd.user.services.xembsni = {
     description = "XEmbed to StatusNotifierItem tray bridge";
     partOf = ["graphical-session.target"];
@@ -32,21 +33,22 @@ in {
   };
 
   # xembsni reparents each icon into an offscreen container window, but
-  # xwayland-satellite still maps it as a toplevel and niri tiles it like a
-  # normal window. niri cannot hide windows, so the container floats as an
-  # unfocused, transparent pixel in the corner. xembsni names it for this.
-  modules.niri.extraConfig = ''
-    window-rule {
-        match app-id="^xembsni$"
-        open-floating true
-        open-focused false
-        default-column-width { fixed 1; }
-        default-window-height { fixed 1; }
-        default-floating-position x=0 y=0 relative-to="bottom-left"
-        opacity 0.0
-        focus-ring { off; }
-        border { off; }
-        shadow { off; }
-    }
+  # Hyprland still maps it as a toplevel and would tile it like a normal
+  # window. The container floats as an unfocusable, transparent pixel in the
+  # corner instead. xembsni names its class for this.
+  modules.hyprland.extraConfig = ''
+    hl.window_rule({
+        match = { class = [[^xembsni$]] },
+        float = true,
+        no_initial_focus = true,
+        no_focus = true,
+        size = { 1, 1 },
+        move = { 0, 0 },
+        opacity = "0.0 override 0.0 override 0.0 override",
+        border_size = 0,
+        no_shadow = true,
+        no_blur = true,
+        no_anim = true,
+    })
   '';
 }

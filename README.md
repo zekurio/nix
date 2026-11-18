@@ -163,11 +163,18 @@ place.
 Without the key file, pi stays on its logins. To go back to them, delete the
 key file and `/login` again.
 
-In Zed, open `agent: open settings` and enter the same client key for both
-`Anthropic (vrouter)` and `OpenAI (vrouter)` under LLM Providers. Zed keeps
-these credentials in the system keychain; update both entries when rotating
-the key file. To refresh the model lists immediately instead of waiting for
-the next 15-minute refresh, run:
+Zed takes the same key from the key file at launch, through the
+`ANTHROPIC_(VROUTER)_API_KEY` and `OPEN_AI_(VROUTER)_API_KEY` variables. On
+`lilith` the `zeditor` wrapper sets them. On `sachiel` a launchd agent puts
+them in the login session when the file changes. Quit and reopen Zed after
+placing or replacing the key; on `sachiel` also after a login that reopened Zed
+before the agent ran. `agent: open settings` then shows the key as coming from
+the variable under `Anthropic (vrouter)` and `OpenAI (vrouter)`. A key entered
+there by hand stays in the system keychain but no longer counts; delete it.
+
+The model lists refresh every 15 minutes. A model vrouter serves that
+`zed-vrouter.nix` does not list gets its family's defaults and vrouter's
+context window. To refresh immediately, run:
 
 ```bash
 zed-vrouter-models
