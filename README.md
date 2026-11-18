@@ -135,7 +135,10 @@ pi, and T3 Code through it, sends Anthropic and OpenAI requests to vrouter
 instead of pi's own logins once the machine has a vrouter client key. `/model`
 then lists only the models vrouter serves.
 Create one key per machine on the API keys page of
-`https://vrouter.zekurio.me` and save it:
+`https://vrouter.zekurio.me`. The dashboard asks for the admin key, which
+`sops -d --extract '["vrouter_admin_key"]' secrets/adam.yaml` prints on a
+machine that can decrypt it. Rotating it in sops and deploying signs every
+browser out. Save the client key:
 
 ```bash
 mkdir -p ~/.config/vrouter
