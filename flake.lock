@@ -748,16 +748,15 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1794690981,
-        "narHash": "sha256-Y4tltN20JlO79Wy1KsfpOr6XXFXT5pfiA9IshJ1D1k0=",
+        "lastModified": 1794956945,
+        "narHash": "sha256-jgs3/cOdkU21ouMDz8BQnRLPiHFignygnL815F4lb8U=",
         "owner": "zekurio",
         "repo": "matinee",
-        "rev": "38400188d1e0d93620820e2efa73bc147affb4b4",
+        "rev": "839bba5bb2f5fda2cc55bd3e252ffeaae4a2aef1",
         "type": "github"
       },
       "original": {
         "owner": "zekurio",
-        "ref": "t3/seerr-style-media-requests",
         "repo": "matinee",
         "type": "github"
       }
