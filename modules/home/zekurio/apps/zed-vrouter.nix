@@ -53,7 +53,7 @@
     {name = "claude-sonnet-5-5";}
     {name = "claude-haiku-5-5";}
   ];
-  # Match pi's conservative GPT context budgets. Use Responses, including
+  # Conservative GPT context budgets. Use Responses, including
   # encrypted reasoning state, so subscription-backed Codex accounts work too.
   gptDefaults = {
     max_tokens = 272000;

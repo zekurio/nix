@@ -131,9 +131,8 @@ securely; it contains private signing keys. Never commit it.
 
 ## Connect the agents to vrouter
 
-pi, and T3 Code through it, sends Anthropic and OpenAI requests to vrouter
-instead of pi's own logins once the machine has a vrouter client key. `/model`
-then lists only the models vrouter serves.
+Claude Code and Codex, also when T3 Code runs them, send their requests to
+vrouter instead of their own logins once the machine has a vrouter client key.
 Create one key per machine on the API keys page of
 `https://vrouter.zekurio.me`. The dashboard asks for the admin key, which
 `sops -d --extract '["vrouter_admin_key"]' secrets/adam.yaml` prints on a
@@ -155,16 +154,21 @@ nh darwin switch                                     # sachiel
 
 `adam` takes its key from sops instead of the file. Put it under
 `agents_vrouter_api_key` with `sops secrets/adam.yaml` and deploy. A replaced
-key needs no restart; pi reads the file again on every request. Sessions
-that started before the first key keep their old credentials. On `adam`, restart
-`t3code.service` once its sessions can end.
+key needs no restart; both CLIs read the file again within five minutes, or
+right after vrouter refuses the old key. Sessions that started before the
+first key keep their old credentials. On `adam`, restart `t3code.service`
+once its sessions can end.
 
-A login stored with `/login` outranks the key and goes to vrouter, which
-rejects it. Run `/logout` for `anthropic` and `openai` in pi once the key is in
-place.
+The key outranks a stored login in both, so there is no need to log out.
+Without the key file they go back to their logins. To return to those, delete
+the key file and run the activation again.
 
-Without the key file, pi stays on its logins. To go back to them, delete the
-key file and `/login` again.
+Claude Code adds the Claude models vrouter lists to `/model`. Codex's `/model` still shows the catalog bundled with the Codex
+release: Codex only reads a model list in its own format, which vrouter's
+`/v1/models` does not serve yet. Any model vrouter serves still works with
+`codex -m <model>`.
+
+opencode keeps its own login; run `opencode auth login` once per machine.
 
 Zed takes the same key from the key file at launch, through the
 `ANTHROPIC_VROUTER_API_KEY` and `OPEN_AI_VROUTER_API_KEY` variables. On
@@ -206,26 +210,12 @@ rm -r ~/.android/avd/Pixel_9.avd ~/.android/avd/Pixel_9.ini
 sudo systemctl restart home-manager-zekurio.service
 ```
 
-## Enable pi's web tools
+## Give Blitzcrank a Firecrawl key
 
-pi's `web_search` and `web_extract` tools from agent-stuff call Firecrawl
-and stay off until the machine has a Firecrawl API key. Create one at
-`https://firecrawl.dev` and save it:
-
-```bash
-mkdir -p ~/.config/firecrawl
-$EDITOR ~/.config/firecrawl/api-key
-chmod 600 ~/.config/firecrawl/api-key
-```
-
-pi reads the file when it starts, so new sessions pick up the key without a
-rebuild.
-
-`adam` takes the key from sops instead of the file and shares it with
-Blitzcrank. Put it under `firecrawl_api_key` with `sops secrets/adam.yaml`,
-keep `FIRECRAWL_API_KEY` out of `blitzcrank_env`, and deploy. Blitzcrank
-restarts with the new key; restart `t3code.service` once its sessions can
-end.
+Blitzcrank's web tools call Firecrawl. Create a key at `https://firecrawl.dev`,
+put it under `firecrawl_api_key` with `sops secrets/adam.yaml`, keep
+`FIRECRAWL_API_KEY` out of `blitzcrank_env`, and deploy. Blitzcrank restarts
+with the new key.
 
 ## Set up the Tangled knot
 

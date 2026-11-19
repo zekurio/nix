@@ -18,8 +18,7 @@ examples/
 # trash-guides
 files/adam/trash-guides/
 
-# Agent session exports and scratch fetches (never belong in the repo)
-pi-session-*.html
+# Scratch fetches (never belong in the repo)
 tmp/
 
 # Python bytecode from running tests by hand

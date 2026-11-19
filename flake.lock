@@ -23,10 +23,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1794265138,
-        "narHash": "sha256-/dA8k/p2wlmTrdmITwoG9tltQJDWINkZdC+PziFF70I=",
+        "lastModified": 1795116658,
+        "narHash": "sha256-XUo9VDRoyND4a+XTKDItd3K9zSAKC64jf1vKNvpFJHw=",
         "ref": "refs/heads/main",
-        "rev": "d1c08f8986469bcf09428c5f1903aa6156351a72",
+        "rev": "fddacc44f4cb8afb8b3bc1540caad64043ac4798",
         "shallow": true,
         "type": "git",
         "url": "https://tangled.org/zekurio.me/agent-stuff"

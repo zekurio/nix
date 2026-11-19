@@ -125,8 +125,6 @@ in {
       seerr_api_key = {};
       # Must match the token the MCP server checks on every request.
       blitzcrank_mcp_token = {};
-      # Shared with pi's web tools; modules/hosts/adam/agents.nix hands it
-      # to zekurio.
       firecrawl_api_key = {};
     };
   };
