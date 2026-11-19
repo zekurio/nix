@@ -9,33 +9,24 @@
   system = pkgs.stdenv.hostPlatform.system;
   chaoticPkgs = inputs.chaotic.legacyPackages.${system};
 
-  # Chaotic's release wrappers predate nixpkgs' dedicated steamcompattool
-  # output. Adapt their official-release payloads to the contract expected by
-  # programs.steam.extraCompatPackages without rebuilding Proton.
-  mkSteamCompatTool = name: source:
-    pkgs.runCommand "${name}-${source.version}" {
-      outputs = [
-        "out"
-        "steamcompattool"
-      ];
-      preferLocalBuild = true;
-      allowSubstitutes = false;
-    } ''
-      mkdir -p "$out" "$steamcompattool"
-      # Recent releases unpack directly into $out; older ones used bin/.
-      payload=${source}
-      if [ ! -f "$payload/compatibilitytool.vdf" ]; then
-        payload="$payload/bin"
-      fi
-      test -f "$payload/compatibilitytool.vdf"
-      ln -s "$payload"/* "$steamcompattool/"
-      # Steam ignores a symlinked compatibility manifest in current clients.
-      rm "$steamcompattool/compatibilitytool.vdf"
-      cp "$payload/compatibilitytool.vdf" "$steamcompattool/"
-      ln -s "$steamcompattool" "$out/${name}"
-    '';
+  # Chaotic builds proton-cachyos-bin_x86_64_v3 from its deprecated
+  # proton-cachyos alias, which warns on every evaluation and fails CI's
+  # abort-on-warn. The same override from the new name gives the identical
+  # derivation. Once Chaotic's overlay stops using the alias, use
+  # chaoticPkgs.proton-cachyos-bin_x86_64_v3 directly.
+  aliasedUpstream =
+    lib.hasInfix "proton-cachyos-bin_x86_64_v3 = final.proton-cachyos.override"
+    (builtins.readFile "${inputs.chaotic}/overlays/default.nix");
+  protonCachyos =
+    lib.warnIf (!aliasedUpstream)
+    "modules/nixos/gaming/default.nix: Chaotic no longer builds proton-cachyos-bin_x86_64_v3 from its alias; use it directly and drop this workaround."
+    (chaoticPkgs.proton-cachyos-bin_edge.override {
+      toolTitle = "Proton-CachyOS x86-64-v3";
+      toolArch = "x86_64_v3";
+      tarballSuffix = "-x86_64_v3.tar.xz";
+      manifestFilename = "cachyos-v3-manifest.json";
+    });
 
-  protonCachyos = mkSteamCompatTool "proton-cachyos-x86-64-v3" chaoticPkgs.proton-cachyos_x86_64_v3;
   heroic = pkgs.heroic.override {
     extraPkgs = pkgs':
       with pkgs'; [
@@ -56,6 +47,8 @@ in {
       steam = {
         enable = true;
         extraPackages = [pkgs.mangohud];
+        # Chaotic's package has its own steamcompattool output with a real
+        # (not symlinked) compatibilitytool.vdf, which current Steam needs.
         extraCompatPackages = [protonCachyos];
         protontricks.enable = true;
       };
