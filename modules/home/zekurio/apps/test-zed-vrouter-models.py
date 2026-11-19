@@ -25,7 +25,6 @@ CATALOG = {
         CLAUDE: {
             "legacy_name": LEGACY_CLAUDE,
             "prefix": "claude-",
-            "display_names": True,
             "defaults": {"max_tokens": 1000000, "mode": {"type": "adaptive"}},
             "models": [
                 {
@@ -42,7 +41,8 @@ CATALOG = {
         GPT: {
             "legacy_name": LEGACY_GPT,
             "prefix": "gpt-",
-            "defaults": {"max_tokens": 272000, "reasoning_effort": "high"},
+            "defaults": {"max_tokens": 272000, "reasoning_effort": "high",
+                         "capabilities": {"chat_completions": False, "images": True}},
             "models": [
                 {
                     "name": "gpt-6.1-sol",
@@ -58,7 +58,7 @@ CATALOG = {
 
 
 def served(*ids):
-    return dict.fromkeys(ids)
+    return {model_id: {} for model_id in ids}
 
 
 def catalog_models(kind, name):
@@ -197,23 +197,32 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(self.settings.read_bytes(), before)
 
     def test_unknown_models_get_family_defaults(self):
-        models = {"claude-opus-6-1": 2000000, "gpt-6.2-astra": None,
-                  "gpt-6.2-sol": 500000, "gpt-6.1-sol": 500000, "other-model": 1}
+        models = {"claude-opus-6-1": {"display_name": "Claude Opus 6.1", "max_tokens": 2000000,
+                                      "max_output_tokens": 256000, "images": True},
+                  "gpt-6.2-astra": {}, "gpt-6.2-sol": {"max_tokens": 500000, "images": False},
+                  "gpt-6.1-sol": {"display_name": "GPT-6.1-Sol", "max_tokens": 500000},
+                  "other-model": {"max_tokens": 1}}
         with patch.object(sync, "fetch_models", return_value=models):
             self.run_sync()
         providers = self.read()["language_models"]
         self.assertEqual(providers["anthropic_compatible"][CLAUDE]["available_models"], [{
             "max_tokens": 2000000,
+            "max_output_tokens": 256000,
             "mode": {"type": "adaptive"},
+            "capabilities": {"images": True},
             "name": "claude-opus-6-1",
             "display_name": "Claude Opus 6.1",
         }])
         gpt = providers["openai_compatible"][GPT]["available_models"]
-        # Catalog entries keep their own budget; new ones take vrouter's.
-        self.assertEqual(gpt[0], catalog_models("openai_compatible", GPT)[0])
+        # Catalog entries keep their own budget and take only the name; new
+        # ones take everything vrouter reports.
+        self.assertEqual(gpt[0], catalog_models("openai_compatible", GPT)[0]
+                         | {"display_name": "GPT-6.1-Sol"})
         self.assertEqual(gpt[1:], [
-            {"max_tokens": 500000, "reasoning_effort": "high", "name": "gpt-6.2-sol"},
-            {"max_tokens": 272000, "reasoning_effort": "high", "name": "gpt-6.2-astra"},
+            {"max_tokens": 500000, "reasoning_effort": "high", "name": "gpt-6.2-sol",
+             "capabilities": {"chat_completions": False, "images": False}},
+            {"max_tokens": 272000, "reasoning_effort": "high", "name": "gpt-6.2-astra",
+             "capabilities": {"chat_completions": False, "images": True}},
         ])
 
     def test_invalid_settings_and_symlinks_are_not_overwritten(self):
@@ -233,12 +242,19 @@ class SyncTests(unittest.TestCase):
 
     def test_fetch_auth_url_timeout_and_deduplication(self):
         self.key.write_text("test-key\n")
-        response = io.BytesIO(b'{"data":[{"id":"gpt-6.1-sol"},{"id":"gpt-6.1-sol","context_window":500000},'
-                              b'{"id":"a","context_window":true},{"id":"b","context_window":0},'
-                              b'{"id":"c","context_window":"1"}]}')
+        response = io.BytesIO(b'{"data":[{"id":"gpt-6.1-sol"},{"id":"gpt-6.1-sol","context_window":500000,'
+                              b'"display_name":" GPT-6.1-Sol ","max_output_tokens":128000,'
+                              b'"input_modalities":["text","image"]},'
+                              b'{"id":"a","context_window":true,"display_name":"a","input_modalities":["text"]},'
+                              b'{"id":"b","context_window":0,"display_name":"","max_output_tokens":-1},'
+                              b'{"id":"c","context_window":"1","display_name":7,"input_modalities":[]}]}')
         with patch.object(sync, "urlopen", return_value=response) as fetch:
             models = sync.fetch_models("https://vrouter.example/", self.key)
-        self.assertEqual(models, {"gpt-6.1-sol": 500000, "a": None, "b": None, "c": None})
+        self.assertEqual(models, {
+            "gpt-6.1-sol": {"display_name": "GPT-6.1-Sol", "max_tokens": 500000,
+                            "max_output_tokens": 128000, "images": True},
+            "a": {"images": False}, "b": {}, "c": {},
+        })
         request = fetch.call_args.args[0]
         self.assertEqual(request.full_url, "https://vrouter.example/v1/models")
         self.assertEqual(request.get_header("Authorization"), "Bearer test-key")

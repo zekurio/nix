@@ -17,8 +17,30 @@ def warn(message):
     print(f"zed-vrouter-models: {message}", file=sys.stderr)
 
 
+def positive(value):
+    # bool is an int subclass; reject it along with zero and negatives.
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def model_metadata(model):
+    """Zed's fields for what one /v1/models row describes."""
+    metadata = {}
+    name = model.get("display_name")
+    if isinstance(name, str) and name.strip() and name != model["id"]:
+        metadata["display_name"] = name.strip()
+    # Zed's max_tokens is the context window.
+    if positive(model.get("context_window")):
+        metadata["max_tokens"] = model["context_window"]
+    if positive(model.get("max_output_tokens")):
+        metadata["max_output_tokens"] = model["max_output_tokens"]
+    inputs = model.get("input_modalities")
+    if isinstance(inputs, list) and inputs:
+        metadata["images"] = "image" in inputs
+    return metadata
+
+
 def fetch_models(url, key_file):
-    """Return {model id: context window or None}, or None without a key."""
+    """Return {model id: model_metadata}, or None without a key."""
     try:
         key = key_file.read_text().strip()
     except FileNotFoundError:
@@ -42,36 +64,36 @@ def fetch_models(url, key_file):
             or not model["id"]
         ):
             raise ValueError("invalid model in /v1/models response")
-        window = model.get("context_window")
-        # bool is an int subclass; reject it along with zero and negatives.
-        if not isinstance(window, int) or isinstance(window, bool) or window <= 0:
-            window = None
-        models[model["id"]] = window
+        models[model["id"]] = model_metadata(model)
     return models
 
 
-def display_name(model_id):
-    """claude-opus-5-5 becomes Claude Opus 5.5, like the catalog's names."""
-    words, version = [], []
-    for part in model_id.split("-"):
-        (version if part.isdigit() else words).append(part)
-    return " ".join([word.capitalize() for word in words] + ([".".join(version)] if version else []))
-
-
 def provider_models(entry, served):
-    """The catalog's models vrouter serves, then served ones it lacks."""
+    """The catalog's models vrouter serves, then served ones it lacks.
+
+    Catalog models keep their own limits and take only vrouter's display
+    name. The others start from the family defaults and take everything
+    vrouter reports.
+    """
     known = {model["name"] for model in entry["models"]}
-    models = [copy.deepcopy(model) for model in entry["models"] if model["name"] in served]
+    models = []
+    for model in entry["models"]:
+        if model["name"] not in served:
+            continue
+        model = copy.deepcopy(model)
+        if name := served[model["name"]].get("display_name"):
+            model["display_name"] = name
+        models.append(model)
     # Newest first, as in the catalog, assuming ids sort by version.
     for model_id in sorted(served, reverse=True):
         if model_id in known or not model_id.startswith(entry["prefix"]):
             continue
         model = copy.deepcopy(entry["defaults"])
         model["name"] = model_id
-        if entry.get("display_names"):
-            model["display_name"] = display_name(model_id)
-        if served[model_id] is not None:
-            model["max_tokens"] = served[model_id]
+        metadata = dict(served[model_id])
+        if "images" in metadata:
+            model["capabilities"] = model.get("capabilities", {}) | {"images": metadata.pop("images")}
+        model.update(metadata)
         models.append(model)
     return models
 

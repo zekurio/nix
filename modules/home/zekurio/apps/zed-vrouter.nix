@@ -20,9 +20,11 @@
     exec "$@"
   '';
 
-  # /v1/models identifies available models, but does not describe thinking,
-  # output limits or beta headers. Known models carry those here; the sync
-  # gives models vrouter serves beyond this list the family's defaults.
+  # /v1/models gives each model's display name, context window, output limit
+  # and input types, but not Zed's thinking mode or beta headers. Known
+  # models carry those here and take only their names from vrouter; the sync
+  # builds models vrouter serves beyond this list from the family's defaults
+  # and everything vrouter reports.
   claudeDefaults = {
     max_tokens = 1000000;
     # Thinking and the visible reply share the documented 128K limit.
@@ -38,27 +40,18 @@
   claudeModels = map (model: claudeDefaults // model) [
     {
       name = "claude-fable-5-2";
-      display_name = "Claude Fable 5.2";
       extra_beta_headers = ["thinking-binding-controls-2026-08-01"];
     }
     {
       name = "claude-fable-5-1";
-      display_name = "Claude Fable 5.1";
       extra_beta_headers = ["thinking-binding-controls-2026-08-01"];
     }
     {
       name = "claude-opus-5-5";
-      display_name = "Claude Opus 5.5";
       extra_beta_headers = ["thinking-binding-controls-2026-08-01"];
     }
-    {
-      name = "claude-sonnet-5-5";
-      display_name = "Claude Sonnet 5.5";
-    }
-    {
-      name = "claude-haiku-5-5";
-      display_name = "Claude Haiku 5.5";
-    }
+    {name = "claude-sonnet-5-5";}
+    {name = "claude-haiku-5-5";}
   ];
   # Match pi's conservative GPT context budgets. Use Responses, including
   # encrypted reasoning state, so subscription-backed Codex accounts work too.
@@ -94,13 +87,11 @@
     "gpt-5.3-codex"
   ];
   # The sync adds a served model missing from `models` when its id starts
-  # with `prefix`, built from `defaults` with vrouter's context window.
-  # `display_names` derives "Claude Opus 5.5" from claude-opus-5-5.
+  # with `prefix`, built from `defaults` and what vrouter reports for it.
   catalog = pkgs.writeText "zed-vrouter-catalog.json" (builtins.toJSON {
     anthropic_compatible.${provider} = {
       legacy_name = "Anthropic (vrouter)";
       prefix = "claude-";
-      display_names = true;
       defaults = claudeDefaults;
       models = claudeModels;
     };
