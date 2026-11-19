@@ -198,6 +198,15 @@
           touch $out
         '';
 
+      codex-config =
+        pkgs.runCommand "codex-config-test" {
+          nativeBuildInputs = [(pkgs.python3.withPackages (ps: [ps.tomli-w]))];
+        } ''
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 ${./modules/home/zekurio/cli/agents}/test-codex-config.py
+          touch $out
+        '';
+
       media-cleanup =
         pkgs.runCommand "media-cleanup-test" {
           nativeBuildInputs = [

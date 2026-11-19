@@ -163,10 +163,16 @@ The key outranks a stored login in both, so there is no need to log out.
 Without the key file they go back to their logins. To return to those, delete
 the key file and run the activation again.
 
-Claude Code adds the Claude models vrouter lists to `/model`. Codex's `/model` still shows the catalog bundled with the Codex
-release: Codex only reads a model list in its own format, which vrouter's
-`/v1/models` does not serve yet. Any model vrouter serves still works with
-`codex -m <model>`.
+Claude Code adds the Claude models vrouter lists to `/model`. Codex's
+`/model` offers only the GPT models vrouter serves. Codex cannot read
+vrouter's list itself, so `codex-vrouter-models` builds its catalog from it on
+activation and every 15 minutes, and Codex picks the list up when it starts.
+A model vrouter serves that this Codex release does not know borrows its
+family's newest entry. To refresh immediately, run:
+
+```bash
+codex-vrouter-models
+```
 
 opencode keeps its own login; run `opencode auth login` once per machine.
 
