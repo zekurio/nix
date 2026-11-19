@@ -5,11 +5,9 @@
   ...
 }: let
   # flake.lock moves the CLI; opencode's own updater cannot replace a store
-  # path.
-  settings = {
-    "$schema" = "https://opencode.ai/config.json";
-    autoupdate = false;
-  };
+  # path. OpenCode 2 also reads v1's `autoupdate`, but `update` is its own
+  # key and wins over it, so the v1 key comes out.
+  settings.update = "disable";
 in {
   # opencode may write its config itself, so merge the keys in instead of
   # owning the file.
@@ -19,6 +17,6 @@ in {
     [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
     tmp=$(mktemp)
     ${lib.getExe pkgs.jq} --argjson s ${lib.escapeShellArg (builtins.toJSON settings)} \
-      '. * $s' "$f" > "$tmp" && run mv "$tmp" "$f"
+      'del(.autoupdate) * $s' "$f" > "$tmp" && run mv "$tmp" "$f"
   '';
 }

@@ -9,10 +9,22 @@
   inherit (pkgs.stdenv.hostPlatform) isLinux system;
   llmAgents = inputs.llm-agents.packages.${system};
 
+  # llm-agents installs OpenCode 2 as opencode2, beside the v1 package. T3
+  # Code runs `opencode` and tells the generations apart by --version, so
+  # the link gives both it and the shell v2.
+  opencode = pkgs.symlinkJoin {
+    name = "opencode-${llmAgents.opencode2.version}";
+    paths = [llmAgents.opencode2];
+    postBuild = ''
+      ln -s opencode2 $out/bin/opencode
+    '';
+    inherit (llmAgents.opencode2) meta version;
+  };
+
   clis = [
     llmAgents.claude-code
     llmAgents.codex
-    llmAgents.opencode
+    opencode
   ];
 
   # Tools agents reach for first; without them they fail and retry via `nix run`.
