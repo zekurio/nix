@@ -1363,11 +1363,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795013314,
-        "narHash": "sha256-8LCxV9K9xrLDQe/I5vbWSZMMGJ0FDI4RSgJnilo1xVw=",
+        "lastModified": 1795110588,
+        "narHash": "sha256-oN8dnoFXUvc+lrumGtM3+uCk4q2o1k/6GpEy5w7i+v4=",
         "owner": "zekurio",
         "repo": "vrouter",
-        "rev": "5adbdf7a359efe927ac741f99409d3b3d1d0c89c",
+        "rev": "55b5322a2eb3d0ec5ba99c038b9b2aa956ebf7a6",
         "type": "github"
       },
       "original": {
