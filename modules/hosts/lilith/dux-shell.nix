@@ -51,7 +51,17 @@
       # Hyprland does not read the keymap from locale1 the way niri did, and
       # NixOS sets no XKB_DEFAULT_LAYOUT. DMS's keyboard settings write
       # dms/input.lua, which is required later and still wins.
+      #
+      # DMS's startup block runs the environment import and the target start
+      # as two concurrent commands. Hyprland imports WAYLAND_DISPLAY into
+      # systemd itself, so dms.service can start with it but without
+      # XDG_SESSION_TYPE. Electron and Chromium apps launched from DMS then
+      # pick XWayland, where Hyprland rounds, blurs and shadows their
+      # override-redirect menus. Starting the target only after an import has
+      # finished closes the race; the first import is repeated, harmlessly.
       substitute stock.lua $out \
+        --replace-fail 'hl.exec_cmd("systemctl --user start hyprland-session.target")' \
+          'hl.exec_cmd("dbus-update-activation-environment --systemd --all && systemctl --user start hyprland-session.target")' \
         --replace-fail '-- empty inherits XKB_DEFAULT_LAYOUT (libxkbcommon), falls back to "us"' \
           "-- From NixOS's services.xserver.xkb" \
         --replace-fail 'kb_layout = "",' \
