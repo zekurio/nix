@@ -9,7 +9,11 @@
 
   # Points pi's built-in anthropic and openai providers at vrouter and keeps
   # only the models vrouter's /v1/models lists, with pi's own catalog
-  # metadata for them. A models.json entry could only redirect the
+  # metadata for them. That catalog is the release's bundled list overlaid
+  # with the pi.dev refresh cached in models-store.json, so a model OpenAI or
+  # Anthropic ships between pi releases still gets its real metadata.
+  # pi-ai's getModel only knows the bundled list; ModelRuntime composes both.
+  # A models.json entry could only redirect the
   # providers: models there add to the catalog, and /model would offer every
   # model pi knows for both. Registering a provider with `models` from an
   # extension replaces its list instead.
@@ -54,7 +58,8 @@
 
   extension = pkgs.writeText "vrouter.ts" ''
     import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-    import { getModel, getModels } from "@earendil-works/pi-ai";
+    import { InMemoryCredentialStore } from "@earendil-works/pi-ai";
+    import { ModelRuntime } from "@earendil-works/pi-coding-agent";
     import { readFileSync } from "node:fs";
 
     const url = ${json cfg.url};
@@ -79,14 +84,18 @@
       return false;
     }
 
-    // vrouter can serve a model before a pi release lists it. Such a model
-    // borrows the newest catalog model of its family, e.g. gpt-6.2-sol takes
-    // gpt-6.1-sol's thinking levels and tool support, with vrouter's context
-    // window. Usage costs then follow the stand-in until pi catches up.
-    function standIn(provider: string, id: string, contextWindow: number | undefined) {
+    type Catalog = Awaited<ReturnType<typeof ModelRuntime.create>>;
+    type CatalogModel = NonNullable<ReturnType<Catalog["getModel"]>>;
+
+    // vrouter can serve a model before pi's catalog lists it, even after the
+    // pi.dev refresh. Such a model borrows the newest catalog model of its
+    // family, e.g. gpt-6.3-sol would take gpt-6.2-sol's thinking levels and
+    // tool support, with vrouter's context window. Usage costs then follow
+    // the stand-in until the catalog catches up.
+    function standIn(catalog: Catalog, provider: string, id: string, contextWindow: number | undefined) {
       const wanted = parse(id);
-      let base: ReturnType<typeof getModels>[number] | undefined;
-      for (const model of getModels(provider as never)) {
+      let base: CatalogModel | undefined;
+      for (const model of catalog.getModels(provider as never) as CatalogModel[]) {
         const candidate = parse(model.id);
         if (candidate.family !== wanted.family || newer(candidate.version, wanted.version)) continue;
         if (!base || newer(candidate.version, parse(base.id).version)) base = model;
@@ -118,18 +127,28 @@
         notes.push("vrouter: could not list its models (" + String(error) + "), so /model shows pi's whole catalog.");
       }
 
+      // Reads the bundled catalog, models-store.json and models.json without
+      // touching the network or auth.json; pi refreshes the store itself.
+      const catalog: Catalog | undefined =
+        served === undefined
+          ? undefined
+          : await ModelRuntime.create({ credentials: new InMemoryCredentialStore() }).catch((error) => {
+              notes.push("vrouter: could not load pi's model catalog (" + String(error) + "), so /model shows pi's whole catalog.");
+              return undefined;
+            });
+
       const found = new Set<string>();
       for (const provider of providers) {
-        if (served === undefined) {
+        if (served === undefined || catalog === undefined) {
           pi.registerProvider(provider.id, { baseUrl: provider.baseUrl, apiKey, compat: provider.compat });
           continue;
         }
         // vrouter lists both vendors' models together; each provider keeps
         // the ones its catalog knows or has a stand-in for.
         const models = served.flatMap(({ id, context_window }) => {
-          const model = getModel(provider.id as never, id as never);
+          const model = catalog.getModel(provider.id as never, id as never) as CatalogModel | undefined;
           if (model) return [model];
-          const borrowed = standIn(provider.id, id, context_window);
+          const borrowed = standIn(catalog, provider.id, id, context_window);
           if (!borrowed) return [];
           notes.push("vrouter: pi's catalog lacks " + id + ", so it uses " + borrowed.base + "'s metadata.");
           return [borrowed.model];
