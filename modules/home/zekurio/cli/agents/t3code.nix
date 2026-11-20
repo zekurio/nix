@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -25,4 +26,21 @@
       }
     } | del(.providerInstances.pi)' "$f" > "$tmp" && run mv "$tmp" "$f"
   '';
+
+  # The desktop app's own server is reachable from the tailnet at
+  # https://<host>.<tailnet>.ts.net. The app runs `tailscale serve` as the
+  # user, which needs Tailscale operator rights on Linux. Network exposure
+  # binds 0.0.0.0, and the host firewall keeps that port closed elsewhere.
+  home.activation.t3codeDesktopSettings = lib.mkIf config.agents.desktop (
+    lib.hm.dag.entryAfter ["writeBoundary"] ''
+      f="$HOME/.t3/userdata/desktop-settings.json"
+      run mkdir -p "$(dirname "$f")"
+      [ -s "$f" ] || run sh -c 'echo "{}" > "$1"' _ "$f"
+      tmp=$(mktemp)
+      ${lib.getExe pkgs.jq} '. * {
+        serverExposureMode: "network-accessible",
+        tailscaleServeEnabled: true
+      }' "$f" > "$tmp" && run mv "$tmp" "$f"
+    ''
+  );
 }
