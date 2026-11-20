@@ -8,12 +8,15 @@
     # UDP 41641 inbound lets peers connect directly instead of falling
     # back to DERP relays.
     openFirewall = true;
-    # Linux rejects advertised subnet routes by default. Flint provides
-    # both the 10.0.0.0/24 route and tailnet DNS.
-    useRoutingFeatures = "client";
     extraSetFlags = [
+      # Flint provides tailnet DNS.
       "--accept-dns=true"
-      "--accept-routes=true"
+      # Lilith sits on Flint's 10.0.0.0/24. Tailscale's routing table takes
+      # precedence over main, so accepting that route pulled LAN traffic,
+      # the gateway and DNS included, into the tunnel. An exit node, Flint
+      # or any other, did the same to all traffic and cut off the internet.
+      "--accept-routes=false"
+      "--exit-node="
       "--hostname=lilith"
       # Without operator rights the tray can show status but not log in,
       # connect or disconnect; tailscaled only takes those from root.
