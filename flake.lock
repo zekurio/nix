@@ -267,23 +267,18 @@
     "fetch-tangled": {
       "inputs": {
         "nixpkgs": [
-          "tangled",
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
-        "lastModified": 1779479671,
-        "narHash": "sha256-8PR9nZnK0Fn4gDOikz+3sLdsEJYnKC3gaunBs4N+V9Q=",
-        "ref": "refs/heads/main",
-        "rev": "2e3744d31b990248f277d16a11ef81753b366f0f",
-        "revCount": 22,
-        "type": "git",
-        "url": "https://tangled.org/isabelroses.com/fetch-tangled"
+        "path": "./flakes/fetch-tangled",
+        "type": "path"
       },
       "original": {
-        "type": "git",
-        "url": "https://tangled.org/isabelroses.com/fetch-tangled"
-      }
+        "path": "./flakes/fetch-tangled",
+        "type": "path"
+      },
+      "parent": []
     },
     "flake-compat": {
       "flake": false,

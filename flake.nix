@@ -105,6 +105,11 @@
       url = "git+https://tangled.org/tangled.org/core?ref=refs/tags/v1.20.0&shallow=1";
       # Only the appview's PDS reads this second pin.
       inputs.nixpkgs-pds.follows = "nixpkgs-unstable";
+      # Its upstream repository is gone; see flakes/fetch-tangled/flake.nix.
+      inputs.fetch-tangled = {
+        url = "path:./flakes/fetch-tangled";
+        inputs.nixpkgs.follows = "nixpkgs-unstable";
+      };
     };
     autoaspm = {
       url = "git+https://git.notthebe.ee/notthebee/AutoASPM";
