@@ -1,6 +1,7 @@
 {
   services.homelab.valheim = {
-    enable = true;
+    # Paused by the group; the world stays in /var/lib/valheim for when it resumes.
+    enable = false;
     serverName = "Die geilsten Gamer e.V. (nicht offiziell)";
     public = true;
     extraEnvironment = {
