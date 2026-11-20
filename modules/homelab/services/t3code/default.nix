@@ -9,6 +9,7 @@
   home = config.users.users.${user}.home;
   inherit (config.home-manager.users.${user}.agents) t3code;
   port = 3773;
+  servePort = 8443;
   tailscale = lib.getExe config.services.tailscale.package;
 in {
   options.services.homelab.t3code.enable = lib.mkEnableOption "T3 Code remote coding server";
@@ -59,12 +60,12 @@ in {
 
     services.homelab.backup.stopUnits = ["t3code.service"];
 
-    # Tailscale Serve publishes the server at https://adam.<tailnet>.ts.net
-    # with a tailnet certificate. Root sets it up instead of `t3 serve
-    # --tailscale-serve`, which would need zekurio as Tailscale operator and
-    # let every agent the server runs reconfigure the node. tailscaled
-    # intercepts 443 only on its own tailnet address, so Caddy keeps 443 on
-    # the LAN.
+    # Tailscale Serve publishes the server at
+    # https://adam.<tailnet>.ts.net:8443 with a tailnet certificate. Root sets
+    # it up instead of `t3 serve --tailscale-serve`, which would need zekurio
+    # as Tailscale operator and let every agent the server runs reconfigure
+    # the node. tailscaled binds the serve port on its tailnet addresses, and
+    # Caddy already holds 443 on every address.
     systemd.services.t3code-tailscale-serve = {
       description = "Expose T3 Code on the tailnet";
       wantedBy = ["multi-user.target"];
@@ -73,8 +74,8 @@ in {
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${tailscale} serve --bg --https=443 http://127.0.0.1:${toString port}";
-        ExecStop = "${tailscale} serve --https=443 off";
+        ExecStart = "${tailscale} serve --bg --https=${toString servePort} http://127.0.0.1:${toString port}";
+        ExecStop = "${tailscale} serve --https=${toString servePort} off";
         # The node may still be logging in at boot.
         Restart = "on-failure";
         RestartSec = 10;
