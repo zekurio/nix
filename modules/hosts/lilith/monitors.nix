@@ -24,11 +24,12 @@ in {
   '';
 
   modules.hdr.outputs.${asus} = {
-    # Hyprland decodes SDR windows in HDR with render.cm_sdr_eotf, set below
-    # to gamma 2.2, which the monitor's SDR modes target. In SDR the output
-    # encodes with the monitor's sdr_eotf, so both have to agree or SDR
-    # shadows shift.
-    sdr.sdr_eotf = "gamma22";
+    sdr = {
+      cm = "srgb";
+      # Match render.cm_sdr_eotf below so SDR shadows don't shift when
+      # switching between SDR and HDR.
+      sdr_eotf = "gamma22";
+    };
 
     hdr = {
       # BT.2020 primaries. "hdredid" would take the EDID's, which Hyprland
