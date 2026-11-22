@@ -58,7 +58,6 @@ in {
 
     # FLUXER_BOT_TOKEN comes from blitzcrank_env with the other bot tokens.
     services.blitzcrank = {
-      gateways = ["fluxer"];
       settings = {
         FLUXER_INSTANCE_URL = cfg.instance;
         FLUXER_CHANNELS = lib.concatStringsSep "," cfg.channels;

@@ -69,7 +69,6 @@ in {
     services.blitzcrank = {
       enable = true;
       inherit package port;
-      gateways = ["seerr"];
       model = "anthropic/claude-opus-5-5:medium";
       # Required by every gateway; it names Discord and Fluxer threads.
       helperModel = "anthropic/claude-haiku-5-5:medium";

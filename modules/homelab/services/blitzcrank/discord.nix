@@ -52,7 +52,6 @@ in {
     ];
 
     services.blitzcrank = {
-      gateways = ["discord"];
       settings = {
         DISCORD_CHANNELS = lib.concatStringsSep "," cfg.channels;
         DISCORD_ALLOWED_USERS = lib.concatStringsSep "," cfg.allowedUsers;
