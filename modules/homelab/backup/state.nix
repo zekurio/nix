@@ -6,8 +6,7 @@
 }: let
   cfg = config.services.homelab.backup;
   postgresql = config.services.postgresql;
-  mountpoint = "/${cfg.dataset}";
-  snapshotDatasets = [cfg.dataset] ++ lib.optionals cfg.offsite.enable cfg.offsite.datasets;
+  resticUnits = ["restic-backups-offsite.service" "restic-offsite-snapshots.service"];
 
   # Postgres stops last, after its dumps, so it is not in stopUnits.
   downUnits = cfg.stopUnits ++ lib.optional postgresql.enable "postgresql.service";
@@ -18,43 +17,17 @@
     "target"
   ];
 
-  # Anchored at /, the root of the transfer.
-  excludes =
-    [
-      "/nix/"
-      "/tmp/"
-      "/var/tmp/"
-      "/var/cache/"
-      "/home/*/.cache/"
-      "/root/.cache/"
-      "/lost+found/"
-      "/var/lib/systemd/coredump/"
-      # Podman pulls the images again on first start.
-      "/var/lib/containers/storage/"
-    ]
-    ++ map (swap: swap.device) config.swapDevices
-    ++ lib.optional (config.nix.settings ? build-dir) "${config.nix.settings.build-dir}/"
-    ++ cfg.exclude;
-
   window = pkgs.writeShellApplication {
     name = "backup-state";
     runtimeInputs = [
       config.boot.zfs.package
       config.systemd.package
       pkgs.coreutils
-      pkgs.rsync
       pkgs.util-linux
       postgresql.package
     ];
     text = ''
-      dest=${lib.escapeShellArg mountpoint}
       dumps=${lib.escapeShellArg cfg.dumpDir}
-
-      # Without the dataset mounted, rsync would fill the SSD itself.
-      if [ "$(findmnt --noheadings --output SOURCE --mountpoint "$dest")" != ${lib.escapeShellArg cfg.dataset} ]; then
-        echo "${cfg.dataset} is not mounted at $dest" >&2
-        exit 1
-      fi
 
       # Stopping a unit also stops whatever Requires, BindsTo or is PartOf
       # it. Record every active unit the window takes down so ExecStopPost
@@ -100,58 +73,46 @@
         rm -rf "$dumps"
         mv "$dumps.new" "$dumps"
 
-        # A stopped cluster copies as a consistent data directory.
+        # Restic reads the data directory while the cluster is stopped.
         systemctl stop postgresql.service
       ''}
 
-      # --inplace with deltas rewrites only the changed blocks, so the
-      # snapshots of the copy hold just the night's changes.
-      status=0
-      rsync --archive --hard-links --acls --xattrs --one-file-system --numeric-ids \
-        --delete --delete-excluded --inplace --no-whole-file \
-        --exclude-from=${pkgs.writeText "backup-state-exclude" (lib.concatLines excludes)} \
-        / "$dest/" || status=$?
-      # 24: files vanished during the copy, as logs and sockets do.
-      if [ "$status" -ne 0 ] && [ "$status" -ne 24 ]; then
-        exit "$status"
-      fi
-
-      # One atomic snapshot, so the files on tank match the database state
-      # in the copy. It replaces the previous one only after a full copy.
-      snapshots=(${lib.escapeShellArgs (map (dataset: "${dataset}@${cfg.snapshot}") snapshotDatasets)})
+      # Snapshot all tank datasets together while database writers are down.
+      snapshots=(${lib.escapeShellArgs (map (dataset: "${dataset}@${cfg.snapshot}") cfg.offsite.datasets)})
       for snapshot in "''${snapshots[@]}"; do
         if zfs list -H -o name "$snapshot" >/dev/null 2>&1; then
           zfs destroy "$snapshot"
         fi
       done
       zfs snapshot "''${snapshots[@]}"
+      touch "$RUNTIME_DIRECTORY/ready"
+      systemctl start restic-backups-offsite.service
     '';
   };
 
   restart = pkgs.writeShellApplication {
     name = "backup-state-restart";
-    runtimeInputs = [config.systemd.package];
+    runtimeInputs = [config.systemd.package pkgs.coreutils];
     text = ''
+      rm -f "$RUNTIME_DIRECTORY/ready"
+      # A timed-out or cancelled systemctl start leaves its job running.
+      # Stop the upload before letting services write to the SSD again.
+      status=0
+      systemctl stop -- ${lib.escapeShellArgs resticUnits} || status=$?
       units="$RUNTIME_DIRECTORY/units"
       if [ -s "$units" ]; then
         mapfile -t active < "$units"
-        systemctl start -- "''${active[@]}"
+        systemctl start -- "''${active[@]}" || status=$?
       fi
+      exit "$status"
     '';
   };
 in {
   options.services.homelab.backup = {
-    enable = lib.mkEnableOption "a nightly copy of the system SSD to tank";
-
-    dataset = lib.mkOption {
-      type = lib.types.str;
-      default = "tank/backups/${config.networking.hostName}";
-      description = "ZFS dataset holding the copy of the system SSD. It must be mounted at /<dataset>.";
-    };
+    enable = lib.mkEnableOption "a consistent offsite backup of the system SSD and selected ZFS datasets";
 
     startAt = lib.mkOption {
       type = lib.types.str;
-      default = "*-*-* 04:30:00";
       description = "When the backup window opens, as a systemd calendar expression.";
     };
 
@@ -173,11 +134,8 @@ in {
       default = [];
       example = ["/var/lib/example/downloads/" "/home/*/Git/**/target/"];
       description = ''
-        rsync patterns for paths the copy of the SSD leaves out, such as
-        caches and files a service downloads again. A leading / anchors a
-        pattern at the root of the SSD, and a trailing / matches only
-        directories. The next window also removes newly excluded paths from
-        the copy.
+        Restic exclude patterns for the SSD and selected ZFS datasets.
+        A leading slash anchors a pattern at the filesystem root.
       '';
     };
 
@@ -185,14 +143,14 @@ in {
       type = lib.types.str;
       default = "/var/backup/postgresql";
       readOnly = true;
-      description = "Where the window writes its PostgreSQL dumps. The copy on tank carries them.";
+      description = "Where the window writes its PostgreSQL dumps for Restic.";
     };
 
     snapshot = lib.mkOption {
       type = lib.types.str;
       default = "backup";
       readOnly = true;
-      description = "Name of the snapshot the window takes of the copy and every offsite dataset.";
+      description = "Name of the snapshot the window takes of each offsite ZFS dataset.";
     };
   };
 
@@ -205,11 +163,11 @@ in {
       cfg.stopUnits;
 
     systemd.services.backup-state = {
-      description = "Copy the system SSD to tank";
-      inherit (cfg) startAt;
+      description = "Back up the system SSD and selected ZFS datasets offsite";
       # Ordering after a oneshot that is already running makes the window
       # wait for it; ordering after a running daemon changes nothing.
-      after = cfg.stopUnits ++ ["nixos-upgrade.service"];
+      after = cfg.stopUnits ++ ["network-online.target" "nixos-upgrade.service"];
+      wants = ["network-online.target"];
       restartIfChanged = false;
       onFailure = config.modules.notify.onFailure;
       serviceConfig = {
@@ -217,8 +175,8 @@ in {
         RuntimeDirectory = "backup-state";
         ExecStart = lib.getExe window;
         ExecStopPost = lib.getExe restart;
-        # Bring the services back even if the copy hangs.
-        TimeoutStartSec = "1h";
+        # Leave time for the upload and bring services back if it hangs.
+        TimeoutStartSec = "6h";
         # The restart waits for Fluxer's health checks.
         TimeoutStopSec = "15min";
       };
@@ -226,9 +184,7 @@ in {
 
     modules.healthchecks.units.backup-state = {
       schedule = cfg.startAt;
-      # The window first waits for a running upgrade, then has the timeouts
-      # above to copy and to bring the services back.
-      grace = 3 * 60 * 60;
+      grace = 7 * 60 * 60;
     };
   };
 }

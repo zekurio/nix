@@ -76,15 +76,6 @@ in {
         autosnap = true;
         autoprune = true;
       };
-      # The copy of the SSD only changes in the nightly backup window, so
-      # each daily snapshot holds one night's copy.
-      ${backup.dataset} = lib.mkIf backup.enable {
-        hourly = 0;
-        daily = 30;
-        monthly = 6;
-        autosnap = true;
-        autoprune = true;
-      };
     };
   };
 
@@ -108,7 +99,7 @@ in {
     script = ''
       # On the 8 TB mirror, these caps leave about 240 GiB available beyond
       # ZFS's internal reserve even when every dataset reaches its quota.
-      # tank/shares and tank/backups already include their child datasets.
+      # tank/shares already includes its child datasets.
       # Every dataset inherits atime and compression from the pool root.
       ${zfs} set atime=off compression=zstd tank
       ${ensureDataset "tank/media" "6700G"}
@@ -134,14 +125,6 @@ in {
       ${ensureDataset "tank/alloy" "20G"}
       ${ensureDataset "tank/shares" "50G"}
       ${ensureUserShareDatasets}
-      ${lib.optionalString backup.enable ''
-        # The copy plus 30 dailies and 6 monthlies of its changes.
-        ${ensureDataset "tank/backups" "150G"}
-        ${ensureDataset backup.dataset "none"}
-        # The copy holds every service's secrets, and /tank is NFS-exported
-        # with crossmnt, so only root may enter.
-        ${pkgs.coreutils}/bin/chmod 0700 /tank/backups
-      ''}
     '';
   };
 

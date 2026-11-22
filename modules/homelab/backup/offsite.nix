@@ -12,16 +12,18 @@
   # mount sits inside another read-only snapshot.
   stage = "/run/restic-offsite";
   stageOf = dataset: "${stage}/${lib.replaceStrings ["/"] ["+"] dataset}";
-  staged = lib.unique (offsite.datasets ++ [cfg.dataset]);
+  staged = lib.unique offsite.datasets;
   unmountStage = pkgs.writeShellApplication {
     name = "restic-offsite-unmount";
     runtimeInputs = [pkgs.util-linux];
     text = ''
+      status=0
       for dir in ${lib.escapeShellArgs (map stageOf staged)}; do
         if mountpoint -q "$dir"; then
-          umount "$dir"
+          umount "$dir" || status=$?
         fi
       done
+      exit "$status"
     '';
   };
   mountStage = pkgs.writeShellApplication {
@@ -37,9 +39,22 @@
       '')
       staged;
   };
-  within = parent: path: lib.hasPrefix "${parent}/" path;
-  # Child datasets are mounts below their parent; restic walks into them.
-  paths = lib.filter (mount: !lib.any (parent: within parent mount) datasetMounts) datasetMounts ++ offsite.paths;
+  excludes =
+    [
+      "/nix"
+      "/tmp"
+      "/var/tmp"
+      "/var/cache"
+      "/home/*/.cache"
+      "/root/.cache"
+      "/lost+found"
+      "/var/lib/systemd/coredump"
+      # Podman pulls the images again on first start.
+      "/var/lib/containers/storage"
+    ]
+    ++ map (swap: swap.device) config.swapDevices
+    ++ lib.optional (config.nix.settings ? build-dir) config.nix.settings.build-dir
+    ++ map (lib.removeSuffix "/") cfg.exclude;
   knownHost =
     if offsite.port == 22
     then offsite.host
@@ -47,8 +62,6 @@
   sftp = "ssh -p ${toString offsite.port} -i ${config.sops.secrets.restic_ssh_key.path} -o ServerAliveInterval=60 ${offsite.user}@${offsite.host} -s sftp";
 in {
   options.services.homelab.backup.offsite = {
-    enable = lib.mkEnableOption "an offsite restic copy of selected data over SFTP";
-
     host = lib.mkOption {
       type = lib.types.str;
       example = "u123456-sub1.your-storagebox.de";
@@ -77,26 +90,21 @@ in {
       type = lib.types.listOf lib.types.str;
       default = [];
       description = ''
-        ZFS datasets to upload, read from the snapshot the backup window
-        takes. Each must be mounted at /<dataset>. A parent's snapshot does
-        not contain its children, so list child datasets as well.
+        ZFS datasets to upload alongside the system SSD. Each must be mounted
+        at /<dataset>. List child datasets separately so Restic can cross
+        their mount boundaries.
       '';
-    };
-
-    paths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      description = "Paths on the system SSD to upload, read from the window's snapshot of the copy on tank.";
-    };
-
-    exclude = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      description = "restic exclude patterns.";
     };
   };
 
-  config = lib.mkIf (cfg.enable && offsite.enable) {
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = staged != [];
+        message = "services.homelab.backup.offsite.datasets must list at least one ZFS dataset.";
+      }
+    ];
+
     sops.secrets = {
       restic_password = {};
       restic_ssh_key = {};
@@ -112,8 +120,11 @@ in {
       passwordFile = config.sops.secrets.restic_password.path;
       extraOptions = ["sftp.command='${sftp}'"];
       initialize = true;
-      inherit paths;
-      inherit (offsite) exclude;
+      paths = ["/"] ++ datasetMounts;
+      exclude = excludes;
+      # Explicit targets can be separate mounts. While walking /, skip
+      # other filesystems such as /boot, /run, and unlisted tank datasets.
+      extraBackupArgs = ["--one-file-system"];
       # The backup window starts this job once its snapshots exist.
       timerConfig = null;
       pruneOpts = [
@@ -121,19 +132,8 @@ in {
         "--keep-weekly 5"
         "--keep-monthly 12"
       ];
-      # Reading back a random 5% each night finds damaged packs on the
-      # server within weeks instead of at restore time.
+      # Read back a random 5% on each run to check for damaged packs.
       checkOpts = ["--read-data-subset=5%"];
-    };
-
-    systemd.services.backup-state = {
-      onSuccess = ["restic-backups-offsite.service"];
-      # Wait for the previous upload, and for its snapshots to be
-      # unmounted, before replacing them.
-      after = [
-        "restic-backups-offsite.service"
-        "restic-offsite-snapshots.service"
-      ];
     };
 
     # systemd sets up restic's namespace again for every command, `+` ones
@@ -143,35 +143,31 @@ in {
     systemd.services.restic-offsite-snapshots = {
       description = "Mount the backup window's snapshots for restic";
       restartIfChanged = false;
-      unitConfig.StopWhenUnneeded = true;
+      unitConfig.AssertPathExists = "/run/backup-state/ready";
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = lib.getExe mountStage;
-        ExecStop = lib.getExe unmountStage;
+        ExecStopPost = lib.getExe unmountStage;
       };
     };
 
-    # Started only by a successful window, so a failed copy also shows up
+    # Started only once preparation succeeds, so a failed preparation shows up
     # here as a missing upload.
     modules.healthchecks.units.restic-backups-offsite = {
       schedule = cfg.startAt;
-      # The window's grace plus the upload, prune and 5% read-back.
-      grace = 5 * 60 * 60;
+      grace = 7 * 60 * 60;
     };
 
     systemd.services.restic-backups-offsite = {
       onFailure = config.modules.notify.onFailure;
       requires = ["restic-offsite-snapshots.service"];
       after = ["restic-offsite-snapshots.service"];
+      unitConfig.AssertPathExists = "/run/backup-state/ready";
       serviceConfig = {
-        # Inside this unit each path shows the window's snapshot instead of
-        # the live data, so the repository records the real paths and a
-        # restore puts files back where they belong. Dataset names must not
-        # contain colons; they separate the bind's fields.
-        BindReadOnlyPaths =
-          map (dataset: "${stageOf dataset}:/${dataset}") offsite.datasets
-          ++ map (path: "${stageOf cfg.dataset}${path}:${path}") offsite.paths;
+        TimeoutStartSec = "5h";
+        # Keep the original dataset paths in the repository for restores.
+        BindReadOnlyPaths = map (dataset: "${stageOf dataset}:/${dataset}") staged;
       };
     };
   };

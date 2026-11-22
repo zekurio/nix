@@ -42,16 +42,6 @@ in {
       "video"
     ];
 
-    services.homelab.backup = {
-      stopUnits = ["jellyfin.service"];
-      # Downloaded artwork and info, and seek-bar previews. A metadata
-      # refresh and the trickplay task bring them back.
-      exclude = [
-        "${config.services.jellyfin.dataDir}/metadata/"
-        "${config.services.jellyfin.dataDir}/data/trickplay/"
-      ];
-    };
-
     services.homelab.caddy.virtualHosts.jellyfin = {
       inherit domain;
       public = true;

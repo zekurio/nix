@@ -13,9 +13,9 @@ ssh adam 'sudo systemctl start nixos-upgrade.service'
 ssh adam 'journalctl -fu nixos-upgrade.service'
 ```
 
-The same unit runs every Sunday between 03:00 and 03:45. It never reboots;
-reboot by hand for a new kernel. If a build hits the unit's resource limits,
-build elsewhere and push it to the cache.
+The Sunday 03:00 backup starts the automatic upgrade after the upload and
+service restarts succeed. Reboot by hand for a new kernel. If a build hits the
+unit's resource limits, build elsewhere and push it to the cache.
 
 For emergencies, run a direct rebuild. This bypasses the upgrade unit's limits:
 
@@ -295,44 +295,15 @@ once the services work.
 
 ## Back up adam
 
-Run the nightly backup by hand and follow it. The offsite upload starts after
-the copy to tank when it is enabled:
+Run the weekly backup by hand and follow it:
 
 ```bash
 ssh adam 'sudo systemctl start backup-state.service'
 ssh adam 'journalctl -fu backup-state.service -u restic-backups-offsite.service'
 ```
 
-Failures of either unit arrive through ntfy.
-
-## Restore adam's SSD from tank
-
-Follow [Install NixOS](#install-nixos) through the disko step, with the new
-SSD's path in `disko.nix`. The copy carries the age key, so skip restoring it.
-`@backup` is the newest complete copy; `zfs list -t snapshot tank/backups/adam`
-lists the dailies, which mount the same way:
-
-```bash
-zpool import -f -N -o readonly=on tank
-mkdir /backup
-mount -t zfs tank/backups/adam@backup /backup
-rsync -aHAX --numeric-ids --exclude /boot/ --exclude /etc/ /backup/ /mnt/
-install -d /mnt/etc/ssh
-cp -a /backup/etc/machine-id /mnt/etc/
-cp -a /backup/etc/ssh/ssh_host_* /mnt/etc/ssh/
-umount /backup
-zpool export tank
-nixos-install --root /mnt --no-root-passwd --flake ".#adam"
-```
-
-Reboot. `/var/lib/nixos` came back before the install, so every service keeps
-its UID, and Postgres starts from the data directory copied while it was
-stopped. Podman pulls its images again on first start.
-
-The copy leaves out `/home` and the download tree, so both come back empty.
-It also leaves out what services fetch or generate again. In Jellyfin,
-refresh each library's metadata with "Replace all images" and run "Generate
-Trickplay Images". The arrs download their posters on their next refresh.
+Stateful services pause while Restic reads the SSD and the selected ZFS
+snapshots and checks the repository. Failures arrive through ntfy.
 
 ## Set up the offsite backup
 
@@ -352,9 +323,8 @@ openssl rand -base64 48
 Add the random string as `restic_password` and the private key as a YAML block
 under `restic_ssh_key` with `sops secrets/adam.yaml`, then delete
 `restic_ssh_key`. In `modules/hosts/adam/backup.nix`, set `offsite.host` to
-`$BOX`, `offsite.hostKey` to the `ssh-ed25519` key `ssh-keyscan` printed, and
-`offsite.enable = true`. Deploy and run a backup by hand. The first upload
-takes a while.
+`$BOX` and `offsite.hostKey` to the `ssh-ed25519` key `ssh-keyscan` printed.
+Deploy and run a backup by hand. The first SSD upload can take a while.
 
 Save the password in your password manager as well. Without it nobody can
 read the repository, and otherwise the saved age key would be the only way to
@@ -362,41 +332,66 @@ reach it. A lost SSH key can be replaced through the Hetzner Console.
 
 ## Restore from the offsite backup
 
-When tank is gone too, reinstall per [Install NixOS](#install-nixos), restoring
-the age key. Before `nixos-install`, restore the UID map so restored files keep
-their owners, and create the new pool:
+Follow [Install NixOS](#install-nixos) through disko and restore the saved age
+key. Before running `nixos-install`, open a shell with Restic and SOPS and list
+the snapshots that contain the SSD root. Choose the Nix configuration that
+matches the backed-up PostgreSQL major version.
 
 ```bash
-BOX=uXXXXXX-subN.your-storagebox.de
 nix-shell -p restic sops
+BOX=uXXXXXX-subN.your-storagebox.de
+RECOVERY=$(mktemp -d)
 export SOPS_AGE_KEY_FILE=/mnt/var/lib/sops-nix/key.txt
-sops -d --extract '["restic_password"]' secrets/adam.yaml > /tmp/restic-password
-(umask 077; sops -d --extract '["restic_ssh_key"]' secrets/adam.yaml > /tmp/restic-key)
-restic -r "sftp:${BOX%%.*}@$BOX:restic" \
-  -o sftp.command="ssh -p 23 -i /tmp/restic-key ${BOX%%.*}@$BOX -s sftp" \
-  --password-file /tmp/restic-password \
-  restore latest --include /var/lib/nixos --target /mnt
-zpool create -o ashift=12 -O compression=zstd -O atime=off -O acltype=posix \
+export RESTIC_REPOSITORY="sftp:${BOX%%.*}@$BOX:restic"
+export RESTIC_PASSWORD_FILE="$RECOVERY/password"
+(
+  umask 077
+  sops -d --extract '["restic_password"]' secrets/adam.yaml > "$RESTIC_PASSWORD_FILE"
+  sops -d --extract '["restic_ssh_key"]' secrets/adam.yaml > "$RECOVERY/ssh-key"
+)
+printf '[%s]:23 %s\n' "$BOX" \
+  "$(awk -F '"' '/hostKey = / { print $2 }' modules/hosts/adam/backup.nix)" \
+  > "$RECOVERY/known-hosts"
+offsite() {
+  restic -o "sftp.command=ssh -p 23 -i $RECOVERY/ssh-key -o UserKnownHostsFile=$RECOVERY/known-hosts -o StrictHostKeyChecking=yes ${BOX%%.*}@$BOX -s sftp" "$@"
+}
+offsite snapshots --path /
+```
+
+Set `SNAPSHOT` to the snapshot ID you chose. Restore the SSD before installing
+so NixOS uses the saved UID map. The stopped PostgreSQL data directory is
+already in this restore.
+
+```bash
+offsite restore "$SNAPSHOT" --target /mnt \
+  --exclude /tank --exclude /boot --exclude /etc --exclude /var/lib/sops-nix/key.txt
+offsite restore "$SNAPSHOT" --target /mnt \
+  --include /etc/machine-id --include '/etc/ssh/ssh_host_*'
+```
+
+If `tank` was lost, create a new mirror with the installer root as its
+temporary mount prefix. Create the datasets listed for the chosen snapshot
+before restoring their contents so they land on the right filesystems:
+
+```bash
+zpool create -R /mnt -o ashift=12 -O compression=zstd -O atime=off -O acltype=posix \
   -O xattr=sa -O mountpoint=/tank tank mirror /dev/disk/by-id/DISK1 /dev/disk/by-id/DISK2
+zfs create tank/alloy
+zfs create tank/fluxer
+zfs create tank/immich
+zfs create -p tank/shares/zekurio
+offsite restore "$SNAPSHOT" --target /mnt --include /tank
 zpool export tank
 ```
 
-After the install and a reboot, restore the data and databases over the fresh
-services:
+Remove the temporary credentials and resume [Install NixOS](#install-nixos)
+at `nixos-install`. If you restored `tank`, run Immich's thumbnail and video
+transcoding jobs for missing assets after boot.
 
 ```bash
-sudo systemctl stop immich-server immich-machine-learning alloy-server pocket-id fluxer.target
-sudo restic-offsite restore latest --target /
-for db in immich alloy fluxer; do
-  sudo -u postgres dropdb --if-exists "$db"
-  sudo -u postgres pg_restore --create --dbname postgres "/var/backup/postgresql/$db.dump"
-done
-sudo systemctl restart mediaShare-user-library-acl
-sudo systemctl start immich-server immich-machine-learning alloy-server pocket-id fluxer.target
+rm -r "$RECOVERY"
+unset RESTIC_PASSWORD_FILE RESTIC_REPOSITORY
 ```
-
-Then run Immich's thumbnail and video transcoding jobs for missing assets, since
-the repository leaves both out.
 
 ## Set up adam's uptime checks
 
@@ -408,8 +403,8 @@ at urgent priority. Add the key as `healthchecks_ping_key` with
 set their schedules:
 
 - `adam-heartbeat`: period 5 minutes, grace 10 minutes.
-- `adam-upgrade`: cron `0 3 * * 0` in Europe/Berlin, grace 3 hours, which
-  covers the timer's random delay and a rebuild.
+- `adam-backup-state` and `adam-restic-backups-offsite`: Sunday 03:00, grace 7 hours.
+- `adam-upgrade`: Sunday 03:00, grace 10 hours for the backup and rebuild.
 
 `ssh adam 'sudo systemctl start healthchecks-heartbeat.service'` pings the
 heartbeat by hand.

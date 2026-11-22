@@ -44,8 +44,6 @@ in {
       unitConfig.RequiresMountsFor = [jellyfinDataDir];
     };
 
-    services.homelab.backup.stopUnits = ["inviterr.service"];
-
     services.homelab.caddy.virtualHosts."inviterr" = {
       inherit domain;
       public = true;
