@@ -12,6 +12,9 @@
   # instead.
   # The server rewrites settings.json when settings change in its UI, so
   # merge the keys in instead of owning the file as a read-only symlink.
+  # opencode asks for every shell command in every mode below Full access, and
+  # MCP-launched threads inherit the caller's mode, so pin the default. A
+  # project default set in T3 still overrides this.
   home.activation.t3codeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     f="$HOME/.t3/userdata/settings.json"
     run mkdir -p "$(dirname "$f")"
@@ -19,6 +22,7 @@
     tmp=$(mktemp)
     ${lib.getExe pkgs.jq} '. * {
       enableProviderUpdateChecks: false,
+      defaultRuntimeMode: "full-access",
       providerInstances: {
         codex: {driver: "codex", enabled: true},
         claudeAgent: {driver: "claudeAgent", enabled: true},
