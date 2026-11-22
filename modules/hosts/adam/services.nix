@@ -4,29 +4,24 @@
   services.homelab = {
     alloy.enable = true;
     atuin-ai.enable = true;
+    # Off until the overhaul: Seerr, its only mandatory backend, is off
+    # while Matinee replaces the Jellyfin stack. Fluxer is off too because
+    # it asserts Blitzcrank itself.
     blitzcrank = {
-      enable = true;
-      discord = {
-        enable = true;
-        channels = ["1511015305592443001"];
-        allowedUsers = ["144853050761150465"];
-        triageModel = "openrouter/typesafe/jev-1.14";
-      };
+      enable = false;
       fluxer = {
-        enable = true;
+        enable = false;
         # #support in the single community.
         channels = ["1564016936159805440"];
         allowedUsers = ["1563624022032252928"];
         triageModel = "openrouter/typesafe/jev-1.14";
       };
     };
-    blitzcrank-mcp.enable = true;
+    blitzcrank-mcp.enable = false;
     configarr.enable = true;
     coolercontrol.enable = true;
     fluxer.enable = true;
     immich.enable = true;
-    jellyfin.enable = true;
-    inviterr.enable = true;
     knot.enable = true;
     matinee.enable = true;
     mediaCleanup.enable = true;
@@ -36,10 +31,10 @@
     prowlarr.enable = true;
     radarr.enable = true;
     sabnzbd.enable = true;
-    seerr.enable = true;
     slskd.enable = true;
     sonarr.enable = true;
     t3code.enable = true;
     vrouter.enable = true;
+    wealthfolio.enable = true;
   };
 }

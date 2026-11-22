@@ -323,7 +323,9 @@ in {
           ];
         };
       }
-      (lib.genAttrs ["jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"] (_: {
+      # Touching users.users.<name> declares that user, so only name the
+      # services that are enabled and therefore define the rest of it.
+      (lib.genAttrs (lib.filter (name: config.services.${name}.enable) ["jellyfin" "radarr" "sabnzbd" "slskd" "sonarr"]) (_: {
         extraGroups = lib.mkAfter [shareGroup];
       }))
       (lib.genAttrs cfg.collaborators (_: {

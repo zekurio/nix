@@ -743,11 +743,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1795194536,
-        "narHash": "sha256-zoAFKLSWcNf7hrX+nI+EKsThX3/lDXCaOTQa6HMXfto=",
+        "lastModified": 1795306187,
+        "narHash": "sha256-/xeGSCooe2jiT9SlLxZHm1JO9lU7DWKv6yYYBxmWsLI=",
         "owner": "zekurio",
         "repo": "matinee",
-        "rev": "53ad6eb48674e9a99499366c717fb5eb855f200e",
+        "rev": "32e7b22ce07a3239719301c648e8dd4d06dbc044",
         "type": "github"
       },
       "original": {
