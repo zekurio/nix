@@ -30,7 +30,8 @@
       includeEmulator = true;
       includeSystemImages = true;
       platformVersions = [platform];
-      systemImageTypes = ["google_apis"];
+      # Android TV too, for the TV apps' virtual devices.
+      systemImageTypes = ["google_apis" "android-tv"];
       abiVersions = [abi];
     }).androidsdk;
 

@@ -38,4 +38,13 @@ in {
       '';
     })
   ];
+
+  # Hyprland's auto HDR offers a fullscreen window the HDR description it
+  # would switch to, and switches once the window tags its surface PQ or
+  # scRGB. Chromium renders into whatever the compositor prefers, so every
+  # fullscreen page took the monitor to HDR, even without HDR content. HDR
+  # video in Helium then needs the desktop toggle from hdr/default.nix.
+  modules.hyprland.extraConfig = ''
+    hl.window_rule({ match = { class = [[^helium$]] }, no_auto_hdr = true })
+  '';
 }
