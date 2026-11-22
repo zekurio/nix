@@ -65,6 +65,9 @@ in {
             "\\.DS_Store$"
             "Thumbs.db$"
             "\\.ini$"
+            # Aurral's temporary flow tracks and its M3U files with
+            # absolute paths. Only the Library itself is worth sharing.
+            "/_(flows|playlists)/"
           ];
           # Without a retention interval slskd only indexes shares at
           # startup. Music imports into this tree continuously, so

@@ -4,6 +4,7 @@
   services.homelab = {
     alloy.enable = true;
     atuin-ai.enable = true;
+    aurral.enable = true;
     # Off until the overhaul: Seerr, its only mandatory backend, is off
     # while Matinee replaces the Jellyfin stack. Fluxer is off too because
     # it asserts Blitzcrank itself.
@@ -25,7 +26,6 @@
     knot.enable = true;
     matinee.enable = true;
     mediaCleanup.enable = true;
-    navidrome.enable = true;
     orianna.enable = true;
     pocket-id.enable = true;
     prowlarr.enable = true;
