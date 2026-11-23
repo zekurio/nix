@@ -20,7 +20,6 @@
     };
     systemPackages = with pkgs; [
       ddcutil
-      feishin
       libnotify
       mpv
       inputs.jellium-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
