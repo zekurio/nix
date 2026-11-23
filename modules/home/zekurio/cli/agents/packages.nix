@@ -6,8 +6,20 @@
   ...
 }: let
   cfg = config.agents;
-  inherit (pkgs.stdenv.hostPlatform) isLinux system;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin system;
   llmAgents = inputs.llm-agents.packages.${system};
+
+  # macOS gets the T3 Code app from Homebrew, whose cask ships no `t3`, and
+  # the app updates itself. A CLI of another version refuses to touch the
+  # database the app's server owns (ServerOwnsDatabaseError), so `t3` runs
+  # the server bundled in the app, in Electron's Node mode.
+  t3AppCli = let
+    app = "/Applications/T3 Code (Beta).app/Contents";
+  in
+    pkgs.writeShellScriptBin "t3" ''
+      ELECTRON_RUN_AS_NODE=1 exec "${app}/MacOS/T3 Code (Beta)" \
+        "${app}/Resources/app.asar/apps/server/dist/bin.mjs" "$@"
+    '';
 
   # llm-agents installs OpenCode 2 as opencode2, beside the v1 package. T3
   # Code runs `opencode` and tells the generations apart by --version, so
@@ -68,8 +80,13 @@ in {
   config.home.packages =
     clis
     ++ tools
-    # macOS gets T3 Code from Homebrew.
-    ++ lib.optional isLinux cfg.t3code
+    ++ [
+      (
+        if isDarwin
+        then t3AppCli
+        else cfg.t3code
+      )
+    ]
     # llm-agents' t3code-desktop wraps the default build, so take the
     # desktop output of this one instead.
     ++ lib.optional cfg.desktop cfg.t3code.desktop;

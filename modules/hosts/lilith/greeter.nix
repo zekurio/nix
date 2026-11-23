@@ -1,8 +1,45 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.displayManager.dux-greeter;
   inherit (config.home-manager.users.zekurio.home) pointerCursor;
   inherit (config.services.xserver) xkb;
   lua = builtins.toJSON;
+  cache = "/var/lib/dms-greeter";
+  jq = lib.getExe pkgs.jq;
+  localAssets = pkgs.writeText "greeter-local-assets.jq" ''
+    def cached:
+      type == "string" and (length == 0 or test("^/var/lib/dms-greeter/[^/]+$"));
+    with_entries(
+      if (.key | test("^wallpaperPath(Light|Dark)?$|^customThemeFile$")) then
+        select(.value == null or (.value | cached))
+      elif (.key | test("^monitorWallpapers(Light|Dark)?$")) and .value != null then
+        .value |= with_entries(select(.value | cached))
+      else . end
+    )
+  '';
+  prepareCache = pkgs.writeShellScript "greeter-prepare-cache" ''
+    set -eu
+    [ -d "${cache}" ] || exit 0
+    cd ${cache}
+    # Old versions could leave source paths in the cached JSON after a failed copy.
+    for name in session.json settings.json; do
+      if [ -f "$name" ]; then
+        tmp=$(mktemp ".$name.XXXXXX")
+        if ${jq} -f ${localAssets} "$name" > "$tmp"; then
+          chown dms-greeter:dms-greeter "$tmp"
+          mv -fT "$tmp" "$name"
+        else
+          rm -f "$tmp" "$name"
+        fi
+      fi
+    done
+  '';
+  upstreamCopy = config.systemd.services.greetd.preStart;
+  stagedCopy = lib.replaceStrings ["cd ${cache}"] ["cd \"$stage\""] upstreamCopy;
 in {
   services.displayManager.dux-greeter = {
     enable = true;
@@ -24,21 +61,59 @@ in {
         ${config.modules.hyprland.outputs}
       '';
     };
-    # greetd copies the shell's settings, colours and wallpaper from here
-    # whenever it starts, so the login screen matches the session.
+    # The background sync reads the desktop's settings from here.
     configHome = config.users.users.zekurio.home;
   };
 
-  # greetd starts once per boot, so the copy above lags a wallpaper or theme
-  # change until the next reboot. DMS's own `dms-greeter sync` refuses to run
-  # on NixOS, so rerun the module's copy, which it keeps in greetd's
-  # preStart, whenever one of the copied files changes. The greeter reads
-  # the copies when it next shows, without restarting greetd.
+  assertions = [
+    {
+      assertion = stagedCopy != upstreamCopy;
+      message = "The Dux greeter copy script changed its cache directory. Update modules/hosts/lilith/greeter.nix.";
+    }
+  ];
+
   systemd = {
+    # The upstream preStart script probes desktop assets, which can be on NFS.
+    services.greetd.serviceConfig.ExecStartPre = lib.mkForce [prepareCache];
     services.dux-greeter-sync = {
       description = "Copy the Dux Shell theme to the greeter";
-      serviceConfig.Type = "oneshot";
-      script = config.systemd.services.greetd.preStart;
+      serviceConfig = {
+        Type = "oneshot";
+        TimeoutStartSec = "20s";
+      };
+      script = ''
+        set -eu
+        stage=$(mktemp -d ${cache}/.sync.XXXXXX)
+        trap 'rm -rf -- "$stage"' EXIT
+        (
+          set -e -o pipefail
+          ${stagedCopy}
+        )
+
+        # Leave the last good cache in place if an asset was unavailable.
+        for name in session.json settings.json; do
+          if [ -f "$stage/$name" ]; then
+            ${jq} -f ${localAssets} "$stage/$name" > "$stage/.filtered"
+            if ! ${jq} -e --slurp '.[0] == .[1]' "$stage/$name" "$stage/.filtered" >/dev/null; then
+              exit 0
+            fi
+          fi
+        done
+        for file in "$stage"/*; do
+          name=$(basename "$file")
+          case "$name" in
+            session.json|settings.json) continue ;;
+          esac
+          [ ! -f "$file" ] || mv -fT "$file" "${cache}/$name"
+        done
+        for name in session.json settings.json; do
+          [ ! -f "$stage/$name" ] || mv -fT "$stage/$name" "${cache}/$name"
+        done
+      '';
+    };
+    timers.dux-greeter-sync = {
+      wantedBy = ["timers.target"];
+      timerConfig.OnBootSec = "30s";
     };
     paths.dux-greeter-sync = {
       wantedBy = ["multi-user.target"];

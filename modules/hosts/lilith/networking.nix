@@ -16,6 +16,9 @@
   # that sync; the kernel suspends the NIC afterwards. NM still owns Wi-Fi.
   systemd.network = {
     enable = true;
+    # NetworkManager handles Wi-Fi. Its connection cannot satisfy networkd's
+    # Ethernet wait when eno1 has no carrier.
+    wait-online.enable = false;
     networks."10-lan" = {
       matchConfig.Name = "eno1";
       networkConfig = {
