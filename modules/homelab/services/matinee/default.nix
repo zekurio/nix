@@ -18,6 +18,11 @@ in {
 
   options.services.homelab.matinee = {
     enable = lib.mkEnableOption "Matinee, the media server that replaces Jellyfin";
+    baseUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:${toString port}";
+      description = "URL other services use to reach the Matinee API.";
+    };
   };
 
   config = lib.mkIf cfg.enable {

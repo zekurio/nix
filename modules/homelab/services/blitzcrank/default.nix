@@ -53,10 +53,6 @@ in {
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = config.services.homelab.seerr.enable;
-        message = "services.homelab.blitzcrank requires services.homelab.seerr; Seerr is the only mandatory backend.";
-      }
-      {
         assertion = config.services.homelab.vrouter.enable;
         message = "services.homelab.blitzcrank requires services.homelab.vrouter for agent model requests.";
       }
@@ -86,20 +82,13 @@ in {
       # `blitzcrank auth logout <provider>`.
 
       # Non-secret configuration; every API key lives in the env template.
-      # The Arr, SABnzbd, and Jellyfin settings belong to the MCP server.
-      settings = {
-        BLITZCRANK_MODELS_PATH = "${modelsFile}";
-        SEERR_URL = config.services.homelab.seerr.baseUrl;
-        # The Seerr account blitzcrank comments as: the id attributes its
-        # comments, the name makes the server drop its own webhooks.
-        SEERR_BOT_USER_ID = "2";
-        SEERR_BOT_USERNAME = "blitzcrank";
-      };
+      # The Matinee, Arr, and SABnzbd settings belong to the MCP server.
+      settings.BLITZCRANK_MODELS_PATH = "${modelsFile}";
     };
 
     systemd.services.blitzcrank = {
-      after = ["seerr.service" "vrouter.service"];
-      wants = ["seerr.service" "vrouter.service"];
+      after = ["vrouter.service"];
+      wants = ["vrouter.service"];
     };
 
     services.homelab.backup.stopUnits = ["blitzcrank.service"];
@@ -107,7 +96,6 @@ in {
     sops.templates."blitzcrank.env" = {
       content = ''
         ${config.sops.placeholder.blitzcrank_env}
-        SEERR_API_KEY=${config.sops.placeholder.seerr_api_key}
         BLITZCRANK_MCP_TOKEN=${config.sops.placeholder.blitzcrank_mcp_token}
         FIRECRAWL_API_KEY=${config.sops.placeholder.firecrawl_api_key}
       '';
@@ -119,9 +107,6 @@ in {
 
     sops.secrets = {
       blitzcrank_env = {};
-      # The host comments on issues itself; the agent's Seerr reads go
-      # through the MCP server.
-      seerr_api_key = {};
       # Must match the token the MCP server checks on every request.
       blitzcrank_mcp_token = {};
       firecrawl_api_key = {};

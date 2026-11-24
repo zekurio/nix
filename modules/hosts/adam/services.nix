@@ -5,20 +5,17 @@
     alloy.enable = true;
     atuin-ai.enable = true;
     aurral.enable = true;
-    # Off until the overhaul: Seerr, its only mandatory backend, is off
-    # while Matinee replaces the Jellyfin stack. Fluxer is off too because
-    # it asserts Blitzcrank itself.
     blitzcrank = {
-      enable = false;
+      enable = true;
       fluxer = {
-        enable = false;
+        enable = true;
         # #support in the single community.
         channels = ["1564016936159805440"];
         allowedUsers = ["1563624022032252928"];
         triageModel = "openrouter/typesafe/jev-1.14";
       };
     };
-    blitzcrank-mcp.enable = false;
+    blitzcrank-mcp.enable = true;
     configarr.enable = true;
     coolercontrol.enable = true;
     fluxer.enable = true;

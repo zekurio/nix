@@ -23,14 +23,21 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = config.services.homelab.matinee.enable;
+        message = "services.homelab.blitzcrank-mcp requires services.homelab.matinee; a Matinee request is the only way the agent adds media.";
+      }
+    ];
+
     services.blitzcrank-mcp = {
       enable = true;
       inherit port;
 
       # Directories the media tools may inspect with ffprobe and ffmpeg, and
       # nothing else. Include SABnzbd's completed tree and the imported
-      # libraries. Music and the private tree are deliberately absent: Seerr
-      # issues never concern them.
+      # libraries. Music and the private tree are deliberately absent: the
+      # agent never handles them.
       mediaRoots = [
         downloadsRoot
         "/tank/media/shows"
@@ -45,22 +52,20 @@ in {
       # Non-secret configuration; the token and every API key live in the env
       # template. A service is served only when both its URL and key are set.
       settings = {
-        SEERR_URL = config.services.homelab.seerr.baseUrl;
+        MATINEE_URL = config.services.homelab.matinee.baseUrl;
         SONARR_URL = config.services.homelab.sonarr.baseUrl;
         RADARR_URL = config.services.homelab.radarr.baseUrl;
         SABNZBD_URL = config.services.homelab.sabnzbd.baseUrl;
-        JELLYFIN_URL = config.services.homelab.jellyfin.baseUrl;
       };
     };
 
     sops.templates."blitzcrank-mcp.env" = {
       content = ''
         BLITZCRANK_MCP_TOKEN=${config.sops.placeholder.blitzcrank_mcp_token}
-        SEERR_API_KEY=${config.sops.placeholder.seerr_api_key}
+        MATINEE_API_KEY=${config.sops.placeholder.matinee_api_key}
         SONARR_API_KEY=${config.sops.placeholder.sonarr_api_key}
         RADARR_API_KEY=${config.sops.placeholder.radarr_api_key}
         SABNZBD_API_KEY=${config.sops.placeholder.sabnzbd_api_key}
-        JELLYFIN_API_KEY=${config.sops.placeholder.jellyfin_api_key}
       '';
       mode = "0400";
       # Rendering a changed template does not touch the unit, so without this
@@ -71,11 +76,14 @@ in {
     sops.secrets = {
       # The host presents the same token on every request.
       blitzcrank_mcp_token = {};
-      seerr_api_key = {};
+      # A Matinee API token from any account. Matinee checks every call
+      # against the token's permissions as well as the account's, so the
+      # permission list in Blitzcrank's README under "Connect Matinee" bounds
+      # it. Without approve or autoApprove its requests wait for approval.
+      matinee_api_key = {};
       sonarr_api_key = {};
       radarr_api_key = {};
       sabnzbd_api_key = {};
-      jellyfin_api_key = {};
     };
   };
 }
