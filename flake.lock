@@ -84,11 +84,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795369934,
-        "narHash": "sha256-UcUoEPpS9vH/6uzUdrS1xzZTC+GlgpINaGAVy0Qldew=",
+        "lastModified": 1795543353,
+        "narHash": "sha256-/3Du5AD69xmhPxLviojRKzGetFza2j3seQWNdKNzT3s=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "e402adeb6316d86c3f23d55dc4aa099b94c04701",
+        "rev": "d2b56eaa533ff9b701a6cf649e54d1ca107ae444",
         "type": "github"
       },
       "original": {
@@ -155,11 +155,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1795430815,
-        "narHash": "sha256-Z3frlGU9YvdtIl4+5L5dbvibHLqA6gI9Qx5YRip0368=",
+        "lastModified": 1795615357,
+        "narHash": "sha256-z839bt0yRGgEBDTW9GvvZAq5576Tv9YsUgPxv42yP7k=",
         "owner": "chaotic-cx",
         "repo": "nyx",
-        "rev": "36fc7d2578d5dc2432b107f502a0b0e0ed9623e8",
+        "rev": "0701261bdd9340b22d3e310dc2567ad02acc5e8b",
         "type": "github"
       },
       "original": {
@@ -406,11 +406,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1795351126,
-        "narHash": "sha256-7f5K+++r9qvoet+k/WP//hiBSsNXfR/cM2qN5aQlduc=",
+        "lastModified": 1795532398,
+        "narHash": "sha256-OWClX8A7I7l/TVmpuoq2kGkwWHWDSBZ1P50U8yRf5vk=",
         "owner": "zekurio",
         "repo": "fluxer-nix",
-        "rev": "c2e73891267a79aeecbe113aff798eb860c7056e",
+        "rev": "4823a19124896dcb8c17f63bafd8bd1a5384b90b",
         "type": "github"
       },
       "original": {
@@ -449,11 +449,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1795297737,
-        "narHash": "sha256-YyTpCLnrCZI6CNiB7XxMXk+8A8GPLmIc4qCH2T7O0uU=",
+        "lastModified": 1795555469,
+        "narHash": "sha256-LoWbp7VNJrmUAa+vv0mvS+O/fiw+b4O/fT8WTZrJHpI=",
         "owner": "schembriaiden",
         "repo": "helium-browser-nix-flake",
-        "rev": "e955e6105a81b44f51d9bc2fcc8e3dc50438fa0b",
+        "rev": "4a6622bb3b0491847a99253646afa88a138bf4cb",
         "type": "github"
       },
       "original": {
@@ -482,11 +482,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795366757,
-        "narHash": "sha256-Tp4Kh4R7ID1f2mMCDlb2PiFQ/DZZsnXB2u2juWN+TT4=",
+        "lastModified": 1795534022,
+        "narHash": "sha256-xkRZ+PcPWaAyf9YrEBszYD5w2S6/Ac2tIfsufzd4dEQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "3b8140d21fa0a70b1b38c2ed29853dfe686234a6",
+        "rev": "b56bcd042b5e69ad188eca20d9bec1bfbf3dd453",
         "type": "github"
       },
       "original": {
@@ -502,11 +502,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795366757,
-        "narHash": "sha256-Tp4Kh4R7ID1f2mMCDlb2PiFQ/DZZsnXB2u2juWN+TT4=",
+        "lastModified": 1795534022,
+        "narHash": "sha256-xkRZ+PcPWaAyf9YrEBszYD5w2S6/Ac2tIfsufzd4dEQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "3b8140d21fa0a70b1b38c2ed29853dfe686234a6",
+        "rev": "b56bcd042b5e69ad188eca20d9bec1bfbf3dd453",
         "type": "github"
       },
       "original": {
@@ -700,11 +700,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1795531585,
-        "narHash": "sha256-xJ5rVG53vq4e+HYTMMAwUjs/6iGL9quh/DSlFy5B9Qs=",
+        "lastModified": 1795615922,
+        "narHash": "sha256-L1OuwlFbptbMzOeh5f0L0+TkIa1hwNrSceF+K4wFPjg=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "6ac1c002f01429ffc811110f7ea0d28779eae5cc",
+        "rev": "4d563e6ab1cc9721b9a465ccbe7e6241cc360cd9",
         "type": "github"
       },
       "original": {
@@ -743,11 +743,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1795516349,
-        "narHash": "sha256-OcW9SsHx9ppJP3kUxBY1jH4d3PnLPavTCAOqLyONdIc=",
+        "lastModified": 1795615765,
+        "narHash": "sha256-lNv0Kw1WvV/xWqmerp5BqKuup+5Ono9I9bfZ+GRFac4=",
         "owner": "zekurio",
         "repo": "matinee",
-        "rev": "6918c49418d871f2a76d859c2b67f61061c618ac",
+        "rev": "d85ecafaca7b6fbf28cff2a32201af2b8494fa99",
         "type": "github"
       },
       "original": {
