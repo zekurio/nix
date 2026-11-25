@@ -58,7 +58,6 @@ in {
         DISCORD_ALLOWED_ROLES = lib.concatStringsSep "," cfg.allowedRoles;
         DISCORD_ADMIN_USERS = lib.concatStringsSep "," cfg.adminUsers;
         DISCORD_ADMIN_ROLES = lib.concatStringsSep "," cfg.adminRoles;
-        # Triage uses OpenRouter directly; agent requests still use vrouter.
         DISCORD_TRIAGE_MODEL = cfg.triageModel;
       };
     };

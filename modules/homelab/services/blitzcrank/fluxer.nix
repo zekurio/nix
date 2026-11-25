@@ -65,7 +65,6 @@ in {
         FLUXER_ALLOWED_ROLES = lib.concatStringsSep "," cfg.allowedRoles;
         FLUXER_ADMIN_USERS = lib.concatStringsSep "," cfg.adminUsers;
         FLUXER_ADMIN_ROLES = lib.concatStringsSep "," cfg.adminRoles;
-        # Triage uses OpenRouter directly; agent requests still use vrouter.
         FLUXER_TRIAGE_MODEL = cfg.triageModel;
       };
     };

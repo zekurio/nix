@@ -26,21 +26,6 @@
         mv "$catalog.tmp" "$catalog"
       '';
   });
-  vrouterUrl = config.services.homelab.vrouter.baseUrl;
-  # Redirects the built-in openai and anthropic providers to vrouter and keeps
-  # their model catalogs. pi expands "$VROUTER_API_KEY" from the environment,
-  # so the store holds the variable name and never the key. Only the OpenAI
-  # base URL ends in /v1; the Anthropic client appends /v1/messages itself.
-  # Strict tools stay off for the reason given in agents/vrouter.nix.
-  modelsFile = pkgs.writeText "blitzcrank-models.json" (builtins.toJSON {
-    providers = {
-      anthropic = {
-        baseUrl = vrouterUrl;
-        apiKey = "$VROUTER_API_KEY";
-        compat.supportsStrictTools = false;
-      };
-    };
-  });
 in {
   imports = [
     inputs.blitzcrank.nixosModules.blitzcrank
@@ -53,10 +38,6 @@ in {
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = config.services.homelab.vrouter.enable;
-        message = "services.homelab.blitzcrank requires services.homelab.vrouter for agent model requests.";
-      }
-      {
         assertion = config.services.homelab.blitzcrank-mcp.enable;
         message = "services.homelab.blitzcrank requires services.homelab.blitzcrank-mcp; the agent reaches every service through it.";
       }
@@ -65,7 +46,7 @@ in {
     services.blitzcrank = {
       enable = true;
       inherit package port;
-      model = "anthropic/claude-opus-5-5:medium";
+      model = "anthropic/claude-opus-5-5:xhigh";
       # Required by every gateway; it names Discord and Fluxer threads.
       helperModel = "anthropic/claude-haiku-5-5:medium";
       # Reviews every write that can remove or change media before it runs.
@@ -75,20 +56,8 @@ in {
       language = "German";
       webProvider = "firecrawl";
       mcpUrl = config.services.homelab.blitzcrank-mcp.url;
+      # blitzcrank_env supplies ANTHROPIC_API_KEY for the built-in provider.
       environmentFile = config.sops.templates."blitzcrank.env".path;
-      # Agent requests authenticate to vrouter with VROUTER_API_KEY from the
-      # env template. A login stored in pi's writable state outranks that key
-      # and vrouter rejects it, so clear any that remains with
-      # `blitzcrank auth logout <provider>`.
-
-      # Non-secret configuration; every API key lives in the env template.
-      # The Matinee, Arr, and SABnzbd settings belong to the MCP server.
-      settings.BLITZCRANK_MODELS_PATH = "${modelsFile}";
-    };
-
-    systemd.services.blitzcrank = {
-      after = ["vrouter.service"];
-      wants = ["vrouter.service"];
     };
 
     services.homelab.backup.stopUnits = ["blitzcrank.service"];
