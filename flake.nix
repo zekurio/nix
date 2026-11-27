@@ -48,11 +48,6 @@
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    jellium-desktop = {
-      url = "github:Galvanizedneuron/jellium-desktop-nixos-temporary-flake";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     # Keep Chaotic's nixpkgs pin so its CachyOS kernel and Proton builds
     # match the binaries available in its cache.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";

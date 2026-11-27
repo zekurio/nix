@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   pkgs,
   ...
 }: {
@@ -22,7 +21,6 @@
       ddcutil
       libnotify
       mpv
-      inputs.jellium-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
       wl-clipboard
       # Launches Zed with the vrouter key in its provider variables.
       config.home-manager.users.zekurio.agents.vrouter.zedPackage
