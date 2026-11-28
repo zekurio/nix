@@ -89,8 +89,6 @@ in {
       restartUnits = ["alloy-server.service"];
     };
 
-    services.homelab.backup.stopUnits = ["alloy-server.service"];
-
     services.homelab.caddy.virtualHosts."alloy" = {
       inherit domain;
       public = true;

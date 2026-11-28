@@ -177,8 +177,6 @@ in {
       };
     };
 
-    services.homelab.backup.stopUnits = ["aurral.service"];
-
     # Public, as Navidrome was: Subsonic apps, music.aurral.org and share
     # links reach it from outside the tailnet. Aurral's own login guards it.
     services.homelab.caddy.virtualHosts.aurral = {

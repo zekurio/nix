@@ -65,8 +65,6 @@ in {
         restartUnits = ["knot-rs.service"];
       };
 
-      services.homelab.backup.stopUnits = ["knot-rs.service"];
-
       services.homelab.caddy.virtualHosts.knot = {
         inherit domain;
         # tangled.org's appview and indexer call the knot, and anyone may

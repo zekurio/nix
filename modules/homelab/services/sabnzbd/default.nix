@@ -85,8 +85,6 @@ in {
       UMask = lib.mkForce mediaShare.umask;
     };
 
-    services.homelab.backup.stopUnits = ["sabnzbd.service"];
-
     # LAN/tailnet-only vhost with SABnzbd's own login in front. url_base
     # makes SABnzbd handle the prefix itself, so no stripping here.
     services.homelab.caddy.virtualHosts."sabnzbd" = {

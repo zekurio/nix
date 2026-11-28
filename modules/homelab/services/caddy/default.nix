@@ -128,9 +128,6 @@ in {
         sites;
     };
 
-    # Access logs only explain the past; a restore needs none of them.
-    services.homelab.backup.exclude = ["${config.services.caddy.logDir}/"];
-
     # Make Cloudflare API token available to Caddy
     systemd.services.caddy.serviceConfig = {
       EnvironmentFile = [config.sops.secrets.caddy_env.path];

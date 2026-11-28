@@ -417,9 +417,6 @@ in {
       sonarr_api_key = {};
     };
 
-    # A sync during the backup window would find the arrs stopped.
-    services.homelab.backup.stopUnits = ["configarr.service" "configarr.timer"];
-
     systemd.services.configarr = {
       inherit (config.modules.notify) onFailure;
       after = ["radarr.service" "sonarr.service"];

@@ -44,8 +44,6 @@ in {
       };
     };
 
-    services.homelab.backup.stopUnits = ["orianna.service"];
-
     # The unit reads both through LoadCredential, so they stay root-only.
     sops.secrets = {
       orianna_bot_token.restartUnits = ["orianna.service"];

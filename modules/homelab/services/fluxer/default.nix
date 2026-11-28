@@ -45,9 +45,5 @@ in {
         FLUXER_EMAIL_SMTP_USERNAME = "homelab@${zekurio}";
       };
     };
-
-    # fluxer-nix's target holds the whole instance, NATS and Meilisearch
-    # included, but not the shared PostgreSQL, which the backup stops last.
-    services.homelab.backup.stopUnits = ["fluxer.target"];
   };
 }

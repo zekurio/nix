@@ -143,14 +143,6 @@ in {
     # Allow the container's two-minute world-save grace period to finish.
     systemd.services.${lib.removeSuffix ".service" unit}.serviceConfig.TimeoutStopSec = lib.mkForce 150;
 
-    services.homelab.backup = {
-      # Stopping gives the server its grace period to save the world.
-      stopUnits = [unit];
-      # The server files, which the container downloads again on start. The
-      # worlds and the server's own backups are in config.
-      exclude = ["${dataDir}/data/"];
-    };
-
     # Valheim uses UDP directly, so it does not have an HTTP Caddy vhost.
     networking.firewall.allowedUDPPorts = [2456 2457 2458];
 

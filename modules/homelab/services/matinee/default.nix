@@ -64,8 +64,6 @@ in {
 
     systemd.services.matinee.environment.LIBVA_DRIVER_NAME = "iHD";
 
-    services.homelab.backup.stopUnits = ["matinee.service"];
-
     # Public, as Jellyfin was: the Android app and browsers outside the
     # tailnet stream through it.
     services.homelab.caddy.virtualHosts.matinee = {

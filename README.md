@@ -13,9 +13,9 @@ ssh adam 'sudo systemctl start nixos-upgrade.service'
 ssh adam 'journalctl -fu nixos-upgrade.service'
 ```
 
-The Sunday 03:00 backup starts the automatic upgrade after the upload and
-service restarts succeed. Reboot by hand for a new kernel. If a build hits the
-unit's resource limits, build elsewhere and push it to the cache.
+The automatic upgrade runs Sundays at 03:00. Reboot by hand for a new
+kernel. If a build hits the unit's resource limits, build elsewhere and push
+it to the cache.
 
 For emergencies, run a direct rebuild. This bypasses the upgrade unit's limits:
 
@@ -251,10 +251,9 @@ To upgrade, read the release's section in
 [Upgrading knots and spindles](https://tangled.org/docs/upgrading/knots-and-spindles/),
 then move the `tangled` tag in `flake.nix`.
 
-To restore, stop `knot-rs.service` and bring back `/var/lib/knot` from the
-offsite backup, keeping the `knot_env` already in sops. A new master key
-can't open the old `sealed-keys`, and a knot started on an empty directory
-creates fresh keys.
+Keep `/var/lib/knot` when reinstalling adam; nothing else holds a copy. The
+`knot_env` in sops alone is not enough: a new master key can't open the old
+`sealed-keys`, and a knot started on an empty directory creates fresh keys.
 
 ## Edit secrets
 
@@ -293,106 +292,6 @@ Then switch to the new configuration, run
 `sudo -u postgres vacuumdb --all --analyze-in-stages`, and delete `$OLDDATA`
 once the services work.
 
-## Back up adam
-
-Run the weekly backup by hand and follow it:
-
-```bash
-ssh adam 'sudo systemctl start backup-state.service'
-ssh adam 'journalctl -fu backup-state.service -u restic-backups-offsite.service'
-```
-
-Stateful services pause while Restic reads the SSD and the selected ZFS
-snapshots and checks the repository. Failures arrive through ntfy.
-
-## Set up the offsite backup
-
-Order a Hetzner Storage Box and enable SSH support. Create a sub-account for
-adam with SSH support, and turn on the box's automatic snapshots: restic can
-delete whatever it wrote, but only the Hetzner Console can delete those. Keep
-the sub-account writable, or restic cannot prune.
-
-```bash
-BOX=uXXXXXX-subN.your-storagebox.de
-ssh-keygen -t ed25519 -N '' -C restic@adam -f restic_ssh_key
-ssh-copy-id -p 23 -s -i restic_ssh_key.pub "${BOX%%.*}@$BOX"
-ssh-keyscan -p 23 "$BOX"
-openssl rand -base64 48
-```
-
-Add the random string as `restic_password` and the private key as a YAML block
-under `restic_ssh_key` with `sops secrets/adam.yaml`, then delete
-`restic_ssh_key`. In `modules/hosts/adam/backup.nix`, set `offsite.host` to
-`$BOX` and `offsite.hostKey` to the `ssh-ed25519` key `ssh-keyscan` printed.
-Deploy and run a backup by hand. The first SSD upload can take a while.
-
-Save the password in your password manager as well. Without it nobody can
-read the repository, and otherwise the saved age key would be the only way to
-reach it. A lost SSH key can be replaced through the Hetzner Console.
-
-## Restore from the offsite backup
-
-Follow [Install NixOS](#install-nixos) through disko and restore the saved age
-key. Before running `nixos-install`, open a shell with Restic and SOPS and list
-the snapshots that contain the SSD root. Choose the Nix configuration that
-matches the backed-up PostgreSQL major version.
-
-```bash
-nix-shell -p restic sops
-BOX=uXXXXXX-subN.your-storagebox.de
-RECOVERY=$(mktemp -d)
-export SOPS_AGE_KEY_FILE=/mnt/var/lib/sops-nix/key.txt
-export RESTIC_REPOSITORY="sftp:${BOX%%.*}@$BOX:restic"
-export RESTIC_PASSWORD_FILE="$RECOVERY/password"
-(
-  umask 077
-  sops -d --extract '["restic_password"]' secrets/adam.yaml > "$RESTIC_PASSWORD_FILE"
-  sops -d --extract '["restic_ssh_key"]' secrets/adam.yaml > "$RECOVERY/ssh-key"
-)
-printf '[%s]:23 %s\n' "$BOX" \
-  "$(awk -F '"' '/hostKey = / { print $2 }' modules/hosts/adam/backup.nix)" \
-  > "$RECOVERY/known-hosts"
-offsite() {
-  restic -o "sftp.command=ssh -p 23 -i $RECOVERY/ssh-key -o UserKnownHostsFile=$RECOVERY/known-hosts -o StrictHostKeyChecking=yes ${BOX%%.*}@$BOX -s sftp" "$@"
-}
-offsite snapshots --path /
-```
-
-Set `SNAPSHOT` to the snapshot ID you chose. Restore the SSD before installing
-so NixOS uses the saved UID map. The stopped PostgreSQL data directory is
-already in this restore.
-
-```bash
-offsite restore "$SNAPSHOT" --target /mnt \
-  --exclude /tank --exclude /boot --exclude /etc --exclude /var/lib/sops-nix/key.txt
-offsite restore "$SNAPSHOT" --target /mnt \
-  --include /etc/machine-id --include '/etc/ssh/ssh_host_*'
-```
-
-If `tank` was lost, create a new mirror with the installer root as its
-temporary mount prefix. Create the datasets listed for the chosen snapshot
-before restoring their contents so they land on the right filesystems:
-
-```bash
-zpool create -R /mnt -o ashift=12 -O compression=zstd -O atime=off -O acltype=posix \
-  -O xattr=sa -O mountpoint=/tank tank mirror /dev/disk/by-id/DISK1 /dev/disk/by-id/DISK2
-zfs create tank/alloy
-zfs create tank/fluxer
-zfs create tank/immich
-zfs create -p tank/shares/zekurio
-offsite restore "$SNAPSHOT" --target /mnt --include /tank
-zpool export tank
-```
-
-Remove the temporary credentials and resume [Install NixOS](#install-nixos)
-at `nixos-install`. If you restored `tank`, run Immich's thumbnail and video
-transcoding jobs for missing assets after boot.
-
-```bash
-rm -r "$RECOVERY"
-unset RESTIC_PASSWORD_FILE RESTIC_REPOSITORY
-```
-
 ## Set up adam's uptime checks
 
 healthchecks.io alerts when adam stops pinging it, which covers adam being
@@ -403,8 +302,7 @@ at urgent priority. Add the key as `healthchecks_ping_key` with
 set their schedules:
 
 - `adam-heartbeat`: period 5 minutes, grace 10 minutes.
-- `adam-backup-state` and `adam-restic-backups-offsite`: Sunday 03:00, grace 7 hours.
-- `adam-upgrade`: Sunday 03:00, grace 10 hours for the backup and rebuild.
+- `adam-upgrade`: Sunday 03:00, grace 3 hours.
 
 `ssh adam 'sudo systemctl start healthchecks-heartbeat.service'` pings the
 heartbeat by hand.

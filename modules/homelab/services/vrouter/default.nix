@@ -41,8 +41,6 @@ in {
     # so a restart after rotation signs every browser out.
     sops.secrets.vrouter_admin_key.restartUnits = ["vrouter.service"];
 
-    services.homelab.backup.stopUnits = ["vrouter.service"];
-
     # Public: the dashboard and /api need the admin key, and /v1 inference
     # needs a vrouter API key.
     services.homelab.caddy.virtualHosts.vrouter = {

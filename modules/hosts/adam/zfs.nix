@@ -5,7 +5,6 @@
   ...
 }: let
   mediaShare = config.services.homelab.mediaShare;
-  backup = config.services.homelab.backup;
   zfs = "${pkgs.zfs}/bin/zfs";
   ensureDataset = name: quota: ''
     if ! ${zfs} list -H -o name ${name} >/dev/null 2>&1; then
@@ -129,11 +128,6 @@ in {
   };
 
   systemd.services.fluxer-seaweedfs = lib.mkIf config.services.homelab.fluxer.enable {
-    requires = ["tank-datasets.service"];
-    after = ["tank-datasets.service"];
-  };
-
-  systemd.services.backup-state = lib.mkIf backup.enable {
     requires = ["tank-datasets.service"];
     after = ["tank-datasets.service"];
   };

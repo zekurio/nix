@@ -58,8 +58,6 @@ in {
       };
     };
 
-    services.homelab.backup.stopUnits = ["t3code.service"];
-
     # Tailscale Serve publishes the server at
     # https://adam.<tailnet>.ts.net:8443 with a tailnet certificate. Root sets
     # it up instead of `t3 serve --tailscale-serve`, which would need zekurio

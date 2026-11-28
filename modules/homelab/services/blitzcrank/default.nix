@@ -60,8 +60,6 @@ in {
       environmentFile = config.sops.templates."blitzcrank.env".path;
     };
 
-    services.homelab.backup.stopUnits = ["blitzcrank.service"];
-
     sops.templates."blitzcrank.env" = {
       content = ''
         ${config.sops.placeholder.blitzcrank_env}

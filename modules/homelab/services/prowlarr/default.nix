@@ -21,8 +21,6 @@ in {
       };
     };
 
-    services.homelab.backup.stopUnits = ["prowlarr.service"];
-
     services.homelab.caddy.virtualHosts."prowlarr" = {
       inherit domain;
       extraConfig = ''

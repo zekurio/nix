@@ -31,8 +31,6 @@ in {
       restartUnits = ["pocket-id.service"];
     };
 
-    services.homelab.backup.stopUnits = ["pocket-id.service"];
-
     # Public: external OIDC clients (Immich mobile sync, Fluxer login)
     # need discovery, authorization and callback reachability.
     services.homelab.caddy.virtualHosts."pocket-id" = {

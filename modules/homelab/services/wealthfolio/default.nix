@@ -62,8 +62,6 @@ in {
     };
     sops.secrets.admin_password.restartUnits = ["wealthfolio-auth-hash.service"];
 
-    services.homelab.backup.stopUnits = ["wealthfolio.service"];
-
     services.homelab.caddy.virtualHosts.wealthfolio = {
       inherit domain;
       reverseProxy = "127.0.0.1:${toString port}";
