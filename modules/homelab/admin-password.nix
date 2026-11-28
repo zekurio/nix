@@ -102,6 +102,7 @@ in {
       group = adminGroup;
       mode = "0440";
       restartUnits = map (name: "${name}.service") (lib.filter (name: config.services.homelab.${name}.enable) [
+        "anvil"
         "prowlarr"
         "radarr"
         "sabnzbd"

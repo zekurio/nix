@@ -3,6 +3,7 @@
 
   services.homelab = {
     alloy.enable = true;
+    anvil.enable = true;
     atuin-ai.enable = true;
     aurral.enable = true;
     blitzcrank = {
