@@ -23,10 +23,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1795116658,
-        "narHash": "sha256-XUo9VDRoyND4a+XTKDItd3K9zSAKC64jf1vKNvpFJHw=",
+        "lastModified": 1795814114,
+        "narHash": "sha256-r3iHTc6D2VeTgGGIvDXEHaXxbmfajqtfEAHZISK/qM0=",
         "ref": "refs/heads/main",
-        "rev": "fddacc44f4cb8afb8b3bc1540caad64043ac4798",
+        "rev": "d07f28354f0de9173ff338e6b5fa47e2e2054c0f",
         "shallow": true,
         "type": "git",
         "url": "https://tangled.org/zekurio.me/agent-stuff"
@@ -65,11 +65,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795825801,
-        "narHash": "sha256-X0CFJffMnPRUGB9LaX+tbWhuYUkFL0wzOY7OiTu7dbA=",
+        "lastModified": 1795859275,
+        "narHash": "sha256-Be9fabEoPYrhejgo0RhTAqKdyqQWEL9KRIxT4H25dKI=",
         "owner": "zekurio",
         "repo": "anvil",
-        "rev": "72ee7f2e46ebdd5c8fa20a464a68cce01c2dd06c",
+        "rev": "01275c89c8175cda15c114fe0e60b16ae1c43519",
         "type": "github"
       },
       "original": {
@@ -105,11 +105,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795543353,
-        "narHash": "sha256-/3Du5AD69xmhPxLviojRKzGetFza2j3seQWNdKNzT3s=",
+        "lastModified": 1795826252,
+        "narHash": "sha256-baKOVKM/kCgAilfAEg6gwz0jQ7DpAn+iKz6N8695IEM=",
         "owner": "zekurio",
         "repo": "blitzcrank",
-        "rev": "d2b56eaa533ff9b701a6cf649e54d1ca107ae444",
+        "rev": "925c91919d87c1c383c115d8fad1d06821f54f81",
         "type": "github"
       },
       "original": {
@@ -676,11 +676,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795748630,
-        "narHash": "sha256-J1iQ1QMnkFwZFXnlPt2t3Qx7TsGjw08/0L3QMqNt+Wg=",
+        "lastModified": 1795827905,
+        "narHash": "sha256-Udjs2j0EkvK+qGXKHRIQwXWRgzNBIl4oXSUktuOzbmQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "54f903fdaaf5d5720ed36706fe75332af69eb793",
+        "rev": "5f5abf5eb8de62d954232f3797b5bf4505656b91",
         "type": "github"
       },
       "original": {
@@ -832,11 +832,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1795789832,
-        "narHash": "sha256-euPmSl9HzbTktN83I1EbJvMkzqQ0TcB/Cq46bx2VS3s=",
+        "lastModified": 1795831089,
+        "narHash": "sha256-cwO9VHA37d4DCJOCBOHL0eFNVL6jCjLCNcREc7S8N+g=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "ed78f78388f2bcea00f5edd0b27bab753723c343",
+        "rev": "512d27e2882c99d80648a121b88de0c4b0426119",
         "type": "github"
       },
       "original": {
@@ -875,11 +875,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1795803842,
-        "narHash": "sha256-WpaPLlFjYC7MpOYBrDbLy5rgSDbYIoo6Ied1wA3s6Ts=",
+        "lastModified": 1795824861,
+        "narHash": "sha256-OI4z44xSvoPLeXZT9wVCHKyrUAsa0KB0uaezDpXlpE4=",
         "owner": "zekurio",
         "repo": "matinee",
-        "rev": "d95b7b04ff4cf10b7ff7bf821c4a061fefd12d1a",
+        "rev": "65e67e0cc338b7d225388c0ec3437ce14086f582",
         "type": "github"
       },
       "original": {
@@ -1106,11 +1106,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1795234589,
-        "narHash": "sha256-f/VVvxf5RsQgWVhUtefoca5ktVg0DA2bnkMOcmSnozo=",
+        "lastModified": 1795546490,
+        "narHash": "sha256-fD1nLSQM8tFob51/thCOr49JIAIjoqybAY27/+hwZQI=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
+        "rev": "58d0d3e9d527ca7263be6a45d1f86eacdc700dab",
         "type": "github"
       },
       "original": {
@@ -1250,10 +1250,10 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1794442316,
-        "narHash": "sha256-xbCUJnWZF1Zkh0iFeVUPhXKjJG5dEmtePoZFfsU+4hY=",
+        "lastModified": 1795828389,
+        "narHash": "sha256-ixhdGoVjvBavtnQgS7hoXhBwmHoGntRFVlUnTnd6kZE=",
         "ref": "refs/heads/main",
-        "rev": "31f6c3fbb4c7764a4b89044e00efa5140f399c35",
+        "rev": "e9c3a97b735fd2fadb6abdba7d71c30f139ea59b",
         "shallow": true,
         "type": "git",
         "url": "https://tangled.org/zekurio.me/orianna"

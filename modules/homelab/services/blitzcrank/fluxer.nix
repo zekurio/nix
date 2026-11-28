@@ -56,7 +56,7 @@ in {
       }
     ];
 
-    # FLUXER_BOT_TOKEN comes from blitzcrank_env with the other bot tokens.
+    # FLUXER_BOT_TOKEN comes from blitzcrank_env.
     services.blitzcrank = {
       settings = {
         FLUXER_INSTANCE_URL = cfg.instance;

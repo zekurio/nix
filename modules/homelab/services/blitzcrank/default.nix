@@ -47,7 +47,7 @@ in {
       enable = true;
       inherit package port;
       model = "anthropic/claude-opus-5-5:xhigh";
-      # Required by every gateway; it names Discord and Fluxer threads.
+      # Required by every gateway; it names Fluxer threads.
       helperModel = "anthropic/claude-haiku-5-5:medium";
       # Reviews every write that can remove or change media before it runs.
       gateModel = "anthropic/claude-haiku-5-5:high";
